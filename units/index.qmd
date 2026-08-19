@@ -1,0 +1,15 @@
+---
+title: Course notes
+toc: false
+---
+
+The notes are organized around materials questions rather than lists of algorithms.
+
+1. [Orientation: computation as a materials experiment](00-orientation/index.qmd)
+2. [Can I trust this number?](01-trust/index.qmd)
+3. [What state does the material prefer?](02-equilibrium/index.qmd)
+4. [What can materials data tell us?](03-data/index.qmd)
+5. [How does a material evolve?](04-odes/index.qmd)
+6. [How does change move through a material?](05-fields/index.qmd)
+7. [How do microscopic rules become macroscopic behavior?](06-micro-to-macro/index.qmd)
+8. [How does structure determine properties?](07-synthesis/index.qmd)

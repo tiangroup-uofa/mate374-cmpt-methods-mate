@@ -1,0 +1,45 @@
+---
+title: "Editable marimo embedding comparison"
+subtitle: "Hosted source iframe and locally exported WASM iframe"
+body-classes: lecture-page
+---
+
+This page renders the same marimo notebook in two ways so their appearance and classroom behavior can be compared directly. Both versions use [`activities/inline_numpy.edit.py`](../../../activities/inline_numpy.edit.py).
+
+## Question
+
+How does grid resolution affect the trapezoidal approximation to
+
+$$
+I = \int_0^\pi \sin(x)\,\mathrm{d}x = 2?
+$$
+
+Before moving a control, predict what should happen to the error as the number of grid points increases. Try editing the same calculation in each version.
+
+## A · Hosted on `marimo.app`
+
+The notebook source is compressed into the hosted iframe URL during the Quarto render.
+
+::: {.marimo-iframe source="activities/inline_numpy.edit.py" title="Hosted editable NumPy notebook" height="720"}
+**Static fallback.** With the default 21 grid points, $\Delta x = 0.1571$, the trapezoidal approximation is $I_N = 1.99588597$, and the absolute error is $4.11\times10^{-3}$. The exact integral is 2.
+:::
+
+## B · Locally exported WASM
+
+The notebook HTML and shared marimo frontend assets are generated into the course site by `_marimo_export.py`. The Quarto source refers only to the notebook filename relative to `activities/`.
+
+::: {.quarto-wasm-local notebook="inline_numpy.edit.py" title="Locally hosted editable NumPy notebook" height="720"}
+**Static fallback.** With the default 21 grid points, $\Delta x = 0.1571$, the trapezoidal approximation is $I_N = 1.99588597$, and the absolute error is $4.11\times10^{-3}$. The exact integral is 2.
+:::
+
+## What to compare
+
+- Time until the editor and initial result become usable.
+- Amount of visible editor chrome and usable notebook area.
+- Typography, spacing, scrolling, and iframe boundaries.
+- Behavior when changing the slider and editing/running a cell.
+- Mobile and narrow-window behavior.
+
+## Locality check
+
+In the rendered course page, version A has an iframe URL on `marimo.app`. Version B has a relative iframe URL under `wasm-local/`; its HTML and marimo frontend assets are served by the same course website. Browser Python and packages may still make external Pyodide or package-CDN requests, which can be inspected separately in the browser network panel.

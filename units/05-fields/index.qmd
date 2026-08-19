@@ -1,0 +1,7 @@
+---
+title: "Unit 5 · How does change move through a material?"
+---
+
+Fields, fluxes, conservation, grids, boundary conditions, diffusion, sparse systems, and phase-field models.
+
+*Class pages to be drafted.*

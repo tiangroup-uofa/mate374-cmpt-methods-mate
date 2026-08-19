@@ -1,0 +1,87 @@
+project:
+  type: website
+  output-dir: _site
+  post-render:
+    - _marimo_export.py
+  preview:
+    port: 7777
+  render:
+    - "*.qmd"
+    - "syllabus/**/*.qmd"
+    - "units/**/*.qmd"
+    - "assignments/**/*.qmd"
+    - "project/**/*.qmd"
+
+website:
+  title: "MATE 374 · Computational Methods in Materials Engineering"
+  page-navigation: true
+  back-to-top-navigation: true
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: syllabus/index.qmd
+        text: Syllabus
+      - href: units/index.qmd
+        text: Course notes
+      - href: assignments/index.qmd
+        text: Assignments
+      - href: project/index.qmd
+        text: Project
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - href: index.qmd
+        text: Course home
+      - href: syllabus/index.qmd
+        text: Syllabus
+      - section: "Course notes"
+        href: units/index.qmd
+        contents:
+          - section: "0 · Orientation"
+            href: units/00-orientation/index.qmd
+            contents:
+              - href: units/00-orientation/L01/index.qmd
+                text: "L01 · Marimo embed comparison"
+              - href: units/00-orientation/L02/index.qmd
+                text: "L02 · Two local playgrounds"
+          - href: units/01-trust/index.qmd
+            text: "1 · Can I trust this number?"
+          - href: units/02-equilibrium/index.qmd
+            text: "2 · Preferred states"
+          - href: units/03-data/index.qmd
+            text: "3 · Materials data"
+          - href: units/04-odes/index.qmd
+            text: "4 · Evolution in time"
+          - href: units/05-fields/index.qmd
+            text: "5 · Fields and conservation"
+          - href: units/06-micro-to-macro/index.qmd
+            text: "6 · Micro to macro"
+          - href: units/07-synthesis/index.qmd
+            text: "7 · Structure and properties"
+      - href: assignments/index.qmd
+        text: Assignments
+      - href: project/index.qmd
+        text: Project
+
+filters:
+  - filters/marimo-iframe.lua
+  - filters/quarto-wasm-local.lua
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    respect-user-color-scheme: true
+    css: styles.css
+    include-after-body:
+      - assets/class-view.html
+    toc: true
+    code-tools: true
+    code-fold: true
+    code-summary: "Show the code"
+    link-external-newwindow: true
+  pdf:
+    toc: true

@@ -1,0 +1,10 @@
+---
+title: "Unit 0 · Computation as a materials experiment"
+toc: false
+---
+
+**Driving question:** What makes a computational prediction useful and believable?
+
+- [L01 · Marimo embedding comparison](L01/index.qmd)
+- [L02 · Two local marimo playgrounds](L02/index.qmd)
+- Reproducible Python workflow, units, arrays, plots, and records of assumptions *(planned)*

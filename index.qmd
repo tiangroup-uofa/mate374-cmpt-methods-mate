@@ -1,0 +1,25 @@
+---
+title: MATE 374
+subtitle: Computational Methods in Materials Engineering
+toc: false
+---
+
+## Course purpose
+
+MATE 374 teaches students to turn a materials question into a trustworthy computational prediction:
+
+> **materials question → model and scale → mathematical problem → numerical representation → computation → verification → interpretation**
+
+The course notes use [Quarto](https://quarto.org/) for durable explanations and printable output. Short, reactive computations run directly inside selected pages with [marimo](https://marimo.io/); longer investigations can remain standalone marimo notebooks.
+
+## Start here
+
+- [Course notes](units/index.qmd)
+- [Syllabus](syllabus/index.qmd)
+- [Reactive NumPy integration test](units/00-orientation/L01/index.qmd)
+
+::: {.callout-note}
+## Site status
+
+This is the initial source skeleton for the redesigned course. The unit architecture and policies remain provisional until the official calendar and delivery constraints are confirmed.
+:::

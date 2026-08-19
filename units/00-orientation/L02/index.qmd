@@ -1,0 +1,28 @@
+---
+title: "Two local marimo playgrounds on one page"
+subtitle: "Independent editable WASM notebooks with shared frontend assets"
+body-classes: lecture-page
+---
+
+This page tests whether two locally exported marimo notebooks can initialize and remain interactive at the same time. Both iframes use eager loading for this experiment.
+
+## Playground 1 · Matrix multiplication
+
+::: {.quarto-wasm-local notebook="matmul.edit.py" title="Editable matrix multiplication playground" height="540" loading="eager"}
+**Static fallback.** For $n=3$, multiplying by the reversed identity matrix reverses the columns of $A$.
+:::
+
+## Playground 2 · Root finding
+
+::: {.quarto-wasm-local notebook="root_finding.edit.py" title="Editable bisection playground" height="540" loading="eager"}
+**Static fallback.** Thirty bisection iterations approximate $\sqrt{2}$ with a residual near machine precision for this scale.
+:::
+
+## Test questions
+
+- Do both initial outputs appear without scrolling?
+- When both runtimes finish loading, can each slider update its own result?
+- Does editing one notebook leave the other notebook unchanged?
+- How do startup time and memory use compare with a page containing one notebook?
+
+The notebook HTML files share the generated `wasm-local/assets/` directory, but each iframe owns an independent browser Python runtime and notebook state.

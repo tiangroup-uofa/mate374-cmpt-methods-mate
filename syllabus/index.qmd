@@ -1,0 +1,18 @@
+---
+title: Syllabus
+toc: true
+---
+
+## Course description
+
+MATE 374 develops numerical modeling skills through materials-engineering questions. Students formulate models, select computational methods, verify numerical results, and interpret predictions with appropriate units and limitations.
+
+## Provisional learning emphasis
+
+- model geometry, physical reasoning, verification, and interpretation;
+- numerical concepts and method selection;
+- only the coding mechanics needed to make work reproducible.
+
+::: {.callout-warning}
+The official calendar, assessment weights, meeting pattern, prerequisites, and software policy still need confirmation.
+:::

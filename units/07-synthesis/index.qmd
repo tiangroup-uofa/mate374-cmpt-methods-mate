@@ -1,0 +1,7 @@
+---
+title: "Unit 7 · How does structure determine properties?"
+---
+
+Interatomic energies, electronic-structure foundations, DFT as a computational example, and affordable surrogate models.
+
+*Class pages to be drafted.*

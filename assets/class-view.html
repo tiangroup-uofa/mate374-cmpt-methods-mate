@@ -1,0 +1,74 @@
+<script>
+(() => {
+  const VIEW_PARAM = "view";
+  const CLASS_VALUE = "class";
+
+  const initialize = () => {
+    if (!document.body.classList.contains("lecture-page")) return;
+
+    const switcher = document.createElement("nav");
+    switcher.className = "course-view-switch";
+    switcher.setAttribute("aria-label", "Lecture display mode");
+    switcher.innerHTML = `
+      <span class="course-view-switch-label">View</span>
+      <a class="course-view-option" data-view="reading">Reading</a>
+      <a class="course-view-option" data-view="class">Class</a>
+    `;
+    document.body.appendChild(switcher);
+
+    const readingLink = switcher.querySelector('[data-view="reading"]');
+    const classLink = switcher.querySelector('[data-view="class"]');
+
+    const urlFor = (view) => {
+      const url = new URL(window.location.href);
+      if (view === CLASS_VALUE) {
+        url.searchParams.set(VIEW_PARAM, CLASS_VALUE);
+      } else {
+        url.searchParams.delete(VIEW_PARAM);
+      }
+      return url;
+    };
+
+    const applyView = () => {
+      const classView =
+        new URL(window.location.href).searchParams.get(VIEW_PARAM) === CLASS_VALUE;
+      document.body.classList.toggle("class-view", classView);
+
+      readingLink.href = urlFor("reading").href;
+      classLink.href = urlFor(CLASS_VALUE).href;
+      readingLink.setAttribute("aria-current", classView ? "false" : "page");
+      classLink.setAttribute("aria-current", classView ? "page" : "false");
+
+      window.requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize"));
+      });
+    };
+
+    const switchInPlace = (event) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+      event.preventDefault();
+      window.history.replaceState({}, "", event.currentTarget.href);
+      applyView();
+    };
+
+    readingLink.addEventListener("click", switchInPlace);
+    classLink.addEventListener("click", switchInPlace);
+    window.addEventListener("popstate", applyView);
+    applyView();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize, { once: true });
+  } else {
+    initialize();
+  }
+})();
+</script>

@@ -1,0 +1,7 @@
+---
+title: "Unit 6 · How do microscopic rules become properties?"
+---
+
+Sampling, Monte Carlo, molecular dynamics, periodic boundaries, observables, and statistical credibility.
+
+*Class pages to be drafted.*
