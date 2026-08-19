@@ -1,6 +1,91 @@
 ---
-title: Course project
-toc: false
+title: "Course project"
+subtitle: "Provisional staged computational materials study"
+toc: true
 ---
 
-Project milestones, rubric, and submission guidance will live here.
+## Purpose
+
+The project asks students to create one end-to-end, reproducible materials prediction:
+
+> question → model and scale → numerical representation → computation → verification/validation → materials conclusion
+
+It should assess synthesis and engineering judgment, not merely successful operation of a software package.
+
+## Recommended structure
+
+Use teams of **three or four**, rather than the Fall 2025 teams of five or six. With roughly 26 students this yields six or seven teams and leaves enough substantive responsibility for each member.
+
+Offer several bounded tracks that share the same rubric and can begin before late-term specialist lectures:
+
+- equilibrium or free-energy prediction;
+- calibration and kinetic evolution;
+- diffusion/heat transport with interfaces;
+- sampling or lattice Monte Carlo;
+- atomistic relaxation or molecular dynamics, with additional scaffolding.
+
+A common Cu/LAMMPS case may remain one option, but it should not be the only project. Students choosing an advanced package must first reproduce or verify one transparent toy/reference result.
+
+## Milestones
+
+| Milestone | Recommended timing | Evidence |
+|---|---|---|
+| **P0 · Interest and skill inventory** | Week 4 | Individual ranked track choices and one relevant skill; formative |
+| **P1 · Proposal** | Week 6 | Question, materials significance, model, data/source, scale, intended method, reference/limit, risks, and team roles |
+| **P2 · Reproducibility checkpoint** | Week 9, before/near Reading Week | A clean run that produces one baseline figure/table; environment and data instructions; failed attempts noted |
+| **P3 · Credibility review** | Week 12 | Draft result plus convergence/conservation/residual/uncertainty evidence; short peer or TA audit |
+| **P4 · Final artifact and handoff** | Last class or approved term-work deadline | Final notebook, static memo, data/code bundle, and individual reflection |
+
+Milestones should receive feedback quickly enough to change the final work. Avoid launching the project only when LAMMPS or MD appears in late November.
+
+## Deliverables
+
+1. **Executable marimo notebook** that presents the question, model, computation, diagnostics, and interpretation in a readable order.
+2. **Two-page engineering memo or equivalent static HTML/PDF**, including the decision/conclusion and key credibility evidence.
+3. **Reproducibility bundle** containing data provenance, environment/package information, and instructions for a clean run.
+4. **Individual contribution and judgment statement** explaining one decision, one diagnostic, and one limitation each student owns.
+
+Marimo is the interactive working and communication environment, but the static artifact is required for reliable grading, archiving, printing, and accessibility.
+
+## Common rubric
+
+| Criterion | Suggested share |
+|---|---:|
+| Materials question, significance, and scope | 10% |
+| Model, assumptions, scales, and method selection | 20% |
+| Correct and reproducible computational work | 20% |
+| Verification, validation, uncertainty, and comparison evidence | 25% |
+| Physical interpretation and limitations | 15% |
+| Communication and reproducibility handoff | 5% |
+| Individual reflection/accountability | 5% |
+
+At least part of the project grade should be individual. A polished visualization cannot compensate for absent verification or an unsupported materials conclusion.
+
+## Seminar support
+
+The project should use existing seminar time rather than add separate meetings:
+
+- **S06:** question, scope, and identifiability clinic;
+- **S09 or S10:** reproducibility and numerical-credibility checkpoint;
+- **S12:** structured peer audit and handoff test.
+
+The TA needs a project triage guide: first check whether the model answers the stated question, then whether the computation is numerically credible, and only then debug package syntax.
+
+## Scope controls
+
+A viable project must:
+
+- answer one focused materials question;
+- use a model and computation the team can explain;
+- include at least one quantitative reference, limit, invariant, or refinement study;
+- fit the available browser, workstation, or server resources;
+- avoid depending on content introduced only in the final one or two lectures;
+- have a reduced-data or toy fallback if a large simulation fails.
+
+Projects should not claim competence in production DFT, FEM, phase field, MC, MD, or ML after one course exercise. They should demonstrate a transferable workflow and honest judgment about what the selected model can support.
+
+::: {.callout-warning}
+## Assessment-weight decision
+
+The Fall 2025 syllabus lists only 25% for all assignments even though the archived A9 is a substantial team project. For the redesign, give the staged project a visible **25–30%** category if administratively possible. If the final examination must remain large, reduce project scope rather than disguising a major project as one small assignment.
+:::

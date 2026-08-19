@@ -1,6 +1,81 @@
 ---
-title: Assignments
-toc: false
+title: "Assignments"
+subtitle: "Provisional assessment architecture"
+toc: true
 ---
 
-Assignment briefs and reproducibility requirements will live here.
+::: {.callout-note}
+## Recommendation
+
+Use **five individual computational investigations plus one staged team project**. This replaces a near-weekly sequence of method-specific problem sets with fewer, more coherent pieces of evidence. Assessment weights and exact due dates still require departmental confirmation.
+:::
+
+## Evidence from Fall 2025
+
+The available Fall 2025 archive contains:
+
+- **seven conventional assignment briefs**, A1–A7, due from September 15 to November 17;
+- **one team-project brief**, numbered A9 and due December 8;
+- no A8 brief in the available archive, so it is not safe to infer its content;
+- a syllabus that groups all assignments under **25%**, with a 30% midterm and 45% final.
+
+The seven archived assignments progress through binary representation/Python, roots, nonlinear and linear systems, regression/interpolation, differentiation, and integration. The A9 project asks teams of five or six to run a common LAMMPS Cu study of melting, RDF, MSD, diffusivity, and Arrhenius fitting. Three hands-on decks introduce remote access, Linux/vi, and LAMMPS late in November.
+
+Useful features to preserve are repeated computational practice, access to seminar starter code, and a real simulation study. Features to change are repetitive hand iteration, generic non-materials contexts, a large final-week team task, and insufficiently visible project milestones and individual accountability.
+
+## Proposed assignment set
+
+| Assignment | Timing window | Main course units | Driving question | Required credibility evidence |
+|---|---|---|---|---|
+| **A1 · Trust a computational result** | Weeks 2–3 | Orientation and Unit 1 | Which reported materials result is believable, and what error source limits it? | units/scale check, limiting or reference case, and an error/convergence plot |
+| **A2 · Find a preferred state** | Weeks 4–5 | Unit 2 | Which equilibrium or relaxed state should be reported when roots, minima, and initial guesses compete? | bracket or landscape evidence, residual/gradient, sensitivity, and physical state classification |
+| **A3 · Learn from sparse materials data** | Weeks 6–7 | Unit 3 | What parameter or prediction is supported by noisy, sparse data? | residuals, uncertainty/sensitivity, and an interpolation/extrapolation or validation check |
+| **A4 · Predict materials evolution** | Weeks 8–9 | Unit 4 | Which kinetic prediction remains credible when timestep, tolerance, or mechanism changes? | timestep/tolerance refinement, comparison with a limit/reference, and interpretation of solver versus model error |
+| **A5 · Conserve transport across a material** | Weeks 10–12 | Unit 5 | How do grid, boundary, timestep, and interface choices affect a diffusion or heat prediction? | conservation balance, mesh/timestep study, boundary check, and a materials conclusion |
+
+Unit 6 sampling/MD and Unit 7 structure–energy content arrive too late for another large individual submission. They should contribute to project synthesis, seminar evidence, and/or the final assessment rather than create an A6 due beside the project.
+
+## Common submission form
+
+Each assignment should be a focused marimo investigation, normally completable in about **3–5 hours**, submitted as:
+
+1. an executable marimo `.py` notebook or approved exported artifact;
+2. a concise static HTML/PDF view for reliable grading and accessibility;
+3. a short engineering conclusion embedded in the notebook—not a separate long report.
+
+Every assignment must show:
+
+1. **question and model**;
+2. **assumptions, scales, units, and data provenance**;
+3. **method choice** and why it fits;
+4. **verification or uncertainty evidence**;
+5. **physical interpretation**;
+6. **limitations and reproducibility information**.
+
+## Common rubric
+
+| Criterion | Suggested share |
+|---|---:|
+| Formulation, assumptions, units, and scale | 20% |
+| Numerical representation and method choice | 20% |
+| Correct, reproducible computation | 20% |
+| Verification, convergence, conservation, or uncertainty evidence | 25% |
+| Materials interpretation and limitations | 15% |
+
+This intentionally gives more weight to credibility and engineering judgment than to reproducing an algorithm from memory. A student should inspect or implement each central mechanism once; later work may use established library routines with appropriate diagnostics.
+
+## Relationship to seminars
+
+Seminars are the rehearsal space, not twelve extra assignments. Each graded investigation should build on one or two seminar patterns while changing the materials case, data, or decision. Students may reuse general seminar code, but the assessed verification and interpretation must be their own.
+
+Recommended workflow:
+
+- release after the relevant first seminar;
+- include one assignment-specific clinic in the next seminar;
+- allow roughly 10–14 days;
+- avoid a due date during Reading Week, on the midterm date, or in the same final week as the project;
+- publish the rubric and a static fallback with the brief.
+
+## Decision still required
+
+If the course must retain the Fall 2025 **25% total assignment weight**, five assignments at 5% each is simple. If project work receives a separate 25–30%, rebalance the midterm/final rather than hiding the project inside the assignment category. Do not finalize due dates until the registered seminar day and official assessment constraints are confirmed.

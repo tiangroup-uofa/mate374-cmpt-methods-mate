@@ -7,7 +7,7 @@ toc: true
 ::: {.callout-note}
 ## Planning status
 
-This is the working instructional map, not yet a published commitment. Lecture titles, the midterm date, and assessment coverage remain tentative.
+This is the working instructional map, not yet a published commitment. Lecture titles, the midterm date, and assessment coverage remain tentative. The separate [seminar plan](seminars.qmd) proposes 12 TA-led hands-on meetings beginning in the second week.
 :::
 
 ## Calendar basis

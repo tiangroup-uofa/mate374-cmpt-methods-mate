@@ -19,4 +19,8 @@ Assessment weights, prerequisites, and software policy still need confirmation.
 
 ## Course schedule
 
-The working [Fall 2026 schedule](schedule.qmd) maps 35 instructional lectures and one tentative in-class midterm onto the official term calendar.
+The working [Fall 2026 schedule](schedule.qmd) maps 35 instructional lectures and one tentative in-class midterm onto the official term calendar. A companion [seminar plan](seminars.qmd) proposes 12 TA-led, marimo-supported computational studios beginning in the second week.
+
+## Provisional assessment architecture
+
+The current recommendation is [five individual computational investigations](../assignments/index.qmd) plus [one staged team project](../project/index.qmd). Exact weights and due dates remain subject to official constraints.

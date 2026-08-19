@@ -48,6 +48,8 @@ website:
         contents:
           - href: syllabus/schedule.qmd
             text: "Fall 2026 schedule"
+          - href: syllabus/seminars.qmd
+            text: "Seminar plan"
       - section: "Course notes"
         href: units/index.qmd
         contents:

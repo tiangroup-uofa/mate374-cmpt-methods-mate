@@ -164,7 +164,11 @@ Verification, validation, uncertainty, and reproducibility remain recurring prac
 
 ## Assessment direction
 
-The 2025 scheme (25% assignments, 30% midterm, 45% final) rewards a conventional methods course more than an end-to-end computational workflow. Consider:
+**Working recommendation (2026-08-19):** use five individual computational investigations plus one staged team project. Run 12 TA-led seminars from the second week through the final full teaching week; use marimo as the interactive backbone and keep seminars primarily formative. Detailed rationale and maps now live in [`assignments/index.qmd`](assignments/index.qmd), [`project/index.qmd`](project/index.qmd), and [`syllabus/seminars.qmd`](syllabus/seminars.qmd).
+
+The available Fall 2025 archive contains seven conventional briefs (A1–A7) and one team-project brief (A9); no A8 brief is present. Its syllabus groups assignments under 25%, alongside a 30% midterm and 45% final. The archived project used teams of five or six and one common LAMMPS Cu task due on the final class day.
+
+The 2025 scheme rewards a conventional methods course more than an end-to-end computational workflow. Consider:
 
 - 20–25% short concept/problem sets;
 - 20–25% reproducible computational investigations;
