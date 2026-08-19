@@ -4,6 +4,18 @@ subtitle: Computational Methods in Materials Engineering
 toc: false
 ---
 
+```{=html}
+<div class="course-affiliation" role="group" aria-label="University of Alberta Faculty of Engineering">
+  <a class="course-affiliation-uofa" href="https://www.ualberta.ca/" aria-label="University of Alberta">
+    <img src="assets/ua-logo-reversed-white.svg" alt="University of Alberta">
+  </a>
+  <span class="course-affiliation-divider" aria-hidden="true"></span>
+  <a class="course-affiliation-engineering" href="https://www.ualberta.ca/en/engineering/" aria-label="Faculty of Engineering">
+    <img src="assets/engineering-logo.png" alt="Faculty of Engineering">
+  </a>
+</div>
+```
+
 ## Course purpose
 
 MATE 374 teaches students to turn a materials question into a trustworthy computational prediction:

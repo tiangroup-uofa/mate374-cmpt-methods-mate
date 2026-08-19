@@ -14,9 +14,14 @@ project:
 
 website:
   title: "MATE 374 · Computational Methods in Materials Engineering"
+  favicon: assets/uofa-crest.svg
   page-navigation: true
   back-to-top-navigation: true
+  page-footer:
+    left: "University of Alberta · Faculty of Engineering"
+    right: "MATE 374 · Computational Methods in Materials Engineering"
   navbar:
+    title: "MATE 374"
     left:
       - href: index.qmd
         text: Home
@@ -28,14 +33,21 @@ website:
         text: Assignments
       - href: project/index.qmd
         text: Project
+    right:
+      - text: "Faculty of Engineering"
+        href: https://www.ualberta.ca/en/engineering/
+        aria-label: "University of Alberta Faculty of Engineering"
   sidebar:
     style: docked
     search: true
     contents:
       - href: index.qmd
         text: Course home
-      - href: syllabus/index.qmd
-        text: Syllabus
+      - section: "Syllabus"
+        href: syllabus/index.qmd
+        contents:
+          - href: syllabus/schedule.qmd
+            text: "Fall 2026 schedule"
       - section: "Course notes"
         href: units/index.qmd
         contents:

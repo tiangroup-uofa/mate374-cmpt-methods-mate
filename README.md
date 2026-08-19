@@ -18,6 +18,10 @@ quarto render
 
 The post-render hook exports notebooks from `activities/` after Quarto builds the site.
 
+## Course identity
+
+The site uses University of Alberta evergreen and gold, the university crest as its favicon, and the official UAlberta and Faculty of Engineering marks in the home-page banner. The navbar remains text-only for a clean, reliable layout. See [`assets/BRANDING.md`](assets/BRANDING.md) for asset provenance and the corresponding UAlberta CSS pattern.
+
 ## Reading and class views
 
 Lecture pages use one rendered HTML document for both student reading and classroom display. Add `body-classes: lecture-page` to a lecture's YAML. The injected view switch changes the URL in place:

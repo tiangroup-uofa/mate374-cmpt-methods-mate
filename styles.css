@@ -1,7 +1,36 @@
 /* Small course-wide additions; Quarto and marimo own component styling. */
 
 :root {
-  --mate374-accent: #275d38;
+  --uofa-evergreen: #275d38;
+  --uofa-evergreen-dark: #1c4630;
+  --uofa-gold: #f2cd00;
+  --mate374-accent: var(--uofa-evergreen);
+  --bs-primary: var(--uofa-evergreen);
+  --bs-primary-rgb: 39, 93, 56;
+  --bs-link-color: #216834;
+  --bs-link-hover-color: var(--uofa-evergreen-dark);
+}
+
+[data-bs-theme="dark"] {
+  --bs-link-color: #f4dc63;
+  --bs-link-hover-color: #ffe98d;
+}
+
+#quarto-header .navbar {
+  border-bottom: 0.28rem solid var(--uofa-gold);
+  background: var(--uofa-evergreen);
+}
+
+#quarto-header .navbar-brand,
+#quarto-header .navbar-title,
+#quarto-header .navbar-nav .nav-link {
+  color: white;
+}
+
+#quarto-header .navbar-nav .nav-link:hover,
+#quarto-header .navbar-nav .nav-link:focus,
+#quarto-header .navbar-nav .nav-link.active {
+  color: var(--uofa-gold);
 }
 
 .navbar-title,
@@ -10,8 +39,72 @@ h2 {
   letter-spacing: -0.015em;
 }
 
+[data-bs-theme="light"] h1,
+[data-bs-theme="light"] h2 {
+  color: var(--uofa-evergreen-dark);
+}
+
+.sidebar-navigation .sidebar-item a.active,
+.sidebar-navigation .sidebar-item a:hover,
+.sidebar nav[role="doc-toc"] ul > li > a.active {
+  color: var(--uofa-evergreen);
+}
+
+[data-bs-theme="dark"] .sidebar-navigation .sidebar-item a.active,
+[data-bs-theme="dark"] .sidebar-navigation .sidebar-item a:hover,
+[data-bs-theme="dark"] .sidebar nav[role="doc-toc"] ul > li > a.active {
+  color: var(--uofa-gold);
+}
+
 blockquote {
-  border-left-color: var(--mate374-accent);
+  border-left-color: var(--uofa-evergreen);
+}
+
+.nav-footer {
+  border-top: 0.25rem solid var(--uofa-gold);
+  background: var(--uofa-evergreen-dark);
+  color: white;
+}
+
+.nav-footer a {
+  color: white;
+}
+
+.course-affiliation {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  width: fit-content;
+  margin: 0 0 2rem;
+  padding: 0.85rem 1.1rem;
+  border-right: 0.35rem solid var(--uofa-gold);
+  border-radius: 0.25rem;
+  background: var(--uofa-evergreen);
+}
+
+.course-affiliation a {
+  display: block;
+  line-height: 0;
+}
+
+.course-affiliation img {
+  display: block;
+  width: auto;
+  object-fit: contain;
+}
+
+.course-affiliation-uofa img {
+  height: 3.25rem;
+}
+
+.course-affiliation-engineering img {
+  height: 3.45rem;
+}
+
+.course-affiliation-divider {
+  align-self: stretch;
+  width: 1px;
+  background: color-mix(in srgb, white 50%, transparent);
 }
 
 /* Preserve a useful minimum space while the browser-side Python runtime loads. */
@@ -93,8 +186,14 @@ marimo-island[data-status="running"] {
   font-size: 0.82rem;
 }
 
+.course-view-logo {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 0.15rem;
+}
+
 .course-view-switch-label {
-  padding: 0 0.4rem 0 0.5rem;
+  padding: 0 0.4rem 0 0.25rem;
   color: var(--bs-secondary-color);
   font-weight: 600;
 }
@@ -112,8 +211,8 @@ marimo-island[data-status="running"] {
 }
 
 .course-view-option[aria-current="page"] {
-  background: var(--mate374-accent);
-  color: white;
+  background: var(--uofa-gold);
+  color: #17251d;
 }
 
 body.class-view #quarto-header,
@@ -156,6 +255,22 @@ body.class-view #quarto-document-content h3 {
 }
 
 @media (max-width: 767.98px) {
+  .course-affiliation {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .course-affiliation-divider {
+    display: none;
+  }
+
+  .course-affiliation-uofa img,
+  .course-affiliation-engineering img {
+    max-width: 100%;
+    height: 2.8rem;
+  }
+
   .course-view-switch {
     top: 3.75rem;
     right: 0.5rem;

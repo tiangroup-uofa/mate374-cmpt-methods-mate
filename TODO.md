@@ -83,7 +83,9 @@ Unless marimo-first clearly wins this test, adopt Option A for the first offerin
 
 ## Proposed units and rough class map
 
-Assumption: approximately 35 × 50-minute meetings, matching Fall 2025. This map intentionally alternates concepts and applications. It can compress to 32–34 meetings.
+**Fall 2026 calendar check (2026-08-19):** The local `MAT E 374 LEC A1` calendar event meets MWF, 12:00–12:50 p.m., from September 2 through December 7. Labour Day, the National Day for Truth and Reconciliation, Thanksgiving, and the three MWF dates during Fall Reading Week remove six of 42 timetable slots. This leaves **36 meetings: 35 instructional lectures plus one tentative in-class midterm on Wednesday, October 28**. See [`syllabus/schedule.qmd`](syllabus/schedule.qmd).
+
+The map intentionally alternates concepts and applications. If the timetable changes, it can compress to 32–34 instructional meetings.
 
 ### Unit 0 — Orientation: computation as a materials experiment (Classes 1–2)
 

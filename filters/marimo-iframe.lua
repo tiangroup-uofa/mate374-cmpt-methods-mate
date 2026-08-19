@@ -64,7 +64,7 @@ function Div(div)
     allowfullscreen
     loading="lazy"
   ></iframe>
-  <p class="marimo-toggle-hint">Click inside the notebook, then press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> elsewhere to switch between app and edit views.</p>
+  <p class="marimo-toggle-hint">Click inside the notebook, then press  <kbd>Ctrl+.</kbd> (Windows/Linux) <kbd>⌘.</kbd> (macOS) to switch between app and edit views.</p>
 </div>]],
     src,
     title,

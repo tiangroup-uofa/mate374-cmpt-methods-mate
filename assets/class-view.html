@@ -7,9 +7,14 @@
     if (!document.body.classList.contains("lecture-page")) return;
 
     const switcher = document.createElement("nav");
+    const favicon = document.querySelector('link[rel~="icon"]');
+    const logo = favicon
+      ? `<img class="course-view-logo" src="${favicon.href}" alt="">`
+      : "";
     switcher.className = "course-view-switch";
     switcher.setAttribute("aria-label", "Lecture display mode");
     switcher.innerHTML = `
+      ${logo}
       <span class="course-view-switch-label">View</span>
       <a class="course-view-option" data-view="reading">Reading</a>
       <a class="course-view-option" data-view="class">Class</a>

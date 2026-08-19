@@ -1,0 +1,6 @@
+---
+title: Course project
+toc: false
+---
+
+Project milestones, rubric, and submission guidance will live here.

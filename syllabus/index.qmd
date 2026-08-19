@@ -14,5 +14,9 @@ MATE 374 develops numerical modeling skills through materials-engineering questi
 - only the coding mechanics needed to make work reproducible.
 
 ::: {.callout-warning}
-The official calendar, assessment weights, meeting pattern, prerequisites, and software policy still need confirmation.
+Assessment weights, prerequisites, and software policy still need confirmation.
 :::
+
+## Course schedule
+
+The working [Fall 2026 schedule](schedule.qmd) maps 35 instructional lectures and one tentative in-class midterm onto the official term calendar.

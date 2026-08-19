@@ -84,6 +84,7 @@ def export_all(
             command = [
                 "uv",
                 "run",
+                "--locked",
                 "marimo",
                 "export",
                 "html-wasm",
