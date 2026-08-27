@@ -4,7 +4,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
-import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -14,6 +14,7 @@ from pathlib import Path
 SOURCE_DIR = "activities"
 OUTPUT_DIR = "wasm-local"
 MANIFEST_NAME = ".marimo-export-manifest.json"
+AUTO_RUN_OPT_OUT = "mate374: auto-run = false"
 
 
 def contains_import_marimo(py_path: Path) -> bool:
@@ -35,7 +36,7 @@ def export_mode_and_outstem(py_file: Path) -> tuple[str, str]:
 def export_fingerprint(project_root: Path, notebooks: list[Path]) -> str:
     """Hash every input that can change the generated WASM bundle."""
     digest = hashlib.sha256()
-    digest.update(b"marimo-html-wasm-v2\0--execute\0")
+    digest.update(b"marimo-html-wasm-v3\0--execute\0auto-run\0")
     inputs = [
         Path(__file__).resolve(),
         project_root / "pyproject.toml",
@@ -70,6 +71,26 @@ def cache_is_current(
     )
 
 
+def enable_browser_auto_run(output_html: Path, notebook: Path) -> None:
+    """Make trusted course exports live immediately in editable WASM mode."""
+    if AUTO_RUN_OPT_OUT in notebook.read_text(encoding="utf-8", errors="ignore"):
+        return
+
+    html = output_html.read_text(encoding="utf-8")
+    html, replacements = re.subn(
+        r'("auto_instantiate"\s*:\s*)false',
+        r"\1true",
+        html,
+        count=1,
+    )
+    if replacements != 1:
+        raise RuntimeError(
+            "Could not enable browser auto-run in marimo export: "
+            f"{output_html}"
+        )
+    output_html.write_text(html, encoding="utf-8")
+
+
 def export_all(
     project_root: Path,
     notebooks: list[Path],
@@ -99,6 +120,7 @@ def export_all(
 
             print(f"Run {' '.join(command)}...")
             subprocess.run(command, check=True, cwd=project_root)
+            enable_browser_auto_run(output_html, notebook)
             shutil.copy2(notebook, temporary_dir)
 
         html_files = sorted(
@@ -128,23 +150,25 @@ def main() -> None:
     if not source_dir.is_dir():
         raise SystemExit(f"Expected {SOURCE_DIR!r} folder at project root: {source_dir}")
 
-    quarto_output = os.environ.get("QUARTO_PROJECT_OUTPUT_DIR")
-    if not quarto_output:
-        raise SystemExit("QUARTO_PROJECT_OUTPUT_DIR is not set")
-
     notebooks = sorted(
         path
         for path in source_dir.iterdir()
-        if path.is_file() and path.suffix == ".py" and contains_import_marimo(path)
+        if path.is_file()
+        and path.suffix == ".py"
+        and not path.name.endswith(".molab.py")
+        and contains_import_marimo(path)
     )
     output_stems = [export_mode_and_outstem(path)[1] for path in notebooks]
     if len(output_stems) != len(set(output_stems)):
         raise SystemExit("Marimo notebook filenames map to duplicate HTML output names")
 
-    target_dir = Path(quarto_output) / OUTPUT_DIR
+    # Export into a generated source resource. Quarto copies this directory to
+    # the output site after pre-render, so preview knows how to serve every
+    # nested CSS, font, worker, and JavaScript asset.
+    target_dir = project_root / OUTPUT_DIR
     fingerprint = export_fingerprint(project_root, notebooks)
 
-    # Quarto preview may invoke post-render more than once while serving pages.
+    # Quarto preview may invoke pre-render more than once while serving pages.
     # Serialize exporters, then recheck the manifest after acquiring the lock.
     lock_path = project_root / ".quarto" / "marimo-export.lock"
     lock_path.parent.mkdir(parents=True, exist_ok=True)

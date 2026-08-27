@@ -1,0 +1,71 @@
+---
+title: "L17 · From a materials inventory to an ODE"
+subtitle: "State variables, rates, initial conditions, and Euler’s method"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**How does a materials mechanism become a time-dependent computational model?**
+
+Let $\alpha(t)$ denote the fraction transformed during a simple first-order process:
+
+$$
+\frac{\mathrm{d}\alpha}{\mathrm{d}t}=k(1-\alpha),
+\qquad \alpha(0)=0.
+$$
+
+The state variable is $\alpha$, the rate law is the model, $k$ is a parameter, and the initial condition specifies the starting material. Euler’s method approximates the rate equation with finite time steps.
+
+## Learning outcomes
+
+Given a first-order materials rate law, students will be able to:
+
+1. **Define** a state variable, rate law, parameter, and initial condition for a kinetic model. *(Understand)*
+2. **Implement** a supplied Euler update and identify the role of $\Delta t$. *(Apply)*
+3. **Compare** a numerical trajectory with an exact reference and quantify final error. *(Analyze)*
+4. **Recognize** when a step size produces an unphysical or unstable trajectory. *(Evaluate)*
+
+## Model before algorithm
+
+The fraction must remain physically meaningful: $0\leq\alpha\leq1$. The exact solution for this simple model is
+
+$$
+\alpha(t)=1-e^{-kt},
+$$
+
+which gives us a verification reference. Real precipitation, grain growth, and oxidation models may have temperature-dependent rates, multiple state variables, nucleation delays, or transport limitations; this first model isolates the time-integration idea.
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="kinetics_euler.edit.py" title="Euler integration of a transformation fraction" height="900" loading="eager"}
+**Static fallback.** With $k=0.020\,\mathrm{min^{-1}}$, $t_f=100\,\mathrm{min}$, and 25 Euler steps, the numerical fraction is about $0.875$ compared with the exact value $0.865$. Reducing the number of steps increases the error and can eventually violate the physical range.
+:::
+
+### What to inspect
+
+- Does the state approach one monotonically?
+- How does the nondimensional step $k\Delta t$ predict the behavior?
+- Does a smaller numerical error mean the kinetic model is validated?
+- What changes when the rate constant or time scale changes?
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Identify a state variable and predict the long-time limit | Physical prediction |
+| 5–15 min | Derive the rate law and exact reference | Model and initial condition |
+| 15–30 min | Implement/inspect one Euler update | Correct state trajectory |
+| 30–40 min | Refine the number of steps | Error comparison |
+| 40–47 min | Deliberately choose a large step | Stability/physical-range diagnosis |
+| 47–50 min | Exit question | Separate timestep error from model error |
+
+## Exit question
+
+A kinetic trajectory converges as the timestep is refined, but the measured material transforms more slowly than the model predicts. Is this primarily a numerical error? What should be checked next?
+
+*Expected direction:* not necessarily. Timestep refinement addresses numerical error; the rate law, parameter, temperature history, and missing mechanism require validation against the material observation.
+
+## Next meeting
+
+L18 will make Euler’s local and global error visible through systematic timestep refinement, before L19 introduces stability and stiffness.

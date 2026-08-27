@@ -1,0 +1,261 @@
+---
+title: "Appendix A1 · A crash course in Python for numerical work"
+subtitle: "What to try before the first week"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Do not panic
+
+You do not need to memorize Python, NumPy, or SciPy before MATE 374. You need to be willing to read a short piece of code, change one thing, run it again, and check whether the result makes sense.
+:::
+
+## What this appendix is for
+
+You may have used Python before and forgotten most of it. That is normal. This appendix is a short route back in, not a complete programming course.
+
+For the first week, the useful skills are modest:
+
+- assign a number to a name;
+- use `+`, `-`, `*`, `/`, and `**`;
+- read a list or NumPy array;
+- follow indentation in a loop or function;
+- call a documented library function;
+- read the last line of an error message;
+- check units and one simple limiting case.
+
+You will usually start from supplied code. Blank-page programming is not the entrance requirement for this course.
+
+## Python, NumPy, and SciPy do different jobs
+
+| Tool | What it supplies | Typical course use |
+|---|---|---|
+| **Python** | names, numbers, lists, loops, conditions, and functions | express the steps of an algorithm |
+| **NumPy** | numerical arrays and operations over whole arrays | store data, evaluate equations, and summarize results |
+| **SciPy** | established scientific algorithms | roots, optimization, integration, interpolation, statistics, and differential equations |
+
+A common pattern is:
+
+```python
+import numpy as np
+from scipy.optimize import root_scalar
+```
+
+`np` is a short conventional name for NumPy. Importing `root_scalar` from `scipy.optimize` tells us which part of SciPy supplies the algorithm.
+
+## Keep the official documentation open
+
+These are reference tools, not readings to finish from beginning to end:
+
+- [The Python tutorial](https://docs.python.org/3/tutorial/)
+- [Python built-in functions](https://docs.python.org/3/library/functions.html)
+- [NumPy: the absolute basics for beginners](https://numpy.org/doc/stable/user/absolute_beginners.html)
+- [NumPy reference](https://numpy.org/doc/stable/reference/)
+- [SciPy user guide](https://docs.scipy.org/doc/scipy/tutorial/)
+- [SciPy API reference](https://docs.scipy.org/doc/scipy/reference/)
+- [marimo getting started](https://docs.marimo.io/getting_started/)
+
+When looking up a function, read in this order:
+
+1. the function **signature**: what inputs does it accept?
+2. **Parameters**: what does each input mean?
+3. **Returns**: what comes back?
+4. one small **example**;
+5. notes about units, shapes, valid ranges, or failure conditions.
+
+For example, if you meet `np.linspace`, search the NumPy reference for that exact name. The documentation tells you that it constructs evenly spaced values and explains the meaning of `start`, `stop`, and `num`.
+
+## Read a small Python calculation
+
+Consider the linear thermal-expansion relation
+
+$$
+\Delta L=\alpha L_0\Delta T.
+$$
+
+A direct Python calculation is
+
+```python
+length0_mm = 100.0
+alpha_per_K = 23.0e-6
+delta_T_K = 100.0
+
+expansion_mm = alpha_per_K * length0_mm * delta_T_K
+print(expansion_mm)
+```
+
+The result is `0.23` mm.
+
+A few details matter:
+
+- `=` assigns a value to a name; it does not state a mathematical equality;
+- names can carry unit reminders such as `_mm` and `_K`;
+- `23.0e-6` means $23.0\times10^{-6}$;
+- `#` begins a comment;
+- Python uses `**` for powers, not `^`;
+- `==` asks whether two values are equal.
+
+Do not remove the unit suffixes merely to make a name shorter. They prevent many avoidable mistakes.
+
+## Lists, indexing, and loops
+
+A Python list stores an ordered collection:
+
+```python
+temperature_changes_K = [-50.0, 0.0, 50.0, 100.0]
+```
+
+Python starts indexing at zero:
+
+```python
+temperature_changes_K[0]   # -50.0
+temperature_changes_K[1]   #   0.0
+temperature_changes_K[-1]  # 100.0, the final item
+```
+
+A loop repeats an indented block:
+
+```python
+for delta_T_K in temperature_changes_K:
+    expansion_mm = alpha_per_K * length0_mm * delta_T_K
+    print(delta_T_K, expansion_mm)
+```
+
+The indentation is part of Python's syntax. All lines belonging to the loop must line up. You do not need to memorize every form of loop; you need to recognize what is being repeated.
+
+## Functions package one calculation
+
+A function gives a calculation a name and states its inputs:
+
+```python
+def thermal_expansion(length_mm, alpha, delta_T_K):
+    change_mm = alpha * length_mm * delta_T_K
+    return change_mm
+```
+
+Call it with
+
+```python
+thermal_expansion(100.0, 23.0e-6, 100.0)
+```
+
+The indented body performs the work. `return` sends the result back to the calling code. In early MATE 374 activities, the function name and inputs will usually be supplied. You will edit or inspect the body.
+
+## NumPy works with arrays
+
+A NumPy array is designed for numerical data:
+
+```python
+import numpy as np
+
+delta_T_values_K = np.array([-50.0, 0.0, 50.0, 100.0])
+expansion_values_mm = alpha_per_K * length0_mm * delta_T_values_K
+```
+
+The multiplication is applied element by element. We do not need to write the loop ourselves. This is one form of **vectorization**.
+
+Useful things to inspect are
+
+```python
+expansion_values_mm.shape
+expansion_values_mm.dtype
+expansion_values_mm[0]
+expansion_values_mm[-1]
+np.min(expansion_values_mm)
+np.max(expansion_values_mm)
+np.mean(expansion_values_mm)
+```
+
+Two common array constructors are
+
+```python
+np.array([1.0, 2.0, 3.0])
+np.linspace(0.0, 100.0, 11)
+```
+
+The first uses values you provide. The second creates 11 evenly spaced values from 0 to 100, including both endpoints.
+
+Arrays introduce questions that ordinary scalar arithmetic can hide:
+
+- What is the array's shape?
+- What numerical type does it store?
+- Are operations element by element or reductions to one value?
+- Are the units consistent across all entries?
+
+When an array expression fails, inspect `shape` and `dtype` before rewriting the whole calculation.
+
+## SciPy supplies algorithms
+
+SciPy collects established numerical methods behind documented interfaces. For example, suppose we want the temperature change that produces a target expansion:
+
+```python
+from scipy.optimize import root_scalar
+
+target_expansion_mm = 0.20
+
+def residual(delta_T_K):
+    predicted_mm = thermal_expansion(
+        length0_mm,
+        alpha_per_K,
+        delta_T_K,
+    )
+    return predicted_mm - target_expansion_mm
+
+solution = root_scalar(residual, bracket=[0.0, 500.0])
+solution.root
+```
+
+The important pieces are visible even before we study root finding:
+
+- `residual` returns zero at the desired answer;
+- `bracket` gives an interval containing the answer;
+- SciPy returns a result object rather than only a number;
+- `solution.root` is the reported root;
+- `solution.converged` tells us whether the algorithm reports success.
+
+Using a library does not remove the need to understand inputs and outputs. It lets us postpone implementation details until they become the subject of the lecture.
+
+## When code fails
+
+An error message is information. Start at the final line, then look upward for the first line referring to code you changed.
+
+| Error | First question to ask |
+|---|---|
+| `NameError` | Did I misspell a name or run the defining cell? |
+| `TypeError` | Did I combine incompatible types or use the wrong operator? |
+| `ValueError` | Is the type acceptable but the value or range invalid? |
+| `IndexError` | Did I request an item outside the list or array? |
+| `ModuleNotFoundError` | Is the package available in this environment? |
+
+A useful recovery routine is:
+
+1. undo the most recent change;
+2. reproduce the error with the smallest input you can;
+3. inspect the type, shape, value, and units;
+4. read the official documentation for the function named in the error;
+5. ask a classmate, TA, instructor, or approved coding assistant while showing the exact error and the smallest relevant code.
+
+Do not replace ten lines at once. Change one thing and run again.
+
+## Try it in the browser
+
+The notebook below combines the same thermal-expansion model with ordinary Python, a NumPy array, and one SciPy solver. Open **Edit code** and work through the five small changes at the end.
+
+::: {.quarto-wasm-local notebook="python_numerics_crash_course.edit.py" title="Python, NumPy, and SciPy: a first numerical calculation" height="1400" loading="eager"}
+**Static fallback.** For $L_0=100\,\mathrm{mm}$ and $\alpha=23\times10^{-6}\,\mathrm{K^{-1}}$, temperature changes of $-50$, $0$, $50$, $100$, and $150\,\mathrm{K}$ produce length changes of $-0.115$, $0$, $0.115$, $0.230$, and $0.345\,\mathrm{mm}$. A target expansion of $0.20\,\mathrm{mm}$ is reached at $\Delta T\approx86.96\,\mathrm{K}$. Setting $\Delta T=0$ returns zero expansion.
+:::
+
+## Before the first week
+
+You are ready if you can do most of the following, with documentation open:
+
+- run a supplied cell;
+- change a numerical value and run the cell again;
+- explain what a short function returns;
+- find the first and last values in an array;
+- use the NumPy documentation to look up one function;
+- read the final line of a Python error;
+- state the units of a result;
+- test a simple case such as $\Delta T=0$.
+
+You do **not** need advanced object-oriented programming, decorators, package development, GPU programming, or a memorized NumPy/SciPy API. Those are not prerequisites for the first week.

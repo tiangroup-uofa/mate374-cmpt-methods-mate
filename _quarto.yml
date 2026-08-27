@@ -1,8 +1,10 @@
 project:
   type: website
   output-dir: _site
-  post-render:
+  pre-render:
     - _marimo_export.py
+  resources:
+    - "wasm-local/**"
   preview:
     port: 7777
   render:
@@ -11,6 +13,7 @@ project:
     - "units/**/*.qmd"
     - "assignments/**/*.qmd"
     - "project/**/*.qmd"
+    - "!templates/**"
 
 website:
   title: "MATE 374 · Computational Methods in Materials Engineering"
@@ -43,37 +46,57 @@ website:
     contents:
       - href: index.qmd
         text: Course home
-      - section: "Syllabus"
-        href: syllabus/index.qmd
-        contents:
-          - href: syllabus/schedule.qmd
-            text: "Fall 2026 schedule"
-          - href: syllabus/seminars.qmd
-            text: "Seminar plan"
+      - href: syllabus/index.qmd
+        text: Syllabus
       - section: "Course notes"
         href: units/index.qmd
         contents:
-          - section: "0 · Orientation"
+          - href: units/front-matter/index.qmd
+            text: "L00 · Course introduction"
+          - section: "0 · Orientation and numerical thinking"
             href: units/00-orientation/index.qmd
             contents:
               - href: units/00-orientation/L01/index.qmd
-                text: "L01 · Marimo embed comparison"
+                text: "L01 · A numerical mindset"
               - href: units/00-orientation/L02/index.qmd
-                text: "L02 · Two local playgrounds"
-          - href: units/01-trust/index.qmd
-            text: "1 · Can I trust this number?"
-          - href: units/02-equilibrium/index.qmd
-            text: "2 · Preferred states"
-          - href: units/03-data/index.qmd
-            text: "3 · Materials data"
-          - href: units/04-odes/index.qmd
-            text: "4 · Evolution in time"
-          - href: units/05-fields/index.qmd
-            text: "5 · Fields and conservation"
-          - href: units/06-micro-to-macro/index.qmd
-            text: "6 · Micro to macro"
-          - href: units/07-synthesis/index.qmd
-            text: "7 · Structure and properties"
+                text: "L02 · Choosing a numerical method"
+              - href: units/00-orientation/L03/index.qmd
+                text: "L03 · Numbers inside a computer"
+              - href: units/00-orientation/L04/index.qmd
+                text: "L04 · Making computation faster"
+              - href: units/00-orientation/references.qmd
+                text: "Unit 0 · References"
+          - section: "1 · Finding special points"
+            href: units/01-finding-answers/index.qmd
+            contents:
+              - href: units/01-finding-answers/L05/index.qmd
+                text: "L05 · Brackets, bisection, and fixed points"
+              - href: units/01-finding-answers/L06/index.qmd
+                text: "L06 · Secant and Newton methods"
+              - href: units/01-finding-answers/L07/index.qmd
+                text: "L07 · One-dimensional minimization"
+              - href: units/01-finding-answers/L08/index.qmd
+                text: "L08 · Optimization landscapes"
+              - href: units/01-finding-answers/references.qmd
+                text: "Unit 1 · References"
+          - section: "2 · Functions and data"
+            href: units/02-functions-data/index.qmd
+            contents:
+              - href: units/02-functions-data/L09/index.qmd
+                text: "L09 · Numerical differentiation"
+              - href: units/02-functions-data/L10/index.qmd
+                text: "L10 · Numerical integration"
+              - href: units/02-functions-data/L11/index.qmd
+                text: "L11 · Interpolation"
+              - href: units/02-functions-data/L12/index.qmd
+                text: "L12 · Curve fitting and regression"
+              - href: units/02-functions-data/references.qmd
+                text: "Unit 2 · References"
+          - section: "Appendices"
+            href: appendices/index.qmd
+            contents:
+              - href: appendices/A01-python-numerics/index.qmd
+                text: "A1 · Python for numerical work"
       - href: assignments/index.qmd
         text: Assignments
       - href: project/index.qmd
@@ -90,6 +113,8 @@ format:
       dark: darkly
     respect-user-color-scheme: true
     css: styles.css
+    include-in-header:
+      - assets/browser-theme.html
     include-after-body:
       - assets/class-view.html
     toc: true

@@ -1,45 +1,202 @@
 ---
-title: "Editable marimo embedding comparison"
-subtitle: "Hosted source iframe and locally exported WASM iframe"
+title: "L01 · A numerical mindset for materials engineers"
+subtitle: "Why we model, how models fail, and where numerical error enters"
 body-classes: lecture-page
 ---
 
-This page renders the same marimo notebook in two ways so their appearance and classroom behavior can be compared directly. Both versions use [`activities/inline_numpy.edit.py`](../../../activities/inline_numpy.edit.py).
+::: {.callout-note}
+## Central question
 
-## Question
-
-How does grid resolution affect the trapezoidal approximation to
-
-$$
-I = \int_0^\pi \sin(x)\,\mathrm{d}x = 2?
-$$
-
-Before moving a control, predict what should happen to the error as the number of grid points increases. Try editing the same calculation in each version.
-
-## A · Hosted on `marimo.app`
-
-The notebook source is compressed into the hosted iframe URL during the Quarto render.
-
-::: {.marimo-iframe source="activities/inline_numpy.edit.py" title="Hosted editable NumPy notebook" height="720"}
-**Static fallback.** With the default 21 grid points, $\Delta x = 0.1571$, the trapezoidal approximation is $I_N = 1.99588597$, and the absolute error is $4.11\times10^{-3}$. The exact integral is 2.
+**When a computer gives us a result, what should we know before we trust it?**
 :::
 
-## B · Locally exported WASM
+## Learning outcomes
 
-The notebook HTML and shared marimo frontend assets are generated into the course site by `_marimo_export.py`. The Quarto source refers only to the notebook filename relative to `activities/`.
+By the end of this lecture, you should be able to:
 
-::: {.quarto-wasm-local notebook="inline_numpy.edit.py" title="Locally hosted editable NumPy notebook" height="720"}
-**Static fallback.** With the default 21 grid points, $\Delta x = 0.1571$, the trapezoidal approximation is $I_N = 1.99588597$, and the absolute error is $4.11\times10^{-3}$. The exact integral is 2.
+1. **Distinguish** mathematical modeling, numerical modeling, and computational materials simulation.
+2. **Describe** the stages between a materials question and a computed result.
+3. **Explain** what modeling can contribute and why a sophisticated calculation can still fail as engineering evidence.
+4. **Classify** model-form, input, stochastic, truncation, implementation, and round-off sources of error or uncertainty.
+5. **Use** the Wooclap and marimo class interfaces for a short interactive investigation.
+
+## Getting to know you
+
+We will begin with a short, ungraded Wooclap survey. The link will be shown in class and posted on Canvas. The questions ask about previous experience with programming and simulation, mathematical topics that may need a refresher, the device you normally use, and the materials methods you are most curious about.
+
+This is not a test. We will use the class-level results to decide where more scaffolding is useful and which examples to emphasize. Individual responses will not be used for grading.
+
+## Why do we need modeling?
+
+### Stages of modeling
+
+As introduced in [Lecture 0](../../front-matter/index.qmd), the word *modeling* can refer to several connected activities.
+
+A **mathematical model** extracts the variables, physical relations, assumptions, and governing equations needed to answer a question. A **numerical model or method** turns that mathematical problem into a finite calculation. A **computational materials simulation** combines a physical model, numerical methods, material data, and software at a chosen length and time scale.
+
+The stages can be summarized as
+
+$$
+\boxed{
+\text{problem statement}
+\rightarrow
+\text{mathematical model}
+\rightarrow
+\text{numerical model or algorithm}
+\rightarrow
+\text{computed result}
+\rightarrow
+\text{interpretation}
+}
+$$
+
+Suppose the problem is to estimate how deeply carbon penetrates steel during a heat treatment. The mathematical stage identifies a diffusion model, material parameters, geometry, initial state, and boundary conditions. The numerical stage may represent position on a finite grid and time using finite steps. A program then carries out the calculation. The final concentration profile is useful only after we interpret it in the context of the original heat-treatment question.
+
+Each arrow matters. A correct program can solve an unsuitable equation. A suitable equation can be discretized poorly. A converged numerical result can be interpreted outside the physical regime in which the model is valid.
+
+The course will meet both general numerical methods—root finding, optimization, matrix calculations, interpolation, differentiation, integration, and differential equations—and materials-simulation families such as finite-element and phase-field models, Monte Carlo, molecular dynamics, and electronic-structure calculations. These lists describe different layers: a simulation family can rely on several numerical methods internally.
+
+### What modeling does well
+
+Modeling is often **less expensive** than fabricating and testing every possible material or process condition. It can reduce the experimental search space, although a serious simulation can still require substantial time, data, and computing resources.
+
+It can also provide **access** to processes that are difficult to observe directly. Atomic rearrangements, diffusion pathways, local stress fields, and early nucleation events may occur at spatial or temporal scales that are inaccessible to an experiment.
+
+Modeling supports **interpretation** by connecting measured behavior to a proposed mechanism. An experimental curve tells us what happened under the measured conditions; a model can test whether a particular physical explanation is consistent with that curve.
+
+A credible model can support **design and optimization**. We can compare compositions, geometries, or processing conditions before choosing which candidates to manufacture.
+
+Models are also **improvable**. New measurements, better physical understanding, or a wider operating regime can motivate revisions. The model should not be treated as a fixed truth.
+
+Finally, well-documented code can act as **executable knowledge**. It records equations and procedures in a form that another person can run, inspect, test, and modify. Code becomes a useful reservoir of knowledge only when its inputs, assumptions, and limitations are also recorded.
+
+### The trade-offs do not disappear
+
+More complexity is not automatically better. We could describe a thrown basketball using quantum mechanics, but that model would be needlessly expensive and would hide the scale of the actual question. An engineering model should be complex enough for its intended use and no more complicated than the evidence requires.
+
+Software creates another trade-off. A commercial package may provide extensive testing and support while hiding some implementation details. Open-source code can be inspected, but inspection does not guarantee that someone has found every bug. Code written by the user is transparent to its author but may have received little independent testing.
+
+The important distinction is therefore not simply **closed versus open source**. It is **transparency and assurance**:
+
+- Can we identify the equations and assumptions?
+- Can we inspect how the calculation was configured?
+- Has the implementation been tested against known cases?
+- Can we reproduce the result independently?
+
+A practical strategy is to begin with the simplest adequate model, compare it with known evidence, and add complexity only when a discrepancy or a new question justifies it. At each stage we need both **verification**—did we solve the chosen equations correctly?—and **validation**—are those equations adequate for the real system and intended use?
+
+### What makes modeling useful, and what can make it fail?
+
+Materials modeling has a long history. In 1896, William Chandler Roberts-Austen reported measurements of gold diffusing into solid lead and interpreted the concentration profile using the diffusion equation. This work helped establish that diffusion occurs in solids, long before a digital computer could solve the equations. The original measurements and analysis are reported by [Roberts-Austen (1896)](../references.qmd#ref-robertsausten1896).
+
+Modern projects operate on a much larger scale. The United States launched the Materials Genome Initiative in 2011 to connect computation, experiments, and digital materials data so that materials could be developed and deployed more quickly ([NIST, n.d.](../references.qmd#ref-nistmgi)). The Materials Project is one example of the open computational infrastructure that grew during this period ([Jain et al., 2013](../references.qmd#ref-jain2013materialsproject)).
+
+Machine-learning methods now help screen crystal structures and estimate properties from existing calculations. For example, a 2023 study reported large-scale prediction of candidate stable crystal structures using graph neural networks ([Merchant et al., 2023](../references.qmd#ref-merchant2023materials)). Such predictions identify candidates for further computation and experiment; they do not remove the need to verify stability, synthesizability, and the domain of the learned model.
+
+These examples show what modeling can contribute. The next two show why a polished calculation is not automatically trustworthy.
+
+#### The Titan pressure vessel
+
+The *Titan* submersible imploded on June 18, 2023 during a descent toward the wreck of the *Titanic*. Its pressure vessel used a carbon-fibre composite cylindrical section in a cyclic, high-pressure environment.
+
+The problem was not simply that “carbon fibre is bad.” The investigation found that accumulated delamination and other damage weakened the as-built pressure vessel before its final local-buckling failure. OceanGate had not adequately established the vessel's actual strength and durability over repeated dives. Analyses based on idealized geometry and material properties therefore did not establish that the manufactured, damaged structure was safe.
+
+::: {.callout-important}
+## Lesson from Titan
+
+**A model can be internally sophisticated yet still fail as engineering evidence when its assumptions and validation are weak.**
+
+Finite-element analysis answers the model supplied to it, not necessarily the object that was built.
 :::
 
-## What to compare
+This account is based primarily on the [NTSB investigation report (2025)](../references.qmd#ref-ntsb2025titan) and the [2015 engineering analysis preserved in the investigation docket](../references.qmd#ref-spencer2015titanfea). A later visualization provides a [supplementary simulation-based reconstruction](../references.qmd#ref-engineeringtitan).
 
-- Time until the editor and initial result become usable.
-- Amount of visible editor chrome and usable notebook area.
-- Typography, spacing, scrolling, and iframe boundaries.
-- Behavior when changing the slider and editing/running a cell.
-- Mobile and narrow-window behavior.
+#### Fast16: when the software is designed to mislead
 
-## Locality check
+In April and May 2026, researchers at SentinelOne and the Symantec and Carbon Black threat-hunting teams published analyses of **Fast16**, a software-sabotage framework whose oldest known components appear to date from around 2005. The name comes from `fast16.sys`, one component of the malware; it is unrelated to the FP16 half-precision number format.
 
-In the rendered course page, version A has an iframe URL on `marimo.app`. Version B has a relative iframe URL under `wasm-local/`; its HTML and marimo frontend assets are served by the same course website. Browser Python and packages may still make external Pyodide or package-CDN requests, which can be inspected separately in the browser network panel.
+Fast16 did not simply crash a simulation or corrupt every output. Its hook engine was tailored to particular builds of LS-DYNA and AUTODYN, two packages used for high-rate deformation, impact, and explosive simulations. The reported mechanisms checked for selected high-explosive equations of state and waited for narrowly defined conditions before modifying results.
+
+One LS-DYNA mechanism began reducing calculated Cauchy stress values only after the simulated material reached a density associated with strongly compressed uranium. The modification was introduced gradually rather than as a sudden jump. Normal calculations below the trigger condition could therefore appear correct, while a targeted full-scale calculation produced a plausible but false pressure response.
+
+If several computers ran the same compromised executable, repeating the calculation on those computers could reproduce the same altered result. Repetition inside one software chain would not be an independent verification.
+
+The reverse engineering strongly supports the conclusion that Fast16 targeted nuclear-detonation simulations. The victim organization and country are less certain. Iran has been discussed as a credible possible target in public reporting, but the recovered code does not establish that attribution by itself. A separate technical interpretation of a publicly shown 2018 simulation is relevant to the discussion but remains speculative ([Santamarta, 2026](../references.qmd#ref-santamarta2026fast16)).
+
+$$
+\boxed{\textit{Titan}:\ \text{model and validation}}
+\qquad
+\boxed{\textit{Fast16}:\ \text{software and result integrity}}
+$$
+
+The technical details come from [SentinelOne Labs (2026)](../references.qmd#ref-sentinelone2026fast16) and the [Symantec Threat Hunter Team (2026)](../references.qmd#ref-symantec2026fast16). The possible target and limits of the attribution are discussed by [Constantin (2026)](../references.qmd#ref-constantin2026fast16).
+
+These cases bring us back to the central question: if we are going to run a numerical program, what exactly could be wrong with its result?
+
+## Errors in modeling
+
+### Sources of error and uncertainty
+
+The sources occur at different stages and require different remedies.
+
+| Stage | Source | Meaning | Example |
+|---|---|---|---|
+| Physical system | **Aleatoric variability** | repeated physical realizations can genuinely differ | thermal fluctuations or random nucleation |
+| Mathematical model | **Model-form error or uncertainty** | the chosen equations or assumptions omit relevant physics | treating a damaged composite as uniform and undamaged |
+| Model inputs | **Parameter or input uncertainty** | a required value is not known exactly | uncertain diffusivity, modulus, or boundary temperature |
+| Numerical model | **Truncation or discretization error** | an exact mathematical procedure is replaced by a finite approximation | a finite series, timestep, or spatial grid |
+| Software | **Implementation error** | the program does not carry out the intended method | wrong sign, index, unit conversion, or boundary condition |
+| Computer arithmetic | **Round-off error** | numbers and operations are represented with finite precision | storing $1/3$ as a finite sequence of digits |
+
+Model-form error is related to **epistemic uncertainty**, meaning uncertainty caused by incomplete knowledge, but the terms are not identical. Epistemic uncertainty also includes uncertain parameters and can sometimes be reduced by better measurements or a better model. Aleatoric variability describes variation represented as intrinsic or random at the chosen modeling scale.
+
+Truncation error has a narrower meaning than “any approximation.” It appears when an exact mathematical operation is replaced by a finite one: stopping an infinite sum, replacing a derivative by a finite difference, or using a finite timestep. Increasing the number of terms or refining the grid can reduce this error if the method converges.
+
+Round-off enters because a computer stores only a finite number of digits. The calculator example
+
+$$
+\frac13\approx0.3333,
+\qquad
+3(0.3333)=0.9999
+$$
+
+shows the basic idea. Real floating-point arithmetic is more systematic than a four-digit calculator, but the representation is still finite. L03 will examine this limitation directly.
+
+::: {.callout-important}
+## Different errors need different remedies
+
+A finer grid cannot repair missing physics. More decimal digits cannot determine an uncertain material parameter. Repeating the same compromised program does not provide independent verification.
+:::
+
+### Simple demonstration: Buffon's needle
+
+Our first interactive numerical experiment estimates $\pi$ by throwing virtual needles. Because $\pi$ is irrational, its decimal representation never terminates or repeats. It is also transcendental, a stronger mathematical property. Numerical calculations therefore store or approximate only a finite number of its digits.
+
+Buffon posed the needle problem in 1733 and published its solution in 1777 ([Weisstein, n.d.](../references.qmd#ref-weissteinbuffon)). Imagine parallel lines separated by a distance $d$. A needle of length $L\le d$ is dropped with a uniformly random position and orientation. The probability that it crosses a line is
+
+$$
+P(\text{crossing})=\frac{2L}{\pi d}.
+$$
+
+If $n$ needles cross a line in $N$ throws, the observed crossing fraction is $n/N$, giving
+
+$$
+\widehat{\pi}=\frac{2LN}{dn}.
+$$
+
+The estimate is undefined when $n=0$, which can occur for a very small experiment. More generally, two runs with the same $N$, $L$, and $d$ need not agree because the throws are random.
+
+The marimo notebook used in class runs directly in the browser; no local Python installation is required. Choose an integer random seed so that your run can be reproduced. You may use digits from your student number, but do not display or share your full student number. Then choose $N$ and $L/d$, press **Simulate**, and compare the estimate with your neighbours. The sliders and buttons change the calculation, and the editable view allows you to inspect or modify the small part of the code that represents the experiment. Repeated interface code will remain hidden.
+
+The use of browser notebooks is partly an access decision: students can participate on different operating systems without first configuring a full scientific-Python installation. Later activities that require a native environment or accelerator will use Molab or another suitable platform.
+
+## Closing questions
+
+Use the Buffon experiment to answer the following questions. Record the settings and random seed with each result.
+
+1. How different is $\widehat{\pi}$ from the reference value for $N=10$, $100$, and $10^6$?
+2. Approximately how large must $N$ be before five correct significant digits become plausible?
+3. At the same $N$, do your result and your neighbours' results agree? Should they?
+4. What changes when the ratio $L/d$ becomes smaller?
+
+These observations connect model assumptions, input choices, random sampling, implementation, and numerical error. L02 keeps the same experiment but asks a new question: **is Buffon's method actually a good way to calculate $\pi$?**

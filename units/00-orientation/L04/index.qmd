@@ -1,0 +1,192 @@
+---
+title: "L04 · How do I make a computer faster?"
+subtitle: "The same Buffon algorithm on Python, NumPy, compiled CPUs, and a GPU"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Central question
+
+**How can we make a numerical program practical when the required number of steps becomes very large?**
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Run** a supplied numerical experiment in a full Python environment on Molab.
+2. **Measure** execution time and estimate how runtime changes with problem size.
+3. **Recognize** vectorization, batching, just-in-time compilation, CPU parallelism, and GPU acceleration as different implementation strategies.
+4. **Explain** why an optimization can help one problem size or numerical structure but not another.
+5. **Compare** methods using total cost and accuracy rather than iteration count alone.
+
+## From $10^6$ to $10^8$ steps
+
+In L03 we explained why an error curve can stop improving. You may also have noticed that the earlier notebooks limited some calculations to approximately $N=10^6$. The limitation was partly practical: a transparent Python loop can keep a browser busy for too long.
+
+We begin by timing the original Buffon function at several manageable values of $N$. If $10^6$ throws take $t$ seconds and the cost per throw remains similar, a first estimate is
+
+$$
+T(10^8)\approx100t.
+$$
+
+This estimate introduces **scaling**: how runtime or memory changes as the size of the calculation changes. We should measure the relationship rather than assume it remains exact, but it gives us a prediction before we attempt the expensive run.
+
+There are two broad ways to finish sooner:
+
+$$
+\boxed{\text{choose an algorithm that needs less work}}
+\qquad\text{or}\qquad
+\boxed{\text{execute the same work more efficiently}}.
+$$
+
+L02 compared algorithms with different convergence rates. In this lecture, we keep the mathematical Buffon method and focus on how its repeated operations are executed.
+
+## Moving to Molab
+
+The performance activity uses Molab, a hosted environment for full Python marimo notebooks ([marimo team, n.d.](../references.qmd#ref-marimomolab)). Unlike the small browser-only notebooks, Molab can provide native packages and, when available, access to accelerator hardware.
+
+Open the activity link supplied in class and on Canvas. Sign in with a Google account when prompted; a Gmail address can be used. Do not place private or restricted information in the notebook. The first run may take time while the environment starts and installs or loads its dependencies.
+
+Record the environment shown by the notebook, the problem size, and whether a timing includes first-time setup. A fair benchmark must distinguish useful calculation time from startup or compilation time.
+
+## The original Python loop
+
+The direct Buffon algorithm follows one needle at a time:
+
+```text
+draw a random position
+draw a random orientation
+test whether the needle crosses a line
+update the crossing count
+repeat N times
+```
+
+This form is readable, but the Python interpreter manages every loop iteration. The arithmetic per needle is small, so interpreter overhead can become a large part of the runtime.
+
+Time the function for increasing $N$ and predict the time for $10^8$ throws. Do not run an input that would occupy the shared environment for an unreasonable time merely to confirm the prediction.
+
+Before optimizing, retain the original implementation as a reference. Every faster version must still estimate the same quantity and produce statistically consistent results.
+
+## Vectorization and memory
+
+NumPy allows us to generate arrays of positions and orientations, evaluate the crossing test over those arrays, and count all crossings using compiled numerical operations ([Harris et al., 2020](../references.qmd#ref-harris2020numpy)). The expensive repetition then occurs inside compiled library code instead of an interpreted Python loop.
+
+$$
+\boxed{
+\text{vectorization}
+=
+\text{describing operations over whole arrays}
+}
+$$
+
+This does not mean that NumPy “packs the numbers into the CPU,” and vectorization is not automatically the same as parallel computing. NumPy moves the repeated low-level operations out of the Python interpreter. Depending on the operation and installation, the compiled implementation may also use optimized processor instructions or numerical libraries.
+
+Vectorization introduces a memory trade-off. At $N=10^8$, one binary64 array requires
+
+$$
+10^8\times8\ \mathrm{bytes}=800\ \mathrm{MB}.
+$$
+
+The positions, angles, trigonometric results, crossing mask, and temporary arrays may require several gigabytes. A vectorized method can therefore be fast at moderate $N$ and fail at larger $N$ because it runs out of memory.
+
+The solution is **batching**, also called **chunking**. Instead of storing all $10^8$ needles, process perhaps $10^6$ at a time and add each batch's crossing count to a running total.
+
+$$
+\boxed{\text{batch size balances repeated overhead against memory use}}
+$$
+
+Very small batches spend more time starting operations. Very large batches consume more memory. The best size depends on the machine and should be measured rather than memorized.
+
+## Compiling and parallelizing the loop
+
+Vectorization changes the way we express the algorithm. Just-in-time compilation offers another route: keep the intuitive loop and compile suitable numerical Python code into machine instructions when the function first runs.
+
+With a JIT compiler such as Numba ([Lam, Pitrou, and Seibert, 2015](../references.qmd#ref-lam2015numba)), the first call contains two costs:
+
+$$
+T_{\mathrm{first}}
+=
+T_{\mathrm{compile}}+T_{\mathrm{run}}.
+$$
+
+Later calls can reuse the compiled version:
+
+$$
+T_{\mathrm{later}}\approx T_{\mathrm{run}}.
+$$
+
+The second call can approach compiled-language performance, although the result depends on whether the function uses operations supported well by the compiler. This leads to a useful lesson:
+
+$$
+\boxed{\text{an explicit loop is not necessarily a slow loop}}
+$$
+
+Buffon throws are also independent. Reordering the throws does not change the crossing count, and one throw does not need the result of the previous throw. Different CPU workers can process separate groups and combine their integer counts.
+
+$$
+\boxed{\text{independent work can often be performed in parallel}}
+$$
+
+Parallelism still has overhead. Work must be divided, workers must be coordinated, and results must be combined. It may slow down a small calculation. Random simulations also require appropriate independent random-number streams; using the same seed independently on every worker would duplicate work rather than create a larger sample.
+
+## Using a GPU
+
+A GPU contains many simpler computational units designed to apply similar operations to large collections of data. Buffon's needle is a reasonable demonstration because every needle requires the same sequence: generate a position and orientation, evaluate one crossing condition, and reduce the Boolean results to a count.
+
+The Molab notebook uses a small PyTorch implementation ([Paszke et al., 2019](../references.qmd#ref-paszke2019pytorch)). Students are not expected to memorize PyTorch or GPU syntax. The purpose is to compare the same mathematical algorithm on a CPU and an accelerator.
+
+A GPU does not guarantee a speedup. Creating or transferring arrays, launching operations, and synchronizing results all take time. For small $N$, the CPU may finish before the GPU overhead is repaid. For sufficiently large batches, the GPU can process the independent throws at much higher throughput. The problem size where the preferred device changes is the **crossover size**.
+
+Precision also affects the comparison. Lower-precision arrays use less memory and may run faster, but L03 showed that fewer significand bits can change accumulation and final accuracy. Report the dtype with the timing.
+
+## Where these strategies matter in materials computation
+
+The same numerical structures appear in larger materials calculations:
+
+- **large grids and repeated local updates:** heat transfer, diffusion, and phase-field models;
+- **many particles with repeated force calculations:** molecular dynamics;
+- **dense matrix and tensor operations:** electronic-structure calculations and machine-learning models;
+- **many independent samples or parameter sets:** Monte Carlo, screening, and uncertainty studies.
+
+Many modern PDE solvers, molecular-dynamics packages, quantum-chemistry programs, and machine-learning tools can use parallel CPUs or GPUs. The benefit depends on the algorithm, data movement, problem size, precision, and software implementation. “Runs on a GPU” does not by itself mean “runs faster.”
+
+A useful comparison table for the Buffon notebook is:
+
+| Implementation | What changes? | Main trade-off to observe |
+|---|---|---|
+| Python loop | baseline interpreted execution | readable but high per-step overhead |
+| NumPy arrays | compiled array operations | speed versus temporary memory |
+| Batched NumPy | fixed-size array blocks | batch overhead versus memory |
+| JIT loop | loop compiled to machine code | first-call compilation cost |
+| Parallel JIT | independent work split across CPU cores | coordination and random-stream handling |
+| PyTorch GPU | many array operations on an accelerator | setup cost and crossover size |
+
+The numerical check is that all versions give statistically consistent estimates of $\pi$ for the same $N$ and $L/d$. Because the experiment is random, identical output is not required unless the random stream is deliberately controlled.
+
+## Closing question for Unit 0
+
+Across the first four lectures, we have seen:
+
+1. how a materials question becomes a mathematical and computational model;
+2. how to quantify error and distinguish several sources;
+3. how to compare convergence when a reference is known and seek other evidence when it is not;
+4. how finite precision can limit a calculation;
+5. how vectorization, batching, compilation, parallelism, and accelerators can make a program more practical.
+
+Now compare two methods:
+
+- Method A converges slowly, but each step is inexpensive.
+- Method B converges rapidly, or may even be exact, but each step is expensive.
+
+Which method is better?
+
+There is no answer from convergence rate or per-step time alone. We need the required accuracy, the number and cost of steps, memory use, robustness, available hardware, and the evidence used to check the result. The meaningful quantity is closer to
+
+$$
+\boxed{
+\text{total time and memory required to reach a trustworthy answer}
+}
+$$
+
+We will meet this trade-off repeatedly: bisection versus Newton's method, low- versus high-order integration, explicit versus implicit time stepping, and simple versus detailed materials models.

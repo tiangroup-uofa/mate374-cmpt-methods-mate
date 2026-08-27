@@ -3,6 +3,7 @@
 --
 -- Usage:
 -- ::: {.quarto-wasm-local notebook="example.edit.py" height="720"}
+-- ::: {.quarto-wasm-local notebook="dashboard.py" fullscreen="true"}
 -- Static/PDF fallback.
 -- :::
 
@@ -53,7 +54,8 @@ function Div(div)
   local offset = quarto.project.offset or "."
   local output_name = exported_stem(notebook) .. ".html"
   local src = pandoc.path.join({ offset, "wasm-local", output_name })
-  if notebook:match("%.edit%.py$") then
+  local editable = notebook:match("%.edit%.py$") ~= nil
+  if editable then
     src = src .. "?show-chrome=false"
   end
 
@@ -63,11 +65,42 @@ function Div(div)
   if loading ~= "lazy" and loading ~= "eager" then
     error("A .quarto-wasm-local loading attribute must be lazy or eager")
   end
-  src = escape_html(src)
 
+  local fullscreen = div.attributes.fullscreen or "false"
+  if fullscreen ~= "true" and fullscreen ~= "false" then
+    error("A .quarto-wasm-local fullscreen attribute must be true or false")
+  end
+
+  local controls = {}
+  if editable then
+    table.insert(
+      controls,
+      '<button class="quarto-wasm-view-toggle" type="button" disabled>App view</button>'
+    )
+  end
+  if fullscreen == "true" then
+    table.insert(
+      controls,
+      '<button class="quarto-wasm-fullscreen" type="button">Full screen</button>'
+    )
+  end
+
+  local controls_html = ""
+  if #controls > 0 then
+    controls_html = '<div class="quarto-wasm-controls">'
+      .. table.concat(controls, "\n")
+      .. "</div>"
+  end
+
+  local hint_html = ""
+  if editable then
+    hint_html = '<p class="marimo-toggle-hint">Use the <strong>App view / Edit code</strong> button, or click inside the notebook and press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> elsewhere.</p>'
+  end
+
+  src = escape_html(src)
   local iframe = string.format(
     [[<div class="marimo-embed-frame quarto-wasm-local-frame">
-  <button class="quarto-wasm-view-toggle" type="button" disabled>App view</button>
+  %s
   <iframe
     src="%s"
     title="%s"
@@ -79,64 +112,100 @@ function Div(div)
     allowfullscreen
     loading="%s"
   ></iframe>
-  <p class="marimo-toggle-hint">Use the <strong>App view / Edit code</strong> button, or click inside the notebook and press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> elsewhere.</p>
+  %s
+  <details class="marimo-troubleshooting">
+    <summary>Notebook not loading?</summary>
+    <p>The first start may take up to a minute while the browser downloads Python and the required packages.</p>
+    <div class="marimo-troubleshooting-actions">
+      <a href="%s" target="_blank" rel="noopener">Open notebook directly</a>
+      <button class="quarto-wasm-reload" type="button">Reload/reset notebook</button>
+    </div>
+    <p class="marimo-troubleshooting-note">Reloading resets unsaved changes. If the direct page also fails, send the course page URL, browser name, and a screenshot to the teaching team.</p>
+  </details>
 </div>
 <script>
 (() => {
   const script = document.currentScript;
   const wrapper = script.previousElementSibling;
-  const button = wrapper.querySelector(".quarto-wasm-view-toggle");
+  const viewButton = wrapper.querySelector(".quarto-wasm-view-toggle");
+  const fullscreenButton = wrapper.querySelector(".quarto-wasm-fullscreen");
+  const reloadButton = wrapper.querySelector(".quarto-wasm-reload");
   const iframe = wrapper.querySelector("iframe");
 
-  const editorsAreVisible = () => {
-    try {
-      return Array.from(iframe.contentDocument.querySelectorAll(".cm-editor"))
-        .some((editor) => editor.getBoundingClientRect().height > 0);
-    } catch (_) {
-      return false;
+  if (viewButton) {
+    const editorsAreVisible = () => {
+      try {
+        return Array.from(iframe.contentDocument.querySelectorAll(".cm-editor"))
+          .some((editor) => editor.getBoundingClientRect().height > 0);
+      } catch (_) {
+        return false;
+      }
+    };
+
+    const updateLabel = () => {
+      const editing = editorsAreVisible();
+      viewButton.textContent = editing ? "App view" : "Edit code";
+      viewButton.setAttribute("aria-pressed", editing ? "false" : "true");
+    };
+
+    const ready = () => {
+      viewButton.disabled = false;
+    };
+
+    iframe.addEventListener("load", ready);
+    if (iframe.contentDocument && iframe.contentDocument.readyState === "complete") {
+      ready();
     }
-  };
 
-  const updateLabel = () => {
-    const editing = editorsAreVisible();
-    button.textContent = editing ? "App view" : "Edit code";
-    button.setAttribute("aria-pressed", editing ? "false" : "true");
-  };
+    viewButton.addEventListener("click", () => {
+      const childWindow = iframe.contentWindow;
+      const childDocument = iframe.contentDocument;
+      if (!childWindow || !childDocument) return;
 
-  const ready = () => {
-    // Local editable exports start in notebook view, matching the label
-    // authored above. Subsequent clicks update the label from the DOM state.
-    button.disabled = false;
-  };
-
-  iframe.addEventListener("load", ready);
-  if (iframe.contentDocument && iframe.contentDocument.readyState === "complete") {
-    ready();
+      const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+      for (const type of ["keydown", "keyup"]) {
+        childDocument.dispatchEvent(new childWindow.KeyboardEvent(type, {
+          key: ".",
+          code: "Period",
+          metaKey: isMac,
+          ctrlKey: !isMac,
+          bubbles: true,
+        }));
+      }
+      window.setTimeout(updateLabel, 150);
+    });
   }
 
-  button.addEventListener("click", () => {
-    const childWindow = iframe.contentWindow;
-    const childDocument = iframe.contentDocument;
-    if (!childWindow || !childDocument) return;
+  if (reloadButton) {
+    reloadButton.addEventListener("click", () => {
+      iframe.src = iframe.src;
+    });
+  }
 
-    const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
-    for (const type of ["keydown", "keyup"]) {
-      childDocument.dispatchEvent(new childWindow.KeyboardEvent(type, {
-        key: ".",
-        code: "Period",
-        metaKey: isMac,
-        ctrlKey: !isMac,
-        bubbles: true,
-      }));
+  if (fullscreenButton) {
+    const requestFullscreen =
+      iframe.requestFullscreen || iframe.webkitRequestFullscreen;
+    if (!requestFullscreen) {
+      fullscreenButton.hidden = true;
+    } else {
+      fullscreenButton.addEventListener("click", async () => {
+        try {
+          await requestFullscreen.call(iframe);
+        } catch (_) {
+          // The browser or an outer iframe may deny fullscreen.
+        }
+      });
     }
-    window.setTimeout(updateLabel, 150);
-  });
+  }
 })();
 </script>]],
+    controls_html,
     src,
     title,
     height,
-    loading
+    loading,
+    hint_html,
+    src
   )
 
   return pandoc.RawBlock("html", iframe)

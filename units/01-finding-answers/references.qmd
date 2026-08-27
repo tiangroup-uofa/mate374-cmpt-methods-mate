@@ -1,0 +1,18 @@
+---
+title: "Unit 1 · References"
+toc: true
+bibliography: references.bib
+nocite: |
+  @*
+---
+
+::: {.callout-warning}
+## Prototype bibliography
+
+This page contains only works cited directly in the current L05–L08 prototypes. Materials-specific references will enter the bibliography when the corresponding examples and citations are added to the lectures.
+:::
+
+## Bibliography
+
+::: {#refs}
+:::

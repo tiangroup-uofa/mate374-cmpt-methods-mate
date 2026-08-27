@@ -1,0 +1,21 @@
+---
+title: "Unit 2 · Learning from functions and data"
+toc: false
+---
+
+**Unit question:** What can we estimate when we can evaluate a function or measure data, but do not have an exact expression we can solve?
+
+::: {.callout-warning}
+## Prototype status
+
+L09–L12 are early text prototypes. Materials datasets, figures, activities, and data provenance are not final. See the [Unit 2 references and source notes](references.qmd) for the initial bibliography.
+:::
+
+The four lectures ask parallel questions about sampled values $(x_i,y_i)$: Can we estimate a slope, an accumulated amount, a value between measurements, or the parameters of a trend?
+
+9. [L09 · Numerical differentiation](L09/index.qmd)
+10. [L10 · Numerical integration](L10/index.qmd)
+11. [L11 · Interpolation](L11/index.qmd)
+12. [L12 · Curve fitting and regression](L12/index.qmd)
+
+[Unit 2 references and source notes](references.qmd)

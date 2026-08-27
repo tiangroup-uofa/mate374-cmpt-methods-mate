@@ -1,0 +1,56 @@
+---
+title: "Lxx · Lecture title"
+subtitle: "A short statement of the lecture question"
+body-classes: lecture-page
+---
+
+## The question
+
+**Write the question that organizes the lecture.**
+
+## Learning outcomes
+
+After working through this note, you should be able to:
+
+- **Identify** ...
+- **Calculate** ...
+- **Judge** ...
+
+## Route through the problem
+
+1. Begin with a familiar case.
+2. Introduce one mathematical idea.
+3. Compare alternatives.
+4. Test the result.
+
+## 1. First part of the argument
+
+Use connected prose and equations. Keep administrative teaching notes out of the student-facing page.
+
+::: {.callout-important}
+## The distinction to remember
+
+State the central contrast in one or two sentences.
+:::
+
+## 2. Second part of the argument
+
+Continue the same problem rather than switching examples without a reason.
+
+::: {.callout-tip collapse="true"}
+## Try this before class moves on
+
+Put optional calculations, hints, or an answer behind a collapsible callout.
+:::
+
+## 3. Engineering judgement
+
+Explain how method choice changes with accuracy, cost, assumptions, and available evidence.
+
+## End-of-lecture test
+
+Give one question whose answer provides evidence for the learning outcomes.
+
+## Next
+
+Use one sentence to create the need for the next lecture.

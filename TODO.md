@@ -31,6 +31,31 @@ Use **problem-centred units**, with methods introduced organically and simulatio
 5. **How do microscopic rules produce macroscopic behavior?** Sampling, Monte Carlo, MD, periodicity, statistics, multiscale limits.
 6. **How does structure determine materials properties?** Electronic-structure/QM foundations, structure–energy–property relationships, DFT as a computational example, and a modest introduction to data-driven property prediction.
 
+### Conceptual course map
+
+The opening lecture should show one shared map, then return to it throughout the semester. Use the old MATE 374 Lecture 1 “principal structure of numerical modeling” as the vertical spine:
+
+> problem statement → mathematical model → numerical representation → numerical solution → results and interpretation
+
+Add a second layer for the method families. Physical scale/model family and numerical kernel are different axes:
+
+| Scale or model family | Representative methods | Mathematical form / numerical kernel |
+|---|---|---|
+| Electronic | DFT | self-consistent nonlinear eigenproblem; eigensolvers, quadrature, minimization, linear algebra |
+| Atomistic | MD, atomistic relaxation | ODE integration or energy minimization |
+| Atomistic/mesoscale | Monte Carlo, KMC | sampling, Markov chains, expectations |
+| Mesoscale | phase field | PDE evolution, spatial discretization, sparse solves |
+| Continuum | FEM, FVM, FDM | balance laws, ODE/PDE discretization, often sparse `Ax=b` |
+| Data/model bridge | CALPHAD fits, ML interatomic potentials | regression/optimization; learned energy and force evaluator |
+
+`Ax=b` is a recurring computational kernel—not the universal center. It appears in balances, discretized fields, least squares, implicit steps, and Newton linearizations. Monte Carlo belongs primarily under sampling and expectation. An MLIP belongs as a bridge from DFT/experimental data to atomistic MD, MC, and relaxation; it is not itself a solver. A true multiscale workflow can pass information across these layers, for example DFT → MLIP → MD/MC → mesoscale or continuum model.
+
+### First-lecture diagnostic
+
+Use a short, non-graded Wooclap “meet the class” block during the syllabus/map discussion. Ask about Python/computational experience, mathematical familiarity, device access, materials-scale interests, and what students would check when a simulation disagrees with an experiment. Store aggregate results and use them to adjust scaffolding, seminar support, examples, and static fallbacks—not to slow the course into a Python prerequisite.
+
+The detailed question set and response rules live in [`units/00-orientation/class-ideas.md`](units/00-orientation/class-ideas.md).
+
 ### Recommended publishing architecture
 
 Use a **hybrid single-repository system**:
@@ -40,11 +65,17 @@ Use a **hybrid single-repository system**:
 - **Light slides are views, not a second textbook:** reveal.js pages should contain prompts, diagrams, pivotal equations, and links/QR codes to live marimo activities. Avoid copying full notes into slides.
 - Each class gets one durable landing page linking its printable note, activity, and after-class material. Organize navigation by **unit first**, class number second.
 
-**Prototype status (2026-08-18):** MATE 374 keeps each micro-demo as a normal `.py` notebook and currently renders the same test through two format-aware Quarto filters. One compresses source into an editable `marimo.app/?embed=true&mode=edit#code/...` iframe. The other maps a filename relative to `activities/` to editable WASM HTML generated locally by the MATE 664-style post-render exporter; all local notebooks share one generated marimo asset directory. Both filters use the fenced Div contents as the static/PDF fallback. Compare appearance, load behavior, editing, responsive layout, and network requests before selecting a convention.
+**Prototype status (2026-08-18):** MATE 374 keeps each micro-demo as a normal `.py` notebook and currently renders the same test through two format-aware Quarto filters. One compresses source into an editable `marimo.app/?embed=true&mode=edit#code/...` iframe. The other maps a filename relative to `activities/` to editable WASM HTML generated locally by a MATE 664-style exporter. The exporter now runs before Quarto rendering into an ignored resource directory so preview can serve every nested asset; all local notebooks share one generated marimo asset directory. Both filters use the fenced Div contents as the static/PDF fallback. Compare appearance, load behavior, editing, responsive layout, and network requests before selecting a convention.
 
 The same prototype page now supplies reading and classroom views from one rendered HTML source. Lecture pages marked `body-classes: lecture-page` receive an in-place URL switch between the ordinary reading URL and `?view=class`; class view hides navigation, expands the content from 938 px to 1372 px at a 1440 px viewport, and increases the base content font from 17 px to about 21 px. This replaces the old pattern of duplicating full notes, reveal.js slides, and handwritten-note links unless a genuinely different medium is needed.
 
 Do **not** make marimo the only canonical format yet. It is excellent for live and student-facing computation, but long-form printing, page breaks, citations, cross-references, accessibility, and exam-study packets remain safer in Quarto/PDF. Also avoid maintaining independent full notes, full slides, and full notebooks: that creates three sources of truth.
+
+### Non-negotiable scientific-Python and plotting policy
+
+Every editable local WASM marimo activity (`*.edit.py`) is authored against the standard course browser environment: the Python standard library plus NumPy, SciPy, SymPy, pandas, Polars, Matplotlib, and Plotly. These are the normal tools students should use. Matplotlib is explicitly supported and should be the default for ordinary scientific and engineering plots; use Plotly when interactive plots add value.
+
+**Do not reinvent the wheel to avoid these libraries.** Do not replace standard numerical, tabular, or plotting functionality with hand-written SVG, canvas, HTML, or custom implementations merely to reduce dependencies or make the code look simpler. Use the established library. Write a custom implementation only when the algorithm itself is the learning objective or when a real, measured WASM compatibility constraint requires it. Keep the `pyproject.toml`, marimo/Pyodide export configuration, and lockfile aligned with this baseline.
 
 ### Authoring rule
 
@@ -83,7 +114,7 @@ Unless marimo-first clearly wins this test, adopt Option A for the first offerin
 
 ## Proposed units and rough class map
 
-**Fall 2026 calendar check (2026-08-19):** The local `MAT E 374 LEC A1` calendar event meets MWF, 12:00–12:50 p.m., from September 2 through December 7. Labour Day, the National Day for Truth and Reconciliation, Thanksgiving, and the three MWF dates during Fall Reading Week remove six of 42 timetable slots. This leaves **36 meetings: 35 instructional lectures plus one tentative in-class midterm on Wednesday, October 28**. See [`syllabus/schedule.qmd`](syllabus/schedule.qmd).
+**Fall 2026 calendar:** The public syllabus now records the MWF lecture period and term interruptions. Detailed meeting counts and a tentative lecture-by-date map are intentionally not published.
 
 The map intentionally alternates concepts and applications. If the timetable changes, it can compress to 32–34 instructional meetings.
 
@@ -91,12 +122,42 @@ The map intentionally alternates concepts and applications. If the timetable cha
 
 **Driving question:** What does it mean for a simulation to be useful and believable?
 
-1. A computational materials workflow; scales and representations; one result viewed through DFT/MD/MC/phase-field/FEM/data models.
-2. Reproducible Python/marimo workflow; units, arrays, plotting, records of assumptions; diagnostic rather than a Python boot camp.
+1. From a materials question to a live calculation; the question → model → numerical result chain, what simulations can and cannot establish, and a first guided marimo function (with the first 15 minutes reserved for the syllabus).
+2. Approximation as an algorithm; a π experiment with supplied functions, loops, arrays, timing, absolute/relative error, and a first look at floating-point representation. Formal function wrapping is deferred to the seminar.
 
 Anchor activity: inspect a polished-but-wrong simulation and list the evidence needed to trust it.
 
-### Unit 1 — Can I trust this number? (Classes 3–5)
+### Lead design — first 17 lectures
+
+This is the lead instructional design for the first half of the term. It supersedes the earlier slower allocation in which three full lectures on trust preceded root finding. Verification is now threaded through the methods, and the first real materials solver appears in L03.
+
+By L17, students should be able to move from a materials question to a mathematical representation, edit or inspect a supplied numerical algorithm, choose among root finding/linear algebra/optimization/data/ODE approaches, and defend a result with residuals, units, limiting cases, convergence, or uncertainty.
+
+Use the default 50-minute rhythm—prediction, short model explanation, guided computation, verification, interpretation, exit question—with one small notebook or worked investigation as the center of most meetings. L01 is the exception: its first 15 minutes are syllabus, course map, Wooclap baseline, and support logistics.
+
+| Lecture | Driving question | Core representation or method | Active evidence |
+|---:|---|---|---|
+| L01 | What is computational modeling, and how do I write one live calculation? | Question → model → numerical representation; supplied marimo function | Edit thermal-expansion function; check units and a limiting case |
+| L02 | How does an algorithm approximate a known number? | Series, loop, array, error, floating point | Compare π implementations; report error and timing |
+| L03 | What does it mean to solve a materials equation? | Scalar residual $F(x)=0$, domain, graph, bracket | Predict and identify a physically admissible sign change |
+| L04 | How can a root be found robustly? | Bisection and convergence history | Implement/modify the bisection loop; report bracket, residual, and stopping rule |
+| L05 | When is a faster method worth the risk? | Regula falsi, Newton, secant, fixed point | Compare convergence and failure; implement only the transparent method |
+| L06 | What changes when equilibrium has several unknowns? | $F(\mathbf{x})=0$ and Jacobian linearization | Interpret $J\,\Delta x=-F$ and diagnose an initial-guess failure |
+| L07 | Where does $Ax=b$ arise in materials work? | Coupled balances, matrix geometry, Gaussian elimination | Solve a small balance system and inspect its residual |
+| L08 | Can a small residual still hide a bad answer? | Scaling, conditioning, pivoting, finite precision | Perturb data and compare residual, solution sensitivity, and units |
+| L09 | Is every equilibrium a minimum? | Free energy, stationary roots, constrained/global minimization | Distinguish a stationary point from a stable material state |
+| L10 | How does an atomistic structure relax? | Energy landscape, forces, gradient-based optimization | Relax a toy pair-potential configuration and define convergence |
+| L11 | Which equilibrium method should we trust? | Roots, linear solves, minimization, verification | Choose a method and defend the result in a short synthesis studio |
+| L12 | What can an Arrhenius data set support? | Regression, transformations, residuals, uncertainty | Fit diffusivity data and interpret parameter meaning |
+| L13 | When is interpolation not a model? | Interpolation, splines, extrapolation | Compare a table lookup with an extrapolated prediction |
+| L14 | Why does differentiation amplify noise? | Finite differences and step-size error | Estimate $P=-\mathrm{d}E/\mathrm{d}V$ or a modulus from noisy data |
+| L15 | How do we integrate measured materials data? | Quadrature and accumulated error | Estimate work, toughness, enthalpy, or heat capacity with units |
+| L16 | Can the data identify the mechanism? | Calibration, validation, identifiability, uncertainty | Reject or defend a model using residual structure and sensitivity |
+| L17 | How does a materials inventory become an ODE? | State variable, rate law, initial condition, Euler preview | Formulate a kinetic model and predict the effect of timestep |
+
+The unit inventories below remain useful source material; the lead table above is the current timetable design.
+
+### Unit 1 — Can I trust this number? (Content inventory)
 
 3. Approximation taxonomy: model-form, parameter/data, discretization/truncation, finite precision, iterative/solver tolerance, sampling error.
 4. Floating point and conditioning through an equation-of-state derivative; U-shaped error versus step size; add “SCF noise.”
@@ -104,7 +165,7 @@ Anchor activity: inspect a polished-but-wrong simulation and list the evidence n
 
 Possible stories from the shared conversation: Sleipner A (discretization/FEM), Vancouver Stock Exchange (biased quantization), Patriot timing (finite representation), Fast16/other failure examples. Carefully source and distinguish error types before teaching.
 
-### Unit 2 — What state does the material prefer? (Classes 6–11)
+### Unit 2 — What state does the material prefer? (Content inventory)
 
 6. Root finding from equilibrium vacancy concentration or electroneutrality: bracket first, then solve.
 7. Nonlinear systems through phase coexistence/equality of chemical potentials; initial guesses and multiple roots.
@@ -115,7 +176,7 @@ Possible stories from the shared conversation: Sleipner A (discretization/FEM), 
 
 Suggested anchor: a binary regular-solution free-energy notebook connects root finding, differentiation, optimization, phase diagrams, and sensitivity in one evolving model.
 
-### Unit 3 — What can materials data tell us? (Classes 12–16)
+### Unit 3 — What can materials data tell us? (Content inventory)
 
 12. Regression with Arrhenius diffusivity data: transformations, residuals, parameter meaning, uncertainty.
 13. Interpolation versus modeling: property tables/CALPHAD-like data, splines, extrapolation hazards.
@@ -123,7 +184,7 @@ Suggested anchor: a binary regular-solution free-energy notebook connects root f
 15. Numerical integration: work/toughness from stress–strain data, enthalpy/heat capacity, radial distribution functions.
 16. Model calibration and validation studio: identifiability, residuals, uncertainty, and overfitting. If calendar coverage requires ML, use only a brief library-level property-fitting example here; do not add neural networks, GNNs, or LLMs to the core course.
 
-### Unit 4 — How does a material evolve? Lumped models (Classes 17–21)
+### Unit 4 — How does a material evolve? Lumped models (Content inventory)
 
 17. From physical inventory to ODE: precipitation fraction, grain growth, oxidation, or lumped thermal history.
 18. Euler as a numerical experiment; local/global error and timestep refinement.
@@ -164,17 +225,16 @@ Verification, validation, uncertainty, and reproducibility remain recurring prac
 
 ## Assessment direction
 
-**Working recommendation (2026-08-19):** use five individual computational investigations plus one staged team project. Run 12 TA-led seminars from the second week through the final full teaching week; use marimo as the interactive backbone and keep seminars primarily formative. Detailed rationale and maps now live in [`assignments/index.qmd`](assignments/index.qmd), [`project/index.qmd`](project/index.qmd), and [`syllabus/seminars.qmd`](syllabus/seminars.qmd).
+**Working recommendation (2026-08-19, revised after workload comparison):** use five focused investigations—A1–A3 individual and A4–A5 paired—plus one staged team project, weighted 20% assignments / 20% project / 20% midterm / 40% final. End assignments by November 20 and reserve November 16–December 7 as the project's three-week active window, informed by the MATE 664 experience. Detailed rationale and public comparators live in [`assignments/index.qmd`](assignments/index.qmd) and [`project/index.qmd`](project/index.qmd).
 
 The available Fall 2025 archive contains seven conventional briefs (A1–A7) and one team-project brief (A9); no A8 brief is present. Its syllabus groups assignments under 25%, alongside a 30% midterm and 45% final. The archived project used teams of five or six and one common LAMMPS Cu task due on the final class day.
 
-The 2025 scheme rewards a conventional methods course more than an end-to-end computational workflow. Consider:
+The 2025 scheme rewards a conventional methods course more than an end-to-end computational workflow. The selected working partition is:
 
-- 20–25% short concept/problem sets;
-- 20–25% reproducible computational investigations;
-- 20–25% midterm;
-- 25–35% staged final project or practical synthesis;
-- optional small participation/verification audits.
+- 20% five focused computational investigations;
+- 20% staged final project;
+- 20% focused in-class midterm;
+- 40% final examination.
 
 Every substantial computational submission should include:
 

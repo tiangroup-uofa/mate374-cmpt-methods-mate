@@ -1,0 +1,88 @@
+---
+title: "L03 · From a materials question to F(x)=0"
+subtitle: "Residuals, physical domains, and the first root-finding problem"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**What does it mean to solve a materials equation when the answer is not an explicit formula?**
+
+A ceramic surface receives a heat flux. Its steady temperature is determined by a balance between convection and radiation:
+
+$$
+q'' = h(T_s-T_\infty)+\varepsilon\sigma(T_s^4-T_\infty^4).
+$$
+
+We turn that balance into a residual,
+
+$$
+R(T_s)=h(T_s-T_\infty)+\varepsilon\sigma(T_s^4-T_\infty^4)-q''.
+$$
+
+and ask for a physically admissible $T_s$ such that $R(T_s)=0$.
+
+This is the first important change from the π experiment. We are no longer approximating a known constant. We are finding an unknown state that satisfies a model condition.
+
+## Learning outcomes
+
+Given a scalar materials balance and an editable notebook, students will be able to:
+
+1. **Formulate** a scalar residual from a materials balance and identify the units of its terms. *(Apply)*
+2. **Determine** a physically admissible domain for the unknown temperature and inspect the residual on that domain. *(Analyze)*
+3. **Identify** a candidate bracket from endpoint signs and explain what continuity does—and does not—guarantee. *(Understand)*
+4. **Distinguish** a residual, a bracket, and a solved root as three different pieces of numerical evidence. *(Evaluate)*
+
+## Model → residual → numerical problem
+
+The equation is a model of a surface, not a universal law for every thermal process. We use $h=15\,\mathrm{W\,m^{-2}\,K^{-1}}$, an ambient temperature of $300\,\mathrm{K}$, and a chosen emissivity. The residual has units of $\mathrm{W/m^2}$ because it is a difference between heat fluxes.
+
+For a positive incoming flux, a reasonable first domain is $T_s\geq T_\infty$. We can test an interval $[a,b]$ by evaluating $R(a)$ and $R(b)$:
+
+- if $R(a)R(b)<0$ and $R$ is continuous on $[a,b]$, at least one root lies inside;
+- if the signs agree, the interval has not established a bracket;
+- a sign change does not prove there is only one root, nor does it validate the heat-transfer model.
+
+## Live investigation: inspect before solving
+
+::: {.quarto-wasm-local notebook="thermal_balance_residual.edit.py" title="Inspect a materials residual before root finding" height="880" loading="eager"}
+**Static fallback.** With $q''=10{,}000\,\mathrm{W/m^2}$, $T_\infty=300\,\mathrm{K}$, and $\varepsilon=0.80$, the residual is $R(300)=-10{,}000\,\mathrm{W/m^2}$ and $R(900)\approx28{,}395\,\mathrm{W/m^2}$. The interval $[300,900]\,\mathrm{K}$ therefore brackets at least one root. The root estimate is intentionally deferred until L04.
+:::
+
+### What to inspect
+
+1. Does the residual have the expected units and sign at ambient temperature?
+2. Does changing emissivity change the residual in the expected direction?
+3. What happens when the right endpoint is too low to produce a sign change?
+4. What assumptions would make this balance unsuitable for a particular material or geometry?
+
+The function body is supplied, as in L01 and L02. Students can edit the equation without first designing a software interface.
+
+## A bracket is evidence, not the answer
+
+The intermediate-value theorem gives a useful guarantee: a continuous function that changes sign on an interval has at least one zero there. This is why a bracket is valuable. It also tells us what the theorem does not provide:
+
+- it does not tell us how to locate the zero efficiently;
+- it does not select among multiple roots;
+- it does not check whether the physical model is appropriate;
+- it does not replace a residual or convergence check after solving.
+
+In L04, we will preserve this bracket while repeatedly shrinking it with bisection.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Retrieve the L02 map: known approximation versus unknown state | Students name the new numerical question |
+| 5–12 min | Introduce the surface heat-balance model and units | Model terms and assumptions identified |
+| 12–20 min | Derive $R(T_s)=0$ and discuss the physical domain | Valid input range and residual units |
+| 20–35 min | Explore the live residual plot and endpoint signs | Candidate bracket and prediction |
+| 35–43 min | Compare sign change, residual, and model validity | Evidence classified correctly |
+| 43–48 min | Sketch the bisection update before seeing code | Algorithm prediction |
+| 48–50 min | Exit question | State what must be checked before calling a root finder |
+
+## Exit question
+
+A residual has values $R(300)=-4$ and $R(500)=-1$. Can you conclude that there is no physical root? What additional information would you seek?
+
+*Expected direction:* no. The interval has not bracketed a root; inspect a wider physically admissible domain, the residual plot, model assumptions, and possible multiple-root behavior.

@@ -1,0 +1,18 @@
+---
+title: "Unit 2 · References"
+toc: true
+bibliography: references.bib
+nocite: |
+  @*
+---
+
+::: {.callout-warning}
+## Prototype bibliography
+
+This page contains only works cited directly in the current L09–L12 prototypes. Dataset sources will enter the bibliography when the corresponding materials datasets and citations are added to the lectures.
+:::
+
+## Bibliography
+
+::: {#refs}
+:::

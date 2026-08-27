@@ -16,7 +16,7 @@ quarto preview
 quarto render
 ```
 
-The post-render hook exports notebooks from `activities/` after Quarto builds the site.
+The pre-render hook exports notebooks from `activities/` into the ignored `wasm-local/` resource directory. Quarto then copies the complete bundle into the built site.
 
 ## Course identity
 
@@ -31,11 +31,13 @@ Lecture pages use one rendered HTML document for both student reading and classr
 .../L01/?view=class  # full-width, larger classroom view
 ```
 
-The switch preserves the page, scroll state, and interactive notebook sessions; it does not maintain a duplicate slide deck. [`assets/class-view.html`](assets/class-view.html) manages URL state and [`styles.css`](styles.css) defines the two layouts.
+A single bottom-right icon toggles the two states while preserving the page, scroll position, and interactive notebook sessions; it does not maintain a duplicate slide deck. [`assets/class-view.html`](assets/class-view.html) manages URL state and [`styles.css`](styles.css) defines the two layouts.
 
-## Marimo embedding comparison
+## Orientation lectures and marimo workflow
 
-[`units/00-orientation/L01/index.qmd`](units/00-orientation/L01/index.qmd) renders the same editable notebook using two iframe sources.
+[`units/00-orientation/L01/index.qmd`](units/00-orientation/L01/index.qmd) introduces the question–model–calculation workflow and gives students a small thermal-expansion function to edit. [`units/00-orientation/L02/index.qmd`](units/00-orientation/L02/index.qmd) turns a π series into an algorithm and compares loops, arrays, timing, error, and floating-point representation.
+
+The earlier iframe and multi-playground deployment experiments are retained under [`units/00-orientation/archive/`](units/00-orientation/archive/index.qmd).
 
 ### Hosted source iframe
 
@@ -55,13 +57,46 @@ Static fallback for non-HTML output.
 :::
 ```
 
-[`_marimo_export.py`](_marimo_export.py), adapted from MATE 664, exports all notebooks into `_site/wasm-local/`. They share one generated marimo `assets/` directory. [`filters/quarto-wasm-local.lua`](filters/quarto-wasm-local.lua) maps the notebook filename to its local HTML output and supplies the iframe attributes.
+For a dashboard-style app that benefits from the whole display, opt in to the course fullscreen control without restoring marimo's full chrome:
+
+```markdown
+::: {.quarto-wasm-local notebook="dashboard.py" height="700" fullscreen="true"}
+Static fallback for non-HTML output.
+:::
+```
+
+`loading="eager"` starts an iframe immediately; the default is `loading="lazy"`. Run-mode `*.py` dashboards expose only requested controls. Editable `*.edit.py` notebooks also receive the **App view / Edit code** control. Every local embed includes a collapsed **Notebook not loading?** panel with direct-open and reload/reset actions.
+
+[`_marimo_export.py`](_marimo_export.py), adapted from MATE 664, exports all notebooks into the generated `wasm-local/` resource directory; Quarto copies it to `_site/wasm-local/`. This pre-render staging makes Quarto preview register every nested CSS, font, worker, and JavaScript asset. The notebooks share one generated marimo `assets/` directory. [`filters/quarto-wasm-local.lua`](filters/quarto-wasm-local.lua) maps the notebook filename to its local HTML output and supplies the iframe attributes.
 
 Filename convention:
 
 - `example.py` → run-mode `example.html`
 - `example.edit.py` → editable `example.html`
+- `example.molab.py` → excluded from WASM export and launched in molab
+
+### Notebook startup policy
+
+Course notebooks run at browser startup by default. `--execute` provides an immediate build-time preview, while the trusted course exporter enables marimo's browser `auto_instantiate` setting so the live kernel runs the complete dependency graph as soon as it is ready. Refreshing therefore resets and reruns the authored notebook without asking students to click **Run all**.
+
+For an exceptional expensive notebook, add this source marker and provide an explicit `mo.ui.run_button` inside the notebook:
+
+```python
+# mate374: auto-run = false
+```
+
+Native activities that should not start in the browser belong in molab instead.
 
 For non-HTML formats, each filter emits the contents of its fenced Div as the static fallback.
+
+### Cloud notebooks in molab
+
+Notebooks that require a native cloud environment—such as a future `mace-torch` activity—should launch in molab instead of pretending to be WASM-compatible. Once the notebook is committed to GitHub, use a normal molab link without the `/wasm` suffix:
+
+```markdown
+[![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/tiangroup-uofa/mate374-cmpt-methods-mate/blob/main/activities/numba_pi.molab.py)
+```
+
+Keep a concise Quarto explanation and static result beside the link so the course page remains readable without starting the cloud runtime.
 
 The canonical test notebook is [`activities/inline_numpy.edit.py`](activities/inline_numpy.edit.py).

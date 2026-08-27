@@ -1,0 +1,63 @@
+---
+title: "L14 · Numerical differentiation and noise"
+subtitle: "Estimate stress from discrete energy data"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**How does a discrete energy–strain record become a stress estimate?**
+
+For a strain-energy density $u(\varepsilon)$,
+
+$$
+\sigma(\varepsilon)=\frac{\mathrm{d}u}{\mathrm{d}\varepsilon}.
+$$
+
+With measured values at discrete strains, the derivative must be approximated. Forward and backward differences use one-sided slopes; the centered difference uses both neighbors and has higher order for clean, equally spaced data.
+
+But differentiation is sensitive to noise. A smaller spacing reduces truncation error only when the data themselves are sufficiently clean.
+
+## Learning outcomes
+
+Given discrete stress–strain energy data, students will be able to:
+
+1. **Apply** forward, backward, and centered finite-difference formulas with correct locations and units. *(Apply)*
+2. **Compare** first- and second-order truncation behavior using a spacing refinement. *(Analyze)*
+3. **Diagnose** noise amplification and distinguish discretization error from data error. *(Analyze)*
+4. **Select** a derivative estimate and defend it using data quality and physical context. *(Evaluate)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="numerical_derivative.edit.py" title="Finite differences for a stress estimate" height="820" loading="eager"}
+**Static fallback.** For clean synthetic energy data at $\varepsilon=0.010$, the centered difference is more accurate than the one-sided estimates. When deterministic measurement noise is added, reducing the spacing can make the estimate less reliable rather than more accurate.
+:::
+
+The notebook supplies the finite-difference function. Students change the local implementation and compare its error with the exact synthetic derivative. The exact derivative is available only for verification; a real experiment would require an independent physical or fitted-model check.
+
+## Formula selection is part of the result
+
+At an interior point with equal spacing $h$,
+
+$$
+\frac{u_{i+1}-u_{i-1}}{2h}=u'(\varepsilon_i)+O(h^2).
+$$
+
+At an endpoint, the centered formula is unavailable without additional data. A one-sided formula may be the best available choice, but its lower order and uncertainty should be stated.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Interpret stress as a derivative of energy density | Units and physical meaning |
+| 5–15 min | Derive one-sided and centered slopes | Correct stencil and location |
+| 15–32 min | Refine spacing in the notebook with clean data | Order-of-accuracy observation |
+| 32–42 min | Turn on noise and repeat | Noise-amplification diagnosis |
+| 42–48 min | Choose a derivative for a real data set | Evidence-based method choice |
+| 48–50 min | Exit question | Explain why smaller $h$ is not always better |
+
+## Exit question
+
+Why might a centered difference with a smaller spacing be worse than a centered difference with a larger spacing when the data come from an experiment?
+
+*Expected direction:* the smaller spacing reduces truncation error but magnifies point-to-point measurement noise and floating-point/data-processing effects.

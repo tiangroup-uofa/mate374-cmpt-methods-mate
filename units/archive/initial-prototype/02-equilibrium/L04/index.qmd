@@ -1,0 +1,91 @@
+---
+title: "L04 · Bisection: keep the root bracketed"
+subtitle: "A robust solver for a nonlinear materials balance"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**How can we improve an equilibrium estimate without losing the guarantee supplied by a valid bracket?**
+
+L03 identified a surface temperature $T_s$ for which the heat-balance residual
+
+$$
+R(T_s)=h(T_s-T_\infty)+\varepsilon\sigma(T_s^4-T_\infty^4)-q''
+$$
+
+changes sign. Bisection uses only that sign information. It does not need a derivative, a clever initial guess, or a sophisticated library.
+
+## Learning outcomes
+
+Given a continuous scalar residual and a valid bracket, students will be able to:
+
+1. **Trace** the bisection algorithm and preserve its sign-change invariant. *(Understand)*
+2. **Implement** or edit a supplied bisection loop using midpoint, conditional update, and iteration limit. *(Apply)*
+3. **Choose** a stopping criterion based on bracket width and residual magnitude. *(Analyze)*
+4. **Verify** a computed equilibrium using its physical interval, residual, and convergence history. *(Evaluate)*
+
+## The invariant
+
+At every successful iteration, the endpoints should still satisfy
+
+$$
+R(a)R(b)\leq 0.
+$$
+
+The midpoint $m=(a+b)/2$ divides the current interval. If $R(a)R(m)\leq0$, replace $b$ with $m$; otherwise replace $a$ with $m$. The interval width is halved even when the function is poorly scaled.
+
+A useful algorithm has more than a formula. It also has:
+
+- a check that the initial bracket is valid;
+- a maximum iteration count;
+- a stopping rule stated before the calculation;
+- a final residual and physical-interpretation check.
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="thermal_bisection.edit.py" title="Bisection for a nonlinear heat-balance residual" height="960" loading="eager"}
+**Static fallback.** With the default $q''=10{,}000\,\mathrm{W/m^2}$ and bracket $[300,900]\,\mathrm{K}$, bisection with a $0.1\,\mathrm{K}$ width tolerance returns approximately $T_s=599.82\,\mathrm{K}$ after 14 iterations. The final bracket is about $0.073\,\mathrm{K}$ wide; the residual is about $1.7\,\mathrm{W/m^2}$.
+:::
+
+### Student coding move
+
+Open **Edit code** and inspect `bisection_root`. The function signature and return structure are supplied. Change a local line, run the cell, and observe which evidence changes:
+
+- changing the midpoint formula changes the algorithm;
+- changing the sign test can lose the root;
+- stopping only on residual can leave a wide temperature interval;
+- omitting the iteration limit can make a failed bracket look like a running calculation.
+
+Students are not asked to write a general-purpose package. They are asked to make the algorithm’s invariant visible.
+
+## Residual tolerance is not temperature tolerance
+
+A residual has heat-flux units, while the root has temperature units. These are different questions:
+
+- Is $|R(T_s)|$ small in $\mathrm{W/m^2}$?
+- Is the bracket or step small in K?
+- Is the model accurate enough for the material decision?
+
+A very small residual can coexist with a badly conditioned problem, and a modest residual may be acceptable if the corresponding temperature uncertainty is physically negligible. State which tolerance you used and why.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Reconstruct the bisection update from the L03 residual plot | Correct midpoint and retained interval |
+| 5–12 min | Derive the sign-change invariant and stopping criteria | Algorithm conditions identified |
+| 12–25 min | Work through two iterations by hand | Updated endpoints and signs |
+| 25–40 min | Edit/run the notebook and vary the tolerance or bracket | Convergence history and failure diagnosis |
+| 40–47 min | Compare residual tolerance with temperature tolerance | Units-aware verification |
+| 47–50 min | Exit question | Explain why bisection is robust but not necessarily fast |
+
+## Exit question
+
+A student reports $T_s=600\,\mathrm{K}$ after bisection but gives no initial bracket, residual, or tolerance. What part of the numerical result can you trust, and what evidence is missing?
+
+*Expected direction:* the displayed number alone is not enough. Request the model, bracket, stopping criterion, residual, and physical-domain check.
+
+## Next meeting
+
+Bisection is deliberately conservative. In L05 we will compare it with methods that use local slope information or two previous estimates. They may converge faster, but their reliability depends more strongly on derivatives, starting values, and iteration maps.

@@ -1,0 +1,95 @@
+---
+title: "L05 · Fast and fragile root finders"
+subtitle: "Newton, secant, and fixed-point iteration as method choices"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**When is a faster root finder worth giving up the protection of a bracket?**
+
+Bisection uses global sign information and is hard to fool when its assumptions hold. Open methods use local information instead:
+
+- Newton uses a derivative and a tangent line;
+- secant approximates the derivative from two points;
+- fixed-point iteration repeatedly applies a rearranged map $x_{k+1}=g(x_k)$.
+
+The speed advantage is conditional. A method can be mathematically correct and still fail because the initial guess is poor, a derivative is nearly zero, or the iteration map is not contractive.
+
+## Learning outcomes
+
+Given the same materials residual and several supplied solver functions, students will be able to:
+
+1. **Classify** a root finder as bracketing or open and state the information it requires. *(Understand)*
+2. **Compare** convergence histories, iteration counts, and failure modes for bisection, Newton, secant, and fixed-point iteration. *(Analyze)*
+3. **Select** a method for a one-off calculation versus a repeated parameter sweep, with a reason tied to robustness and cost. *(Evaluate)*
+4. **Diagnose** a failed solve using the physical domain, derivative, starting values, iteration map, and residual. *(Evaluate)*
+
+## Geometric picture
+
+For Newton’s method,
+
+$$
+T_{k+1}=T_k-\frac{R(T_k)}{R'(T_k)}.
+$$
+
+This is a tangent-line prediction. It can be excellent near a simple root and unreasonable far away. The secant method replaces $R'(T_k)$ with a slope from two previous points. Fixed-point iteration replaces the residual equation with an iteration map; its behavior depends on the local slope $|g'(T^*)|$.
+
+The methods are therefore not a ranking from “bad” to “good.” They are instruments with different assumptions:
+
+| Method | Strength | Failure risk |
+|---|---|---|
+| Bisection | Bracketed and robust | Slow; needs a sign-changing interval |
+| Newton | Very fast near a root | Needs derivative and good starting value |
+| Secant | No explicit derivative | Can leave the physical domain or use a poor slope |
+| Fixed point | Simple update | Convergence depends on the chosen map |
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="root_methods.edit.py" title="Compare root-finding methods for a materials balance" height="980" loading="eager"}
+**Static fallback.** For the default heat balance, all four methods can approach the same surface temperature near $599.79\,\mathrm{K}$ when their starting values and iteration map are suitable. Bisection takes more iterations but preserves its bracket; Newton and secant can be faster; fixed-point iteration changes behavior when its gain is too large.
+:::
+
+### What students should change
+
+Use the controls to change the starting values and fixed-point gain. Then inspect the table and residual histories:
+
+- move Newton’s starting point away from the root;
+- make the secant points nearly equal or place them on one side;
+- increase the fixed-point gain until convergence becomes slow or fails;
+- compare the result with the bisection bracket and residual.
+
+The code is supplied for comparison. Students need to implement the core mechanism deeply once—bisection—and learn to inspect, select, and diagnose the others.
+
+## Verification is method-independent
+
+For every method, ask the same closing questions:
+
+1. Is the reported temperature inside the physical domain?
+2. Is the residual small in the correct units?
+3. Did the iteration history actually converge?
+4. Does the answer agree with an independent method or limiting case?
+5. Are the model assumptions appropriate for the material and regime?
+
+A fast answer with no evidence is not a better answer.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Predict which methods need a bracket or derivative | Method classification |
+| 5–15 min | Derive tangent/secant/fixed-point updates geometrically | Assumptions linked to formulas |
+| 15–30 min | Compare method histories in the notebook | Iteration and residual evidence |
+| 30–40 min | Deliberately choose bad starts or gain | Failure diagnosis |
+| 40–47 min | Defend a method for one calculation and a parameter sweep | Method-selection argument |
+| 47–50 min | Exit question | State when robustness matters more than speed |
+
+## Exit question
+
+You must solve the same equilibrium equation 10,000 times while sweeping temperature and composition. Would you automatically choose Newton’s method because it is fastest near a root? What additional evidence would you require?
+
+*Expected direction:* no. Check starting values, derivative cost/availability, physical bounds, failure recovery, convergence rate over the parameter region, and agreement with a robust reference method.
+
+## Next meeting
+
+In L06, one equilibrium condition becomes several coupled conditions. The Newton step will reveal why a linear system—and therefore $Ax=b$—keeps reappearing inside nonlinear materials calculations.

@@ -1,5 +1,6 @@
 /.quarto/
 /_site/
+/wasm-local/
 /.venv/
 __marimo__/
 **/__marimo__/
@@ -11,3 +12,4 @@ __pycache__/
 .\#*
 
 **/*.quarto_ipynb
+**/index_files/

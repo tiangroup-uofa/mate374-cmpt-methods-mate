@@ -1,0 +1,101 @@
+---
+title: "L07 · Finding a minimum in one dimension"
+subtitle: "From stationary points to stable material states"
+body-classes: lecture-page
+---
+
+## The question
+
+**How can we find the value of one variable that minimizes an energy or objective function?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Distinguish** roots, stationary points, local minima, and global minima.
+- **Bracket** a one-dimensional minimum from function values.
+- **Explain** how golden-section search reduces an interval without derivatives.
+- **Check** whether a reported minimum is physically admissible and sufficiently resolved.
+
+## A zero derivative is not automatically a minimum
+
+For a smooth objective $\phi(x)$, an interior stationary point satisfies
+
+$$
+\phi'(x^*)=0.
+$$
+
+Root finding can locate such a point, but the condition also holds at a local maximum or a flat saddle-like point. The sign of the derivative around $x^*$ or the local curvature distinguishes the possibilities:
+
+$$
+\phi''(x^*)>0
+\quad\Rightarrow\quad
+\text{local minimum}
+$$
+
+under the usual smoothness assumptions.
+
+A minimum may also lie at a boundary where $\phi'(x)$ is not zero. Constraints such as
+
+$$
+0\le x\le1
+$$
+
+for a composition are therefore part of the problem, not an afterthought.
+
+## Local and global questions
+
+A **local minimum** is lower than nearby points. A **global minimum** is no higher than any admissible point. A free-energy curve may have several local minima separated by barriers. An algorithm that descends from one initial region can reach a metastable state without finding the globally preferred state.
+
+Before optimizing, plot or sample the objective over the physical domain whenever one dimension makes that possible.
+
+## Bracketing a minimum
+
+For a unimodal function, three points $a<b<c$ bracket a minimum when
+
+$$
+\phi(b)<\phi(a)
+\qquad\text{and}\qquad
+\phi(b)<\phi(c).
+$$
+
+This pattern says that moving toward $b$ from either side lowers the objective. It does not prove global optimality if the wider domain contains other wells.
+
+## Golden-section search
+
+Golden-section search reduces a bracket while reusing one of the existing function values. The interior points divide the interval using the golden ratio
+
+$$
+\varphi=\frac{1+\sqrt5}{2}.
+$$
+
+At each step, compare the objective at the two interior points and discard the outer portion that cannot contain the minimum under the unimodal assumption. The bracket shrinks by a fixed factor, giving predictable progress without derivatives.
+
+This is attractive when function values are reliable but derivatives are unavailable, noisy, or expensive. Brent's treatment connects bracketing, golden-section search, and faster interpolation-based steps ([Brent, 1973](../references.qmd#ref-brent1973algorithms)).
+
+## Derivative-based minimization
+
+If derivatives are available, the stationary condition $\phi'(x)=0$ can be solved with the methods from L05--L06. The derivative can give rapid progress, but differentiation may amplify data noise and a stationary-point solver may converge to a maximum. We therefore keep the optimization question visible rather than treating it as ordinary root finding.
+
+## Materials interpretation
+
+For a free energy $G(x,T)$ at fixed temperature, the optimizer is not merely a number. We must ask:
+
+- Is $x$ a physically allowed composition?
+- Is the minimum local or global over the allowed domain?
+- Are multiple phases or common-tangent constructions required rather than a single homogeneous composition?
+- How sensitive is the preferred state to uncertain parameters or temperature?
+
+A numerical minimum is evidence about the chosen free-energy model, not automatic proof of the experimentally observed phase. The distinction between local, global, and constrained optimization is treated systematically by [Nocedal and Wright (2006)](../references.qmd#ref-nocedal2006optimization).
+
+## Credibility check
+
+Report the final bracket or position tolerance, objective value, domain constraints, number of function evaluations, and a comparison with neighboring points or a denser reference scan.
+
+## Exit question
+
+A root finder locates three values where $G'(x)=0$. What additional information is needed to identify the stable composition predicted by the model?
+
+## Next
+
+In two dimensions there is no longer only “left” and “right.” L08 introduces directions, contour maps, and derivative-free movement across an optimization landscape.

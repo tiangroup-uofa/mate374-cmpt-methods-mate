@@ -1,0 +1,8 @@
+---
+title: Appendices
+toc: false
+---
+
+The appendices provide short refreshers and practical help. They are not additional examinable units unless a lecture or assessment says otherwise.
+
+- [Appendix A1 · A crash course in Python for numerical work](A01-python-numerics/index.qmd)

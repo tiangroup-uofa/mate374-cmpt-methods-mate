@@ -30,13 +30,14 @@ A common Cu/LAMMPS case may remain one option, but it should not be the only pro
 
 | Milestone | Recommended timing | Evidence |
 |---|---|---|
-| **P0 · Interest and skill inventory** | Week 4 | Individual ranked track choices and one relevant skill; formative |
-| **P1 · Proposal** | Week 6 | Question, materials significance, model, data/source, scale, intended method, reference/limit, risks, and team roles |
-| **P2 · Reproducibility checkpoint** | Week 9, before/near Reading Week | A clean run that produces one baseline figure/table; environment and data instructions; failed attempts noted |
-| **P3 · Credibility review** | Week 12 | Draft result plus convergence/conservation/residual/uncertainty evidence; short peer or TA audit |
-| **P4 · Final artifact and handoff** | Last class or approved term-work deadline | Final notebook, static memo, data/code bundle, and individual reflection |
+| **P0 · Track and team selection** | Fri Oct 23 | Individual ranked track choices and one relevant skill; formative |
+| **P1 · Lightweight proposal** | Mon Nov 2, prepared in S08 | Question, model/data source, intended method, reference/limit, risks, and team roles |
+| — | Nov 9–13 | **Reading Week: no expected project work** |
+| **P2 · Reproducible baseline** | Fri Nov 20 | A clean run producing one baseline figure/table plus environment and data instructions |
+| **P3 · Credibility checkpoint** | Fri Nov 27 | Draft result plus convergence/conservation/residual/uncertainty evidence; short TA or peer audit |
+| **P4 · Final artifact and handoff** | Mon Dec 7 or approved term-work deadline | Final notebook, static memo, data/code bundle, and individual reflection |
 
-Milestones should receive feedback quickly enough to change the final work. Avoid launching the project only when LAMMPS or MD appears in late November.
+Track selection and the proposal are deliberately light setup. Based on the MATE 664 experience, protect **November 16–December 7 as three active project weeks**. Milestones should receive feedback quickly enough to change the final work, and no assignment should be due after November 20. Avoid making a project depend on MD or other material introduced only in late November.
 
 ## Deliverables
 
@@ -66,6 +67,7 @@ At least part of the project grade should be individual. A polished visualizatio
 The project should use existing seminar time rather than add separate meetings:
 
 - **S06:** question, scope, and identifiability clinic;
+- **S08:** complete the lightweight proposal template;
 - **S09 or S10:** reproducibility and numerical-credibility checkpoint;
 - **S12:** structured peer audit and handoff test.
 
@@ -87,5 +89,5 @@ Projects should not claim competence in production DFT, FEM, phase field, MC, MD
 ::: {.callout-warning}
 ## Assessment-weight decision
 
-The Fall 2025 syllabus lists only 25% for all assignments even though the archived A9 is a substantial team project. For the redesign, give the staged project a visible **25–30%** category if administratively possible. If the final examination must remain large, reduce project scope rather than disguising a major project as one small assignment.
+The Fall 2025 syllabus lists only 25% for all assignments even though the archived A9 is a substantial team project. For the redesign, give the staged project a visible **20%** category in the recommended 20/20/20/40 partition. Keep proposal and checkpoint grading light; most marks should belong to the final artifact and individual reflection. If the final examination must remain at 45%, reduce the midterm to 15% rather than disguising the project as one small assignment.
 :::

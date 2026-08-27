@@ -1,0 +1,92 @@
+---
+title: "L09 · Numerical differentiation"
+subtitle: "Estimating slopes when a derivative is unavailable"
+body-classes: lecture-page
+---
+
+## The question
+
+**How can we estimate a derivative from function values or measured materials data?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Construct** forward, backward, and central finite-difference estimates.
+- **Compare** their truncation errors using Taylor expansion.
+- **Choose** a step size with attention to truncation, round-off, and data noise.
+- **Interpret** a numerical derivative with correct sign and units.
+
+## A derivative from nearby values
+
+The derivative
+
+$$
+f'(x)=\lim_{h\to0}\frac{f(x+h)-f(x)}{h}
+$$
+
+suggests the forward difference
+
+$$
+f'(x)\approx\frac{f(x+h)-f(x)}{h}.
+$$
+
+Taylor expansion gives
+
+$$
+f(x+h)=f(x)+hf'(x)+\frac{h^2}{2}f''(x)+O(h^3),
+$$
+
+so the forward-difference truncation error is $O(h)$. The backward difference has the same leading order:
+
+$$
+f'(x)\approx\frac{f(x)-f(x-h)}{h}.
+$$
+
+Combining values on both sides cancels the leading error term:
+
+$$
+f'(x)\approx\frac{f(x+h)-f(x-h)}{2h}+O(h^2).
+$$
+
+The central difference usually gains accuracy faster as $h$ is reduced, but it requires data on both sides of $x$. Standard finite-difference derivations are given by [Kiusalaas (2013)](../references.qmd#ref-kiusalaas2013) and [Burden, Faires, and Burden (2016)](../references.qmd#ref-burden2016numerical).
+
+## Boundaries matter
+
+At the end of a measured interval, one side may not exist. A one-sided difference is then necessary unless we fit a local model. The numerical formula must respect the available domain rather than silently extrapolating.
+
+## Smaller $h$ is not always better
+
+Reducing $h$ lowers truncation error at first. But the numerator subtracts increasingly similar values. Round-off or measurement noise is then divided by a small $h$ and amplified. A conceptual error balance is
+
+$$
+E(h)\approx C_1h^p+C_2\frac{\varepsilon}{h},
+$$
+
+where $p$ is the order of the difference formula and $\varepsilon$ represents arithmetic or data uncertainty.
+
+A refinement study should therefore vary $h$ over a useful range and look for a stable region, not automatically choose the smallest spacing.
+
+## Materials example: pressure from energy--volume data
+
+At fixed particle number, pressure is related to the energy--volume curve by
+
+$$
+P(V)=-\frac{\mathrm{d}E}{\mathrm{d}V}.
+$$
+
+If $E$ is in electronvolts and $V$ in cubic ångströms, the derivative has units of energy per volume and must be converted before reporting pressure in GPa. The minus sign also has physical meaning: energy increasing with compression corresponds to positive pressure.
+
+Numerical differentiation can reveal pressure or elastic response from sampled calculations, but electronic-structure noise and sparse volume spacing can strongly affect the derivative.
+
+## Callable functions and measured data are different
+
+For a callable model, we can often evaluate $f(x\pm h)$ at a chosen $h$. For a measured table, spacing and noise are already fixed. Smoothing or fitting before differentiation changes the question and introduces assumptions. Those choices must be reported. One influential local-polynomial approach is due to [Savitzky and Golay (1964)](../references.qmd#ref-savitzky1964smoothing).
+
+## Exit question
+
+A central-difference derivative changes greatly when $h$ is halved, then stabilizes for two refinements, then becomes noisy. Which estimate would you report, and what uncertainty statement would accompany it?
+
+## Next
+
+Differentiation asks for a local rate of change. L10 asks for the accumulated effect over an interval.

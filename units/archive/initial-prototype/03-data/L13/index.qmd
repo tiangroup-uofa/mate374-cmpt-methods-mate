@@ -1,0 +1,57 @@
+---
+title: "L13 · Interpolation, splines, and extrapolation"
+subtitle: "Use a property table without pretending it is a complete model"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**What property value should we use between measured or tabulated conditions?**
+
+A property table is discrete. Interpolation supplies a local estimate inside the measured range; extrapolation extends the model beyond evidence. These are not equally defensible operations.
+
+We use thermal conductivity of compressed oxygen as a small example. Bilinear interpolation applies linear weights in temperature and pressure across one rectangular table cell.
+
+## Learning outcomes
+
+Given a tabulated two-variable materials property, students will be able to:
+
+1. **Locate** the cell containing a query and identify whether it is interpolation or extrapolation. *(Apply)*
+2. **Calculate** a bilinear estimate using dimensionless local weights. *(Apply)*
+3. **Check** limiting cases at table corners and interpret the result with units. *(Evaluate)*
+4. **Reject** an extrapolated value when the physical regime or data support is inadequate. *(Evaluate)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="bilinear_interpolation.edit.py" title="Bilinear interpolation of thermal conductivity" height="820" loading="eager"}
+**Static fallback.** For the table values at $(T,P)=(180,1),(180,10),(200,1),(200,10)$ and query $(190,5)$, bilinear interpolation gives approximately $\lambda=18.17\times10^{-3}\,\mathrm{W/(m\,K)}$. A query outside the rectangle should be labelled extrapolation.
+:::
+
+The four corner weights add to one. That makes the interpolation a weighted average when the query is inside the cell, but it does not guarantee monotonicity or physical validity outside the table.
+
+## Interpolation is a model choice
+
+- **Nearest-neighbor lookup** preserves data values but creates jumps.
+- **Linear or bilinear interpolation** is local, transparent, and often adequate.
+- **High-degree global polynomials** can oscillate, especially near boundaries.
+- **Splines** use low-order pieces and impose smoothness conditions.
+- **Extrapolation** requires a mechanism or validated model, not just a formula.
+
+The right question is not “which curve is smoothest?” It is “what behavior is supported between these data and under this physical regime?”
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Classify sample queries as interpolation or extrapolation | Range judgment |
+| 5–15 min | Derive the four bilinear weights | Weights sum to one |
+| 15–32 min | Use the notebook at corners, midpoint, and outside the table | Correct values and labels |
+| 32–42 min | Compare local interpolation with a high-order/global fit | Method-selection argument |
+| 42–48 min | Discuss what additional data would justify extrapolation | Limitation statement |
+| 48–50 min | Exit question | Identify a dangerous extrapolation |
+
+## Exit question
+
+A property table covers $180$–$200\,\mathrm{K}$ and $1$–$10\,\mathrm{atm}$. Is a bilinear estimate at $(190\,\mathrm{K},5\,\mathrm{atm})$ automatically trustworthy? What else should be checked?
+
+*Expected direction:* no. Check smoothness, phase/regime boundaries, units, measurement uncertainty, corner consistency, and whether the query lies within the same physical regime.

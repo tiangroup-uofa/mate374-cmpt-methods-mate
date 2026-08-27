@@ -1,0 +1,264 @@
+---
+title: "L03 · Numbers in computer systems"
+subtitle: "Binary representation, floating point, and round-off error"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Central question
+
+**How do we trust the numbers produced by a computer, and what limits do those numbers have?**
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Convert** simple integers and fractions between decimal and binary representations.
+2. **Describe** how sign, exponent, and fraction fields represent a floating-point number.
+3. **Identify** representation, rounding, and accumulation as sources of round-off error.
+4. **Compare** the approximate precision and range of binary16, binary32, and binary64 arithmetic.
+5. **Explain** why using more terms or more arithmetic precision does not automatically guarantee a more accurate result.
+
+## Why did the error stop decreasing?
+
+L02 began with a tempting rule:
+
+$$
+N\uparrow
+\quad\Longrightarrow\quad
+\text{error}\downarrow.
+$$
+
+That rule describes the mathematical approximation only while other errors remain smaller. In the polygon calculation, increasing the number of sides eventually caused the error to plateau and then rise. If we are patient enough—or if we use the faster implementations introduced in L04—we can reach a regime where the limitation comes from the numbers used by the computer rather than the geometry of the polygon.
+
+To understand this behavior, we first need to ask how a digital computer represents a number.
+
+## Binary representation
+
+Modern digital computers store and process information using binary states, written as 0 and 1. Analog computers also exist and represent quantities using continuously varying physical signals, but they are still limited by component tolerances, noise, and measurement accuracy.[^analog]
+
+[^analog]: See the [Computer History Museum (n.d.)](../references.qmd#ref-computerhistoryanalog) for historical examples. A continuous representation should not be confused with infinite precision.
+
+### Integers
+
+A decimal integer is a weighted sum of powers of ten. For example,
+
+$$
+(374)_{10}
+=3\times10^2+7\times10^1+4\times10^0.
+$$
+
+A binary integer is a weighted sum of powers of two:
+
+$$
+(a_ma_{m-1}\ldots a_1a_0)_2
+=
+\sum_{i=0}^{m}a_i2^i,
+\qquad a_i\in\{0,1\}.
+$$
+
+For example,
+
+$$
+(101101)_2
+=1\times2^5+0\times2^4+1\times2^3+1\times2^2+0\times2^1+1\times2^0
+=45.
+$$
+
+The amount has not changed; only its representation has changed. To convert a positive decimal integer to binary by hand, repeatedly divide by two and record the remainders. Python provides `bin(n)` for an integer-to-binary string and `int("101101", 2)` for conversion back to decimal.
+
+::: {.callout-tip}
+## Partner activity
+
+Choose an integer between 100 and 1000. Convert it to binary without telling your partner the original value. Your partner converts the binary digits back to decimal. Do both routes recover the same integer?
+:::
+
+### Fractions
+
+Digits to the right of a binary point represent negative powers of two:
+
+$$
+(0.a_1a_2a_3\ldots)_2
+=
+\sum_{i=1}^{\infty}a_i2^{-i}.
+$$
+
+For example,
+
+$$
+(0.101)_2
+=1\times2^{-1}+0\times2^{-2}+1\times2^{-3}
+=0.625.
+$$
+
+The sequence of place values is
+
+$$
+2^{-1}=0.5,
+\qquad
+2^{-2}=0.25,
+\qquad
+2^{-3}=0.125,
+\qquad\ldots
+$$
+
+Some fractions have a finite binary representation. Others require infinitely many binary digits. Just as $1/3$ repeats forever in decimal, $0.1$ repeats forever in binary.
+
+The binary expansion of $\pi$ begins
+
+$$
+\pi=(11.00100100001111110110\ldots)_2.
+$$
+
+Keeping only five digits after the binary point gives
+
+$$
+(11.00100)_2=3.125,
+$$
+
+which is an approximation. We could keep adding digits, but a computer word has finite length. We also need a convenient way to represent both very large and very small numbers without fixing the binary point in one location.
+
+## Floating-point numbers
+
+Floating point is the binary analogue of scientific notation. We first normalize the number so that its leading nonzero digit is in a standard position. For example,
+
+$$
+(11.001001\ldots)_2
+=(1.1001001\ldots)_2\times2^1.
+$$
+
+For a normalized IEEE 754 binary number,
+
+$$
+\boxed{
+x=(-1)^s(1.f)_2\,2^{E-\mathrm{bias}}
+}
+$$
+
+where:
+
+- $s$ stores the sign;
+- $E$ stores a biased exponent;
+- $f$ stores a finite number of fraction bits;
+- the exponent moves, or “floats,” the binary point to the required scale.
+
+The leading 1 of a normalized binary number is implicit and does not need its own stored bit. Special exponent patterns represent zero, subnormal values, positive or negative infinity, and `NaN` (“not a number”).
+
+According to the IEEE floating-point standard ([IEEE, 2019](../references.qmd#ref-ieee7542019)), commonly used binary formats include:
+
+| Format | Total bits | Sign bits | Exponent bits | Stored fraction bits | Approximate significant decimal digits |
+|---|---:|---:|---:|---:|---:|
+| binary16 / half precision | 16 | 1 | 5 | 10 | 3--4 |
+| binary32 / single precision | 32 | 1 | 8 | 23 | 7--8 |
+| binary64 / double precision | 64 | 1 | 11 | 52 | 15--17 |
+
+The exponent mainly controls the **range** of magnitudes. The significand controls the **precision**, or how closely neighbouring values can be distinguished. These are different properties.
+
+Python's ordinary `float` is normally binary64. Python 3 also makes `/` floating-point division, so `1 / 2` gives `0.5`. In C, C++, and some older teaching examples, dividing two integer operands can instead perform integer division, so `1 / 2` may evaluate to `0`. The issue there is the operand type and language rule, not floating-point precision.
+
+NumPy makes the precision explicit with types such as `float16`, `float32`, and `float64`:
+
+```python
+import numpy as np
+
+x16 = np.float16(np.pi)
+x32 = np.float32(np.pi)
+x64 = np.float64(np.pi)
+```
+
+Standard NumPy does not currently provide a general `float8` type. Several machine-learning libraries provide specialized 8-bit floating-point formats, but their small range and precision make them a separate topic. Our comparison begins with binary16.
+
+## Where round-off error comes from
+
+A finite floating-point format cannot represent every real number. When a value lies between two available floating-point numbers, it must be rounded to one of them. Arithmetic operations then produce new exact mathematical values that usually must be rounded again. Goldberg's classic review develops these effects in detail ([Goldberg, 1991](../references.qmd#ref-goldberg1991floating)).
+
+A simple model is
+
+$$
+\operatorname{fl}(x\circ y)
+=(x\circ y)(1+\delta),
+\qquad |\delta|\lesssim u,
+$$
+
+where $\circ$ denotes an arithmetic operation and $u$ is the unit round-off of the format.
+
+Three effects are important in our demonstrations.
+
+### Representation
+
+The decimal number $0.1$ has no finite binary representation. In binary64 it is stored as the exact fraction
+
+$$
+\frac{3602879701896397}{36028797018963968},
+$$
+
+which is close to, but not exactly, $1/10$. This is why an expression such as
+
+$$
+0.1+0.2-0.3
+$$
+
+may leave a tiny nonzero remainder.
+
+### Accumulation
+
+A small rounding error in one step can accumulate over a long calculation. In the class demonstration, one sequence of random positive and negative increments is generated once and then accumulated using binary16, binary32, and binary64. The random path is the same; only the arithmetic precision changes. Comparing the cumulative sums reveals when the lower-precision path begins to depart from the binary64 reference.
+
+### Loss of small increments
+
+Floating-point values are not evenly spaced. The spacing grows with magnitude. If a running total becomes large enough, adding a much smaller value may no longer change it.
+
+A useful counting experiment repeatedly adds exactly 1. Consecutive integers are represented exactly only up to a limit:
+
+$$
+\begin{array}{ll}
+\text{binary16:} & 2^{11}=2048,\\
+\text{binary32:} & 2^{24}=16{,}777{,}216,\\
+\text{binary64:} & 2^{53}=9{,}007{,}199{,}254{,}740{,}992.
+\end{array}
+$$
+
+Above these thresholds, the next representable value may be two or more integers away. The statement does not mean that every simulation fails after this many steps; it shows how precision depends on the magnitude of the accumulated quantity and the size of each update.
+
+Subtracting nearly equal values can cause a related problem called **cancellation**. In the polygon recurrence from L02,
+
+$$
+s_{2N}=\sqrt{2-\sqrt{4-s_N^2}},
+$$
+
+the inner square root approaches 2 as $s_N$ becomes very small. The subtraction then removes nearly all leading digits, so the remaining result may contain little useful precision. This is why increasing $N$ eventually made the polygon estimate worse.
+
+## Comparing precision in NumPy
+
+The first precision activity stores the same value in binary16, binary32, and binary64 and asks: at which decimal digit do the displayed values stop agreeing? The exact display depends on formatting, but the approximate rule is stable:
+
+$$
+\boxed{
+\begin{array}{ccl}
+\text{binary16} & \rightarrow & 3\text{--}4\text{ significant decimal digits},\\
+\text{binary32} & \rightarrow & 7\text{--}8\text{ significant decimal digits},\\
+\text{binary64} & \rightarrow & 15\text{--}17\text{ significant decimal digits}.
+\end{array}
+}
+$$
+
+The second activity uses the same long sequence of increments for every precision. Record when the cumulative binary16 and binary32 results visibly depart from binary64. The number of safe steps is not universal: it depends on the increment size, cancellation, total magnitude, and algorithm.
+
+Higher precision generally reduces round-off, but it costs memory and may reduce speed. A binary64 array uses four times as much storage as a binary16 array. On some accelerators, lower-precision operations are also much faster. The engineering question is therefore not “Which type has the most digits?” but “Which type provides enough accuracy for the required result?”
+
+A **precision study** repeats the calculation at higher precision and compares the quantity that matters. Agreement is useful evidence; displaying more digits is not.
+
+## Closing question
+
+The smallest positive binary64 subnormal number is
+
+$$
+2^{-1074}\approx4.94\times10^{-324}.
+$$
+
+Why, then, do we say that binary64 provides only about 15--17 significant decimal digits rather than hundreds of digits?
+
+The answer lies in the division of labour inside a floating-point number. The exponent allows the representation to *reach* extremely small and large magnitudes. The finite significand determines how many meaningful digits are available around any one magnitude. The binary point can float over a vast range, but only a limited number of significant bits travel with it.
+
+L04 turns to the practical consequence of large $N$: even when the numerical accuracy is acceptable, how can we make millions or billions of steps finish in a reasonable time?

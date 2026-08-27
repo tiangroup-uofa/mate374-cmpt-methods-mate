@@ -1,0 +1,68 @@
+---
+title: "Lxx · Lecture title"
+subtitle: "A short statement of the lecture topic"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Central question
+
+**Write the single question that organizes the lecture.**
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Explain** ...
+2. **Apply** ...
+3. **Compare** ...
+4. **Check** ...
+
+## First broad part of the argument
+
+Begin from a familiar observation or engineering problem. Develop the explanation in connected prose rather than giving each small point its own heading.
+
+$$
+\boxed{\text{Use a box for the central relation or contrast}}
+$$
+
+Use third-level headings only when several genuinely distinct cases belong inside one broad section.
+
+### First case
+
+Keep definitions close to their first use.
+
+### Second case
+
+Use equations as part of the argument, not as decoration.
+
+## Second broad part of the argument
+
+Continue the same problem when possible. A lecture should normally have a small number of broad sections rather than one heading for every method or implementation detail.
+
+::: {.callout-important}
+## A distinction that needs words
+
+Use a callout for a warning or distinction that cannot be expressed clearly by one boxed relation.
+:::
+
+## Materials interpretation or credibility check
+
+Connect the result to units, assumptions, limiting behavior, residuals, refinement, conservation, uncertainty, or comparison with evidence.
+
+## What to keep
+
+- End with three to five specific statements.
+- Do not repeat every section heading.
+- Preserve the argument students will need after class.
+
+## Check your understanding
+
+1. Add a short interpretation question.
+2. Add a comparison or diagnostic question.
+3. Add a question that creates the need for the next lecture.
+
+## Next
+
+Use one short paragraph to make the transition.

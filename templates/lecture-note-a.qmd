@@ -1,0 +1,56 @@
+---
+title: "Lxx · Lecture title"
+subtitle: "A short statement of the lecture question"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Central question
+
+**Write the question that organizes the lecture.**
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Explain** ...
+2. **Apply** ...
+3. **Compare** ...
+4. **Check** ...
+
+## Opening problem
+
+Start from an observation, prediction, or engineering decision rather than an algorithm name.
+
+## Main concept
+
+Develop the model and notation in short sections. Define every symbol near its first use.
+
+$$
+\text{materials question}\rightarrow\text{model}\rightarrow\text{calculation}\rightarrow\text{evidence}
+$$
+
+::: {.callout-tip}
+## Pause and predict
+
+Add one question students should answer before seeing the result.
+:::
+
+## Worked reasoning
+
+Show enough intermediate reasoning that the page remains useful after class. Code and images are optional layers, not substitutes for the explanation.
+
+## Credibility check
+
+Use the check that fits the problem: units, limiting case, residual, refinement, conservation, uncertainty, or comparison with a reference.
+
+## What to keep
+
+End with three to five specific statements, not a generic summary.
+
+## Check your understanding
+
+1. A short interpretation question.
+2. A short comparison or diagnostic question.
+3. A bridge to the next lecture.

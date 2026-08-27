@@ -1,0 +1,13 @@
+---
+title: "Unit 2 · What state does the material prefer?"
+---
+
+Root finding, nonlinear systems, optimization, and linear algebra through equilibrium and atomistic relaxation.
+
+- [L04 · Bisection: keep the root bracketed](L04/index.qmd)
+- [L05 · Fast and fragile root finders](L05/index.qmd)
+- [L06 · Coupled equilibrium and the Jacobian](L06/index.qmd)
+- [L07 · $Ax=b$ from a materials balance](L07/index.qmd)
+- [L09 · Roots versus minima](L09/index.qmd)
+- [L10 · Atomistic relaxation](L10/index.qmd)
+- [L11 · Equilibrium synthesis](L11/index.qmd)

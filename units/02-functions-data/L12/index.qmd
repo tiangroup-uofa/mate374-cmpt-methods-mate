@@ -1,0 +1,111 @@
+---
+title: "L12 · Curve fitting and regression"
+subtitle: "Estimating model parameters from materials data"
+body-classes: lecture-page
+---
+
+## The question
+
+**What trend and parameter values can a finite, noisy materials dataset actually support?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Formulate** a least-squares objective from observed and predicted values.
+- **Fit and interpret** an Arrhenius relation using physically meaningful units.
+- **Inspect** residuals for systematic model failure.
+- **Distinguish** calibration accuracy from validation on independent data.
+
+## Data, model, and residual
+
+Suppose measurements are $(x_i,y_i)$ and a model predicts
+
+$$
+\widehat{y}_i=f(x_i;\boldsymbol{\theta}),
+$$
+
+where $\boldsymbol{\theta}$ contains unknown parameters. The residual for point $i$ is
+
+$$
+r_i=y_i-\widehat{y}_i.
+$$
+
+Ordinary least squares chooses parameters that minimize
+
+$$
+S(\boldsymbol{\theta})
+=
+\sum_{i=1}^{n}r_i^2.
+$$
+
+Squaring prevents positive and negative residuals from cancelling and penalizes large discrepancies strongly. It also encodes assumptions about the error structure; it is not a universal law of fitting. Regression assumptions and residual diagnostics are treated by [Draper and Smith (1998)](../references.qmd#ref-draper1998regression).
+
+## Arrhenius example
+
+A common model for diffusivity is
+
+$$
+D(T)=D_0\exp\left(-\frac{Q}{RT}\right),
+$$
+
+where $D_0$ is a prefactor, $Q$ is an activation energy, and $R$ is the gas constant. Taking logarithms gives
+
+$$
+\ln D
+=
+\ln D_0-\frac{Q}{R}\frac{1}{T}.
+$$
+
+A graph of $\ln D$ against $1/T$ should be linear if one Arrhenius mechanism is adequate over the measured range. The intercept estimates $\ln D_0$ and the slope estimates $-Q/R$.
+
+Units matter. $T$ must be absolute temperature, and the units of $Q$ must be consistent with $R$. Changing from $D$ to $\ln D$ also changes the statistical meaning of least squares: equal errors in $\ln D$ correspond roughly to equal relative errors in $D$.
+
+## Residuals are more informative than one score
+
+A small sum of squares does not prove that the model is appropriate. Plot residuals against temperature or prediction. A systematic curve, a regime change, or increasing spread suggests that the model or error assumptions are incomplete.
+
+Useful questions include:
+
+- Are residuals centered around zero without a visible pattern?
+- Does one high-leverage point control the slope?
+- Are uncertainties similar, or should points be weighted differently?
+- Does the fitted parameter have a plausible sign and magnitude?
+- Does the model remain credible across the intended temperature range?
+
+## Calibration is not validation
+
+**Calibration** estimates parameters using a dataset. **Validation** tests the calibrated model against evidence not used to choose those parameters. Excellent agreement with calibration data can coexist with poor prediction outside that dataset.
+
+A simple validation strategy holds back part of the data. A stronger one uses a different experiment, material condition, or trusted reference that tests the intended application.
+
+## More flexible is not automatically better
+
+Adding parameters nearly always improves the fit to the calibration data. It can also fit noise, make parameters unidentifiable, and produce unstable extrapolation. Model complexity should be justified by improved predictive evidence or a physical mechanism, not only by a lower training residual.
+
+## Uncertainty in fitted parameters
+
+Parameter estimates depend on measurement uncertainty, data range, number and placement of observations, and model form. Reporting many digits from an optimizer does not imply that those digits are known. Confidence intervals, resampling, or sensitivity analysis can express how strongly the data constrain the parameters.
+
+## Unit synthesis
+
+Given sampled values, we can ask four different questions:
+
+$$
+\begin{array}{ll}
+\text{slope} & \rightarrow \text{numerical differentiation},\\
+\text{accumulation} & \rightarrow \text{numerical integration},\\
+\text{value between points} & \rightarrow \text{interpolation},\\
+\text{parameters of a trend} & \rightarrow \text{regression}.
+\end{array}
+$$
+
+Choosing the wrong question can produce a polished but meaningless result.
+
+## Exit question
+
+An Arrhenius line fits the measured range very well but predicts an implausibly large diffusivity at a much higher temperature. List three reasons not to treat the extrapolated value as validated.
+
+## Next
+
+Later lectures will show that fitting several parameters and solving several coupled equations naturally lead to vectors, matrices, and linear algebra. Those tools will be introduced when the problem requires them.

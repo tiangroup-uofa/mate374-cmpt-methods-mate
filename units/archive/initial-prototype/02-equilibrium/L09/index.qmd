@@ -1,0 +1,59 @@
+---
+title: "L09 · Roots versus minima"
+subtitle: "Free energy, stationary points, and the state a material prefers"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**Does solving an equilibrium equation tell us which material state is stable?**
+
+For a binary regular solution, the free energy is
+
+$$
+g(x)=RT[x\ln x+(1-x)\ln(1-x)]+\Omega x(1-x).
+$$
+
+Stationary compositions satisfy $g'(x)=0$. But a stationary point may be a local minimum, a local maximum, or one of several competing minima. Root finding and minimization answer related but different questions.
+
+## Learning outcomes
+
+Given a free-energy model, students will be able to:
+
+1. **Locate** stationary compositions by examining $g'(x)$. *(Apply)*
+2. **Classify** stationary points using curvature and free-energy values. *(Analyze)*
+3. **Distinguish** a local stationary condition from a globally preferred state. *(Evaluate)*
+4. **Relate** temperature and interaction energy to the number and stability of states. *(Understand)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="free_energy_minimization.edit.py" title="Regular-solution free energy: roots versus minima" height="900" loading="eager"}
+**Static fallback.** At $T=400\,\mathrm{K}$ and $\Omega=8.0\,\mathrm{kJ/mol}$, the symmetric model has stationary compositions near $x=0.169$, $0.500$, and $0.831$. The central stationary point is a local maximum; the two outer points are minima with equal free energy.
+:::
+
+## Why this follows root finding
+
+L03–L08 asked whether equations were satisfied and whether a solve was numerically trustworthy. Here we add a physical question: **which mathematical solution corresponds to a stable material state?** A small residual in $g'(x)$ does not distinguish a phase minimum from a barrier or unstable stationary point.
+
+The common-tangent construction later becomes a phase-equilibrium interpretation of the same free-energy landscape. Do not confuse a stationary composition, a metastable state, and the global equilibrium without stating the criterion.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Predict how temperature changes mixing preference | Physical prediction |
+| 5–15 min | Introduce regular-solution free energy and derivative | Model terms identified |
+| 15–32 min | Inspect roots, curvature, and free-energy plot | State classification |
+| 32–42 min | Vary temperature through the critical regime | Regime transition explained |
+| 42–48 min | Connect stationary roots to common-tangent intuition | Roots/minima distinction |
+| 48–50 min | Exit question | Stable-state criterion |
+
+## Exit question
+
+If $g'(x)=0$ at three compositions, why is it insufficient to report all three as equilibrium compositions?
+
+*Expected direction:* classify curvature and compare free energies; some roots may be unstable or metastable rather than globally preferred.
+
+## Next meeting
+
+L10 moves from a composition landscape to an atomistic energy landscape and asks how a structure relaxes toward a low-energy configuration.

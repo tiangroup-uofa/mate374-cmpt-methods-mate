@@ -1,0 +1,81 @@
+---
+title: "L08 · Conditioning, scaling, and solver trust"
+subtitle: "Why a small residual does not guarantee a stable inference"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**Can a linear solver produce a tiny residual while the inferred material parameters are still unreliable?**
+
+Suppose two measurements are used to separate two material contributions:
+
+$$
+A\mathbf{x}=\mathbf{b},\qquad
+A=\begin{bmatrix}1&1\\1&1+\delta\end{bmatrix}.
+$$
+
+When $\delta$ is small, the measurements carry nearly the same information. A small perturbation in one observation can produce a large change in $\mathbf{x}$ even though the perturbed system is solved almost exactly.
+
+This is the distinction between:
+
+- **residual:** did we solve the stated equations?
+- **conditioning:** how sensitive is the solution to perturbations?
+- **identifiability:** does the data contain enough independent information to support the requested parameters?
+
+## Learning outcomes
+
+Given a parameter-recovery system and plausible measurement perturbations, students will be able to:
+
+1. **Compute** and interpret a residual and condition number. *(Apply)*
+2. **Compare** clean and perturbed solutions and quantify sensitivity. *(Analyze)*
+3. **Explain** why scaling can improve numerical representation but cannot create missing information. *(Understand)*
+4. **Defend** whether a parameter estimate is reportable using conditioning, uncertainty, and physical admissibility. *(Evaluate)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="conditioning.edit.py" title="Conditioning and sensitivity in a two-parameter materials inference" height="860" loading="eager"}
+**Static fallback.** With $\delta=10^{-3}$ and a perturbation of $10^{-4}$ in the second observation, the matrix condition number is about $4.0\times10^3$. The clean coefficients $[0.6,0.4]$ shift to approximately $[0.5,0.5]$. The perturbed equations have essentially zero residual, but the inferred coefficients have changed by $[-0.1,+0.1]$.
+:::
+
+### What to vary
+
+- make the two signatures more similar by reducing $\delta$;
+- remove or increase the measurement perturbation;
+- compare the raw and row-scaled condition numbers;
+- ask whether the recovered coefficients remain physically meaningful.
+
+The notebook deliberately solves the perturbed system accurately. The problem is not that the solver failed; the problem is that the data/model pair is sensitive.
+
+## Scaling is not a cure for missing information
+
+Changing units can make matrix entries more comparable and reduce avoidable numerical scaling problems. It cannot fix nearly dependent columns. If two experiments respond almost identically to two unknown contributions, no choice of solver can manufacture the missing distinction.
+
+A credible report should therefore include:
+
+1. the equations and units;
+2. the residual for the equations solved;
+3. the condition or sensitivity diagnostic;
+4. a plausible perturbation or uncertainty analysis;
+5. a physical admissibility check and a clear limitation.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Revisit the L07 residual and ask what it cannot reveal | Residual limitation stated |
+| 5–15 min | Construct nearly dependent material signatures | Conditioning prediction |
+| 15–30 min | Vary separation and measurement noise in the notebook | Sensitivity table |
+| 30–40 min | Compare raw and scaled systems | Scaling distinction |
+| 40–47 min | Decide whether a parameter estimate should be reported | Evidence-based engineering judgment |
+| 47–50 min | Exit question | Residual versus conditioning explained |
+
+## Exit question
+
+A solver reports a coefficient vector with residual $10^{-12}$, but its condition number is $10^8$ and measurement uncertainty is $10^{-4}$. What would you report besides the coefficient vector?
+
+*Expected direction:* sensitivity/uncertainty bounds, conditioning, units, physical admissibility, and a limitation on the number of meaningful digits.
+
+## Bridge forward
+
+The first eight lectures have now used the main mathematical forms on the course map: approximation, $F(x)=0$, and $Ax=b$. L09 returns to the materials question “what state does the material prefer?” and distinguishes solving a stationary equation from minimizing a free energy.

@@ -1,0 +1,65 @@
+---
+title: "L16 · Calibration, validation, and identifiability"
+subtitle: "Decide whether a fitted materials model deserves interpretation"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**When does a fitted curve support a materials conclusion rather than merely describe the calibration points?**
+
+Calibration chooses parameters to reduce discrepancies on available data. Validation asks how the model performs on data or conditions not used for calibration. Identifiability asks whether the available evidence can distinguish the parameters or mechanisms at all.
+
+These are related but different from numerical convergence. A solver can converge perfectly to parameters that the experiment cannot identify.
+
+## Learning outcomes
+
+Given a small materials data set and competing model forms, students will be able to:
+
+1. **Separate** calibration error, validation error, measurement uncertainty, and model discrepancy. *(Analyze)*
+2. **Compare** a held-out prediction with a training fit without overinterpreting a tiny data set. *(Evaluate)*
+3. **Identify** evidence that parameters are weakly constrained or extrapolative. *(Analyze)*
+4. **Recommend** an additional measurement or model check that would improve a materials decision. *(Create)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="model_calibration.edit.py" title="Calibration versus validation for diffusion models" height="850" loading="eager"}
+**Static fallback.** The notebook holds out one synthetic diffusivity measurement and compares an Arrhenius model with a power-law alternative. Both models can fit the remaining points; the held-out prediction and residual structure determine whether the calibration supports the chosen interpretation.
+:::
+
+The data are intentionally small. A single holdout is not a substitute for a designed uncertainty analysis, but it makes the distinction between fitting and prediction visible.
+
+## A credibility checklist
+
+Before reporting fitted parameters, state:
+
+- what quantity was measured and with what uncertainty;
+- which data were used for calibration and which for validation;
+- which transformations or weights were applied;
+- whether parameters have physical units and plausible magnitude;
+- whether residuals show structure;
+- what range of temperature, composition, or time the model can support;
+- what additional data would discriminate between competing models.
+
+A smooth curve is a visual object. A materials model is a claim with a domain of validity.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Distinguish fit, prediction, validation, and uncertainty | Vocabulary used correctly |
+| 5–15 min | Hold out a data point before fitting | Prediction made without leakage |
+| 15–32 min | Compare candidate models in the notebook | Training/validation table |
+| 32–42 min | Diagnose parameter confounding and extrapolation | Identifiability argument |
+| 42–48 min | Design one additional measurement | Information-gain proposal |
+| 48–50 min | Exit question | State why convergence is insufficient |
+
+## Exit question
+
+A nonlinear optimizer reports a converged parameter set and a small training residual, but two very different parameter sets fit equally well. What should you conclude?
+
+*Expected direction:* the parameters are not identifiable from the current data; report prediction uncertainty or a reduced claim and seek measurements that distinguish the mechanisms.
+
+## Next meeting
+
+L17 changes the question from “what parameter explains the data?” to “how does a material state evolve with time?” We begin with a first-order transformation model and Euler’s method.

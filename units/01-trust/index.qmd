@@ -1,7 +1,0 @@
----
-title: "Unit 1 · Can I trust this number?"
----
-
-Approximation, floating point, conditioning, error, convergence, and reproducibility.
-
-*Class pages to be drafted.*

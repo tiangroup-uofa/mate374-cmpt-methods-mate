@@ -1,7 +1,0 @@
----
-title: "Unit 2 · What state does the material prefer?"
----
-
-Root finding, nonlinear systems, optimization, and linear algebra through equilibrium and atomistic relaxation.
-
-*Class pages to be drafted.*

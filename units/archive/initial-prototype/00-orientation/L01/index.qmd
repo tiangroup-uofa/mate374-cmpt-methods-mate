@@ -1,0 +1,155 @@
+---
+title: "L01 · From a materials question to a live calculation"
+subtitle: "Course orientation, computational modeling, and your first marimo function"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## First 15 minutes: course orientation
+
+The opening part of class is reserved for the syllabus and a short “meet the class” diagnostic: how the course is organized, how seminars and computational investigations fit together, where help is available, and what students should do when a notebook or environment fails. A handful of non-graded Wooclap questions will give us a baseline for Python experience, mathematical confidence, device access, and materials interests. The remaining time is a small, guided marimo exercise rather than a Python lecture.
+:::
+
+## Opening diagnostic
+
+The Wooclap questions are not a test. They help us decide how much scaffolding to provide, which examples and seminar supports to emphasize, and whether students need a paired or static fallback. We will use aggregate responses—not individual scores—to adjust the semester.
+
+The first-lecture map also gives the course a shared vocabulary: physical scale and model choice sit above recurring mathematical forms such as $F(x)=0$, $Ax=b$, ODE/PDE evolution, optimization, and sampling. DFT, MD, Monte Carlo, phase field, FEM, and ML interatomic potentials occupy different places on that map; they are not interchangeable numerical algorithms.
+
+## The course map
+
+::: {.content-visible when-format="html"}
+```{mermaid}
+flowchart TB
+    Q["Materials question"] --> M["Model + scale + assumptions"]
+    M --> R["Mathematical representation"]
+    R --> E["Evaluate / estimate<br/>sums · quadrature · Monte Carlo"]
+    R --> F["Find a condition<br/>F(x) = 0 · equilibrium"]
+    R --> A["Solve balances<br/>Ax = b · FEM/FVM/FDM"]
+    R --> T["Evolve a state<br/>ODE/PDE · MD · phase field"]
+    R --> O["Optimize / eigenproblem<br/>relaxation · DFT"]
+    R --> D["Build a data-driven model<br/>regression · CALPHAD · MLIP"]
+    E --> V["Verify · validate · interpret"]
+    F --> V
+    A --> V
+    T --> V
+    O --> V
+    D --> V
+    classDef spine fill:#007c41,color:#fff,stroke:#005b30,stroke-width:2px;
+    classDef kernel fill:#f4c300,color:#222,stroke:#9a7900,stroke-width:1px;
+    class Q,M,R,V spine;
+    class E,F,A,T,O,D kernel;
+```
+:::
+
+The same map in words is: **question → model → representation → computation → evidence → materials decision**. `Ax=b` is a recurring kernel inside several branches, not the universal center; Monte Carlo belongs primarily under sampling and expectation. DFT is an electronic-scale self-consistent eigenproblem, while an MLIP is a data-driven bridge from reference data to atomistic MD, Monte Carlo, or relaxation.
+
+## Today’s question
+
+**What does a computational model do—and what is the smallest useful piece of code we can write to explore one?**
+
+A computational result is not automatically a fact about a material. It is the output of a chain:
+
+$$
+\text{materials question}
+\;\longrightarrow\;
+\text{physical abstraction}
+\;\longrightarrow\;
+\text{mathematical model}
+\;\longrightarrow\;
+\text{numerical calculation}
+\;\longrightarrow\;
+\text{evidence and interpretation}.
+$$
+
+For example, “Will this rod fit after heating?” is a materials question. The linear-expansion model is an abstraction: useful at small strain and over a stated temperature range, but not a complete description of every microstructural or geometric effect.
+
+## Learning outcomes
+
+By the end of this meeting, given a simple materials relation and an editable notebook, students will be able to:
+
+1. **Describe** the four links from a materials question to a numerical result, and identify where an assumption enters. *(Understand)*
+2. **Distinguish** one thing a simulation can reveal from one thing it cannot establish without validation or additional data. *(Analyze)*
+3. **Edit** the body of a supplied Python function in marimo, run the cell, and use its returned value in a downstream calculation. *(Apply)*
+4. **Check** a result using units and a limiting case such as $\Delta T=0$. *(Evaluate)*
+
+## A short model, not a complete material
+
+The first notebook uses
+
+$$
+\Delta L = \alpha L_0 \Delta T,
+$$
+
+where $L_0$ is an initial length, $\alpha$ is a linear expansion coefficient, and $\Delta T$ is a temperature change. This model is valuable because it is small enough to inspect. It also has visible limits:
+
+- it does not choose the material or measure $\alpha$ for us;
+- it assumes a uniform temperature change and small strain;
+- it does not predict cracking, plasticity, phase transformation, or constraint forces;
+- it can still answer a narrow design question when its assumptions are appropriate.
+
+The code is therefore part of an argument. We should be able to say what equation it represents, what its inputs mean, and what check makes the result credible.
+
+## First marimo notebook
+
+This is the main activity for the second half of class. The controls are deliberately simple; the important action is opening **Edit code**, finding the supplied function, changing its indented body, and running that cell.
+
+::: {.quarto-wasm-local notebook="first_marimo.edit.py" title="Your first marimo function: thermal expansion" height="760" loading="eager"}
+**Static fallback.** With $L_0=100\,\mathrm{mm}$, $\alpha=23\times10^{-6}\,\mathrm{K^{-1}}$, and $\Delta T=100\,\mathrm{K}$, the model predicts $\Delta L=0.2300\,\mathrm{mm}$ and a final length of $100.2300\,\mathrm{mm}$. Setting $\Delta T=0$ gives $\Delta L=0$, which is a basic limiting-case check.
+:::
+
+### The only Python recipe needed today
+
+The function signature is given so students do not have to invent an interface:
+
+```python
+def thermal_expansion(length0_mm, alpha_per_K, delta_temperature_K):
+    # write or change the indented body
+    return length0_mm * alpha_per_K * delta_temperature_K
+```
+
+For now, focus on four pieces:
+
+1. **inputs** arrive through the function arguments;
+2. an indented **body** carries out the calculation;
+3. `return` sends a value to the next cell;
+4. marimo reruns cells that depend on a changed function or control.
+
+Students do not need to wrap functions in decorators or learn a formal functional-programming style in this first meeting. The seminar can introduce those ideas later. Here, a supplied function is a readable place to write the equation.
+
+## What simulations can—and cannot—do
+
+A simulation can expose a quantity that is difficult or expensive to measure, compare a design before fabrication, or make the consequences of an assumption visible. It cannot turn an untested model, a wrong unit, or an unmeasured parameter into reliable evidence. Commercial and open-source software differ in visibility, but neither removes the need to identify the equations and verify an implementation.
+
+A practical rule for this course is:
+
+> Start with the simplest model that can answer the question, then add complexity only when a check or a materials observation requires it.
+
+We will repeatedly use the same loop: **question → model → numerical representation → computation → verification → physical interpretation**.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–15 min | Syllabus, course map, support, recovery plan, and Wooclap baseline | We know the class starting point and students know where the course work lives |
+| 15–20 min | Predict what happens when $\Delta T$ changes sign or becomes zero | Written prediction with units |
+| 20–27 min | Build the question–model–calculation chain | One assumption named explicitly |
+| 27–42 min | Edit and run the marimo function | Changed function body and updated output |
+| 42–47 min | Compare units and the $\Delta T=0$ limiting case | Verification statement |
+| 47–50 min | Exit question and bridge to π | One sentence explaining why code is not the model by itself |
+
+## Exit question
+
+A notebook reports that a steel bar grows by `230` after heating. Before deciding whether the result is reasonable, what two pieces of information would you ask for first?
+
+*Expected direction:* identify the units and the input/model assumptions, then ask for a simple limiting-case or reference check.
+
+## Next meeting
+
+In L02 we will use a deliberately simple problem—approximating $\pi$—to turn an equation into an algorithm, compare a Python loop with an array implementation, measure absolute and relative error, and begin the story of finite-precision numbers.
+
+::: {.callout-tip}
+## Instructor note
+
+The former L01 and L02 pages were implementation/embedding experiments rather than lectures. They remain available in the [orientation archive](../archive/index.qmd) for deployment history and should not be assigned as course content.
+:::

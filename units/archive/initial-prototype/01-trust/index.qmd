@@ -1,0 +1,10 @@
+---
+title: "Unit 1 · Can I trust this number?"
+---
+
+Approximation, floating point, conditioning, error, convergence, and reproducibility.
+
+Verification is threaded through the numerical methods rather than isolated as a prerequisite block.
+
+- [L03 · From a materials question to $F(x)=0$](L03/index.qmd)
+- [L08 · Conditioning, scaling, and solver trust](L08/index.qmd)

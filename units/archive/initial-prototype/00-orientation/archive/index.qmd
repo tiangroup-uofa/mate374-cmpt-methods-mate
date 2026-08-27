@@ -1,0 +1,11 @@
+---
+title: "Orientation archive"
+subtitle: "Prototype pages retained for reference, not current course instruction"
+---
+
+These pages were the first deployment experiments for the course site. They tested hosted `marimo.app` iframes, locally exported WASM notebooks, shared assets, eager loading, and fullscreen behavior. They are kept so implementation decisions remain traceable; the current L01 and L02 pages are the student-facing lectures.
+
+- [Archived L01 · editable marimo embedding comparison](L01-embed-comparison.qmd)
+- [Archived L02 · two local marimo playgrounds](L02-local-playgrounds.qmd)
+
+The archive is not part of the Fall 2026 lecture sequence.

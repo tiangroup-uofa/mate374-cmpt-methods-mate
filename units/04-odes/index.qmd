@@ -1,7 +1,0 @@
----
-title: "Unit 4 · How does a material evolve?"
----
-
-Models in time, integration error, stability, stiffness, established ODE solvers, and coupled kinetics.
-
-*Class pages to be drafted.*

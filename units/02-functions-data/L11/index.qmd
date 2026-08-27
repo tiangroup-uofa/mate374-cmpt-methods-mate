@@ -1,0 +1,68 @@
+---
+title: "L11 · Interpolation"
+subtitle: "Estimating between known materials-property values"
+body-classes: lecture-page
+---
+
+## The question
+
+**How should we estimate a value between measurements without pretending that interpolation is a physical law?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Construct** a piecewise-linear interpolation between tabulated points.
+- **Compare** polynomial and spline interpolants by smoothness and unwanted oscillation.
+- **Distinguish** interpolation from extrapolation and regression.
+- **Judge** an interpolated materials property using domain, units, and physical constraints.
+
+## Piecewise-linear interpolation
+
+Given neighboring points $(x_i,y_i)$ and $(x_{i+1},y_{i+1})$, the linear interpolant for $x$ between them is
+
+$$
+y(x)=y_i+
+\frac{x-x_i}{x_{i+1}-x_i}
+\left(y_{i+1}-y_i\right).
+$$
+
+The formula reproduces both endpoints exactly and assumes a straight line only within that interval. Piecewise-linear interpolation is transparent and often adequate when the data spacing is fine relative to the curvature of the property.
+
+## Exact passage through data is not always desirable
+
+A single high-degree polynomial can pass through every point, but it may oscillate strongly between points, especially near the edges. Exact agreement at the data locations does not guarantee sensible behavior between them.
+
+A cubic spline uses low-degree polynomials on separate intervals and joins them with continuity conditions. It is smoother than piecewise-linear interpolation and usually avoids the most severe global-polynomial oscillations. It can still overshoot or violate positivity or monotonicity unless an appropriate constrained or shape-preserving method is selected. A detailed treatment of spline construction is given by [de Boor (2001)](../references.qmd#ref-deboor2001splines).
+
+## Interpolation, extrapolation, and regression
+
+- **Interpolation** estimates inside the domain covered by data and commonly passes through the supplied points.
+- **Extrapolation** extends beyond that domain, where the data provide much weaker control.
+- **Regression** fits a trend without generally passing through every noisy measurement.
+
+The same formula can behave reasonably inside a table and badly just outside it. A program should not hide the difference.
+
+## A materials-property table is not a model of all regimes
+
+Suppose thermal conductivity is tabulated over a temperature interval. Interpolation can provide values between measurements, but it does not automatically represent a phase transition, a composition change, or a new scattering regime outside the table. Near discontinuities or sharp changes, interpolating across the feature may create values with no physical meaning.
+
+Questions to ask include:
+
+- Is the requested point inside the measured domain?
+- Are all inputs expressed in compatible units?
+- Should the property remain positive or monotonic?
+- Does the interval cross a phase boundary?
+- Are the data exact calculations or noisy measurements?
+
+## How to check an interpolant
+
+Withhold selected data points, interpolate from the remaining points, and compare the predictions with the withheld values. Inspect the full curve rather than only pointwise error. Check limits, monotonicity, positivity, and continuity where the physics requires them.
+
+## Exit question
+
+A cubic spline fitted to positive diffusivity data dips below zero between two sparse points. The code has done what was requested. Why is the result unacceptable, and what alternatives would you test?
+
+## Next
+
+Interpolation treats the supplied values as points to reproduce. L12 treats measurements as noisy evidence for the parameters of a model.

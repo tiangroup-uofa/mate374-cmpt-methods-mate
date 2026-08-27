@@ -28,7 +28,7 @@ The course notes use [Quarto](https://quarto.org/) for durable explanations and 
 
 - [Course notes](units/index.qmd)
 - [Syllabus](syllabus/index.qmd)
-- [Reactive NumPy integration test](units/00-orientation/L01/index.qmd)
+- [L01 · First marimo calculation](units/00-orientation/L01/index.qmd)
 
 ::: {.callout-note}
 ## Site status

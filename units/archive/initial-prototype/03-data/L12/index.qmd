@@ -1,0 +1,69 @@
+---
+title: "L12 · Arrhenius regression and parameter meaning"
+subtitle: "Fit a materials trend without losing the error story"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**What can a small diffusion data set actually support?**
+
+A common materials model is
+
+$$
+D(T)=D_0\exp\!\left(-\frac{E_a}{RT}\right),
+$$
+
+where $D_0$ is a prefactor and $E_a$ is an activation energy. Taking logarithms gives a linear relation in $1/T$, which connects regression to the matrix methods from L07:
+
+$$
+\ln D=\ln D_0-\frac{E_a}{R}\frac1T.
+$$
+
+The transformation is useful, but it also changes how residuals and uncertainty should be interpreted.
+
+## Learning outcomes
+
+Given temperature–diffusivity data and a supplied fitting function, students will be able to:
+
+1. **Transform** an Arrhenius model into a linear regression problem with correct units. *(Apply)*
+2. **Fit** prefactor and activation energy and calculate predictions in physical units. *(Apply)*
+3. **Compare** transformed-space residuals with relative errors in diffusivity. *(Analyze)*
+4. **Evaluate** whether the fitted temperature range supports an extrapolated materials claim. *(Evaluate)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="arrhenius_fit.edit.py" title="Arrhenius regression for diffusion data" height="850" loading="eager"}
+**Static fallback.** Fitting the four Fe self-diffusion measurements gives approximately $D_0=4.67\times10^{-5}\,\mathrm{m^2/s}$ and $E_a=283.4\,\mathrm{kJ/mol}$. The fitted values reproduce the order and trend of the data, but the parameter estimate depends on the Arrhenius assumption and the narrow temperature range.
+:::
+
+The optional holdout mode fits the first three measurements and predicts the highest-temperature point. This is a small validation exercise, not a claim of statistical certainty.
+
+## What to report
+
+A regression result should include more than two coefficients:
+
+- the model form and transformation;
+- the units of $D_0$, $E_a$, $T$, and $R$;
+- residuals and the error measure used;
+- the calibration range and any held-out validation result;
+- whether extrapolation is physically justified.
+
+A straight line on a transformed plot is evidence about the chosen representation. It is not proof that the underlying mechanism is Arrhenius over every temperature range.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Predict the shape of $\ln D$ versus $1/T$ | Model trend |
+| 5–15 min | Derive the transformed regression and units | Correct slope/parameter mapping |
+| 15–32 min | Fit the notebook and inspect residuals | Coefficients and errors |
+| 32–42 min | Hold out a point and compare prediction | Calibration versus validation |
+| 42–48 min | Discuss extrapolation and physical mechanism | Defensible scope statement |
+| 48–50 min | Exit question | State one limitation of the fit |
+
+## Exit question
+
+A fit has a small RMS residual in $\ln D$ but is used to predict diffusion ten times outside the measured temperature range. What evidence is missing?
+
+*Expected direction:* validation at relevant temperatures, uncertainty bounds, mechanism/phase-regime checks, and a justification for extrapolation.

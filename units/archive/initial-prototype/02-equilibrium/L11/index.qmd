@@ -1,0 +1,92 @@
+---
+title: "L11 · Equilibrium synthesis"
+subtitle: "Choose, verify, and interpret a numerical method"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**Given a materials question, how do we choose a numerical representation and defend the result?**
+
+The first equilibrium block has used four related but distinct mathematical tasks:
+
+| Materials question | Representation | Main evidence |
+|---|---|---|
+| What temperature satisfies a balance? | $F(x)=0$ | bracket, residual, convergence |
+| What state satisfies several balances? | $F(\mathbf{x})=0$ with Jacobian solves | residual vector, Jacobian/initial-guess diagnostics |
+| What temperatures satisfy local balances? | $A\mathbf{x}=\mathbf{b}$ | matrix assembly, residual, physical bounds |
+| Which composition or structure is preferred? | minimize $g(x)$ or $E(\mathbf{r})$ | curvature/energy, gradient, convergence |
+
+No method is “the numerical method.” The method follows from the question, model, available information, and required evidence.
+
+## Learning outcomes
+
+Given a short equilibrium scenario, students will be able to:
+
+1. **Select** a mathematical representation and numerical method appropriate to the question. *(Evaluate)*
+2. **Justify** the choice using domain, derivatives, sparsity, initial guesses, or physical constraints. *(Evaluate)*
+3. **Design** a minimal verification plan containing a residual, limiting case, convergence, or independent comparison. *(Create)*
+4. **Interpret** the numerical result as a materials statement with a stated limitation. *(Evaluate)*
+
+## Method-selection studio
+
+Work in pairs. For each card, write the model, unknown, numerical method, and one credibility check before opening the linked notebook.
+
+### Card A · One unknown
+
+A ceramic surface must reach a steady temperature under a specified heat flux. The residual is continuous and a physical interval is available.
+
+- Start with [L03 residual inspection](../../01-trust/L03/index.qmd).
+- Compare [L04 bisection](../L04/index.qmd) and [L05 open methods](../L05/index.qmd).
+
+### Card B · Coupled unknowns
+
+Two thermally coupled regions have two unknown temperatures and two balance equations. Each equation depends on both temperatures.
+
+- Inspect [L06 coupled equilibrium and the Jacobian](../L06/index.qmd).
+
+### Card C · Local balances
+
+A one-dimensional bar has fixed boundary temperatures, local conductances, and interior heat sources.
+
+- Inspect [L07 matrix assembly and Gaussian elimination](../L07/index.qmd).
+- Ask whether sparsity or conditioning changes the method choice.
+
+### Card D · Preferred state
+
+A binary material or atomistic pair can occupy several configurations. The model supplies a free energy or potential energy.
+
+- Inspect [L09 roots versus minima](../L09/index.qmd).
+- Inspect [L10 atomistic relaxation](../L10/index.qmd).
+
+## Synthesis worksheet
+
+For one card, complete:
+
+1. **Question:** what quantity or state is being requested?
+2. **Model:** what equation, energy, parameters, and domain represent it?
+3. **Representation:** scalar residual, vector residual, matrix system, or objective function?
+4. **Method:** why this method rather than a nearby alternative?
+5. **Verification:** what residual, limiting case, convergence test, or independent calculation will you use?
+6. **Interpretation:** what does the result mean physically, and what does it not establish?
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Retrieve the four numerical representations | Correct classification |
+| 5–12 min | Instructor models one method-selection card | Reasoning made explicit |
+| 12–32 min | Pairs solve two cards and inspect prior notebooks | Completed model/method/check chain |
+| 32–42 min | Compare choices and diagnose seductive alternatives | Method defense |
+| 42–48 min | Write a compact credibility statement | Evidence-based conclusion |
+| 48–50 min | Exit question | Choose and justify a method |
+
+## Exit question
+
+A problem has a smooth scalar residual, a valid bracket, and only one required solve. Why might bisection be a better engineering choice than Newton’s method even if Newton converges faster in a successful trial?
+
+*Expected direction:* bisection is bracketed and robust; for a one-off solve, a predictable method can be preferable to a faster method requiring a derivative and a suitable initial guess.
+
+## Bridge to materials data
+
+The next block changes the source of uncertainty. Instead of solving a model equation or energy landscape, we will infer relationships from sparse materials data and ask what interpolation, differentiation, integration, and calibration can legitimately support.

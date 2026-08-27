@@ -1,0 +1,111 @@
+---
+title: "L06 · Faster root finding"
+subtitle: "Secant and Newton methods: convergence versus cost and risk"
+body-classes: lecture-page
+---
+
+## The question
+
+**When is a faster root finder worth the loss of a guaranteed bracket?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Construct** a secant or tangent update from the graph of a residual.
+- **Compare** bisection, secant, and Newton methods by information required, cost, and convergence.
+- **Diagnose** failure caused by a poor initial guess, small derivative, or departure from the physical domain.
+- **Select** a root-finding strategy and state how its result will be checked.
+
+## Use more than the sign
+
+Bisection deliberately ignores most of the values $F(a)$ and $F(b)$; it uses only their signs. A secant method uses the line through two evaluated points to estimate where the residual crosses zero.
+
+Given $x_{k-1}$ and $x_k$,
+
+$$
+x_{k+1}
+=
+x_k-F(x_k)
+\frac{x_k-x_{k-1}}{F(x_k)-F(x_{k-1})}.
+$$
+
+The secant method does not require an analytical derivative. It often converges faster than bisection near a simple root, but the new estimate need not remain inside the original interval.
+
+## Newton's method
+
+If $F'(x_k)$ is available, replace the residual locally by its tangent line:
+
+$$
+F(x)\approx F(x_k)+F'(x_k)(x-x_k).
+$$
+
+Setting the tangent approximation to zero gives
+
+$$
+x_{k+1}=x_k-\frac{F(x_k)}{F'(x_k)}.
+$$
+
+Near a simple root and under suitable smoothness conditions, Newton's method can have quadratic convergence:
+
+$$
+|e_{k+1}|\approx C|e_k|^2,
+\qquad e_k=x_k-x^*.
+$$
+
+Once the iteration is in this local regime, the number of correct digits can grow rapidly. The convergence assumptions and failure cases are developed in [Kiusalaas (2013)](../references.qmd#ref-kiusalaas2013) and [Burden, Faires, and Burden (2016)](../references.qmd#ref-burden2016numerical).
+
+## Why Newton can fail
+
+Fast local convergence is not a global guarantee. Problems include:
+
+- $F'(x_k)$ is zero or very small, producing an enormous step;
+- the initial guess lies in the attraction region of a different root;
+- the tangent leaves the physically admissible domain;
+- $F$ is discontinuous or not differentiable where the method travels;
+- the iteration cycles or diverges;
+- evaluating $F'$ is expensive or inaccurate.
+
+A plot or bracket remains useful even when Newton's method will do the final work.
+
+## Cost per iteration versus number of iterations
+
+Calling one method “faster” requires a cost definition. Newton may use fewer iterations but require a derivative. A secant step reuses previous function values but may take more steps. Bisection may require many iterations but provides a guaranteed shrinking interval.
+
+A fair comparison records:
+
+$$
+\text{total cost}
+\approx
+n_F C_F+n_{F'}C_{F'}+C_{\mathrm{overhead}},
+$$
+
+where $n_F$ and $n_{F'}$ are evaluation counts and $C_F$ and $C_{F'}$ are their costs.
+
+## Hybrid methods
+
+Robust software often combines strategies:
+
+1. establish a physical sign-changing bracket;
+2. attempt a secant or Newton-like step;
+3. reject a step that leaves the bracket or behaves poorly;
+4. fall back to bisection;
+5. update the bracket and continue.
+
+This is a recurring engineering pattern: use a fast method when its assumptions are supported and a conservative method when they are not.
+
+## Method comparison
+
+| Method | Needs | Main strength | Main risk |
+|---|---|---|---|
+| Bisection | continuous sign-changing bracket | guaranteed interval reduction | slow linear convergence |
+| Secant | two starting values | no analytical derivative; usually faster | can leave the useful region |
+| Newton | one guess and derivative | very fast local convergence | sensitive to derivative and initial guess |
+
+## Exit question
+
+A residual evaluation takes ten minutes, while its derivative requires a second ten-minute simulation. Which method would you test first, and what evidence would change your choice?
+
+## Next
+
+A root identifies where $F(x)=0$. A stable material state is often described instead as a minimum of energy. L07 asks when those two ideas agree and when they do not.

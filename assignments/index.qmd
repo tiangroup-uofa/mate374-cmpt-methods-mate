@@ -7,7 +7,7 @@ toc: true
 ::: {.callout-note}
 ## Recommendation
 
-Use **five individual computational investigations plus one staged team project**. This replaces a near-weekly sequence of method-specific problem sets with fewer, more coherent pieces of evidence. Assessment weights and exact due dates still require departmental confirmation.
+Use **five focused computational investigations plus one staged team project**. A1–A3 are individual; A4–A5 are completed in pairs with a short individual interpretation. This gives each major topic a roughly two-week assessment cycle without creating five full sets of individual marking. The recommended partition is **20% assignments + 20% project + 20% midterm + 40% final**. Exact due dates still require confirmation.
 :::
 
 ## Evidence from Fall 2025
@@ -23,6 +23,21 @@ The seven archived assignments progress through binary representation/Python, ro
 
 Useful features to preserve are repeated computational practice, access to seminar starter code, and a real simulation study. Features to change are repetitive hand iteration, generic non-materials contexts, a large final-week team task, and insufficiently visible project milestones and individual accountability.
 
+## Public U of A benchmark
+
+A comprehensive current public archive of CME undergraduate syllabi could not be located, so this is a **small benchmark, not a departmental rule or census**.
+
+| Public source | Assessment pattern | What it tells us |
+|---|---|---|
+| [CH E 318 Mass Transfer, Winter 2026](https://tiangroup-uofa.github.io/che318-mass-transfer/lectures/L01/) | Eight assignments, best seven counted: 25%; midterm: 30%; final: 45%; no project | Frequent assignments fit a conventional exam-centred course, but are not a good workload comparator once a substantial project is added. |
+| [ENGG 404, Spring 2024 syllabus](https://www.ualberta.ca/en/engineering/media-library/school-engineering-safety-and-risk-management/program/engg404-2024s-course-syllabus-v20240502.pdf) | Four assignments plus quizzes: 21%; staged team project and surveys: 39%; final: 40%; no midterm | A project-heavy engineering course reduces the number of conventional assignments and gives the project an explicit category. |
+| [ENGG 406, Winter 2023 syllabus](https://www.ualberta.ca/en/engineering/media-library/school-engineering-safety-and-risk-management/program/engg406-2023w-course-syllabus.pdf) | Quizzes: 10%; assignments: 30%; participation: 10%; final: 50%; no project or midterm | U of A engineering courses use materially different partitions; 25/30/45 is not a universal Faculty formula. |
+| [UAPPOL Assessment and Grading Policy](https://www.ualberta.ca/en/alfresco/uappol/academic/assessment-and-grading/policy/assessment-and-grading-policy.pdf) | No prescribed number of assignments or fixed percentage split | Assessment should be aligned, clearly communicated, multifaceted, timely, and both formative and summative. Innovative forms are permitted. |
+
+The [official MAT E 374 catalogue entry](https://apps.ualberta.ca/catalogue/course/mat_e/374) confirms that this is a 3-1S-0 course, but does not prescribe an assessment partition. The public evidence therefore supports using professional judgment and explicit alignment rather than copying seven or eight assignments from a course without a project.
+
+For roughly 26 students, five fully individual assignments would mean **130 submissions**. The proposed three-individual plus two-pair pattern produces about **104 assignment artifacts**—the same marking count as four fully individual assignments and 43% fewer than seven individual assignments—before project marking.
+
 ## Proposed assignment set
 
 | Assignment | Timing window | Main course units | Driving question | Required credibility evidence |
@@ -30,18 +45,31 @@ Useful features to preserve are repeated computational practice, access to semin
 | **A1 · Trust a computational result** | Weeks 2–3 | Orientation and Unit 1 | Which reported materials result is believable, and what error source limits it? | units/scale check, limiting or reference case, and an error/convergence plot |
 | **A2 · Find a preferred state** | Weeks 4–5 | Unit 2 | Which equilibrium or relaxed state should be reported when roots, minima, and initial guesses compete? | bracket or landscape evidence, residual/gradient, sensitivity, and physical state classification |
 | **A3 · Learn from sparse materials data** | Weeks 6–7 | Unit 3 | What parameter or prediction is supported by noisy, sparse data? | residuals, uncertainty/sensitivity, and an interpolation/extrapolation or validation check |
-| **A4 · Predict materials evolution** | Weeks 8–9 | Unit 4 | Which kinetic prediction remains credible when timestep, tolerance, or mechanism changes? | timestep/tolerance refinement, comparison with a limit/reference, and interpretation of solver versus model error |
-| **A5 · Conserve transport across a material** | Weeks 10–12 | Unit 5 | How do grid, boundary, timestep, and interface choices affect a diffusion or heat prediction? | conservation balance, mesh/timestep study, boundary check, and a materials conclusion |
+| **A4 · Predict materials evolution** *(pair)* | Weeks 8–9 | Unit 4 | Which kinetic prediction remains credible when timestep, tolerance, or mechanism changes? | timestep/tolerance refinement, reference/limit comparison, and individual interpretation of solver versus model error |
+| **A5 · Conserve transport across a material** *(pair)* | Weeks 10–12 | Unit 5 | How do grid, boundary, timestep, and interface choices affect a diffusion or heat prediction? | conservation balance, mesh/timestep check, and individual materials conclusion |
 
-Unit 6 sampling/MD and Unit 7 structure–energy content arrive too late for another large individual submission. They should contribute to project synthesis, seminar evidence, and/or the final assessment rather than create an A6 due beside the project.
+Unit 6 sampling/MD and Unit 7 structure–energy content arrive too late for another large assignment. They should contribute to project synthesis, seminar evidence, and/or the final assessment.
+
+## Working rhythm
+
+| Assignment | Provisional due date | Submission mode |
+|---|---|---|
+| A1 | Fri Sep 25 | individual |
+| A2 | Fri Oct 9 | individual |
+| A3 | Fri Oct 23 | individual |
+| A4 | Fri Nov 6 | pair notebook + individual interpretation |
+| A5 | Fri Nov 20 | pair notebook + individual interpretation |
+
+A4 should be released early enough that the October 28 midterm does not consume its working period. A5 spans instructional time before and after Reading Week; no work should be expected during the break. No assignment is due after November 20, preserving three active project weeks through December 7.
 
 ## Common submission form
 
-Each assignment should be a focused marimo investigation, normally completable in about **3–5 hours**, submitted as:
+Each assignment should be a focused marimo investigation, normally completable in about **2–3 hours per student**, submitted as:
 
 1. an executable marimo `.py` notebook or approved exported artifact;
 2. a concise static HTML/PDF view for reliable grading and accessibility;
-3. a short engineering conclusion embedded in the notebook—not a separate long report.
+3. a short engineering conclusion embedded in the notebook—not a separate long report;
+4. for A4–A5, clearly identified individual interpretation cells from both partners.
 
 Every assignment must show:
 
@@ -76,6 +104,13 @@ Recommended workflow:
 - avoid a due date during Reading Week, on the midterm date, or in the same final week as the project;
 - publish the rubric and a static fallback with the brief.
 
-## Decision still required
+## Recommended partition
 
-If the course must retain the Fall 2025 **25% total assignment weight**, five assignments at 5% each is simple. If project work receives a separate 25–30%, rebalance the midterm/final rather than hiding the project inside the assignment category. Do not finalize due dates until the registered seminar day and official assessment constraints are confirmed.
+| Component | Weight | Workload control |
+|---|---:|---|
+| Five investigations | 20% | 4% each; A1–A3 individual, A4–A5 paired |
+| Staged team project | 20% | small proposal/checkpoint plus one final group artifact and individual reflection |
+| Midterm | 20% | one focused 50-minute in-class assessment |
+| Final examination | 40% | remains the largest individual summative assessment |
+
+The lower midterm weight should make it **lower stakes, not artificially easy**. It should sample the essential pre-midterm outcomes with fewer time-pressure traps and provide useful feedback before the final. The three individual assignments, individual portions of paired work and the project, and examinations preserve enough individual evidence for grading confidence. Do not finalize due dates until the registered seminar day and official constraints are confirmed.

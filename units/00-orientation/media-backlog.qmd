@@ -1,0 +1,57 @@
+---
+title: "Unit 0 · Visual and interactive backlog"
+toc: true
+---
+
+The current L01–L04 pages are text and mathematics prototypes. Do not treat them as complete lecture packages until the visual and activity items below are selected, sourced, credited, and tested.
+
+## L01
+
+- Three-stage modeling diagram: problem → mathematical model → numerical model/software → result and interpretation.
+- One restrained comic or sketch for the complexity/fitness-for-purpose trade-off.
+- Roberts-Austen diffusion profile or historical apparatus, with reuse permission checked.
+- Materials Genome Initiative / Materials Project visual.
+- One modern ML materials-screening visual, with the claim tied to its paper.
+- Titan pressure-hull geometry and one investigation/FEA figure.
+- Fast16 normal-versus-tampered EOS/stress curve from the Symantec analysis; verify reuse terms.
+- Error-source map aligned with the modeling stages.
+- Buffon's needle geometry plus the browser notebook.
+
+## L02
+
+- Shared Buffon notebook from L01 with CSV export.
+- Wooclap comparison poll.
+- One visual for each of the four π methods.
+- Error-versus-$N$ plot in linear and log--log views.
+- Plot showing stochastic spread for repeated Buffon runs.
+- Large-$N$ polygon plot showing initial convergence and later round-off growth.
+- Pair-programming Basel scaffold.
+
+## L03
+
+- Historical analog-computer photograph or diagram with credit.
+- Decimal-versus-binary place-value diagram.
+- IEEE 754 sign/exponent/fraction diagram for binary32 and binary64.
+- Interactive integer/fraction conversion activity.
+- Float16/32/64 representation comparison.
+- Shared-increment random-walk accumulation plot.
+- Exact-integer threshold demonstration.
+- Polygon cancellation visualization carried forward from L02.
+
+## L04
+
+- Molab launch instructions and final activity link.
+- Runtime-versus-$N$ benchmark for the Python loop.
+- Array/vectorization diagram that does not imply automatic parallelism.
+- Memory estimate and batching diagram.
+- First-call versus reused JIT timing.
+- Serial versus parallel CPU comparison.
+- CPU/GPU crossover plot, including dtype and hardware.
+- Final time–memory–accuracy comparison table populated from measured results.
+
+## Unit-wide checks
+
+- Every essential image needs alt text and a printable interpretation.
+- Every external figure needs a source and license/reuse decision.
+- Every live activity needs a static fallback.
+- Screenshots should not substitute for equations or numerical data that can be rendered accessibly.

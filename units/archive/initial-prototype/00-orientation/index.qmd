@@ -1,0 +1,12 @@
+---
+title: "Unit 0 · Computation as a materials experiment"
+toc: false
+---
+
+**Driving question:** What makes a computational prediction useful and believable?
+
+- [L01 · From a materials question to a live calculation](L01/index.qmd)
+- [L02 · Approximation, algorithms, and the numbers in a computer](L02/index.qmd)
+The first week is a gentle computational on-ramp. Students edit the bodies of supplied functions in marimo, connect code to equations, and begin checking numerical results. Formal function-wrapping and functional-programming patterns can be developed in the accompanying seminar rather than front-loaded into lecture.
+
+The former deployment experiments are preserved in the [orientation archive](archive/index.qmd).

@@ -1,28 +1,237 @@
 ---
-title: "Two local marimo playgrounds on one page"
-subtitle: "Independent editable WASM notebooks with shared frontend assets"
+title: "L02 · Choosing and judging a numerical method"
+subtitle: "How accuracy changes with effort"
 body-classes: lecture-page
 ---
 
-This page tests whether two locally exported marimo notebooks can initialize and remain interactive at the same time. Both iframes use eager loading for this experiment.
+::: {.callout-note}
+## Central question
 
-## Playground 1 · Matrix multiplication
-
-::: {.quarto-wasm-local notebook="matmul.edit.py" title="Editable matrix multiplication playground" height="540" loading="eager"}
-**Static fallback.** For $n=3$, multiplying by the reversed identity matrix reverses the columns of $A$.
+**When we see a numerical method, how do we decide whether it is a good way to solve the problem?**
 :::
 
-## Playground 2 · Root finding
+## Learning outcomes
 
-::: {.quarto-wasm-local notebook="root_finding.edit.py" title="Editable bisection playground" height="540" loading="eager"}
-**Static fallback.** Thirty bisection iterations approximate $\sqrt{2}$ with a residual near machine precision for this scale.
-:::
+By the end of this lecture, you should be able to:
 
-## Test questions
+1. **Calculate** absolute and relative error when a reference value is available.
+2. **Distinguish** statistical sampling error from deterministic truncation error.
+3. **Interpret** convergence as the rate at which error decreases as computational effort increases.
+4. **Compare** numerical methods using accuracy, convergence, cost, and the information they require.
 
-- Do both initial outputs appear without scrolling?
-- When both runtimes finish loading, can each slider update its own result?
-- Does editing one notebook leave the other notebook unchanged?
-- How do startup time and memory use compare with a page containing one notebook?
+## Return to Buffon's needle
 
-The notebook HTML files share the generated `wasm-local/assets/` directory, but each iframe owns an independent browser Python runtime and notebook state.
+We begin by reopening the Buffon notebook from L01. Do not focus on the Python syntax yet. Use the controls to repeat the four closing investigations:
+
+1. Compare $\widehat{\pi}$ with $\pi$ for $N=10$, $100$, and $10^6$.
+2. Ask how large $N$ must be before five correct significant digits become plausible.
+3. Compare results from different random seeds at the same $N$.
+4. Change the ratio $L/d$ and observe the crossing count and estimate.
+
+Increasing $N$ generally reduces the spread of the estimates, but an individual run does not move smoothly toward $\pi$. A larger sample can occasionally be farther from the reference than a smaller sample.
+
+For the simple choice $L=d$,
+
+$$
+P(\text{crossing})=\frac{2}{\pi}\approx0.6366.
+$$
+
+A large-sample estimate of the standard deviation of $\widehat{\pi}$ is
+
+$$
+\sigma_{\widehat{\pi}}
+\approx
+\frac{2.37}{\sqrt{N}}.
+$$
+
+This gives a typical uncertainty of about $0.75$ at $N=10$, $0.24$ at $N=100$, and $0.0024$ at $N=10^6$. The exact error of one run can be smaller or larger.
+
+Rounding $\pi$ to five significant digits requires an absolute error below roughly $5\times10^{-5}$. The scaling above suggests about $2.3\times10^9$ throws merely to make that tolerance comparable to one standard deviation, and about $8.6\times10^9$ throws for an approximate 95% interval of that half-width. If “five digits” means five digits *after* the decimal point, the tolerance is ten times smaller and the required $N$ is about one hundred times larger. The calculation does not guarantee either target; it shows why **billions of throws** are the right order of magnitude even for five significant digits.
+
+When $L/d$ becomes smaller, crossings become less frequent. A fixed number of throws then contains less information, and the estimate is more likely to be noisy or undefined because no crossing occurred.
+
+## Measuring error
+
+Let $V_{\mathrm{true}}$ be a trusted reference and $V_{\mathrm{calc}}$ a calculated value. The signed true error is
+
+$$
+E_{\mathrm{true}}
+=
+V_{\mathrm{true}}-V_{\mathrm{calc}}.
+$$
+
+The **absolute error** is
+
+$$
+E_{\mathrm{abs}}
+=
+\left|V_{\mathrm{true}}-V_{\mathrm{calc}}\right|,
+$$
+
+and the **relative error** is
+
+$$
+E_{\mathrm{rel}}
+=
+\frac{\left|V_{\mathrm{true}}-V_{\mathrm{calc}}\right|}
+{\left|V_{\mathrm{true}}\right|},
+\qquad V_{\mathrm{true}}\ne0.
+$$
+
+Absolute error has the same units as the quantity. Relative error is dimensionless and is often reported as a percentage.
+
+The name of the error depends on the method. In Buffon's experiment, finite $N$ produces **sampling error** because the crossing fraction is random. If we stop an infinite series after $N$ terms, the omitted tail produces **truncation error**. Both may decrease with $N$, but they should not be given the same name.
+
+## How quickly does the error decrease?
+
+The notebook records $N$, the estimate, elapsed time, and absolute error. After downloading the results as a CSV file, we can plot error against $N$. Many methods show an approximate power-law region,
+
+$$
+E(N)\approx C N^{-p}.
+$$
+
+Taking logarithms gives
+
+$$
+\log E\approx\log C-p\log N.
+$$
+
+On a log--log plot, the slope is therefore approximately $-p$. A larger $p$ means that error falls more rapidly as $N$ increases.
+
+For a random method such as Buffon's needle, a single run produces a noisy error curve. We need repeated runs and a typical measure such as root-mean-square error. Buffon's sampling error behaves approximately as
+
+$$
+E_{\mathrm{RMS}}\propto N^{-1/2}.
+$$
+
+This relationship between increasing effort and decreasing error is **convergence**. Convergence rate is one way to judge a method, but it is not the only one. The cost of each step and the usefulness of the method for the real problem also matter.
+
+The Wooclap poll asks two questions. First: is Buffon's needle a good method? Second: before running them, which of the alternative equations below appears likely to be better? The activity link will be shown in class and posted on Canvas.
+
+## Four methods for the same number
+
+The comparison uses exactly four routes to $\pi$: Buffon's needle, a polygon, the Basel series, and a rapidly convergent Ramanujan series. Each method has a refinement parameter $N$, but $N$ does not represent the same physical action in every case.
+
+### 1. Buffon's needle: random sampling
+
+With $L=d$,
+
+$$
+\widehat{\pi}_N=\frac{2N}{n}.
+$$
+
+Here $N$ is the number of random throws. Repeated calculations differ, and the typical error decreases as $N^{-1/2}$.
+
+### 2. Inscribed polygons: geometric refinement
+
+For a unit circle, begin with an inscribed hexagon whose side length is $s_6=1$. Repeatedly double the number of sides using
+
+$$
+s_{2N}=\sqrt{2-\sqrt{4-s_N^2}},
+$$
+
+then estimate $\pi$ from half of the perimeter:
+
+$$
+\pi_N=\frac{Ns_N}{2}.
+$$
+
+The geometric error initially behaves as
+
+$$
+E_N\propto N^{-2}.
+$$
+
+This is related to the polygon method used by Archimedes in the third century BCE to place upper and lower bounds on $\pi$ ([Beckmann, 1971](../references.qmd#ref-beckmann1971pi)).
+
+### 3. The Basel series: deterministic truncation
+
+Euler's solution of the Basel problem gives the following identity ([Weisstein, n.d.](../references.qmd#ref-weissteinbasel)):
+
+$$
+\sum_{k=1}^{\infty}\frac{1}{k^2}=\frac{\pi^2}{6},
+$$
+
+so a finite approximation is
+
+$$
+\pi_N
+=
+\sqrt{6\sum_{k=1}^{N}\frac{1}{k^2}}.
+$$
+
+All terms are positive, so the estimate approaches $\pi$ monotonically from below. Although the individual terms decrease as $1/k^2$, the accumulated tail decreases as $1/N$. The leading error therefore behaves as
+
+$$
+E_N\propto N^{-1}.
+$$
+
+A related historical series is the Gregory--Leibniz formula,
+
+$$
+\frac{\pi}{4}=1-\frac13+\frac15-\frac17+\cdots,
+$$
+
+which is easy to understand but also converges as $N^{-1}$. We use Basel in the activity because its non-negative terms make the accumulation easier to inspect.
+
+### 4. Ramanujan's series: rapid convergence
+
+One of Ramanujan's formulas is
+
+$$
+\frac{1}{\pi}
+=
+\frac{2\sqrt{2}}{9801}
+\sum_{k=0}^{\infty}
+\frac{(4k)!(1103+26390k)}
+{(k!)^4 396^{4k}}.
+$$
+
+Each additional term contributes roughly eight more correct decimal digits ([Ramanujan, 1914](../references.qmd#ref-ramanujan1914)). We will not derive this identity. Its role is to show that not every convergent method follows a slow power law $N^{-p}$.
+
+The four signatures are now visible:
+
+| Method | Meaning of $N$ | Deterministic? | Typical initial convergence |
+|---|---|---:|---:|
+| Buffon | random throws | no | $N^{-1/2}$ |
+| Polygon | number of sides | yes | $N^{-2}$ |
+| Basel | retained terms | yes | $N^{-1}$ |
+| Ramanujan | retained terms | yes | about eight digits per term |
+
+## A common numerical interface
+
+Despite their different mathematics, all four methods accept some measure of effort $N$. A common Python interface can make the comparison fair:
+
+```python
+def estimate_pi(N: int, method: str, **parameters):
+    # select one method and return its estimate
+    ...
+```
+
+The function name and input structure remain the same while the body changes with the algorithm. This lets the notebook apply the same timing and error calculation to every method.
+
+Work with a partner on the Basel method. You do not need to begin from a blank page. Translate the following algorithm into the supplied function:
+
+```text
+set total to zero
+for k from 1 through N:
+    add 1 / k² to total
+return the square root of 6 × total
+```
+
+Remember that Python uses `**` for powers. Although Python indexing often begins at zero, this mathematical sum begins at $k=1$, so `range(1, N + 1)` is the relevant sequence. If you do not complete the code, use the supplied implementation and focus on interpreting the comparison.
+
+## What should we observe?
+
+At the same $N$, the four methods can have vastly different errors. Buffon fluctuates between runs. Basel approaches from below. The polygon initially improves faster than Basel. Ramanujan reaches high accuracy with only a few terms.
+
+The error curves also contain a surprise. For sufficiently large $N$, a deterministic method may stop improving, plateau, or even become less accurate. In particular, the polygon recurrence subtracts two nearly equal numbers when $N$ becomes very large. We will leave the cause unresolved for the moment; it is the starting point for L03.
+
+A runtime limit is equally real. Entering $N=10^8$ into an ordinary browser loop may freeze the page for an inconvenient length of time. The activity therefore caps some inputs and may use precomputed data for the largest comparison. L04 will show how the same calculation can be implemented more efficiently.
+
+## Closing questions
+
+1. Compared with the other methods, is Buffon's needle a fast way to calculate $\pi$? Is its underlying Monte Carlo idea still useful?
+2. Our error calculation used a known reference value. What evidence could replace it when the true solution is unknown?
+3. Why might an error curve plateau or begin to increase as $N$ grows?
+4. Why would entering $N=10^8$ hang an ordinary browser implementation, and how could a demonstration show that regime without asking every browser to perform all the work?

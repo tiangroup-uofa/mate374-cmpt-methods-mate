@@ -1,0 +1,151 @@
+---
+title: "L02 · Approximation, algorithms, and the numbers in a computer"
+subtitle: "A π experiment with loops, arrays, timing, error, and floating point"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**If $\pi$ is known, how can an algorithm approximate it—and how can we tell whether the result deserves trust?**
+
+The same question appears when a materials calculation estimates an area, a diffusion coefficient, an equilibrium composition, or an energy. We begin with a friendly reference problem so the algorithm and the error are visible.
+
+For a circular cross-section,
+
+$$
+A = \pi r^2.
+$$
+
+Today the exact reference value is available as `numpy.pi`. In later problems the reference may be an analytical limit, a refined numerical solution, an experiment, or a conservation law.
+
+## Learning outcomes
+
+Given a convergent series and an editable marimo notebook, students will be able to:
+
+1. **Translate** a finite series into an algorithm using a supplied Python function, a loop, and zero-based indexing. *(Apply)*
+2. **Compare** a transparent loop with a vectorized implementation using an approximation, a wall-time measurement, and a reproducible term count. *(Analyze)*
+3. **Calculate and interpret** absolute and relative error against a known reference value. *(Evaluate)*
+4. **Explain** why increasing the number of terms first reduces truncation error but cannot remove finite-precision round-off error. *(Understand)*
+
+## From a formula to an algorithm
+
+The Leibniz series is
+
+$$
+\frac{\pi}{4}=1-\frac13+\frac15-\frac17+\cdots
+=\sum_{k=0}^{N-1}\frac{(-1)^k}{2k+1}.
+$$
+
+A direct translation is a recipe:
+
+```text
+start total at zero
+for k = 0, 1, ..., N-1:
+    choose +1 for even k and -1 for odd k
+    add sign / (2k + 1) to total
+return 4 × total
+```
+
+The details matter. Python starts indexing and `range` at zero; the upper end of `range(N)` is excluded; and the alternating sign is part of the model, not decoration. The notebook supplies the function so students can concentrate on mapping the mathematics to a few lines.
+
+## One notebook, three implementations
+
+Choose a term count and benchmark:
+
+- **Python loop · Leibniz** keeps every addition visible;
+- **NumPy array · Leibniz** evaluates the same series with array operations;
+- **Python loop · Nilakantha** changes the series and converges faster for this experiment.
+
+::: {.quarto-wasm-local notebook="pi_approximation.edit.py" title="Approximate π: algorithm, implementation, and error" height="1120" loading="eager"}
+**Static fallback.** At $N=10{,}000$, the Leibniz implementations produce approximately $3.141492653590034$, with absolute error about $1.00\times10^{-4}$. The Nilakantha series reaches a much smaller error at the same term count. The exact timing depends on the device; the error, term count, method, and reference value should always be reported together.
+:::
+
+### What to change in the editor
+
+Open **Edit code** and change only the body of `pi_leibniz_loop`. Keep its name and input unchanged. Useful small experiments include:
+
+- replace the temporary `sign` variable with an equivalent expression;
+- change the accumulator carefully and see how the result changes;
+- introduce an off-by-one error in `range` and diagnose the effect;
+- restore the correct version and compare the output with the NumPy implementation.
+
+This is intentional scaffolding. Students are writing inside a function whose purpose and inputs are already given; they are not being asked to design an API before they can see the numerical idea.
+
+## Three kinds of comparison
+
+For an approximation $\pi_N$ and reference $\pi_\mathrm{ref}$,
+
+$$
+E_\mathrm{abs}=\left|\pi_N-\pi_\mathrm{ref}\right|,
+\qquad
+E_\mathrm{rel}=\frac{\left|\pi_N-\pi_\mathrm{ref}\right|}{\left|\pi_\mathrm{ref}\right|}.
+$$
+
+Keep these questions separate:
+
+1. **Mathematical approximation:** Does the series converge, and how quickly?
+2. **Implementation:** Does a loop or array operation perform the same additions correctly?
+3. **Measurement:** What does one wall-time measurement say—and what does it not say—about performance on another device?
+
+A faster implementation is not automatically a more accurate implementation. Conversely, matching a reference once does not prove that a method is appropriate for a different materials problem.
+
+## Where the error comes from
+
+At first, adding more terms reduces **truncation error**: the finite sum has not yet captured enough of the infinite series. With finite-precision arithmetic, every stored number and addition is rounded. Eventually **round-off error** can become comparable to, or larger than, the improvement from additional terms.
+
+For a known reference, the true error is visible:
+
+$$
+E_\text{true}=\text{True solution}-\text{Numerical solution}.
+$$
+
+When the true solution is unknown, we need a different credibility argument: compare with a more accurate calculation, refine the discretization, check a limiting case, test conservation, or compare with data. “The code ran” is not one of those arguments.
+
+## Optional native extension: JIT compilation
+
+Numba can compile the same explicit loop with a native LLVM toolchain. That is useful for discussing implementation speed, but Numba is not a dependable browser-WASM dependency. Run it only when the native cloud environment is available:
+
+```{=html}
+<a href="https://molab.marimo.io/github/tiangroup-uofa/mate374-cmpt-methods-mate/blob/main/activities/numba_pi.molab.py"><img src="https://marimo.io/molab-shield.svg" alt="Open in molab"></a>
+```
+
+The Molab notebook has a **Compile and benchmark** button. The first JIT call includes compilation; a later call reuses compiled machine code. The trust check is still numerical agreement with the transparent Python loop. If Molab is unavailable, the local notebook is the complete L02 activity.
+
+## A quick floating-point warm-up
+
+Computers do not store every real number exactly. An IEEE-754 double stores a sign, an exponent, and a finite fraction of bits. For example, the decimal number $0.1$ has the exact stored ratio
+
+$$
+0.1_\text{stored}
+=\frac{3602879701896397}{36028797018963968},
+$$
+
+not exactly $1/10$. The notebook displays the 64 bits for several values and evaluates the small diagnostic `0.1 + 0.2 - 0.3`. We only need the conclusion today:
+
+> Finite representation introduces a small error before a numerical algorithm has even started.
+
+The next lecture will make floating-point representation, cancellation, and conditioning more precise. The binary conversion exercise is a short way to see that “decimal input” and “exactly stored real number” are different ideas.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Predict which implementation will be fastest and which method will be most accurate | Prediction with a reason |
+| 5–12 min | Connect π to a materials geometry and introduce the series | Model and reference identified |
+| 12–20 min | Convert the series to an algorithm; inspect `range`, indexing, and a supplied function | Pseudocode matches code |
+| 20–35 min | Run the notebook, change the function body, compare methods and errors | Approximation, error, and term count recorded |
+| 35–43 min | Separate truncation error, implementation/time differences, and round-off | Error classification |
+| 43–48 min | Inspect binary/floating-point representation | Explain why `0.1` is not exact |
+| 48–50 min | Exit question and bridge to L03 | One defensible trust check |
+
+## Exit question
+
+Suppose two implementations return the same estimate of $\pi$, but one is ten times faster. What evidence would you collect before deciding to use the faster implementation in a materials simulation?
+
+*Expected direction:* compare the algorithms and assumptions, check numerical agreement over relevant inputs, inspect error/convergence behavior, and measure performance under a representative workload.
+
+::: {.callout-tip}
+## Instructor note
+
+The former L02 page was a local-WASM deployment stress test with matrix multiplication and bisection. It is preserved in the [orientation archive](../archive/index.qmd), not used as the lecture activity.
+:::

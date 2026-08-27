@@ -1,0 +1,91 @@
+---
+title: "L10 · Numerical integration"
+subtitle: "Accumulating area, work, and other materials quantities"
+body-classes: lecture-page
+---
+
+## The question
+
+**How can we estimate an accumulated quantity from a function or a set of measured values?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Interpret** a definite integral as accumulated signed area with units.
+- **Apply** rectangle and trapezoidal approximations to sampled data.
+- **Explain** when Simpson's rule is appropriate.
+- **Check** an integral using refinement, bounds, and physical interpretation.
+
+## Replace a continuous area by finite pieces
+
+For
+
+$$
+I=\int_a^b f(x)\,\mathrm{d}x,
+$$
+
+a numerical method replaces the curve over each interval by a simple local approximation.
+
+For equally spaced points with width $h$, a left rectangle gives
+
+$$
+I\approx h\sum_{i=0}^{N-1}f(x_i).
+$$
+
+The composite trapezoidal rule connects adjacent values by straight lines:
+
+$$
+I\approx
+\sum_{i=0}^{N-1}
+\frac{x_{i+1}-x_i}{2}
+\left[f(x_i)+f(x_{i+1})\right].
+$$
+
+This form naturally handles unequal spacing.
+
+Simpson's rule fits a quadratic over pairs of equally spaced intervals. It can converge rapidly for a smooth callable function, but it is not automatically superior for noisy or irregular measurements. Derivations and error orders for these rules are given by [Kiusalaas (2013)](../references.qmd#ref-kiusalaas2013) and [Burden, Faires, and Burden (2016)](../references.qmd#ref-burden2016numerical).
+
+## Materials example: work from a stress--strain curve
+
+The work per unit volume done during uniaxial loading is
+
+$$
+W=\int_{\varepsilon_a}^{\varepsilon_b}\sigma(\varepsilon)\,\mathrm{d}\varepsilon.
+$$
+
+Strain is dimensionless and stress has units of energy per volume, so the area under the stress--strain curve also has units of energy per volume. The integration interval determines the physical quantity: elastic energy, total work to fracture, and an unloading loop are not interchangeable.
+
+If the data contain loading and unloading branches, their order matters. Sorting all points by strain can destroy the path and produce a meaningless area.
+
+## Callable functions versus measured tables
+
+For a smooth function, we can choose new points and perform a refinement study. For experimental data, the measurement locations and uncertainty are fixed. Applying a high-order quadrature rule does not create information between sparse or noisy points.
+
+A defensible report states:
+
+- the integration interval;
+- the quadrature rule;
+- whether spacing is uniform;
+- units of the integrated quantity;
+- treatment of missing, repeated, or out-of-order points;
+- a refinement or uncertainty estimate when available.
+
+## Accuracy checks
+
+Useful checks include:
+
+- integrate a constant or linear function whose area is known;
+- compare coarse and refined results;
+- compare two reasonable rules;
+- bound the area using known minimum and maximum values;
+- test sign and units;
+- inspect whether the result is dominated by a poorly sampled region.
+
+## Exit question
+
+Two stress--strain datasets contain the same points but in different row orders. A program integrates each and obtains different energies. Is this a numerical-method failure, a data-handling failure, or both? Explain.
+
+## Next
+
+Integration uses the values we have to estimate an accumulation. L11 asks how to estimate a value *between* the points we have.

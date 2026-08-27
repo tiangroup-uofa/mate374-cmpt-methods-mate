@@ -1,0 +1,116 @@
+---
+title: "L08 · Optimization landscapes"
+subtitle: "Moving from one variable to several without hiding the geometry"
+body-classes: lecture-page
+---
+
+## The question
+
+**How does minimization change when an objective depends on more than one variable?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Interpret** contours, basins, ridges, and local minima on a two-variable objective landscape.
+- **Use** the gradient as the direction of greatest local increase.
+- **Explain** the difference between gradient-based and derivative-free search.
+- **Diagnose** sensitivity to starting point, scaling, constraints, and multiple minima.
+
+## From a curve to a landscape
+
+A one-variable objective is a curve $\phi(x)$. With two variables,
+
+$$
+\phi(x,y),
+$$
+
+we can view height as the objective value or draw contour lines of constant $\phi$. A low region is a basin; a narrow high region is a ridge. Different basins may contain different local minima.
+
+This geometric view is enough to understand the main challenge: there are now infinitely many directions in which to move.
+
+## The gradient
+
+For a differentiable objective,
+
+$$
+\nabla\phi(x,y)
+=
+\left(
+\frac{\partial\phi}{\partial x},
+\frac{\partial\phi}{\partial y}
+\right).
+$$
+
+The gradient points in the direction of greatest local increase. Its negative points downhill ([Nocedal and Wright, 2006](../references.qmd#ref-nocedal2006optimization)). A simple descent step is
+
+$$
+\mathbf{x}_{k+1}
+=
+\mathbf{x}_k-\alpha_k\nabla\phi(\mathbf{x}_k),
+$$
+
+where $\mathbf{x}=(x,y)$ and $\alpha_k$ is a step length.
+
+A step that is too small wastes evaluations. A step that is too large can overshoot, oscillate across a narrow valley, or leave the physical domain. The best direction and the best distance are separate questions.
+
+## Derivative-free movement
+
+When derivatives are unavailable or noisy, a method can compare objective values at a small geometric shape. In two dimensions, the Nelder--Mead simplex is a triangle. The triangle can be reflected, expanded, contracted, or shrunk as it moves toward lower objective values ([Nelder and Mead, 1965](../references.qmd#ref-nelder1965simplex)).
+
+Students do not need to memorize these operations here. The main idea is:
+
+> A derivative-free method learns a useful direction from the relative heights of several nearby points.
+
+Such methods can be intuitive and convenient for small problems, but they do not guarantee a global minimum and can struggle with poor scaling or many variables.
+
+## Scaling changes the geometry seen by the algorithm
+
+Suppose one coordinate varies near $10^{-6}$ and another near $10^3$. A numerically equal step in the two coordinates does not represent an equal physical change. Rescaling to dimensionless variables can turn a severely stretched valley into a more balanced landscape and can greatly improve search behavior.
+
+Units and characteristic scales therefore belong in optimizer design.
+
+## Constraints and physical domains
+
+Materials variables often have limits:
+
+$$
+0\le x_i\le1,
+\qquad T>0,
+\qquad r_{ij}>0.
+$$
+
+An unconstrained update can suggest a negative temperature, an impossible composition, or overlapping atoms. A valid optimizer must enforce the domain directly, transform variables, or penalize violations in a controlled way.
+
+## Local success is not global evidence
+
+To judge a result:
+
+- start from more than one physically meaningful location;
+- compare with a coarse scan when the dimension is small;
+- report objective and gradient or step diagnostics;
+- check constraints;
+- inspect whether different starts reach different basins;
+- separate numerical convergence from validation of the physical objective.
+
+## Unit synthesis
+
+Root finding and optimization are variations of one larger question: where does a function satisfy a special condition?
+
+$$
+\begin{array}{ll}
+F(x)=0 & \text{balance or equilibrium condition},\\[4pt]
+\phi'(x)=0 & \text{stationary point},\\[4pt]
+\min\phi(\mathbf{x}) & \text{preferred state under stated constraints}.
+\end{array}
+$$
+
+The method must match the condition we actually care about.
+
+## Exit question
+
+Two optimization runs converge to different structures with small final forces. Is one result necessarily wrong? What evidence would you collect to decide which structure the model prefers?
+
+## Next
+
+The next unit changes the source of information. Instead of a convenient equation, we may have only function evaluations or measured points. We begin by estimating slopes from finite differences.

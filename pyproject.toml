@@ -7,4 +7,9 @@ dependencies = [
   "lzstring>=1.0.4",
   "marimo>=0.23.16",
   "numpy>=2.0",
+  "scipy>=1.14",
 ]
+
+[tool.marimo.runtime]
+# Embedded course demos should become live without requiring a manual Run all.
+auto_instantiate = true

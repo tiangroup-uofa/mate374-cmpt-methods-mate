@@ -1,7 +1,0 @@
----
-title: "Unit 3 · What can materials data tell us?"
----
-
-Regression, interpolation, numerical differentiation and integration, calibration, and uncertainty.
-
-*Class pages to be drafted.*

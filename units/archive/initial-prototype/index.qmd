@@ -1,0 +1,17 @@
+---
+title: "Archive · Initial course prototype"
+toc: false
+listing: false
+---
+
+These pages preserve the first implementation of the redesigned course. They are retained for comparison and reuse, but they are not part of the current lecture sequence.
+
+- [Former course-notes index](course-notes-index.qmd)
+- [Former orientation unit](00-orientation/index.qmd)
+- [Former trust unit](01-trust/index.qmd)
+- [Former equilibrium unit](02-equilibrium/index.qmd)
+- [Former data unit](03-data/index.qmd)
+- [Former ODE unit](04-odes/index.qmd)
+- [Former fields placeholder](05-fields/index.qmd)
+- [Former micro-to-macro placeholder](06-micro-to-macro/index.qmd)
+- [Former synthesis placeholder](07-synthesis/index.qmd)

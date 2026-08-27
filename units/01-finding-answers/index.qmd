@@ -1,0 +1,21 @@
+---
+title: "Unit 1 · Finding special points"
+toc: false
+---
+
+**Unit question:** How can we locate a physically meaningful root or minimum, and how do we know the method has succeeded?
+
+::: {.callout-warning}
+## Prototype status
+
+L05–L08 are early text prototypes. Materials examples, figures, activities, and dataset provenance are not final. See the [Unit 1 references and source notes](references.qmd) for the initial bibliography.
+:::
+
+This unit stays mostly in one dimension so that graphs, intervals, slopes, and energy curves remain visible. Matrices are deferred until several-variable problems make them necessary.
+
+5. [L05 · Brackets, bisection, and fixed points](L05/index.qmd)
+6. [L06 · Faster root finding: secant and Newton methods](L06/index.qmd)
+7. [L07 · Finding a minimum in one dimension](L07/index.qmd)
+8. [L08 · Optimization landscapes](L08/index.qmd)
+
+[Unit 1 references and source notes](references.qmd)

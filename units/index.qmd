@@ -3,13 +3,35 @@ title: Course notes
 toc: false
 ---
 
-The notes are organized around materials questions rather than lists of algorithms.
+These notes are written as a small, readable textbook rather than as a stack of slides. Equations and reasoning form the stable layer. Images, live questions, and executable notebooks will be added only where they improve the explanation.
 
-1. [Orientation: computation as a materials experiment](00-orientation/index.qmd)
-2. [Can I trust this number?](01-trust/index.qmd)
-3. [What state does the material prefer?](02-equilibrium/index.qmd)
-4. [What can materials data tell us?](03-data/index.qmd)
-5. [How does a material evolve?](04-odes/index.qmd)
-6. [How does change move through a material?](05-fields/index.qmd)
-7. [How do microscopic rules become macroscopic behavior?](06-micro-to-macro/index.qmd)
-8. [How does structure determine properties?](07-synthesis/index.qmd)
+## Front matter
+
+- [Lecture 0 · Course introduction and guide](front-matter/index.qmd)
+
+## Unit 0 · Orientation and numerical thinking
+
+1. [L01 · A numerical mindset for materials engineers](00-orientation/L01/index.qmd)
+2. [L02 · Choosing and judging a numerical method](00-orientation/L02/index.qmd)
+3. [L03 · Numbers inside a computer](00-orientation/L03/index.qmd)
+4. [L04 · Making a computation faster](00-orientation/L04/index.qmd)
+
+## Unit 1 · Finding special points
+
+5. [L05 · Brackets, bisection, and fixed points](01-finding-answers/L05/index.qmd)
+6. [L06 · Faster root finding: secant and Newton methods](01-finding-answers/L06/index.qmd)
+7. [L07 · Finding a minimum in one dimension](01-finding-answers/L07/index.qmd)
+8. [L08 · Optimization landscapes](01-finding-answers/L08/index.qmd)
+
+## Unit 2 · Learning from functions and data
+
+9. [L09 · Numerical differentiation](02-functions-data/L09/index.qmd)
+10. [L10 · Numerical integration](02-functions-data/L10/index.qmd)
+11. [L11 · Interpolation](02-functions-data/L11/index.qmd)
+12. [L12 · Curve fitting and regression](02-functions-data/L12/index.qmd)
+
+## Appendices
+
+- [A1 · A crash course in Python for numerical work](../appendices/A01-python-numerics/index.qmd)
+
+Later units remain under development. The [initial implementation is archived](archive/initial-prototype/index.qmd) rather than deleted.

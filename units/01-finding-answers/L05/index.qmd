@@ -1,0 +1,135 @@
+---
+title: "L05 · Brackets, bisection, and fixed points"
+subtitle: "What does it mean to solve a materials equation?"
+body-classes: lecture-page
+---
+
+## The question
+
+**How can we locate an unknown value that satisfies a physical balance or equilibrium condition?**
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+- **Formulate** a scalar equation as a residual $F(x)=0$ and state the physical domain of $x$.
+- **Identify** a sign-changing bracket from a graph or table.
+- **Apply** bisection and report a defensible stopping condition.
+- **Explain** why a fixed-point rearrangement may converge or diverge.
+
+## The residual is the unmet condition
+
+Many materials problems can be written as
+
+$$
+F(x)=0.
+$$
+
+The unknown $x$ might be a temperature, composition, displacement, chemical potential, or interface position. The function $F(x)$ is a **residual**: it measures how far a trial value is from satisfying the governing condition.
+
+For a steady thermal balance, for example,
+
+$$
+F(T)=Q_{\mathrm{out}}(T)-Q_{\mathrm{in}}.
+$$
+
+A positive residual means the trial temperature loses too much heat; a negative residual means it loses too little. A root $T^*$ satisfies the balance.
+
+Before choosing a solver, state:
+
+1. the meaning and units of $x$ and $F$;
+2. the physically admissible domain;
+3. discontinuities or undefined regions;
+4. whether several roots may exist.
+
+## Bracketing a root
+
+If $F$ is continuous on $[a,b]$ and
+
+$$
+F(a)F(b)<0,
+$$
+
+then at least one root lies between $a$ and $b$. The sign change is a **bracket**. It is strong information: it does not require a derivative or a precise initial guess.
+
+A bracket does not prove that there is exactly one root. A root can also touch zero without changing sign. The graph and physical context still matter.
+
+## Bisection
+
+Bisection repeatedly halves a valid bracket. With
+
+$$
+c=\frac{a+b}{2},
+$$
+
+we evaluate $F(c)$ and retain the half interval that still has a sign change. After $k$ halvings, the interval width is
+
+$$
+\frac{b_0-a_0}{2^k}.
+$$
+
+The midpoint error is bounded by half of the current width. To make the bracket no wider than a target $\tau_x$, we need at least
+
+$$
+k\ge
+\left\lceil
+\log_2\left(\frac{b_0-a_0}{\tau_x}\right)
+\right\rceil
+$$
+
+iterations.
+
+Bisection is not glamorous, but it is robust when its assumptions hold. Its convergence is steady and predictable. Standard derivations and stopping-error bounds are given by [Kiusalaas (2013)](../references.qmd#ref-kiusalaas2013) and [Burden, Faires, and Burden (2016)](../references.qmd#ref-burden2016numerical).
+
+## When should the iteration stop?
+
+Useful stopping information includes:
+
+- interval width: $|b-a|$;
+- change in the estimate: $|x_{k+1}-x_k|$;
+- residual magnitude: $|F(x_k)|$;
+- iteration or function-evaluation limit.
+
+No single test is sufficient for every problem. A small residual may correspond to a large error in $x$ when $F$ is very flat. A small change in $x$ may mean the iteration has stalled. Tolerances must be connected to units and the engineering decision.
+
+## Fixed-point iteration
+
+An equation can sometimes be rearranged as
+
+$$
+x=g(x).
+$$
+
+Starting from $x_0$, fixed-point iteration uses
+
+$$
+x_{k+1}=g(x_k).
+$$
+
+A fixed point of $g$ is a root of $F(x)=g(x)-x$. Near a solution $x^*$, the iteration tends to converge when
+
+$$
+|g'(x^*)|<1
+$$
+
+and to diverge when $|g'(x^*)|>1$. Different algebraic rearrangements of the same equation produce different functions $g$ and therefore different numerical behavior.
+
+This is our first warning that an equation does not determine a unique algorithm.
+
+## Credibility check
+
+A reported root should include:
+
+- the physical domain and initial bracket or guess;
+- the final estimate with units;
+- the residual $F(x^*)$ with units;
+- the stopping rule;
+- evidence that the selected root is physically admissible.
+
+## Exit question
+
+A solver reports $T^*=912.347891$ K with $|F(T^*)|=10^{-9}$ W. What information is still missing before you trust the temperature to six decimal places?
+
+## Next
+
+Bisection uses only the sign of $F$. L06 asks whether using the magnitude or slope of $F$ can reach the root faster, and what robustness we give up in return.

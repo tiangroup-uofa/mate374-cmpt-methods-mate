@@ -1,0 +1,18 @@
+---
+title: "Unit 0 · References"
+toc: true
+bibliography: references.bib
+nocite: |
+  @*
+---
+
+::: {.callout-warning}
+## Prototype bibliography
+
+This page contains only works cited directly in the current L01–L04 prototypes. A source is added here when a corresponding citation is added to a lecture. Image credits, licenses, and dataset provenance will be added when those assets are selected.
+:::
+
+## Bibliography
+
+::: {#refs}
+:::

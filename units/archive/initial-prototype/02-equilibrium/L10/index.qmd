@@ -1,0 +1,67 @@
+---
+title: "L10 · Atomistic relaxation and energy landscapes"
+subtitle: "Use energy, forces, and convergence to find a structure"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**How does an atomistic model decide whether a structure is relaxed?**
+
+A pair potential gives an energy as a function of separation. For the Lennard–Jones model,
+
+$$
+E(r)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right].
+$$
+
+Relaxation is an optimization problem: move through the energy landscape toward a minimum while monitoring the gradient or force-like quantity.
+
+## Learning outcomes
+
+Given a one-dimensional pair-potential energy landscape and a supplied relaxation routine, students will be able to:
+
+1. **Interpret** energy, gradient, separation, and equilibrium in a toy atomistic model. *(Understand)*
+2. **Apply** gradient descent to update a structure. *(Apply)*
+3. **Diagnose** overshoot, a stuck boundary, or incomplete convergence from an iteration history. *(Analyze)*
+4. **Verify** a relaxed state using energy, gradient, and a reference minimum. *(Evaluate)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="atomistic_relaxation.edit.py" title="Relax a Lennard–Jones pair" height="900" loading="eager"}
+**Static fallback.** The Lennard–Jones minimum occurs at $r/\sigma=2^{1/6}\approx1.122462$. A stable gradient-descent run approaches this separation while decreasing energy and reducing the gradient.
+:::
+
+The toy potential is not a production interatomic model. Its value is that the energy landscape, update rule, and convergence evidence can all be inspected before using a library optimizer or an ML interatomic potential.
+
+## Convergence is a physical and numerical statement
+
+A relaxation can stop because:
+
+- the gradient is small;
+- the step is small;
+- the energy change is small;
+- the iteration limit is reached;
+- a bound or numerical failure stopped the update.
+
+These stopping reasons are not equivalent. Report the criterion and check that the final structure lies in a meaningful domain.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Predict the equilibrium separation from the potential shape | Energy-landscape prediction |
+| 5–15 min | Connect gradient to force and relaxation direction | Sign and units |
+| 15–32 min | Run and edit the relaxation routine | Energy/gradient history |
+| 32–42 min | Increase step size or start in a compressed state | Failure diagnosis |
+| 42–48 min | Define a defensible convergence criterion | Verification statement |
+| 48–50 min | Exit question | Distinguish minimum from iteration stop |
+
+## Exit question
+
+A relaxation reaches a nearly unchanged energy after 100 steps, but the gradient is still large. Should the structure be reported as relaxed? Why not?
+
+*Expected direction:* no. A small energy change or exhausted iterations does not establish a stationary state; inspect gradient, step, bounds, and an independent reference.
+
+## Next meeting
+
+L11 synthesizes the equilibrium methods: root finding, linear systems, free-energy minimization, and atomistic relaxation.

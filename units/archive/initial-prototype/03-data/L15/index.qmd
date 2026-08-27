@@ -1,0 +1,61 @@
+---
+title: "L15 · Numerical integration of materials data"
+subtitle: "Estimate toughness and accumulated quantities from a curve"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**How much energy has a material absorbed when the only record is a stress–strain curve?**
+
+The work per unit volume up to failure is the area
+
+$$
+W=\int_0^{\varepsilon_f}\sigma(\varepsilon)\,\mathrm{d}\varepsilon.
+$$
+
+Because experiments give discrete points, the integral becomes an approximation based on rectangles, trapezoids, or piecewise polynomials.
+
+## Learning outcomes
+
+Given equally spaced stress–strain data, students will be able to:
+
+1. **Apply** rectangle, trapezoidal, and Simpson’s one-third rules with correct spacing and units. *(Apply)*
+2. **Check** the assumptions of a composite integration formula before using it. *(Analyze)*
+3. **Compare** numerical estimates with a reference or refinement study. *(Evaluate)*
+4. **Interpret** an integrated quantity as a materials property and state its limitations. *(Understand)*
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="stress_strain_integration.edit.py" title="Integrate a stress–strain curve" height="820" loading="eager"}
+**Static fallback.** For the clean quadratic stress curve with 11 equally spaced points, Simpson’s one-third rule gives the exact synthetic reference $W=1.333333\,\mathrm{GPa}=1.333333\,\mathrm{GJ/m^3}$. The trapezoidal estimate is approximately $1.335000\,\mathrm{GPa}$.
+:::
+
+The synthetic reference makes numerical error visible. With measured noise, no formula can recover information that was not recorded; increasing the rule order is not a substitute for better data.
+
+## Formula conditions
+
+For composite Simpson’s one-third rule:
+
+- points must be equally spaced;
+- the number of subintervals must be even;
+- the integrand should be sufficiently smooth over each pair of intervals.
+
+Trapezoidal integration is less demanding and works naturally with unequal spacing when the interval widths are handled individually. Method choice should reflect the data, not only the formal order of a formula.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Interpret the area under a stress–strain curve | Quantity and units |
+| 5–15 min | Derive rectangle, trapezoid, and Simpson weights | Formula conditions |
+| 15–32 min | Compare rules as point count changes | Refinement/error table |
+| 32–42 min | Add measurement noise | Data quality interpretation |
+| 42–48 min | Choose a rule for a real experimental curve | Justified method choice |
+| 48–50 min | Exit question | State when Simpson’s rule is invalid |
+
+## Exit question
+
+A data set has unequal spacing and an odd number of intervals. Should you use the composite Simpson one-third formula unchanged? Why or why not?
+
+*Expected direction:* no. Use a method compatible with the spacing, or partition the data carefully and document the treatment of the remaining interval.

@@ -1,0 +1,97 @@
+---
+title: "L07 · Ax=b from a materials balance"
+subtitle: "Matrix structure, Gaussian elimination, and independent verification"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**How does a local materials balance become a matrix equation?**
+
+Consider a one-dimensional bar with fixed temperatures at its two ends. At each interior node, heat flows to neighboring nodes and a source may add heat. The local balances assemble into
+
+$$
+A\mathbf{T}=\mathbf{b}.
+$$
+
+The matrix is a compact record of the physical coupling:
+
+- diagonal entries collect conductances leaving a node;
+- off-diagonal entries connect neighboring nodes;
+- the right-hand side contains boundary contributions and sources.
+
+This is why `Ax=b` appears repeatedly in conduction, diffusion, elasticity, circuit analogies, and discretized field equations.
+
+## Learning outcomes
+
+Given a small one-dimensional balance system, students will be able to:
+
+1. **Assemble** matrix rows from local neighbor balances and boundary conditions. *(Apply)*
+2. **Interpret** diagonal, off-diagonal, and right-hand-side entries physically. *(Understand)*
+3. **Trace** Gaussian elimination with partial pivoting and back-substitution. *(Apply)*
+4. **Verify** a solution by comparing implementations and evaluating the balance residual. *(Evaluate)*
+
+## A local balance is one matrix row
+
+For an interior node $i$ with equal conductance $G$ to its neighbors,
+
+$$
+G(T_i-T_{i-1})+G(T_i-T_{i+1})=q_i.
+$$
+
+Rearranging gives
+
+$$
+-GT_{i-1}+2GT_i-GT_{i+1}=q_i.
+$$
+
+The same pattern repeats for each node. Boundary temperatures move to $\mathbf{b}$; they do not disappear. A sign error in one row changes the physical problem even if the linear solver reports success.
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="linear_balance.edit.py" title="Assemble and solve a one-dimensional materials balance" height="980" loading="eager"}
+**Static fallback.** For four interior nodes, $G=1.5\,\mathrm{W/K}$, a $0.5\,\mathrm{W}$ source per node, and boundary temperatures $600$ and $300\,\mathrm{K}$, the system has the tridiagonal matrix with diagonal $3$ and off-diagonal $-1.5$. Gaussian elimination returns approximately $[540.667,481.000,421.000,360.667]\,\mathrm{K}$ with a residual at machine precision.
+:::
+
+### Student coding move
+
+Open **Edit code** and inspect `gaussian_elimination`:
+
+1. choose a pivot and swap rows when necessary;
+2. eliminate entries below the pivot;
+3. solve the upper-triangular system backward.
+
+The notebook compares this transparent implementation with `numpy.linalg.solve`. Students should not treat the library result as the explanation; it is an independent verification of the small implementation.
+
+## Matrix geometry and physical checks
+
+Before trusting a solution, inspect:
+
+- symmetry or asymmetry implied by the physical coupling;
+- diagonal dominance or sparsity from local interactions;
+- boundary rows and source signs;
+- temperature bounds and monotonicity where the physics predicts them;
+- the residual $A\mathbf{T}-\mathbf{b}$ in watts.
+
+A solver can solve the wrong matrix perfectly. Assembly is part of the numerical method.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Convert one node balance into a matrix row | Correct signs and units |
+| 5–15 min | Assemble the tridiagonal system for the bar | Matrix linked to material geometry |
+| 15–27 min | Trace one elimination step and pivot swap | Algorithm state updated correctly |
+| 27–40 min | Edit/run the solver and vary node count/source | Solution and residual recorded |
+| 40–47 min | Compare manual and library solutions | Independent verification |
+| 47–50 min | Exit question | Explain how a wrong matrix can still produce a clean output |
+
+## Exit question
+
+A matrix solve returns a smooth temperature profile with a residual of $10^{-14}$. What additional check would you perform before accepting it?
+
+*Expected direction:* inspect the assembled equations, boundary conditions, units, physical bounds, and an independent or limiting-case solution. A small residual verifies only the equations that were actually assembled.
+
+## Next meeting
+
+L08 asks when a small residual is misleading. We will perturb a nearly dependent materials system and distinguish solver residual from sensitivity and identifiability.

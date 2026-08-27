@@ -1,0 +1,92 @@
+---
+title: "L06 · Coupled equilibrium and the Jacobian"
+subtitle: "Several residuals, one Newton step, and the return of Ax=b"
+body-classes: lecture-page
+---
+
+## Today’s question
+
+**What changes when one materials state is determined by several coupled conditions?**
+
+Two thermally coupled surface regions have unknown temperatures $T_1$ and $T_2$. Each region exchanges heat with the environment and with the other region. The model gives two residuals:
+
+$$
+\mathbf{F}(\mathbf{T})=
+\begin{bmatrix}F_1(T_1,T_2)\\F_2(T_1,T_2)\end{bmatrix}=\mathbf{0}.
+$$
+
+Newton’s method linearizes this vector equation. At each iteration, the update solves
+
+$$
+J(\mathbf{T}_k)\,\Delta\mathbf{T}=-\mathbf{F}(\mathbf{T}_k).
+$$
+
+This is the conceptual bridge to linear systems: `Ax=b` is not a separate island. It is the local problem solved inside many nonlinear algorithms.
+
+## Learning outcomes
+
+Given a coupled materials balance, students will be able to:
+
+1. **Formulate** a vector residual and identify the physical meaning and units of each component. *(Apply)*
+2. **Interpret** the Jacobian as local coupling and sensitivity between unknowns. *(Understand)*
+3. **Trace** a Newton step as a linear solve followed by a state update. *(Analyze)*
+4. **Diagnose** failure caused by an initial guess, a poorly conditioned Jacobian, or a model/domain violation. *(Evaluate)*
+
+## From one residual to several
+
+For the two-region model, the diagonal Jacobian entries contain the local thermal response and the off-diagonal entries contain the coupling conductance:
+
+$$
+J=\begin{bmatrix}
+\partial F_1/\partial T_1 & \partial F_1/\partial T_2\\
+\partial F_2/\partial T_1 & \partial F_2/\partial T_2
+\end{bmatrix}.
+$$
+
+A strong off-diagonal term means changing one region affects the other. The Newton step must account for those interactions simultaneously; solving each equation independently would break the model.
+
+## Live investigation
+
+::: {.quarto-wasm-local notebook="coupled_thermal_newton.edit.py" title="Coupled thermal equilibrium and a Newton linear solve" height="980" loading="eager"}
+**Static fallback.** With $q_1''=10{,}000\,\mathrm{W/m^2}$, $q_2''=5{,}000\,\mathrm{W/m^2}$, and an initial guess of $500\,\mathrm{K}$ for both regions, Newton’s method converges to approximately $T_1=577.128\,\mathrm{K}$ and $T_2=518.232\,\mathrm{K}$. The final infinity-norm residual is below $10^{-3}\,\mathrm{W/m^2}$.
+:::
+
+### What to inspect
+
+- How do the off-diagonal Jacobian entries encode thermal coupling?
+- What happens when the two heat fluxes are made equal?
+- How does a poor initial guess alter the iteration history?
+- Where exactly does the notebook call `np.linalg.solve`?
+
+The supplied `newton_system` function makes the algorithm visible without requiring students to derive a general-purpose nonlinear solver from scratch.
+
+## Verification questions
+
+A converged vector solution should satisfy all of the following:
+
+- every residual component is small in the same declared units;
+- every temperature is physically admissible;
+- the Jacobian solve produced a meaningful update;
+- the result is not an artifact of one lucky initial guess;
+- the coupled model—not two independently solved equations—was evaluated.
+
+## Class sequence
+
+| Time | Activity | Evidence of learning |
+|---:|---|---|
+| 0–5 min | Retrieve scalar residuals and ask what “zero” means for two equations | Vector residual identified |
+| 5–15 min | Build the coupled heat-balance model and Jacobian structure | Diagonal/off-diagonal roles explained |
+| 15–25 min | Derive the Newton linearization | $J\Delta T=-F$ written correctly |
+| 25–40 min | Run the notebook and vary initial guesses/coupling | Iteration history and failure diagnosis |
+| 40–47 min | Inspect the linear solve inside Newton | `Ax=b` connection made explicitly |
+| 47–50 min | Exit question | Name one reason a coupled Newton solve can fail |
+
+## Exit question
+
+Why is solving two scalar equations independently generally not equivalent to solving a coupled system?
+
+*Expected direction:* each equation depends on both unknowns; the Jacobian’s off-diagonal terms carry that coupling, so independent updates ignore the model’s local sensitivity structure.
+
+## Next meeting
+
+In L07 we remove the nonlinear radiation term and study the linear balance system directly. The matrix structure will come from neighboring material nodes rather than appearing only as a Newton subproblem.
