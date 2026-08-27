@@ -18,6 +18,10 @@ quarto render
 
 The pre-render hook exports notebooks from `activities/` into the ignored `wasm-local/` resource directory. Quarto then copies the complete bundle into the built site.
 
+## Continuous deployment
+
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) renders the site with `quarto render` (using `uv` for the pinned Python environment, matching the pre-render marimo export and iframe filters above) on every push to `main` and publishes the result to GitHub Pages. Pull requests trigger the same render as a build check without deploying. The repository's **Settings → Pages** source must be set to "GitHub Actions" for the deploy job to publish.
+
 ## Course identity
 
 The site uses University of Alberta evergreen and gold, the university crest as its favicon, and the official UAlberta and Faculty of Engineering marks in the home-page banner. The navbar remains text-only for a clean, reliable layout. See [`assets/BRANDING.md`](assets/BRANDING.md) for asset provenance and the corresponding UAlberta CSS pattern.
