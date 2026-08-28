@@ -122,5 +122,6 @@ format:
     code-fold: true
     code-summary: "Show the code"
     link-external-newwindow: true
+    format-links: true
   pdf:
     toc: true
