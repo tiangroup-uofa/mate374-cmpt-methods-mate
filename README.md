@@ -18,11 +18,19 @@ quarto render
 
 The pre-render hook exports notebooks from `activities/` into the ignored `wasm-local/` resource directory. Quarto then copies the complete bundle into the built site.
 
+<<<<<<< HEAD
 ## Deployment
 
 Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/render_pages.yml). The workflow installs the locked `uv` environment, Quarto and TinyTeX, exports the marimo WASM notebooks during Quarto pre-render, renders the complete site, and deploys `_site/` with GitHub Pages.
 
 The workflow follows the CHE 318 and MATE 664 Pages pattern, with `uv sync --locked` added so local and CI Python environments use the same dependency resolution.
+=======
+## Continuous deployment
+
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) renders the site with `quarto render` (using `uv` for the pinned Python environment, matching the pre-render marimo export and iframe filters above) on every push to `main` and publishes the result to GitHub Pages. Pull requests trigger the same render as a build check without deploying. The repository's **Settings → Pages** source must be set to "GitHub Actions" for the deploy job to publish.
+
+Because `_quarto.yml` declares both `html` and `pdf` output formats, `quarto render` builds a PDF for every page as well as the HTML site, so the workflow installs TinyTeX (`quarto-dev/quarto-actions/setup` with `tinytex: true`) and `librsvg2-bin` (for SVG-to-PDF image conversion in the LaTeX build). `format-links: true` on the `html` format surfaces each page's PDF as an "Other Formats" download link, so every lecture (and syllabus/assignment/project page) gets a printable PDF alongside its HTML reading view. Pages that opt out of the `pdf` format via a directory `_metadata.yml` (e.g. `units/archive/`) correctly show no PDF link, since they have no other format to link to.
+>>>>>>> 17f92945844808872c8a62c091c62f91069a621d
 
 ## Course identity
 
