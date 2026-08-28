@@ -167,7 +167,7 @@ Useful starting points include the [Dean of Students](https://www.ualberta.ca/en
 
 You do not need to install Python for the first class. Bring a device that can open the course website if possible. If device access is a problem, tell the teaching team so that we can arrange a paired or static route.
 
-If Python feels rusty, work through [Appendix A1 · A crash course in Python for numerical work](../../appendices/A01-python-numerics/index.qmd). Keep the Python, NumPy, and SciPy documentation open; the appendix is practice, not a prerequisite test.
+If Python feels rusty, work through [Seminar S01 · A crash course in Python for numerical work](../../seminars/S01-python-numerics/index.qmd). Keep the Python, NumPy, and SciPy documentation open; the seminar is practice, not a prerequisite test.
 
 The first lecture begins with a more important question than “Can the code run?”:
 

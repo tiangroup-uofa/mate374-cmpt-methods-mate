@@ -39,7 +39,7 @@ def _(mo):
     Open **Edit code**. Change the ordinary values in the input cell,
     run that cell, and watch the later results update. You are not
     expected to memorize the code. Use the linked documentation in
-    Appendix A1 when you do not recognize a function.
+    Seminar S01 when you do not recognize a function.
     """)
     return
 

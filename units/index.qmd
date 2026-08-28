@@ -3,7 +3,16 @@ title: Course notes
 toc: false
 ---
 
-These notes are written as a small, readable textbook rather than as a stack of slides. Equations and reasoning form the stable layer. Images, live questions, and executable notebooks will be added only where they improve the explanation.
+These pages are working prototypes toward a small, readable course textbook rather than a stack of slides. The current pass establishes the equations and main reasoning. Many pages still need tighter writing, figures, live questions, and tested notebooks.
+
+## Companion books and formats
+
+Many topics use the formats of two companion books alongside these notes.
+
+- Eric Sullivan's *Numerical Methods: An Inquiry-Based Approach with Python* supplies question-driven investigations. Use the [online book](https://numericalmethodssullivan.github.io/index.html) and its [GitHub source](https://github.com/NumericalMethodsSullivan/NumericalMethodsSullivan.github.io/tree/master) when a page assigns a Sullivan-style activity.
+- Jaan Kiusalaas's *Numerical Methods in Engineering with Python 3* supplies concise equation → algorithm → Python examples. The book is available from [Cambridge University Press](https://doi.org/10.1017/CBO9781139523899) and through the University library.
+
+These books are companions, not material to memorize cover to cover. Read the section named by the lecture or seminar.
 
 ## Front matter
 
@@ -29,9 +38,5 @@ These notes are written as a small, readable textbook rather than as a stack of 
 10. [L10 · Numerical integration](02-functions-data/L10/index.qmd)
 11. [L11 · Interpolation](02-functions-data/L11/index.qmd)
 12. [L12 · Curve fitting and regression](02-functions-data/L12/index.qmd)
-
-## Appendices
-
-- [A1 · A crash course in Python for numerical work](../appendices/A01-python-numerics/index.qmd)
 
 Later units remain under development. The [initial implementation is archived](archive/initial-prototype/index.qmd) rather than deleted.

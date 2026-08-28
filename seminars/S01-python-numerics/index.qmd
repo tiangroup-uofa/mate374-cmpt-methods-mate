@@ -1,7 +1,7 @@
 ---
-title: "Appendix A1 · A crash course in Python for numerical work"
-subtitle: "What to try before the first week"
-body-classes: lecture-page
+title: "S01 · A crash course in Python for numerical work"
+subtitle: "A practical refresher before the first week"
+body-classes: lecture-page seminar-page
 ---
 
 ::: {.callout-note}
@@ -10,9 +10,9 @@ body-classes: lecture-page
 You do not need to memorize Python, NumPy, or SciPy before MATE 374. You need to be willing to read a short piece of code, change one thing, run it again, and check whether the result makes sense.
 :::
 
-## What this appendix is for
+## What this seminar is for
 
-You may have used Python before and forgotten most of it. That is normal. This appendix is a short route back in, not a complete programming course.
+You may have used Python before and forgotten most of it. That is normal. This seminar is a short route back in, not a complete programming course.
 
 For the first week, the useful skills are modest:
 
@@ -54,6 +54,16 @@ These are reference tools, not readings to finish from beginning to end:
 - [SciPy user guide](https://docs.scipy.org/doc/scipy/tutorial/)
 - [SciPy API reference](https://docs.scipy.org/doc/scipy/reference/)
 - [marimo getting started](https://docs.marimo.io/getting_started/)
+
+## Two companion formats used in this course
+
+Many topics in the lectures and seminars will use the presentation and exercise formats of two companion books.
+
+Eric Sullivan's *Numerical Methods: An Inquiry-Based Approach with Python* often begins with a question, asks you to test an idea, and then asks you to explain what happened. Use the [online book](https://numericalmethodssullivan.github.io/index.html) and its [GitHub source](https://github.com/NumericalMethodsSullivan/NumericalMethodsSullivan.github.io/tree/master) when a course activity points to a Sullivan-style investigation.
+
+Jaan Kiusalaas's *Numerical Methods in Engineering with Python 3* usually moves from an equation to an algorithm and then to a compact Python implementation. We will use this format when the numerical steps need to be visible. The book is available from [Cambridge University Press](https://doi.org/10.1017/CBO9781139523899) and through the University library.
+
+You are not expected to read either book from beginning to end before class. Use the relevant section alongside the course page, especially when you need a second explanation or another worked problem.
 
 When looking up a function, read in this order:
 
@@ -245,7 +255,7 @@ The notebook below combines the same thermal-expansion model with ordinary Pytho
 **Static fallback.** For $L_0=100\,\mathrm{mm}$ and $\alpha=23\times10^{-6}\,\mathrm{K^{-1}}$, temperature changes of $-50$, $0$, $50$, $100$, and $150\,\mathrm{K}$ produce length changes of $-0.115$, $0$, $0.115$, $0.230$, and $0.345\,\mathrm{mm}$. A target expansion of $0.20\,\mathrm{mm}$ is reached at $\Delta T\approx86.96\,\mathrm{K}$. Setting $\Delta T=0$ returns zero expansion.
 :::
 
-## Before the first week
+## Before the first week of lectures
 
 You are ready if you can do most of the following, with documentation open:
 

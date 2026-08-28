@@ -13,6 +13,7 @@ project:
     - "units/**/*.qmd"
     - "assignments/**/*.qmd"
     - "project/**/*.qmd"
+    - "seminars/**/*.qmd"
     - "!templates/**"
 
 website:
@@ -32,6 +33,8 @@ website:
         text: Syllabus
       - href: units/index.qmd
         text: Course notes
+      - href: seminars/index.qmd
+        text: Seminars
       - href: assignments/index.qmd
         text: Assignments
       - href: project/index.qmd
@@ -92,11 +95,11 @@ website:
                 text: "L12 · Curve fitting and regression"
               - href: units/02-functions-data/references.qmd
                 text: "Unit 2 · References"
-          - section: "Appendices"
-            href: appendices/index.qmd
-            contents:
-              - href: appendices/A01-python-numerics/index.qmd
-                text: "A1 · Python for numerical work"
+      - section: "Seminar materials"
+        href: seminars/index.qmd
+        contents:
+          - href: seminars/S01-python-numerics/index.qmd
+            text: "S01 · Python for numerical work"
       - href: assignments/index.qmd
         text: Assignments
       - href: project/index.qmd
