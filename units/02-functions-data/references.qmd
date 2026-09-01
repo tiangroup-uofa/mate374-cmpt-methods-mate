@@ -1,6 +1,10 @@
 ---
 title: "Unit 2 · References"
-toc: true
+format:
+  html:
+    toc: true
+  pdf:
+    toc: false
 bibliography: references.bib
 nocite: |
   @*

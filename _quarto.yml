@@ -127,4 +127,9 @@ format:
     link-external-newwindow: true
     format-links: true
   pdf:
-    toc: true
+    toc: false
+    mainfont: "TeX Gyre Heros"
+    sansfont: "TeX Gyre Heros"
+    fontsize: 11pt
+    geometry:
+      - margin=1in

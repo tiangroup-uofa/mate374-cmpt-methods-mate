@@ -1,6 +1,10 @@
 ---
 title: "Unit 0 · Visual and interactive backlog"
-toc: true
+format:
+  html:
+    toc: true
+  pdf:
+    toc: false
 ---
 
 The current L01–L04 pages are text and mathematics prototypes. Do not treat them as complete lecture packages until the visual and activity items below are selected, sourced, credited, and tested.

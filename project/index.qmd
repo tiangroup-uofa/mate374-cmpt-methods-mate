@@ -1,7 +1,11 @@
 ---
 title: "Course project"
 subtitle: "Provisional staged computational materials study"
-toc: true
+format:
+  html:
+    toc: true
+  pdf:
+    toc: false
 ---
 
 ## Purpose

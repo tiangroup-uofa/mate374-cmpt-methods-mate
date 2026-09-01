@@ -1,7 +1,11 @@
 ---
 title: "MATE 374 · Course syllabus"
 subtitle: "Computational Methods in Materials Engineering · Fall 2026"
-toc: true
+format:
+  html:
+    toc: true
+  pdf:
+    toc: false
 ---
 
 ::: {.callout-warning}
