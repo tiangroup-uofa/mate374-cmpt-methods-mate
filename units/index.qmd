@@ -1,5 +1,5 @@
 ---
-title: Course notes
+title: Units
 toc: false
 ---
 
@@ -18,25 +18,25 @@ These books are companions, not material to memorize cover to cover. Read the se
 
 - [Lecture 0 · Course introduction and guide](front-matter/index.qmd)
 
-## Unit 0 · Orientation and numerical thinking
+## 01 · Numerical thinking
 
-1. [L01 · A numerical mindset for materials engineers](00-orientation/L01/index.qmd)
-2. [L02 · Choosing and judging a numerical method](00-orientation/L02/index.qmd)
-3. [L03 · Numbers inside a computer](00-orientation/L03/index.qmd)
-4. [L04 · Making a computation faster](00-orientation/L04/index.qmd)
+1. [L01](01/L01/index.qmd)
+2. [L02](01/L02/index.qmd)
+3. [L03](01/L03/index.qmd)
+4. [L04](01/L04/index.qmd)
 
-## Unit 1 · Finding special points
+## 02 · Finding special points
 
-5. [L05 · Brackets, bisection, and fixed points](01-finding-answers/L05/index.qmd)
-6. [L06 · Faster root finding: secant and Newton methods](01-finding-answers/L06/index.qmd)
-7. [L07 · Finding a minimum in one dimension](01-finding-answers/L07/index.qmd)
-8. [L08 · Optimization landscapes](01-finding-answers/L08/index.qmd)
+5. [L05](02/L05/index.qmd)
+6. [L06](02/L06/index.qmd)
+7. [L07](02/L07/index.qmd)
+8. [L08](02/L08/index.qmd)
 
-## Unit 2 · Learning from functions and data
+## 03 · Functions and data
 
-9. [L09 · Numerical differentiation](02-functions-data/L09/index.qmd)
-10. [L10 · Numerical integration](02-functions-data/L10/index.qmd)
-11. [L11 · Interpolation](02-functions-data/L11/index.qmd)
-12. [L12 · Curve fitting and regression](02-functions-data/L12/index.qmd)
+9. [L09](03/L09/index.qmd)
+10. [L10](03/L10/index.qmd)
+11. [L11](03/L11/index.qmd)
+12. [L12](03/L12/index.qmd)
 
 Later units remain under development. The [initial implementation is archived](archive/initial-prototype/index.qmd) rather than deleted.

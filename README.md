@@ -49,9 +49,9 @@ A single bottom-right icon toggles the two states while preserving the page, scr
 
 ## Orientation lectures and marimo workflow
 
-[`units/00-orientation/L01/index.qmd`](units/00-orientation/L01/index.qmd) introduces the question–model–calculation workflow and gives students a small thermal-expansion function to edit. [`units/00-orientation/L02/index.qmd`](units/00-orientation/L02/index.qmd) turns a π series into an algorithm and compares loops, arrays, timing, error, and floating-point representation.
+[`units/01/L01/index.qmd`](units/01/L01/index.qmd) introduces the question–model–calculation workflow and gives students a small thermal-expansion function to edit. [`units/01/L02/index.qmd`](units/01/L02/index.qmd) turns a π series into an algorithm and compares loops, arrays, timing, error, and floating-point representation.
 
-The earlier iframe and multi-playground deployment experiments are retained under [`units/00-orientation/archive/`](units/00-orientation/archive/index.qmd).
+The earlier iframe and multi-playground deployment experiments are retained under [`units/archive/initial-prototype/00-orientation/archive/`](units/archive/initial-prototype/00-orientation/archive/index.qmd).
 
 ### Hosted source iframe
 

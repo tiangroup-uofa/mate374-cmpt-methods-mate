@@ -32,7 +32,7 @@ website:
       - href: syllabus/index.qmd
         text: Syllabus
       - href: units/index.qmd
-        text: Course notes
+        text: Units
       - href: seminars/index.qmd
         text: Seminars
       - href: assignments/index.qmd
@@ -51,50 +51,50 @@ website:
         text: Course home
       - href: syllabus/index.qmd
         text: Syllabus
-      - section: "Course notes"
+      - section: "Units"
         href: units/index.qmd
         contents:
           - href: units/front-matter/index.qmd
             text: "L00 · Course introduction"
-          - section: "0 · Orientation and numerical thinking"
-            href: units/00-orientation/index.qmd
+          - section: "01 · Numerical thinking"
+            href: units/01/index.qmd
             contents:
-              - href: units/00-orientation/L01/index.qmd
-                text: "L01 · A numerical mindset"
-              - href: units/00-orientation/L02/index.qmd
-                text: "L02 · Choosing a numerical method"
-              - href: units/00-orientation/L03/index.qmd
-                text: "L03 · Numbers inside a computer"
-              - href: units/00-orientation/L04/index.qmd
-                text: "L04 · Making computation faster"
-              - href: units/00-orientation/references.qmd
-                text: "Unit 0 · References"
-          - section: "1 · Finding special points"
-            href: units/01-finding-answers/index.qmd
+              - href: units/01/L01/index.qmd
+                text: "L01"
+              - href: units/01/L02/index.qmd
+                text: "L02"
+              - href: units/01/L03/index.qmd
+                text: "L03"
+              - href: units/01/L04/index.qmd
+                text: "L04"
+              - href: units/01/references.qmd
+                text: "References"
+          - section: "02 · Finding special points"
+            href: units/02/index.qmd
             contents:
-              - href: units/01-finding-answers/L05/index.qmd
-                text: "L05 · Brackets, bisection, and fixed points"
-              - href: units/01-finding-answers/L06/index.qmd
-                text: "L06 · Secant and Newton methods"
-              - href: units/01-finding-answers/L07/index.qmd
-                text: "L07 · One-dimensional minimization"
-              - href: units/01-finding-answers/L08/index.qmd
-                text: "L08 · Optimization landscapes"
-              - href: units/01-finding-answers/references.qmd
-                text: "Unit 1 · References"
-          - section: "2 · Functions and data"
-            href: units/02-functions-data/index.qmd
+              - href: units/02/L05/index.qmd
+                text: "L05"
+              - href: units/02/L06/index.qmd
+                text: "L06"
+              - href: units/02/L07/index.qmd
+                text: "L07"
+              - href: units/02/L08/index.qmd
+                text: "L08"
+              - href: units/02/references.qmd
+                text: "References"
+          - section: "03 · Functions and data"
+            href: units/03/index.qmd
             contents:
-              - href: units/02-functions-data/L09/index.qmd
-                text: "L09 · Numerical differentiation"
-              - href: units/02-functions-data/L10/index.qmd
-                text: "L10 · Numerical integration"
-              - href: units/02-functions-data/L11/index.qmd
-                text: "L11 · Interpolation"
-              - href: units/02-functions-data/L12/index.qmd
-                text: "L12 · Curve fitting and regression"
-              - href: units/02-functions-data/references.qmd
-                text: "Unit 2 · References"
+              - href: units/03/L09/index.qmd
+                text: "L09"
+              - href: units/03/L10/index.qmd
+                text: "L10"
+              - href: units/03/L11/index.qmd
+                text: "L11"
+              - href: units/03/L12/index.qmd
+                text: "L12"
+              - href: units/03/references.qmd
+                text: "References"
       - section: "Seminar materials"
         href: seminars/index.qmd
         contents:

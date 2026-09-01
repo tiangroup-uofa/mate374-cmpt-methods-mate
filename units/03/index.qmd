@@ -1,5 +1,5 @@
 ---
-title: "Unit 2 · Learning from functions and data"
+title: "Unit 03 · Functions and data"
 toc: false
 ---
 
@@ -8,7 +8,7 @@ toc: false
 ::: {.callout-warning}
 ## Prototype status
 
-L09–L12 are early text prototypes. Materials datasets, figures, activities, and data provenance are not final. See the [Unit 2 references and source notes](references.qmd) for the initial bibliography.
+L09–L12 are early text prototypes. Materials datasets, figures, activities, and data provenance are not final. See the [Unit 03 references and source notes](references.qmd) for the initial bibliography.
 :::
 
 The four lectures ask parallel questions about sampled values $(x_i,y_i)$: Can we estimate a slope, an accumulated amount, a value between measurements, or the parameters of a trend?
@@ -18,4 +18,4 @@ The four lectures ask parallel questions about sampled values $(x_i,y_i)$: Can w
 11. [L11 · Interpolation](L11/index.qmd)
 12. [L12 · Curve fitting and regression](L12/index.qmd)
 
-[Unit 2 references and source notes](references.qmd)
+[Unit 03 references and source notes](references.qmd)

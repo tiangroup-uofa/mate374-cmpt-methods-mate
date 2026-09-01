@@ -164,7 +164,7 @@ A useful comparison table for the Buffon notebook is:
 
 The numerical check is that all versions give statistically consistent estimates of $\pi$ for the same $N$ and $L/d$. Because the experiment is random, identical output is not required unless the random stream is deliberately controlled.
 
-## Closing question for Unit 0
+## Closing question for Unit 01
 
 Across the first four lectures, we have seen:
 

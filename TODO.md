@@ -54,7 +54,7 @@ Add a second layer for the method families. Physical scale/model family and nume
 
 Use a short, non-graded Wooclap “meet the class” block during the syllabus/map discussion. Ask about Python/computational experience, mathematical familiarity, device access, materials-scale interests, and what students would check when a simulation disagrees with an experiment. Store aggregate results and use them to adjust scaffolding, seminar support, examples, and static fallbacks—not to slow the course into a Python prerequisite.
 
-The detailed question set and response rules live in [`units/00-orientation/class-ideas.md`](units/00-orientation/class-ideas.md).
+The detailed question set and response rules live in [`units/01/class-ideas.md`](units/01/class-ideas.md).
 
 ### Recommended publishing architecture
 
@@ -350,7 +350,7 @@ MATE374/
 ├── index.qmd
 ├── syllabus/
 ├── units/
-│   ├── 00-orientation/
+│   ├── 01/
 │   ├── 01-trust/
 │   ├── 02-equilibrium/
 │   ├── 03-data/

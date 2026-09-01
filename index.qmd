@@ -22,13 +22,13 @@ MATE 374 teaches students to turn a materials question into a trustworthy comput
 
 > **materials question → model and scale → mathematical problem → numerical representation → computation → verification → interpretation**
 
-The course notes use [Quarto](https://quarto.org/) for durable explanations and printable output. Short, reactive computations run directly inside selected pages with [marimo](https://marimo.io/); longer investigations can remain standalone marimo notebooks.
+The course uses [Quarto](https://quarto.org/) for durable explanations and printable output. Short, reactive computations run directly inside selected pages with [marimo](https://marimo.io/); longer investigations can remain standalone marimo notebooks.
 
 ## Start here
 
-- [Course notes](units/index.qmd)
+- [Units](units/index.qmd)
 - [Syllabus](syllabus/index.qmd)
-- [L01 · First marimo calculation](units/00-orientation/L01/index.qmd)
+- [L01 · First marimo calculation](units/01/L01/index.qmd)
 
 ::: {.callout-note}
 ## Site status

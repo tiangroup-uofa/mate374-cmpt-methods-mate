@@ -1,5 +1,5 @@
 ---
-title: "Unit 0 · Orientation and numerical thinking"
+title: "Unit 01 · Numerical thinking"
 toc: false
 ---
 
@@ -8,7 +8,7 @@ toc: false
 ::: {.callout-warning}
 ## Prototype status
 
-L01–L04 currently establish the textual and mathematical spine. They are not complete lecture packages. Figures, image permissions and alt text, Wooclap links, and executable notebooks remain in the [visual and interactive backlog](media-backlog.qmd). Sources are collected in the [Unit 0 references and source notes](references.qmd).
+L01–L04 currently establish the textual and mathematical spine. They are not complete lecture packages. Figures, image permissions and alt text, Wooclap links, and executable notebooks remain in the [visual and interactive backlog](media-backlog.qmd). Sources are collected in the [Unit 01 references and source notes](references.qmd).
 :::
 
 The first four lectures use one recurring problem, estimating $\pi$, to separate four ideas that are often mixed together: the quality of a model, the convergence of a numerical method, the limitations of floating-point arithmetic, and the speed of an implementation.
@@ -18,6 +18,6 @@ The first four lectures use one recurring problem, estimating $\pi$, to separate
 3. [L03 · Numbers inside a computer](L03/index.qmd)
 4. [L04 · Making a computation faster](L04/index.qmd)
 
-[Unit 0 references and source notes](references.qmd)
+[Unit 01 references and source notes](references.qmd)
 
 By the end of the unit, you should be able to explain why a result can be plausible but untrustworthy, compare methods using error and cost, recognize common finite-precision problems, and identify several ways to accelerate a calculation without assuming that faster is always better.
