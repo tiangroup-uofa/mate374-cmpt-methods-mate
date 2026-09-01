@@ -8,36 +8,39 @@ format:
     toc: false
 ---
 
-::: {.callout-warning}
-## Working syllabus
-
-This web syllabus is being prepared for Fall 2026. Department-approved dates, room assignments, examination rules, and University policy language will be incorporated before publication. Canvas and the final distributed syllabus will govern if they differ from this draft.
-:::
-
 ## Course information
 
 | Item | Information |
 |---|---|
-| Course | MAT E 374 · Computational Methods in Materials Engineering |
-| Term | Fall 2026 |
-| Lectures | Monday, Wednesday, Friday, 12:00–12:50 p.m. |
-| Location | NRE 2-090 |
-| Instructor | Dr. Tian Tian |
+| Course | **MAT E 374 - A1** · Computational Methods in Materials Engineering |
+| Term | **Fall 2026** |
+| Instructor | Dr. Tian Tian · [ttian7@ualberta.ca](mailto:ttian7@ualberta.ca) |
 | Office | DICE 12-245 |
-| Office hour | Monday, 1:30–2:15 p.m.; no appointment needed |
-| Teaching assistant | Prince Ezeano |
-| Seminar | Weekly TA-guided session; section information on Bear Tracks/Canvas |
+| Office hour | Monday, 1:30–2:15 p.m.; *no appointment needed* |
+| Teaching assistant | Prince Ezeano · [ezeano@ualberta.ca](mailto:ezeano@ualberta.ca) |
 
-Contact details will be distributed through Canvas.
+## Meeting information
+
+| Component | Days | Time | Room | Meeting dates |
+|---|---|---|---|---|
+| Lecture | Monday, Wednesday, Friday | 12:00–12:50 p.m. | **NRE 2-090** | 1 September–8 December 2026 |
+| Seminar | Friday | 3:00–3:50 p.m. | **GSB 8-11** | 1 September–8 December 2026 |
+
+- Course materials, interactive python notebooks and assignments will be published to the [course website](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/) and synchronized to [Canvas](https://canvas.ualberta.ca/courses/35875)
+- Course announcements and assignment submissions will be handled through Canvas.
 
 ## Fall 2026 calendar
 
-Lectures begin Wednesday, September 2 and follow the Monday–Wednesday–Friday timetable through Monday, December 7. The [University of Alberta Calendar 2026–2027](https://calendar.ualberta.ca/content.php?catoid=69&navoid=20884) identifies the following interruptions to our regular meeting pattern:
+Lectures begin Wednesday, September 2 and follow the
+Monday–Wednesday–Friday timetable through Monday, December 7. According
+to the [University of Alberta Calendar
+2026–2027](https://calendar.ualberta.ca/content.php?catoid=69&navoid=20884),
+there will be no classes / seminars on the following dates:
 
-- Monday, September 7 — Labour Day;
-- Wednesday, September 30 — National Day for Truth and Reconciliation;
-- Monday, October 12 — Thanksgiving Day;
-- Monday–Friday, November 9–13 — Fall Reading Week, including Remembrance Day on Wednesday, November 11.
+- Monday, **September 7** — Labour Day;
+- Wednesday, **September 30** — National Day for Truth and Reconciliation;
+- Monday, **October 12** — Thanksgiving Day;
+- Monday–Friday, **November 9–13** — Fall Reading Week
 
 Changes or assessment-specific dates will be announced through Canvas.
 
@@ -49,8 +52,6 @@ The University of Alberta acknowledges that we are located on Treaty 6 territory
 
 > *3.5 (fi) (either term, 3-1S-0). Formulation and solution of materials engineering problems; solution of systems of linear and nonlinear algebraic equations; materials modeling and simulation techniques that cover different time and length scales, which include density functional theory methods, Monte Carlo, molecular dynamics, phase field, finite element method, and machine learning approaches; hands-on experience with several modern materials modeling codes.*
 
-The quotation above is retained from the 2025 course outline and will be checked against the 2026–2027 University Calendar before the syllabus is finalized.
-
 ## Prerequisites
 
 ENCMP 100 (or equivalent), MATH 102, MATH 201, and MATH 209, subject to confirmation against the current University Calendar.
@@ -60,22 +61,6 @@ ENCMP 100 (or equivalent), MATH 102, MATH 201, and MATH 209, subject to confirma
 MATE 374 develops the numerical judgement needed to turn a materials question into a trustworthy computational result. Students will formulate mathematical problems, select and apply numerical methods, examine the effects of approximation and finite precision, and interpret calculations at several materials length and time scales.
 
 Python is the main language used for small transparent calculations. Established scientific libraries and materials-simulation software are introduced where they help answer an engineering question. Programming mechanics remain subordinate to model choice, error analysis, verification, and physical interpretation.
-
-The recurring workflow is
-
-$$
-\text{materials question}
-\rightarrow
-\text{model and assumptions}
-\rightarrow
-\text{numerical representation}
-\rightarrow
-\text{computation}
-\rightarrow
-\text{verification}
-\rightarrow
-\text{interpretation}.
-$$
 
 ## Course learning outcomes
 
@@ -92,7 +77,7 @@ By the end of the course, given a materials problem, dataset, or computational r
 
 ## Course organization
 
-The course is organized around questions rather than a catalogue of software packages.
+The course is organized into distinct units, themed around questions:
 
 | Unit | Organizing question | Main ideas |
 |---|---|---|
@@ -106,64 +91,101 @@ The course is organized around questions rather than a catalogue of software pac
 
 ## Learning materials and computing
 
-The [course notes](../units/index.qmd) are the main reference and are designed for both browser reading and printing. Interactive activities use marimo notebooks in the browser where practical. Molab or another approved environment may be used for packages or hardware unavailable in browser-only Python.
+The [course notes](../units/index.qmd) are the main reference and are designed for both browser reading and printing. Interactive activities use marimo notebooks in the browser where practical. Molab (hosted marimo notebooks by `https://molab.marimo.io`) or local Unix workstations may be used for completing the heavier computational loads and / or using simulation packages.
 
-Students should have regular access to a modern web browser. Device or installation difficulty should not prevent participation; static and paired routes will be provided for essential activities. Installation requirements for assessed work will be announced in advance.
+Use a modern web browser, such as Chrome, Firefox, or Safari, to read the course notes and run the interactive Python notebooks. Browser-based activities let you edit code, run it, and view the results without installing Python. You may also download the source code and run it locally; this is optional, but useful if you want to experiment beyond the activities.
 
 ### Recommended references
 
+The course does not require an official textbook, as the course materials contain the cannonical sources, code examples and interactive demos within itself. However, students are strongly recommended to check the following alternative sources
+
+**Numerical methods and implementations**
+
 - J. Kiusalaas, [*Numerical Methods in Engineering with Python 3*](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true).
 - E. Sullivan, [*Numerical Methods: An Inquiry-Based Approach with Python*](https://numericalmethodssullivan.github.io/index.html).
-- J. Mmbaga, R. Hayes, K. Nandakumar, and M. Flynn, *Computational Methods for Engineers: Modeling, Algorithms and Analysis*.
-- W. D. Callister Jr. and D. G. Rethwisch, *Materials Science and Engineering: An Introduction*.
+
+**Computational methods and analysis**
+
+- J. Mmbaga, R. Hayes, K. Nandakumar, and M. Flynn, *Computational Methods for Engineers: Modeling, Algorithms and Analysis*. (Available at UofA library as hard copy)
+
+**Concepts in materials science and engineering**
+
+- W. D. Callister Jr. and D. G. Rethwisch, *Materials Science and Engineering: An Introduction*. (Available at UofA library as hard copy)
 
 ## Assessment
 
 | Assessment | Weight | Working form |
 |---|---:|---|
-| Assignments | 20% | Five computational investigations; best four counted |
-| Group project | 20% | Staged materials-simulation study and final report/artifact |
+| Assignments | 20% | **Five (5)** computational investigations; **best four (4)** counted |
+| Group project | 20% | Materials simulation study and final report |
 | Midterm examination | 20% | 50-minute in-class examination; tentative week of October 28 |
 | Final examination | 40% | Two-hour examination scheduled by the University |
 | **Total** | **100%** | |
 
-Assignment and project briefs will state the permitted collaboration, required evidence, submission format, and rubric. Substantial computational work will normally be assessed on the formulation, method choice, verification, interpretation, and reproducibility, not only on whether code produces an output.
+### Notes on assessment
+
+Each assignment will normally be available for approximately two weeks. An assignment may ask you to:
+
+1. complete a step-by-step derivation or calculation by hand;
+2. write or edit Python code to implement a numerical method and solve a particular problem; or
+3. use interactive controls to manipulate a program and report your findings.
 
 ### Assignment timing and late work
 
-The working plan is to release five assignments through Canvas with approximately two weeks for each. The best four grades will count. Late penalties, emergency extensions, and documentation requirements will be stated in the final approved syllabus and on each assignment brief. Students facing an emergency should contact the instructor and TA as early as reasonably possible.
+Five assignments will be released through Canvas, each with approximately two weeks for completion. The four highest assignment grades will count toward the assignment component.
+
+A late submission will lose 25% of the assignment mark for each 24-hour period after the deadline. If illness or an emergency delays your work, contact the instructor and TA as soon as possible. The circumstances and any requested adjustment will be reviewed case by case.
 
 ### Project
 
-Students will work in teams of approximately five on a defined materials-simulation problem. The project will use staged checkpoints so that model choice, computational progress, and verification can be reviewed before the final submission. Team formation, individual accountability, grading rules, and the final format remain to be finalized.
+You will work in groups of approximately five on a realistic multiscale materials-simulation problem. Where practical, you will interact with the problem through a Python-based interface. Your group will construct and submit a final report that clearly presents:
+
+- the problem identification and motivation;
+- the key theoretical background;
+- the simulation details, including the model, assumptions, parameters, numerical methods, and implementation; and
+- the results and their materials-engineering interpretation.
 
 ## Examinations and permitted resources
 
-The working plan is for open-resource examinations. Students may consult approved course notes, their own notebooks, and named Python/API documentation. Short code completion, execution, diagnosis, and interpretation may be required.
+Both the midterm and final examinations will be open-book examinations. You may use a laptop or tablet to access the course website, course notes, Python notebooks, and official Python/API documentation. Exam questions may require you to complete, run, interpret, or diagnose short Python programs within the time limit.
 
-Generative-AI and person-to-person communication will not be permitted during examinations. The final list of allowed devices, websites, local files, calculators, and software will be published before each examination and will supersede this draft.
+Generative-AI tools and communication with other people are not permitted during examinations. Any additional device or proctoring instructions will be provided before each examination.
 
-No official formula sheet is currently planned because the examinations are open resource. Students are encouraged to build their own concise reference notes throughout the term.
+**No formula sheet** will be provided. Because the examinations are open book, you are encouraged to prepare concise notes on the methods and concepts covered in the course.
+
+- A survey about midterm availability will be sent in late September to identify scheduling conflicts.
+
+- The University has not yet released the final examination schedule. This syllabus will be updated once the schedule is available.
 
 ## Academic integrity and AI-assisted work
 
 Students are responsible for following the University of Alberta Student Academic Integrity Policy and for understanding the permitted collaboration stated on each assessment.
 
-AI-assisted coding is permitted for assignments and the project unless a task explicitly states otherwise. Students remain responsible for the correctness and authorship of submitted work. They must be able to explain the model, algorithm, code, verification, and interpretation.
+AI-assisted coding is **permitted** for assignments and the project unless a task explicitly states otherwise. Students remain responsible for the correctness and authorship of submitted work. They must be able to explain the model, algorithm, code, verification, and interpretation.
 
-Any submitted work that used an AI-assisted tool must include a short disclosure naming the tool and describing its contribution. Students must not submit generated code or prose they cannot defend, fabricate results or citations, or enter confidential, personal, proprietary, or restricted data into external services.
+Any submitted work that used an AI-assisted tool must include a **short disclosure** naming the tool and describing its contribution. Students must not submit generated code or prose they cannot defend, fabricate results or citations, or enter confidential, personal, proprietary, or restricted data into external services.
 
 A course-specific [Gemini assistant](https://gemini.google.com/gem/7d47e82eecb2) is available as an optional coding aid. University guidance and the assessment-specific rules still apply.
 
 ## Accommodations, illness, and missed work
 
-Students requiring accommodations should register through the University's approved process and contact the instructor early enough to confirm that course software and resources will be accessible in the accommodated setting.
+If you require accommodations, register through the University's approved process and contact the instructor and TA as early as possible, preferably at least two weeks before an accommodated examination. This gives us time to confirm that the course materials, software, and examination environment are accessible in the approved setting.
 
-Procedures for missed term work, a missed midterm, deferred final examinations, and reappraisal will follow the final Faculty and University policy language. Contact the instructor and TA promptly when illness or an emergency affects an assessment; do not rely on this draft for a formal deadline or documentation rule.
+Per University of Alberta regulations, there will be **no deferred
+midterm examination**. If illness or an emergency affects your ability
+to write the midterm, contact the instructor and TA as soon as possible
+**before the examination**. Any adjustment to the assessment weighting
+will be reviewed case by case and will follow University
+policy. Deferred final examinations and other missed term work will
+follow the applicable Faculty and University procedures.
+
+
 
 ## Respectful learning environment and recordings
 
-The course follows University and Faculty expectations for respectful, professional, safe, and inclusive conduct. Course materials, class recordings, and student work may not be redistributed except as permitted by the University, the copyright holder, or an approved accommodation. The final syllabus will include the required Faculty policy language.
+Treat your classmates, instructor, teaching assistant, and other members of the University community with respect. Questions, disagreement, and constructive criticism are welcome; harassment, discrimination, intimidation, and disruptive conduct are not.
+
+Course materials, class recordings, and student work may not be copied, recorded, or redistributed except as permitted by the University, the copyright holder, or an approved accommodation. Recordings, when provided, are for use by enrolled students in this course.
 
 ## Student support
 
