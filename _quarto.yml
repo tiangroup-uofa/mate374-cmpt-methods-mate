@@ -10,6 +10,7 @@ project:
   render:
     - "*.qmd"
     - "syllabus/**/*.qmd"
+    - "introduction/**/*.qmd"
     - "units/**/*.qmd"
     - "assignments/**/*.qmd"
     - "project/**/*.qmd"
@@ -31,6 +32,8 @@ website:
         text: Home
       - href: syllabus/index.qmd
         text: Syllabus
+      - href: introduction/index.qmd
+        text: Introduction
       - href: units/index.qmd
         text: Units
       - href: seminars/index.qmd
@@ -51,11 +54,11 @@ website:
         text: Course home
       - href: syllabus/index.qmd
         text: Syllabus
+      - href: introduction/index.qmd
+        text: Introduction
       - section: "Units"
         href: units/index.qmd
         contents:
-          - href: units/front-matter/index.qmd
-            text: "L00 · Course introduction"
           - section: "01 · Numerical thinking"
             href: units/01/index.qmd
             contents:

@@ -112,7 +112,7 @@ Students should have regular access to a modern web browser. Device or installat
 
 ### Recommended references
 
-- J. Kiusalaas, *Numerical Methods in Engineering with Python 3*, Cambridge University Press.
+- J. Kiusalaas, [*Numerical Methods in Engineering with Python 3*](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true).
 - E. Sullivan, [*Numerical Methods: An Inquiry-Based Approach with Python*](https://numericalmethodssullivan.github.io/index.html).
 - J. Mmbaga, R. Hayes, K. Nandakumar, and M. Flynn, *Computational Methods for Engineers: Modeling, Algorithms and Analysis*.
 - W. D. Callister Jr. and D. G. Rethwisch, *Materials Science and Engineering: An Introduction*.

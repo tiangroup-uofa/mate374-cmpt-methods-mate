@@ -1,13 +1,12 @@
 ---
-title: "Lecture 0 · Introduction to computational methods and modeling"
+title: "Introduction to the course"
 subtitle: "How to use this course and what it is trying to teach"
-body-classes: lecture-page
 ---
 
 ::: {.callout-note}
 ## Purpose of this page
 
-This is the front matter for the course notes. It introduces the course language, learning approach, tools, and working policies. The formal [course syllabus](../../syllabus/index.qmd) and Canvas remain the authoritative sources for approved dates and policies.
+This introduction explains the course language, learning approach, and tools. The [course syllabus](../syllabus/index.qmd) is the single source for official dates, assessment, policies, accommodations, and support information; Canvas remains authoritative for course announcements and submissions.
 :::
 
 ## Land acknowledgement
@@ -84,6 +83,15 @@ We will use three recurring tools.
 
 The tool is never the learning objective by itself. A notebook should help us expose a model, compare methods, test a limit, or diagnose a result.
 
+## Official documentation
+
+Keep the official documentation open when you work:
+
+- [Python 3.12 documentation](https://docs.python.org/3.12/)
+- [NumPy 2.0 documentation](https://numpy.org/doc/2.0/)
+- [SciPy 1.14.1 documentation](https://docs.scipy.org/doc/scipy-1.14.1/)
+- [marimo documentation](https://docs.marimo.io/)
+
 ## Meet the teaching team
 
 **Instructor:** Dr. Tian Tian, Assistant Professor in Chemical and Materials Engineering and Fellow at the Alberta Machine Intelligence Institute (Amii). His research focuses on machine learning and multiscale computational methods for materials simulation and discovery.
@@ -91,16 +99,6 @@ The tool is never the learning objective by itself. A notebook should help us ex
 **Teaching assistant:** Prince Ezeano, M.Sc. student in Chemical and Materials Engineering.
 
 Contact details and any changes to office hours will be posted on Canvas.
-
-## Working course information
-
-| Item | Working information |
-|---|---|
-| Lectures | Monday, Wednesday, and Friday, 12:00–12:50 p.m. |
-| Lecture location | NRE 2-090 |
-| Seminar | Weekly TA-guided computational session; time and room on Bear Tracks/Canvas |
-| Instructor office hour | Monday, 1:30–2:15 p.m., DICE 12-245; no appointment needed |
-| Primary course site | This website for notes; Canvas for announcements and submissions |
 
 ## Course organization
 
@@ -118,56 +116,24 @@ The course is organized into themed units rather than isolated chapters on algor
 
 The exact allocation of later lectures may change as the schedule and project are finalized. The underlying progression will remain: formulate, compute, check, and interpret.
 
-## Assessment at a glance
-
-The working assessment structure is:
-
-| Assessment | Weight |
-|---|---:|
-| Five assignments, best four counted | 20% |
-| Group project | 20% |
-| Midterm examination | 20% |
-| Final examination | 40% |
-
-Assignments will normally allow about two weeks for completion. Project instructions, team size, milestones, and the marking rubric will be posted separately. The tentative midterm is in the week of October 28.
-
-The current plan is for open-resource examinations in which students may consult course notes and approved Python documentation. Completing and interpreting short Python calculations may be required. Generative-AI tools will not be permitted during examinations. The final approved examination rules will be stated in the formal syllabus and repeated before each exam.
-
-## Academic integrity and AI-assisted work
-
-AI-assisted coding is permitted in assignments and the project unless a specific task states otherwise. Permission does not transfer responsibility. You must be able to explain the submitted model, code, numerical method, checks, and conclusion.
-
-When an AI-assisted tool contributes to submitted work:
-
-1. name the tool;
-2. briefly state how it was used;
-3. verify the generated code and numerical result yourself;
-4. do not submit explanations or code you cannot defend.
-
-A course-specific Gemini assistant is available at [this link](https://gemini.google.com/gem/7d47e82eecb2). Follow University guidance on privacy and do not enter confidential, personal, proprietary, or restricted data into an external tool.
+For official assessment, examination, academic-integrity, accommodation, and support information, see the [course syllabus](../syllabus/index.qmd).
 
 ## Texts and other resources
 
 The course notes are the main reference. The following sources provide useful alternative explanations and practice:
 
-- Jaan Kiusalaas, *Numerical Methods in Engineering with Python 3*, Cambridge University Press.
+- Jaan Kiusalaas, [*Numerical Methods in Engineering with Python 3*](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true).
 - Eric Sullivan, [*Numerical Methods: An Inquiry-Based Approach with Python*](https://numericalmethodssullivan.github.io/index.html).
 - J. Mmbaga, R. Hayes, K. Nandakumar, and M. Flynn, *Computational Methods for Engineers: Modeling, Algorithms and Analysis*.
 - William D. Callister Jr. and David G. Rethwisch, *Materials Science and Engineering: An Introduction*, for materials background and example systems.
 
-Use the University of Alberta Library catalogue to find the available print or electronic edition.
-
-## Access, accommodations, and support
-
-Students who require accommodations should follow the University process and contact the instructor early enough to make sure that software, notebooks, and course resources are accessible in the approved setting. If illness or an emergency affects an assessment, contact the instructor and TA as soon as reasonably possible and follow the formal syllabus and University procedures.
-
-Useful starting points include the [Dean of Students](https://www.ualberta.ca/en/dean-of-students/index.html), [Academic Success Centre](https://www.ualberta.ca/en/current-students/academic-success-centre/index.html), and [Accessibility and Accommodations](https://www.ualberta.ca/en/current-students/academic-success-centre/accessibility-resources/index.html).
+Use the [course syllabus](../syllabus/index.qmd) for the official resource and support information.
 
 ## Before Lecture 1
 
 You do not need to install Python for the first class. Bring a device that can open the course website if possible. If device access is a problem, tell the teaching team so that we can arrange a paired or static route.
 
-If Python feels rusty, work through [Seminar S01 · A crash course in Python for numerical work](../../seminars/S01-python-numerics/index.qmd). Keep the Python, NumPy, and SciPy documentation open; the seminar is practice, not a prerequisite test.
+If Python feels rusty, work through [Seminar S01 · A crash course in Python for numerical work](../seminars/S01-python-numerics/index.qmd). Keep the Python, NumPy, and SciPy documentation open; the seminar is practice, not a prerequisite test.
 
 The first lecture begins with a more important question than “Can the code run?”:
 

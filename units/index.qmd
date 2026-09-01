@@ -10,13 +10,9 @@ These pages are working prototypes toward a small, readable course textbook rath
 Many topics use the formats of two companion books alongside these notes.
 
 - Eric Sullivan's *Numerical Methods: An Inquiry-Based Approach with Python* supplies question-driven investigations. Use the [online book](https://numericalmethodssullivan.github.io/index.html) and its [GitHub source](https://github.com/NumericalMethodsSullivan/NumericalMethodsSullivan.github.io/tree/master) when a page assigns a Sullivan-style activity.
-- Jaan Kiusalaas's *Numerical Methods in Engineering with Python 3* supplies concise equation → algorithm → Python examples. The book is available from [Cambridge University Press](https://doi.org/10.1017/CBO9781139523899) and through the University library.
+- Jaan Kiusalaas's [*Numerical Methods in Engineering with Python 3*](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true) supplies concise equation → algorithm → Python examples.
 
 These books are companions, not material to memorize cover to cover. Read the section named by the lecture or seminar.
-
-## Front matter
-
-- [Lecture 0 · Course introduction and guide](front-matter/index.qmd)
 
 ## 01 · Numerical thinking
 

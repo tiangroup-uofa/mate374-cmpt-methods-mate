@@ -47,12 +47,12 @@ from scipy.optimize import root_scalar
 
 These are reference tools, not readings to finish from beginning to end:
 
-- [The Python tutorial](https://docs.python.org/3/tutorial/)
-- [Python built-in functions](https://docs.python.org/3/library/functions.html)
-- [NumPy: the absolute basics for beginners](https://numpy.org/doc/stable/user/absolute_beginners.html)
-- [NumPy reference](https://numpy.org/doc/stable/reference/)
-- [SciPy user guide](https://docs.scipy.org/doc/scipy/tutorial/)
-- [SciPy API reference](https://docs.scipy.org/doc/scipy/reference/)
+- [The Python 3.12 tutorial](https://docs.python.org/3.12/tutorial/)
+- [Python 3.12 built-in functions](https://docs.python.org/3.12/library/functions.html)
+- [NumPy 2.0: the absolute basics for beginners](https://numpy.org/doc/2.0/user/absolute_beginners.html)
+- [NumPy 2.0 reference](https://numpy.org/doc/2.0/reference/)
+- [SciPy 1.14.1 user guide](https://docs.scipy.org/doc/scipy-1.14.1/tutorial/)
+- [SciPy 1.14.1 API reference](https://docs.scipy.org/doc/scipy-1.14.1/reference/)
 - [marimo getting started](https://docs.marimo.io/getting_started/)
 
 ## Two companion formats used in this course
@@ -61,7 +61,7 @@ Many topics in the lectures and seminars will use the presentation and exercise 
 
 Eric Sullivan's *Numerical Methods: An Inquiry-Based Approach with Python* often begins with a question, asks you to test an idea, and then asks you to explain what happened. Use the [online book](https://numericalmethodssullivan.github.io/index.html) and its [GitHub source](https://github.com/NumericalMethodsSullivan/NumericalMethodsSullivan.github.io/tree/master) when a course activity points to a Sullivan-style investigation.
 
-Jaan Kiusalaas's *Numerical Methods in Engineering with Python 3* usually moves from an equation to an algorithm and then to a compact Python implementation. We will use this format when the numerical steps need to be visible. The book is available from [Cambridge University Press](https://doi.org/10.1017/CBO9781139523899) and through the University library.
+Jaan Kiusalaas's *Numerical Methods in Engineering with Python 3* usually moves from an equation to an algorithm and then to a compact Python implementation. We will use this format when the numerical steps need to be visible. The book is available through the [University of Alberta Library](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true).
 
 You are not expected to read either book from beginning to end before class. Use the relevant section alongside the course page, especially when you need a second explanation or another worked problem.
 
