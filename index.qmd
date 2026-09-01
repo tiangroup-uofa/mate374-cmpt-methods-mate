@@ -18,21 +18,27 @@ toc: false
 
 ## Course purpose
 
+[MAT E 374](https://apps.ualberta.ca/catalogue/course/mat_e/374) is a senior-level undergraduate course in materials engineering. It covers the formulation and solution of materials-engineering problems, numerical methods, and materials modeling across different length and time scales.
+
+Official course description:
+
+> Formulation and solution of materials engineering problems; solution of systems of linear and nonlinear algebraic equations; materials modeling and simulation techniques that cover different time and length scales, which include density functional theory methods, Monte Carlo, molecular dynamics, phase field, finite element method, and machine learning approaches; hands-on experience with several modern materials modeling codes.
+>
+> — [University of Alberta course catalogue](https://apps.ualberta.ca/catalogue/course/mat_e/374)
+
 MATE 374 teaches students to turn a materials question into a trustworthy computational prediction:
 
 > **materials question → model and scale → mathematical problem → numerical representation → computation → verification → interpretation**
 
 The course uses [Quarto](https://quarto.org/) for durable explanations and printable output. Short, reactive computations run directly inside selected pages with [marimo](https://marimo.io/); longer investigations can remain standalone marimo notebooks.
 
+The course materials are open source and published on [GitHub](https://github.com/tiangroup-uofa/mate374-cmpt-methods-mate). If you find a typo, please email [ttian7@ualberta.ca](mailto:ttian7@ualberta.ca) or [open an issue](https://github.com/tiangroup-uofa/mate374-cmpt-methods-mate/issues).
+
 ## Start here
 
-- [Units](units/index.qmd)
 - [Syllabus](syllabus/index.qmd)
 - [Introduction to the course](introduction/index.qmd)
-- [L01 · First marimo calculation](units/01/L01/index.qmd)
-
-::: {.callout-note}
-## Site status
-
-This is the initial source skeleton for the redesigned course. The unit architecture and policies remain provisional until the official calendar and delivery constraints are confirmed.
-:::
+- [Units](units/index.qmd)
+- [Seminar materials](seminars/index.qmd)
+- [Assignments](assignments/index.qmd)
+- [Group project](project/index.qmd)
