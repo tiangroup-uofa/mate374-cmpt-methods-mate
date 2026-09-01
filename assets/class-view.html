@@ -4,7 +4,7 @@
   const CLASS_VALUE = "class";
 
   const initialize = () => {
-    if (!document.body.classList.contains("lecture-page")) return;
+    if (!document.body.matches(".lecture-page, .course-view-page")) return;
 
     const switcher = document.createElement("button");
     switcher.className = "course-view-switch";

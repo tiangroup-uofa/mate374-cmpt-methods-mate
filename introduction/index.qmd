@@ -1,12 +1,13 @@
 ---
 title: "Introduction to the course"
-subtitle: "How to use this course and what it is trying to teach"
+subtitle: "Welcome to MATE 374 and the course website"
+body-classes: course-view-page
 ---
 
 ::: {.callout-note}
 ## Purpose of this page
 
-This introduction explains the course language, learning approach, and tools. The [course syllabus](../syllabus/index.qmd) is the single source for official dates, assessment, policies, accommodations, and support information; Canvas remains authoritative for course announcements and submissions.
+This page welcomes you to MATE 374 and introduces the course website and its interactive materials. For official dates, assessments, policies, accommodations, and support information, refer to the [course syllabus](../syllabus/index.qmd). Course announcements and assignment submissions will be handled through Canvas.
 :::
 
 ## Land acknowledgement
@@ -15,126 +16,44 @@ The University of Alberta acknowledges that we are located on Treaty 6 territory
 
 ## Welcome to MATE 374
 
-MATE 374 is a third-year course in computational methods for materials engineering. The course is not only about obtaining an answer from Python or from a simulation package. It is about deciding what should be calculated, choosing a suitable method, and gathering enough evidence to decide whether the answer is useful.
+Welcome to MATE 374. You and I will learn together this semester through in-class lectures, mathematical foundations, and interactive code demonstrations that enrich your understanding of the numerical and computational techniques used in materials engineering.
 
-Materials engineers use the word *modeling* for several related activities. We will distinguish three layers.
+### The instructor's philosophy
 
-### Mathematical modeling
+- **Equations as executable explanations.** Most equations in engineering and science become easier to explain when they are translated into computer programs.
+- **This is not a Python-for-engineering course.** We use Python because it is an accessible, student-friendly language for both general-purpose and scientific computing. Python is our entry point, not the learning objective.
+- **Do not be intimidated by programming.** Many activities provide the computation for you through interactive controls. Start by dragging a slider, changing an input, and observing what happens.
 
-A mathematical model turns a physical question into variables, assumptions, and governing relations. It might describe diffusion using a conservation law, phase equilibrium using free energy, or thermal expansion using a constitutive relation. The model is an abstraction: it keeps the features needed for a particular question and leaves others out.
+::: {.callout-tip}
+## Equations → code → interaction
 
-### Numerical modeling and numerical methods
-
-Many mathematical models cannot be solved exactly in the form we need. A numerical method replaces the exact problem with a finite calculation that a computer can carry out. Examples include replacing an infinite series with $N$ terms, locating a root by repeatedly shrinking an interval, or representing a continuous field on a finite grid.
-
-### Computational materials simulation
-
-A materials simulation combines a physical model, numerical methods, material data, and software to study a system at a chosen length and time scale. Density-functional theory, molecular dynamics, Monte Carlo methods, phase-field models, and finite-element models are examples of different model families. They do not answer the same questions, and none of them removes the need for engineering judgement.
-
-These layers form the main thread of the course:
-
-$$
-\text{materials question}
-\rightarrow
-\text{mathematical model}
-\rightarrow
-\text{numerical representation}
-\rightarrow
-\text{computation}
-\rightarrow
-\text{verification and interpretation}.
-$$
-
-## What this course emphasizes
-
-Scientific software has changed quickly. Numerical routines once written directly in FORTRAN or C are now available through mature libraries such as NumPy and SciPy. Browser-based Python makes small computational experiments available without a complicated installation. Code-completion tools can also reduce the effort needed to produce a first implementation.
-
-Those changes make numerical judgement more important, not less. By the end of the course, the central skills are to:
-
-- **formulate** a materials question as a mathematical problem;
-- **select** a numerical method that fits the problem and the required accuracy;
-- **analyze** assumptions, parameters, scales, and sources of error;
-- **verify** a result using evidence such as units, residuals, limiting cases, refinement, or conservation;
-- **interpret and criticize** the result as a materials engineer;
-- **document** enough of the calculation that another person can reproduce it.
-
-Python is the main language used to make these ideas concrete, but this is not a Python syntax course. You will normally begin from a supplied function or notebook and change the part that represents the mathematical idea.
-
-::: {.callout-important}
-## A course principle
-
-A program can evaluate almost any equation we can state precisely. That does not mean every equation is a good model, every implementation is correct, or every output deserves trust.
+Whenever practical, I will connect an equation to code and then to an interactive or visual explanation. You will be able to change inputs and see what the mathematics predicts rather than treating the equation as a static expression to memorize.
 :::
 
-## How to use the course materials
+## How to use the course website
 
-The course website is the main reading and reference source. Each lecture page is designed to work in two ways:
+1. **Open a printable PDF.** Select the following link in the right-hand column of a lecture page. Canvas will also include links to the lecture PDFs.
 
-- **before or after class:** read it as a short chapter, with the main definitions, equations, and reasoning in one place;
-- **during class:** use the same page for predictions, discussion questions, and links to interactive work.
+   ![](../assets/other-formats-pdf.png){width=95px fig-alt="The Other Formats menu showing the PDF link"}
 
-We will use three recurring tools.
+2. **Switch between reading and class views.** Select the following button in the lower-right corner of the page. The presentation-screen icon switches to **class view**, which removes most navigation and enlarges the lesson content. In class view, the icon changes to a book; select it to return to **reading view**.
 
-**Wooclap** supports short polls and anonymous class diagnostics. These questions are usually for discussion rather than grades.
+   ![](../assets/class-view-button.png){width=57px fig-alt="The yellow class-view button showing a presentation screen"}
 
-**marimo** provides reactive Python notebooks. Many small notebooks run directly in the browser, and a static explanation will be provided when an interactive activity is essential.
+3. **Try the browser-based code.** Most lectures include small marimo notebooks that run directly in your browser.[^marimo] They require no local Python installation. Depending on the activity, you can hide or reveal the code, change an input, and see dependent results update automatically. Interactive controls such as sliders, text boxes, and buttons let you explore the calculation without first writing the full program.
 
-**Molab** provides a fuller cloud Python environment for activities that need packages or computing resources that are not practical in a browser-only notebook.
+[^marimo]: For more background and a comparison with common Jupyter workflows, see marimo's official announcement, [*Introducing marimo*](https://marimo.io/blog/introducing-marimo), and Marie-Hélène Burle's 2025 SFU Research Computing/WestDRI tutorial, [*The next generation of Python notebooks*](https://mint.westdri.ca/tools/wb_marimo).
 
-The tool is never the learning objective by itself. A notebook should help us expose a model, compare methods, test a limit, or diagnose a result.
+## Try your first browser notebook
 
-## Official documentation
+Enter your name and move the entirely unofficial GPA slider. The result should update automatically.
 
-Keep the official documentation open when you work:
+Use **Edit code** above the notebook to reveal the Python cells. Select **App view** to hide the cells and return to the interactive display. You can also click inside the notebook and press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> on Windows or Linux to switch views.
 
-- [Python 3.12 documentation](https://docs.python.org/3.12/)
-- [NumPy 2.0 documentation](https://numpy.org/doc/2.0/)
-- [SciPy 1.14.1 documentation](https://docs.scipy.org/doc/scipy-1.14.1/)
-- [marimo documentation](https://docs.marimo.io/)
+::: {.quarto-wasm-local notebook="welcome_mate374.edit.py" title="Welcome to MATE 374: browser-notebook check" height="620" loading="eager"}
+**Printable fallback.** In the browser version, enter a preferred name and move the unofficial GPA slider. The greeting should update immediately. The GPA control is only a joke and has no connection to assessment.
+:::
 
-## Meet the teaching team
+## Continue to Lecture 1
 
-**Instructor:** Dr. Tian Tian, Assistant Professor in Chemical and Materials Engineering and Fellow at the Alberta Machine Intelligence Institute (Amii). His research focuses on machine learning and multiscale computational methods for materials simulation and discovery.
-
-**Teaching assistant:** Prince Ezeano, M.Sc. student in Chemical and Materials Engineering.
-
-Contact details and any changes to office hours will be posted on Canvas.
-
-## Course organization
-
-The course is organized into themed units rather than isolated chapters on algorithms.
-
-| Theme | Typical questions | Main computational ideas |
-|---|---|---|
-| Orientation and numerical thinking | Can we trust this calculation? | approximation, convergence, finite precision, performance |
-| Finding special points | Where is an equilibrium, root, or minimum? | bisection, fixed-point iteration, secant and Newton methods, optimization |
-| Functions and data | What can values or measurements tell us? | differentiation, integration, interpolation, regression |
-| Larger coupled systems | How do many variables interact? | vectors, matrices, linear and nonlinear systems |
-| Evolution in time | How does a material state change? | ordinary differential equations, timestep error, stability |
-| Evolution in space and time | How do heat, mass, or structure move through a material? | conservation laws, grids, boundary conditions, partial differential equations |
-| Simulation across scales | Which description fits the materials question? | continuum, phase field, Monte Carlo, molecular dynamics, electronic structure |
-
-The exact allocation of later lectures may change as the schedule and project are finalized. The underlying progression will remain: formulate, compute, check, and interpret.
-
-For official assessment, examination, academic-integrity, accommodation, and support information, see the [course syllabus](../syllabus/index.qmd).
-
-## Texts and other resources
-
-The course notes are the main reference. The following sources provide useful alternative explanations and practice:
-
-- Jaan Kiusalaas, [*Numerical Methods in Engineering with Python 3*](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true).
-- Eric Sullivan, [*Numerical Methods: An Inquiry-Based Approach with Python*](https://numericalmethodssullivan.github.io/index.html).
-- J. Mmbaga, R. Hayes, K. Nandakumar, and M. Flynn, *Computational Methods for Engineers: Modeling, Algorithms and Analysis*.
-- William D. Callister Jr. and David G. Rethwisch, *Materials Science and Engineering: An Introduction*, for materials background and example systems.
-
-Use the [course syllabus](../syllabus/index.qmd) for the official resource and support information.
-
-## Before Lecture 1
-
-You do not need to install Python for the first class. Bring a device that can open the course website if possible. If device access is a problem, tell the teaching team so that we can arrange a paired or static route.
-
-If Python feels rusty, work through [Seminar S01 · A crash course in Python for numerical work](../seminars/S01-python-numerics/index.qmd). Keep the Python, NumPy, and SciPy documentation open; the seminar is practice, not a prerequisite test.
-
-The first lecture begins with a more important question than “Can the code run?”:
-
-> **What evidence would make a computational result believable?**
+If the greeting changed when you used the controls, your browser is ready for the first activity. Continue to [L01 · A numerical mindset for materials engineers](../units/01/L01/index.qmd), where we will introduce mathematical modeling, numerical methods, and computational materials simulation.

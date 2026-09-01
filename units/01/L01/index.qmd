@@ -30,7 +30,7 @@ This is not a test. We will use the class-level results to decide where more sca
 
 ### Stages of modeling
 
-As introduced in the [Introduction to the course](../../../introduction/index.qmd), the word *modeling* can refer to several connected activities.
+In materials engineering, the word *modeling* can refer to several connected activities.
 
 A **mathematical model** extracts the variables, physical relations, assumptions, and governing equations needed to answer a question. A **numerical model or method** turns that mathematical problem into a finite calculation. A **computational materials simulation** combines a physical model, numerical methods, material data, and software at a chosen length and time scale.
 

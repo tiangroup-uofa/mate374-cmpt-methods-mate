@@ -1,6 +1,7 @@
 ---
 title: "MATE 374 · Course syllabus"
 subtitle: "Computational Methods in Materials Engineering · Fall 2026"
+body-classes: course-view-page
 format:
   html:
     toc: true
@@ -48,7 +49,7 @@ Changes or assessment-specific dates will be announced through Canvas.
 
 The University of Alberta acknowledges that we are located on Treaty 6 territory, and respects the histories, languages, and cultures of First Nations, Métis, Inuit, and all First Peoples of Canada, whose presence continues to enrich our vibrant community.
 
-## Calendar description
+## Course  description
 
 > *3.5 (fi) (either term, 3-1S-0). Formulation and solution of materials engineering problems; solution of systems of linear and nonlinear algebraic equations; materials modeling and simulation techniques that cover different time and length scales, which include density functional theory methods, Monte Carlo, molecular dynamics, phase field, finite element method, and machine learning approaches; hands-on experience with several modern materials modeling codes.*
 
@@ -101,6 +102,8 @@ The course does not require an official textbook, as the course materials contai
 
 **Numerical methods and implementations**
 
+The following courses or textbooks have freely accessible resources with University of Alberta login:
+
 - J. Kiusalaas, [*Numerical Methods in Engineering with Python 3*](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true).
 - E. Sullivan, [*Numerical Methods: An Inquiry-Based Approach with Python*](https://numericalmethodssullivan.github.io/index.html).
 
@@ -111,6 +114,15 @@ The course does not require an official textbook, as the course materials contai
 **Concepts in materials science and engineering**
 
 - W. D. Callister Jr. and D. G. Rethwisch, *Materials Science and Engineering: An Introduction*. (Available at UofA library as hard copy)
+
+**Programming and API documentation**
+
+Keep these official references available when reading course examples, writing code, and preparing for the open-book examinations:
+
+- [Python documentation](https://docs.python.org/3.12/)
+- [NumPy documentation](https://numpy.org/doc/2.0/)
+- [SciPy documentation](https://docs.scipy.org/doc/scipy-1.18.0/)
+- [marimo documentation](https://docs.marimo.io/)
 
 ## Assessment
 
