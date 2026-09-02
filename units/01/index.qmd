@@ -1,23 +1,17 @@
 ---
-title: "Unit 01 · Numerical thinking"
+title: "Unit 01 · Orientation and numerical thinking"
 toc: false
 ---
 
 **Unit question:** How should a materials engineer judge a computational result?
 
-::: {.callout-warning}
-## Prototype status
-
-L01–L04 currently establish the textual and mathematical spine. They are not complete lecture packages. Figures, image permissions and alt text, Wooclap links, and executable notebooks remain in the [visual and interactive backlog](media-backlog.qmd). Sources are collected in the [Unit 01 references and source notes](references.qmd).
-:::
-
-The first four lectures use one recurring problem, estimating $\pi$, to separate four ideas that are often mixed together: the quality of a model, the convergence of a numerical method, the limitations of floating-point arithmetic, and the speed of an implementation.
+This unit serves as a general prelude to the course. Across four lectures, we will work at a deliberately slower pace to establish the language and habits used throughout MATE 374. We will distinguish mathematical, numerical, and computational modeling; analyze numerical results using the concepts of numerical precision and convergence; and introduce ways to optimize a computation without sacrificing correctness or interpretability.
 
 1. [L01 · A numerical mindset for materials engineers](L01/index.qmd)
 2. [L02 · Choosing and judging a numerical method](L02/index.qmd)
 3. [L03 · Numbers inside a computer](L03/index.qmd)
 4. [L04 · Making a computation faster](L04/index.qmd)
 
-[Unit 01 references and source notes](references.qmd)
+[Unit 01 references](references.qmd)
 
 By the end of the unit, you should be able to explain why a result can be plausible but untrustworthy, compare methods using error and cost, recognize common finite-precision problems, and identify several ways to accelerate a calculation without assuming that faster is always better.

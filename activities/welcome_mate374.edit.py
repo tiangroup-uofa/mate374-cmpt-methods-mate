@@ -40,7 +40,7 @@ def _(mo):
         stop=5.0,
         step=0.1,
         value=4.0,
-        label="Completely unofficial target GPA for MATE 374",
+        label="Completely **unofficial target GPA** for MATE 374",
         show_value=True,
     )
     mo.vstack([name, intended_gpa], align="start", gap=1)
@@ -51,16 +51,16 @@ def _(mo):
 def _(intended_gpa, mo, name):
     display_name = name.value.strip() or "future materials modeler"
     if intended_gpa.value < 3.0:
-        response = "WHAT?"
+        response = "WHAT??"
     elif intended_gpa.value > 4.0:
-        response = "impossible"
+        response = "Hey that's impossible!"
     else:
-        response = "good work"
+        response = "Good work!"
 
     mo.callout(
         mo.md(
             f"""
-            ## Welcome to MATE 374, {display_name}!
+            ## Welcome to MATE 374, **{display_name}**!
 
             Your entirely unofficial target is **{intended_gpa.value:.1f}**.
 

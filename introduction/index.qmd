@@ -54,6 +54,21 @@ Use **Edit code** above the notebook to reveal the Python cells. Select **App vi
 **Printable fallback.** In the browser version, enter a preferred name and move the unofficial GPA slider. The greeting should update immediately. The GPA control is only a joke and has no connection to assessment.
 :::
 
+### Wait—this does not look like my usual Python code
+
+The notebook interface may look unfamiliar, but the code inside it is ordinary Python. Under the hood, these browser-based notebooks use [Pyodide and WebAssembly](https://docs.marimo.io/guides/wasm/) to run Python entirely in your browser rather than on a course server. Many standard and scientific Python packages, including NumPy and SciPy, are available. However, not every package or system-level feature is compatible with this environment; see the official [WebAssembly limitations](https://docs.marimo.io/guides/wasm/#limitations).
+
+If you want to build a browser-first notebook from scratch, open the free [marimo WebAssembly playground](https://marimo.app/). No login is required. The playground does not save your work automatically, so use the save button in the lower-right corner to download the notebook as a single `.py` file before you close the page.
+
+![](../assets/marimo-wasm-playground.png){fig-alt="The marimo WebAssembly playground, with an empty Python cell and the save button in the lower-right corner"}
+
+If your calculation needs more computing resources or a package that is not compatible with WebAssembly, you can [install and run marimo locally](https://docs.marimo.io/getting_started/installation/) and follow the [marimo quickstart](https://docs.marimo.io/getting_started/quickstart/). You may also use [Molab](https://molab.marimo.io/), marimo's hosted notebook service, which requires registration and provides a persistent online workspace. We will introduce Molab in [L04](../units/01/L04/index.qmd).
+
+![](../assets/molab-workspace.png){fig-alt="A signed-in Molab workspace showing a searchable gallery of example notebooks"}
+
+Python basics and more detailed guidance on using the interactive demonstrations will be covered in [Seminar S01](../seminars/S01-python-numerics/index.qmd).
+
+
 ## Continue to Lecture 1
 
 If the greeting changed when you used the controls, your browser is ready for the first activity. Continue to [L01 · A numerical mindset for materials engineers](../units/01/L01/index.qmd), where we will introduce mathematical modeling, numerical methods, and computational materials simulation.
