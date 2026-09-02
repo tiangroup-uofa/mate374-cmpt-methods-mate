@@ -110,6 +110,7 @@ The following courses or textbooks have freely accessible resources with Univers
 **Computational methods and analysis**
 
 - J. Mmbaga, R. Hayes, K. Nandakumar, and M. Flynn, *Computational Methods for Engineers: Modeling, Algorithms and Analysis*. (Available at UofA library as hard copy)
+- K. Ohno, K. Esfarjani, and Y. Kawazoe, [*Computational Materials Science: From Ab Initio to Monte Carlo Methods*](https://ualberta.primo.exlibrisgroup.com/nde/fulldisplay?query=Computational%20Materials%20Science%20ohno&tab=Everything&search_scope=MyInst_and_CI&vid=01UOA_INST:UOA_NDE&lang=en&docid=alma991043753370609116&adaptor=Local%20Search%20Engine&context=L&isFrbr=false&isHighlightedRecord=false&state=) (Online resource available with UofA login).
 
 **Concepts in materials science and engineering**
 
