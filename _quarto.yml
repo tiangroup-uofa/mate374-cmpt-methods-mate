@@ -5,6 +5,7 @@ project:
     - _marimo_export.py
   resources:
     - "wasm-local/**"
+    - "assets/L01-fast16-implosion-poster.png"
   preview:
     port: 7777
   render:
@@ -12,9 +13,11 @@ project:
     - "syllabus/**/*.qmd"
     - "introduction/**/*.qmd"
     - "units/**/*.qmd"
+    - "!units/02/**"
+    - "!units/03/**"
     - "assignments/**/*.qmd"
     - "project/**/*.qmd"
-    - "seminars/**/*.qmd"
+    - "!seminars/S01-python-numerics/**"
     - "!templates/**"
 
 website:
@@ -72,37 +75,8 @@ website:
                 text: "L04"
               - href: units/01/references.qmd
                 text: "References"
-          - section: "02 · Finding special points"
-            href: units/02/index.qmd
-            contents:
-              - href: units/02/L05/index.qmd
-                text: "L05"
-              - href: units/02/L06/index.qmd
-                text: "L06"
-              - href: units/02/L07/index.qmd
-                text: "L07"
-              - href: units/02/L08/index.qmd
-                text: "L08"
-              - href: units/02/references.qmd
-                text: "References"
-          - section: "03 · Functions and data"
-            href: units/03/index.qmd
-            contents:
-              - href: units/03/L09/index.qmd
-                text: "L09"
-              - href: units/03/L10/index.qmd
-                text: "L10"
-              - href: units/03/L11/index.qmd
-                text: "L11"
-              - href: units/03/L12/index.qmd
-                text: "L12"
-              - href: units/03/references.qmd
-                text: "References"
-      - section: "Seminar materials"
-        href: seminars/index.qmd
-        contents:
-          - href: seminars/S01-python-numerics/index.qmd
-            text: "S01 · Python for numerical work"
+      - href: seminars/index.qmd
+        text: "Seminar materials"
       - href: assignments/index.qmd
         text: Assignments
       - href: project/index.qmd

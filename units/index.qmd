@@ -3,16 +3,6 @@ title: Units
 toc: false
 ---
 
-These pages are working prototypes toward a small, readable course textbook rather than a stack of slides. The current pass establishes the equations and main reasoning. Many pages still need tighter writing, figures, live questions, and tested notebooks.
-
-## Companion books and formats
-
-Many topics use the formats of two companion books alongside these notes.
-
-- Eric Sullivan's *Numerical Methods: An Inquiry-Based Approach with Python* supplies question-driven investigations. Use the [online book](https://numericalmethodssullivan.github.io/index.html) and its [GitHub source](https://github.com/NumericalMethodsSullivan/NumericalMethodsSullivan.github.io/tree/master) when a page assigns a Sullivan-style activity.
-- Jaan Kiusalaas's [*Numerical Methods in Engineering with Python 3*](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true) supplies concise equation → algorithm → Python examples.
-
-These books are companions, not material to memorize cover to cover. Read the section named by the lecture or seminar.
 
 ## 01 · Numerical thinking
 
@@ -20,19 +10,3 @@ These books are companions, not material to memorize cover to cover. Read the se
 2. [L02](01/L02/index.qmd)
 3. [L03](01/L03/index.qmd)
 4. [L04](01/L04/index.qmd)
-
-## 02 · Finding special points
-
-5. [L05](02/L05/index.qmd)
-6. [L06](02/L06/index.qmd)
-7. [L07](02/L07/index.qmd)
-8. [L08](02/L08/index.qmd)
-
-## 03 · Functions and data
-
-9. [L09](03/L09/index.qmd)
-10. [L10](03/L10/index.qmd)
-11. [L11](03/L11/index.qmd)
-12. [L12](03/L12/index.qmd)
-
-Later units remain under development. The [initial implementation is archived](archive/initial-prototype/index.qmd) rather than deleted.

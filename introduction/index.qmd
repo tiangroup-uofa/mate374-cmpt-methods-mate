@@ -66,7 +66,7 @@ If your calculation needs more computing resources or a package that is not comp
 
 ![](../assets/molab-workspace.png){fig-alt="A signed-in Molab workspace showing a searchable gallery of example notebooks"}
 
-Python basics and more detailed guidance on using the interactive demonstrations will be covered in [Seminar S01](../seminars/S01-python-numerics/index.qmd).
+Python basics and more detailed guidance on using the interactive demonstrations will be introduced alongside the course activities.
 
 
 ## Continue to Lecture 1

@@ -22,43 +22,30 @@ By the end of this lecture, you should be able to:
 
 ## Why do materials engineers model?
 
-An experiment begins with a physical specimen. A computational study begins with a representation of one. Neither route is automatically easier or more reliable; they answer different parts of an engineering question.
+An experiment begins with a physical specimen, while a computational study begins with a representation of one. In modern day material discovery, neither route is automatically easier or more reliable; they answer different parts of an engineering question.
 
-A model lets us vary one condition at a time before committing material, equipment, or laboratory time. It can expose quantities that are difficult to measure directly, such as the force on each atom, the concentration inside a diffusion couple, or the stress near a buried interface. It can also connect an observed response to a proposed mechanism. A measured stress–strain curve tells us what the specimen did. A model can help test *why* it behaved that way.
+A **model** lets us vary one condition at a time before committing material, equipment, or laboratory time. It can expose quantities that are difficult to measure directly, such as the force on each atom, the concentration inside a diffusion couple, or the stress near a buried interface. It can also connect an observed response to a proposed mechanism. A well-known example from your earlier MAT E courses is the measured stress–strain curve, which tells the how hard a material can be. A model can help test *why* it behaved that way.
 
-Models are especially useful when they guide decisions. We might screen processing temperatures, compare candidate compositions, or determine which experiment would be most informative. The calculation does not replace the experiment. It helps us decide what to measure and how to interpret the measurement.
+Models are especially useful when they **guide decisions**. We might screen processing temperatures, compare candidate compositions, or determine which experiment would be most informative. The calculation does not replace the experiment. It helps us decide what to measure and how to interpret the measurement.
 
-Code adds one more benefit. A well-documented program records equations and procedures in an executable form. Another person can run it, inspect its assumptions, change an input, and compare the result with other evidence. In that sense, code can become a reservoir of engineering knowledge.
+**Programmed codes** add one more benefit. A well-documented program (in particular, open-source code) records equations and procedures in an executable form. Another person can run it, inspect its assumptions, change an input, and compare the result with other evidence. In that sense, code can become a reservoir of engineering knowledge.
 
 ## Three connected layers of modeling
 
 The word *modeling* is used for several related activities in materials engineering. We will separate them into three layers throughout this course.
 
-A **mathematical model** states which parts of the physical system matter for the question. It identifies the variables, properties, physical laws, geometry, initial conditions, boundary conditions, and assumptions. Its result is usually a set of equations, but choosing those equations already requires engineering judgment.
+- A **mathematical model** states which parts of the physical system matter for the question, by identifying the variables, properties, physical laws, geometry, initial conditions, boundary conditions, and assumptions. Its result is usually a **set of equations**, but choosing those equations already requires engineering judgment.
 
-A **numerical method** turns the mathematical problem into a finite sequence of operations. A derivative may be replaced by a finite difference, a continuous trajectory by discrete timesteps, or an integral by a weighted sum. This is where questions of discretization, convergence, stability, and finite precision enter.
+- A **numerical method** turns the mathematical problem into a **finite sequence of operations**. A derivative may be replaced by a finite difference, a continuous trajectory by discrete timesteps, or an integral by a weighted sum. This is where questions of discretization, convergence, stability, and finite precision enter.
 
-A **computational materials simulation** combines the physical model and numerical method with material data, software, and computing resources. It produces quantities that can be compared, visualized, and interpreted at a chosen length and time scale.
+- A **computational materials simulation** combines the physical model and numerical method with material data, software, and computing resources. It produces quantities that can be compared, visualized, and interpreted at a chosen length and time scale.
 
-$$
-\boxed{
-\text{materials question}
-\longrightarrow
-\text{mathematical model}
-\longrightarrow
-\text{numerical method}
-\longrightarrow
-\text{computer simulation}
-\longrightarrow
-\text{physical interpretation}
-}
-$$
-
-The arrows do not point only to the right. If the result is inconsistent with an experiment, a known limiting case, or physical reasoning, we return to earlier choices and examine them.
 
 ### One example: molecular dynamics
 
-![The mathematical, numerical, and computational layers of a molecular-dynamics simulation. Newtonian mechanics and an interatomic potential define the mathematical model; velocity-Verlet integration advances the atoms through finite timesteps; the implemented simulation predicts the temperature-dependent structure of a gold nanoparticle.](../../../assets/model-to-md-simulation.png){#fig-md-layers fig-cap="Three layers of a molecular-dynamics calculation. Course illustration created with OpenAI image generation; the gold-nanoparticle melting example is adapted conceptually from Zeni et al. (2021)."}
+One well-known example that clearly demonstrates the relationship between mathematical, numerical and computational methods is the molecular dynamics (MD), which we will introduce in the later part of this course.
+
+![The mathematical, numerical, and computational layers of a molecular-dynamics simulation.](../../../assets/model-to-md-simulation.png){#fig-md-layers fig-cap="Three layers of a molecular-dynamics calculation. Course illustration created with OpenAI image generation; the MD simulation example is adapted conceptually from Zeni et al. (2021)."}
 
 In @fig-md-layers, the mathematical model describes atoms with positions $\mathbf r_i$, masses $m_i$, and forces obtained from a potential energy $U$:
 
@@ -70,45 +57,66 @@ m_i\frac{\mathrm d^2\mathbf r_i}{\mathrm dt^2}
 -\nabla_i U(\mathbf r_1,\ldots,\mathbf r_N).
 $$
 
-These equations describe continuous motion. A computer cannot advance through every instant of continuous time, so the numerical layer introduces a finite timestep $\Delta t$. The velocity-Verlet algorithm uses the current positions, velocities, and accelerations to approximate their values at the next timestep.
+These equations describe continuous motion of atoms, but a computer cannot advance through every instant of continuous time! The numerical layer introduces a finite timestep $\Delta t$. The velocity-Verlet **algorithm** uses the current positions, velocities, and accelerations to approximate their values at the next timestep.
 
-The computational simulation implements this repeated update for many atoms and many timesteps. It also supplies an atomic structure, an interatomic model, temperature control, boundary conditions, data collection, and visualization. The example in the figure follows a gold nanoparticle as its atomic structure becomes increasingly liquid-like with temperature, an application adapted from [Zeni et al. (2021)](../references.qmd#ref-zeni2021gold).
+Finally, after the algorithm (numerical methods) for implementing the mathematical equations are defined, the are usually distributed as reusable **computational software**. In the case of MD, the computational simulation implements this repeated update for many atoms and many timesteps. It also supplies an atomic structure, an interatomic model, temperature control, boundary conditions, data collection, and visualization. The example in the figure follows a gold nanoparticle as its atomic structure becomes increasingly liquid-like with temperature, an application adapted from [Zeni et al. (2021)](../references.qmd#ref-zeni2021gold).
 
-Molecular dynamics is therefore not just Newton's equation, not just velocity Verlet, and not just an animation of atoms. It is the combination
 
-$$
-\boxed{
-\text{physical model}
-+
-\text{numerical algorithm}
-+
-\text{computation at scale}
-}.
-$$
 
 ## Numerical methods and computational materials science
 
-A traditional numerical-methods course is often organized by mathematical problem: roots, linear systems, interpolation, integration, optimization, ordinary differential equations, and partial differential equations. A computational materials science course is often organized by physical scale or simulation family: electronic structure, molecular dynamics, Monte Carlo, phase field, finite elements, or thermodynamic databases.
+Textbooks and courses in this area often approach computation from two directions. A numerical-methods course, such as the text by Mmbaga and co-authors, is usually organized around mathematical problems. A computational materials science course, such as LeSar's [*Introduction to Computational Materials Science*](../references.qmd#ref-lesar2013), is usually organized around physical scales and simulation families.
 
-These are two views of the same computation, not competing subjects.
+::: {.columns}
 
-| | Traditional numerical-methods view | Computational materials science view |
-|---|---|---|
-| Starting question | What algorithm solves this mathematical problem? | What representation can answer this materials question? |
-| Organizing language | equations, matrices, derivatives, integrals, errors | electrons, atoms, defects, microstructures, fields, properties |
-| Example | integrate a system of ordinary differential equations | advance an atomic trajectory in molecular dynamics |
-| Main concern | accuracy, convergence, stability, and cost | physical assumptions, scale, parameters, and interpretation |
-| In MATE 374 | learn and judge the numerical kernel | place that kernel inside a materials model and test the result |
+::: {.column width="50%"}
 
-A molecular-dynamics program relies on time integration. A phase-field program relies on spatial discretization, time integration, and often linear algebra. A finite-element model may produce a large system $A\mathbf x=\mathbf b$. Monte Carlo uses random sampling rather than a time-integration algorithm. The simulation family tells us what physical representation we chose; the numerical method tells us how the resulting mathematics is calculated.
+### Numerical methods for engineers
 
-This course will move between both views. We will study the numerical methods explicitly, but we will keep asking what physical question created the mathematics and what evidence would make the answer believable.
+**How can we calculate a mathematical problem reliably?**
+
+Typical topics include:
+
+- choosing a model and assessing numerical precision;
+- solving nonlinear equations;
+- optimization;
+- solving systems of equations;
+- numerical differentiation and integration;
+- ordinary differential equations; and
+- partial differential equations.
+
+:::
+
+::: {.column width="50%"}
+
+### Computational materials science
+
+**Which simulation can answer a materials question?**
+
+Typical topics include:
+
+- atomistic structure and molecular motion;
+- electronic-structure methods;
+- molecular dynamics;
+- random sampling and Monte Carlo methods;
+- phase-field simulations; and
+- finite-element and finite-volume methods.
+
+:::
+
+:::
+
+These are not competing subjects, but rather two views of the same computation. The materials view identifies the physical representation, length and time scales, and quantities of interest. The numerical-methods view explains how the resulting equations are represented and solved.
+
+For example, a molecular-dynamics simulation advances atomic positions using a time-integration method. A phase-field simulation combines spatial discretization, time integration, and often linear algebra. A finite-element model may produce a large system such as $A\mathbf{x}=\mathbf{b}$. A Monte Carlo simulation uses random sampling rather than a time-integration algorithm. In each case, the simulation family tells us what physical model we selected, while the numerical method tells us how the calculation is carried out.
+
+MAT E 374 moves between these two views. We will study numerical methods explicitly, but we will also keep asking what materials question produced the mathematics and what evidence would make the computed answer believable.
 
 ## Choosing an adequate model
 
 A more complicated model is not automatically a better model. The appropriate level of detail depends on the question.
 
-If we need the thermal expansion of a long metal bar over a modest temperature range, a single coefficient may be adequate. Simulating every atom would add cost without necessarily improving the engineering decision. If we instead need to study how a nanoscale defect interacts with a crack tip, the continuum approximation may hide the mechanism of interest.
+If we need the thermal expansion of a long metal bar over a modest temperature range, a single coefficient may be adequate. Simulating every atom would add cost without necessarily improving the engineering decision. If we instead need to study how a nanoscale defect interacts with a crack tip, a continuum model may hide the mechanism of interest.
 
 A useful calculation therefore begins with four plain questions:
 
@@ -119,75 +127,104 @@ A useful calculation therefore begins with four plain questions:
 
 We normally begin with the simplest model that can answer the question. We add detail when evidence shows that an omitted process matters.
 
-### What the computer does not decide
+### Computational methods for discovery
 
-A computer carries out the specified calculation. It does not decide whether the selected equations describe the manufactured material, whether an input property is trustworthy, or whether the result has been interpreted outside the model's range.
+Advances in electronic-structure software have made large collections of materials calculations possible. Projects such as the [Materials Project](../references.qmd#ref-jain2013materialsproject) organize these calculations into searchable databases. More recently, AI/ML models have been coupled with electronic-structure calculations to screen candidate crystals at an unprecedented scale. The GNoME study, for example, reported millions of candidate structures and used density-functional-theory calculations to evaluate their stability ([Merchant et al., 2023](../references.qmd#ref-merchant2023materials)).
 
-The *Titan* pressure-vessel investigation provides an engineering example. Analyses based on idealized geometry and material behaviour could not establish the safety of an as-built composite vessel that accumulated damage over repeated dives. The issue was not a lack of sophisticated software. The physical object and its service history had to be represented and validated adequately ([NTSB, 2025](../references.qmd#ref-ntsb2025titan)).
+This scale does not remove the need for experiments or careful interpretation. It allows researchers to narrow a vast search space and decide which candidates deserve more detailed simulation, synthesis, and measurement. We will return to electronic-structure methods and AI/ML-assisted materials simulation later in the course.
 
-Software itself is also part of the evidence chain. The Fast16 sabotage framework reportedly altered selected high-rate simulation results only under narrow trigger conditions. Repeating a calculation with the same compromised software could reproduce the same false result ([SentinelOne Labs, 2026](../references.qmd#ref-sentinelone2026fast16)). Independent checks matter because reproducibility within one implementation is not the same as an independent verification.
+![Computational screening helps prioritize materials for further simulation and experiment.](../../../assets/L01-model-for-good.png){fig-alt="A diagram of the GNoME workflow, relative database scales, example crystal structures, and an automated synthesis laboratory."}
 
-These examples motivate two questions that will recur throughout the course:
+### “If only we had run that simulation”
+
+Modeling can guide experiments and reveal possible failure modes before a design is placed in service. However, a computer carries out the calculation it is given. It does not decide whether the equations represent the manufactured object, whether the material properties are trustworthy, or whether damage accumulated during service has changed the system.
+
+The OceanGate *Titan* submersible imploded on June 18, 2023. The subsequent investigation found that its carbon-fibre composite pressure vessel had accumulated delamination and other damage, and that OceanGate had not adequately established the as-built vessel's strength and durability over repeated dives ([NTSB, 2025](../references.qmd#ref-ntsb2025titan)). Analyses based on idealized geometry and material behaviour could not by themselves establish that the damaged vessel was safe.
+
+A later simulation-based reconstruction illustrated how instability could lead to rapid collapse under deep-sea pressure ([Engineering.com, n.d.](../references.qmd#ref-engineeringtitan)). (Side note: such a reconstruction can help explain a plausible failure sequence, but it does not prove that simply running one more simulation would have prevented the disaster.)
+
+![Simulation in more extreme conditions may help evaluate real-world scenario and prevent disaster.](../../../assets/L01-oceangate.png){fig-alt="The recovered Titan pressure vessel, the Titan submersible before the accident, and simulated pressure-vessel stress and collapse."}
+
+::: {.callout-important}
+## Lesson from *Titan*
+
+A model can be internally sophisticated yet still fail as engineering evidence when its assumptions and validation are weak.
+:::
+
+### “What if the computer deceived me?”
+
+A more difficult situation arises when the software itself has been designed to produce misleading results. `Fast16.sys` was a long-lived software-sabotage framework that was targeted to at least one country-wide high-performance computing facilities (most prominently Iran [Constantin, 2026](../references.qmd#ref-constantin2026fast16)). Unlike a traditional error in programming codes (which are usually called a "bug"), `Fast16.sys` was designed originally as a malware that targeted high-precision scientific computing programs ([SentinelOne Labs, 2026](../references.qmd#ref-sentinelone2026fast16)).
+
+Public analyses reported that it targeted particular builds of LS-DYNA and AUTODYN routines in Ansys, and altered selected high-rate or explosive simulations only after narrow trigger conditions were reached ([Symantec Threat Hunter Team, 2026](../references.qmd#ref-symantec2026fast16)). A small, gradual change to an equation-of-state response could remain plausible while corrupting the final coupled simulation.
+
+What's even worse: as all copies of the same software was infected, repeating a calculation on several computers running the same compromised software could reproduce the same false result.
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+![](../../../assets/L01-fast16-fig.png){fig-alt="A comparison of normal and tampered simulation results; the curves differ most strongly shortly after the trigger and then appear to converge."}
+
+:::
+
+::: {.column width="50%"}
+
+::: {.content-visible when-format="html"}
+
+```{=html}
+<video controls loop muted playsinline preload="metadata" poster="../../../assets/L01-fast16-implosion-poster.png" width="100%" style="aspect-ratio: 460 / 290; object-fit: contain; background: white;" aria-label="Side-by-side spherical implosion simulations showing different results">
+  <source src="../../../assets/L01-fast16-implosion.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="../../../assets/L01-fast16-implosion.mp4">Open the video directly</a>.
+</video>
+```
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+![](../../../assets/L01-fast16-implosion-poster.png){fig-alt="A still frame comparing two spherical implosion simulations."}
+
+:::
+
+:::
+
+:::
+
+*Fast16 could introduce a small change in an intermediate result that propagated into a different coupled simulation.*
+
+::: {.callout-warning}
+## A question for every supplied program
+
+If you are given a program and told only to run it, what independent evidence would help you trust its result?
+:::
+
+Together, these examples motivate two questions that will recur throughout the course:
 
 - **Verification:** did we calculate the chosen mathematical problem correctly?
 - **Validation:** is that mathematical problem adequate for the physical question?
 
+Verification may require comparison with a known case, a limiting value, a convergence study, or an independent implementation. Validation requires comparison with physical evidence and careful attention to the model's intended range.
+
+
 ## Equations, code, and interaction
 
-Python is not the main subject of this course. It is the language we will use to make numerical reasoning visible.
+In MAT E 374, Python is our chosen language for writing small programs and numerical code, but this course is not a "Python for engineering" lecture series. More importantly, each lecture will connect a mathematical statement to its numerical or computational implementation.
 
-An equation gives a compact mathematical relationship. Code forces us to state how inputs are represented and which operations are carried out. An interactive notebook lets us change those inputs and see the consequences immediately.
+An equation expresses a mathematical relationship compactly. Code requires us to specify how the inputs are represented and which operations are carried out. An interactive notebook then lets us change those inputs and observe the consequences immediately.
 
-$$
-\boxed{
-\text{equation}
-\longrightarrow
-\text{code}
-\longrightarrow
-\text{interactive numerical experiment}
-}
-$$
+> **Equation → code → interactive numerical experiment**
 
 You will not always write a program from a blank page. In many activities, a working calculation will be supplied. Your task will be to inspect it, change a meaningful part, check the result, and explain what changed. This is closer to how engineers work with established numerical libraries and simulation software.
 
 ## First numerical experiment: Buffon's needle
 
-Buffon's needle problem turns an experiment with random throws into an estimate of $\pi$. It is useful here because the physical picture is simple, the algorithm is short, and the reference value is known.
+Buffon's needle problem estimates the mathematical constant $\pi$ through a physical experiment with random throws ([Weisstein, n.d.](../references.qmd#ref-weissteinbuffon)). We will use Buffon's experiment as our first example because the physical picture is simple, the algorithm is short, and the reference value $\pi$ is known.
 
 Imagine equally spaced parallel lines on a floor. The distance between neighbouring lines is $D$. We drop a needle of length $L$, with $L\le D$, without choosing its position or direction. Sometimes the needle crosses a line and sometimes it does not.
 
-Two quantities determine one throw:
+![Needle B crosses a line, while needle A does not. Adapted from [Wikipedia](https://en.wikipedia.org/wiki/Buffon%27s_needle).](../../../assets/buffon-needles-visualization.png){fig-alt="Parallel vertical lines separated by distance D, with one needle of length L between the lines and a second needle crossing a line."}
 
-- the angle $\theta$ between the needle and the parallel lines;
-- the distance $y$ from the needle's centre to the nearest line.
-
-The needle's perpendicular half-length is
-
-$$
-\frac{L}{2}|\sin\theta|.
-$$
-
-A crossing occurs when the centre is close enough to a line:
-
-$$
-y\le \frac{L}{2}|\sin\theta|.
-$$
-
-For uniformly random positions and directions, the probability of crossing a line is
-
-$$
-P(\text{crossing})=\frac{2L}{\pi D}.
-$$
-
-We do not need the full geometric derivation to run the experiment. The important point is that the unknown $\pi$ appears in a probability that we can estimate by counting crossings.
-
-If $C$ needles cross in $N$ throws, then the observed crossing fraction is $C/N$. Replacing the probability by this measured fraction gives
-
-$$
-\frac{C}{N}\approx\frac{2L}{\pi D},
-$$
-
-and rearranging gives the estimate
+If we throw $N$ needles and observe $C$ crossings, Buffon's result gives the estimate
 
 $$
 \boxed{
@@ -196,9 +233,11 @@ $$
 }.
 $$
 
+Here, $N$ is the total number of needles thrown and $C$ is the number that cross a line.
+
 ### Random numbers and a reproducible experiment
 
-The browser does not physically drop needles. It generates pseudorandom numbers for the centre position and angle. These numbers behave like random samples for this experiment, but they are produced by a deterministic algorithm.
+The computer program does not physically drop needles! It generates *pseudorandom numbers* for the centre position and angle. These numbers behave like random samples for this experiment, but they are produced by a deterministic algorithm. We will encounter this idea again later when we study Monte Carlo methods.
 
 A **random seed** selects the starting point of that algorithm. The same seed and the same inputs produce the same sequence of virtual throws. A different seed produces a different, but equally valid, sample.
 
@@ -222,7 +261,7 @@ This is an **algorithm**: a finite, ordered procedure that turns the model into 
 
 ### Run the simulation
 
-1. Replace the placeholder seed with your student ID.
+1. Enter your student ID as the random seed. The activity accepts up to eight digits.
 2. Choose the ratio $L/D$.
 3. Choose the number of throws $N$.
 4. Press **Simulate**. Moving a slider alone does not start a new run.
