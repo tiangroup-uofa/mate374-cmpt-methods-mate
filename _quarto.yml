@@ -3,6 +3,8 @@ project:
   output-dir: _site
   pre-render:
     - _marimo_export.py
+  post-render:
+    - python scripts/generate_llms_txt.py
   resources:
     - "wasm-local/**"
     - "assets/L01-fast16-implosion-poster.png"
