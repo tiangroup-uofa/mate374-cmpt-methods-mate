@@ -1,271 +1,137 @@
 ---
-title: "S01 · A crash course in Python for numerical work"
-subtitle: "A practical refresher before the first week"
+title: "S01 · Python, marimo, and your first plot"
+subtitle: "A 50-minute working session"
 body-classes: lecture-page seminar-page
 ---
 
-::: {.callout-note}
-## Do not panic
+## Recap of Python concepts
 
-You do not need to memorize Python, NumPy, or SciPy before MATE 374. You need to be willing to read a short piece of code, change one thing, run it again, and check whether the result makes sense.
-:::
+You do not need to memorize any of this. Skim the blocks — if nothing looks completely alien, you are fine.
 
-## What this seminar is for
-
-You may have used Python before and forgotten most of it. That is normal. This seminar is a short route back in, not a complete programming course.
-
-For the first week, the useful skills are modest:
-
-- assign a number to a name;
-- use `+`, `-`, `*`, `/`, and `**`;
-- read a list or NumPy array;
-- follow indentation in a loop or function;
-- call a documented library function;
-- read the last line of an error message;
-- check units and one simple limiting case.
-
-You will usually start from supplied code. Blank-page programming is not the entrance requirement for this course.
-
-## Python, NumPy, and SciPy do different jobs
-
-| Tool | What it supplies | Typical course use |
-|---|---|---|
-| **Python** | names, numbers, lists, loops, conditions, and functions | express the steps of an algorithm |
-| **NumPy** | numerical arrays and operations over whole arrays | store data, evaluate equations, and summarize results |
-| **SciPy** | established scientific algorithms | roots, optimization, integration, interpolation, statistics, and differential equations |
-
-A common pattern is:
+### `int` and `float`
 
 ```python
-import numpy as np
-from scipy.optimize import root_scalar
+n = 10            # int
+x = 3.14          # float
+y = 2.0e-6        # 2.0 × 10⁻⁶, also float
+7 / 2             # 3.5 — division always gives float
+7 // 2            # 3   — floor division
+2 ** 10           # 1024 — power (not ^)
 ```
 
-`np` is a short conventional name for NumPy. Importing `root_scalar` from `scipy.optimize` tells us which part of SciPy supplies the algorithm.
-
-## Keep the official documentation open
-
-These are reference tools, not readings to finish from beginning to end:
-
-- [The Python 3.12 tutorial](https://docs.python.org/3.12/tutorial/)
-- [Python 3.12 built-in functions](https://docs.python.org/3.12/library/functions.html)
-- [NumPy 2.0: the absolute basics for beginners](https://numpy.org/doc/2.0/user/absolute_beginners.html)
-- [NumPy 2.0 reference](https://numpy.org/doc/2.0/reference/)
-- [SciPy 1.14.1 user guide](https://docs.scipy.org/doc/scipy-1.14.1/tutorial/)
-- [SciPy 1.14.1 API reference](https://docs.scipy.org/doc/scipy-1.14.1/reference/)
-- [marimo getting started](https://docs.marimo.io/getting_started/)
-
-## Two companion formats used in this course
-
-Many topics in the lectures and seminars will use the presentation and exercise formats of two companion books.
-
-Eric Sullivan's *Numerical Methods: An Inquiry-Based Approach with Python* often begins with a question, asks you to test an idea, and then asks you to explain what happened. Use the [online book](https://numericalmethodssullivan.github.io/index.html) and its [GitHub source](https://github.com/NumericalMethodsSullivan/NumericalMethodsSullivan.github.io/tree/master) when a course activity points to a Sullivan-style investigation.
-
-Jaan Kiusalaas's *Numerical Methods in Engineering with Python 3* usually moves from an equation to an algorithm and then to a compact Python implementation. We will use this format when the numerical steps need to be visible. The book is available through the [University of Alberta Library](https://ualberta.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=19059219040009116&institutionId=9116&customerId=9115&VE=true).
-
-You are not expected to read either book from beginning to end before class. Use the relevant section alongside the course page, especially when you need a second explanation or another worked problem.
-
-When looking up a function, read in this order:
-
-1. the function **signature**: what inputs does it accept?
-2. **Parameters**: what does each input mean?
-3. **Returns**: what comes back?
-4. one small **example**;
-5. notes about units, shapes, valid ranges, or failure conditions.
-
-For example, if you meet `np.linspace`, search the NumPy reference for that exact name. The documentation tells you that it constructs evenly spaced values and explains the meaning of `start`, `stop`, and `num`.
-
-## Read a small Python calculation
-
-Consider the linear thermal-expansion relation
-
-$$
-\Delta L=\alpha L_0\Delta T.
-$$
-
-A direct Python calculation is
+### `list`
 
 ```python
-length0_mm = 100.0
-alpha_per_K = 23.0e-6
-delta_T_K = 100.0
-
-expansion_mm = alpha_per_K * length0_mm * delta_T_K
-print(expansion_mm)
+temps = [300.0, 400.0, 500.0]
+temps[0]           # 300.0
+temps[-1]          # 500.0
+temps.append(600.0)
+len(temps)         # 4
 ```
 
-The result is `0.23` mm.
-
-A few details matter:
-
-- `=` assigns a value to a name; it does not state a mathematical equality;
-- names can carry unit reminders such as `_mm` and `_K`;
-- `23.0e-6` means $23.0\times10^{-6}$;
-- `#` begins a comment;
-- Python uses `**` for powers, not `^`;
-- `==` asks whether two values are equal.
-
-Do not remove the unit suffixes merely to make a name shorter. They prevent many avoidable mistakes.
-
-## Lists, indexing, and loops
-
-A Python list stores an ordered collection:
+### `dict`
 
 ```python
-temperature_changes_K = [-50.0, 0.0, 50.0, 100.0]
+steel = {"E_GPa": 200.0, "nu": 0.3}
+steel["E_GPa"]     # 200.0
 ```
 
-Python starts indexing at zero:
+### Loops
 
 ```python
-temperature_changes_K[0]   # -50.0
-temperature_changes_K[1]   #   0.0
-temperature_changes_K[-1]  # 100.0, the final item
+for T in temps:
+    print(T)
+
+for i in range(5):
+    print(i, i ** 2)
 ```
 
-A loop repeats an indented block:
+### Functions
 
 ```python
-for delta_T_K in temperature_changes_K:
-    expansion_mm = alpha_per_K * length0_mm * delta_T_K
-    print(delta_T_K, expansion_mm)
+def expansion(L0, alpha, dT):
+    return alpha * L0 * dT
+
+expansion(100.0, 23e-6, 80.0)
 ```
 
-The indentation is part of Python's syntax. All lines belonging to the loop must line up. You do not need to memorize every form of loop; you need to recognize what is being repeated.
-
-## Functions package one calculation
-
-A function gives a calculation a name and states its inputs:
+### Type hints
 
 ```python
-def thermal_expansion(length_mm, alpha, delta_T_K):
-    change_mm = alpha * length_mm * delta_T_K
-    return change_mm
+def expansion(L0: float, alpha: float, dT: float) -> float:
+    return alpha * L0 * dT
 ```
 
-Call it with
+Hints do not change behaviour — they document intent.
 
-```python
-thermal_expansion(100.0, 23.0e-6, 100.0)
-```
+---
 
-The indented body performs the work. `return` sends the result back to the calling code. In early MATE 374 activities, the function name and inputs will usually be supplied. You will edit or inspect the body.
+## Working with marimo
 
-## NumPy works with arrays
+Course activities run in [marimo](https://docs.marimo.io/) notebooks embedded on the site. Nothing to install — they run in the browser via WebAssembly.
 
-A NumPy array is designed for numerical data:
+### Variable scope is per-cell
 
-```python
-import numpy as np
+Each cell sees variables **returned by other cells**. A name defined but not returned stays local to that cell. If two cells return the same name, marimo flags the conflict.
 
-delta_T_values_K = np.array([-50.0, 0.0, 50.0, 100.0])
-expansion_values_mm = alpha_per_K * length0_mm * delta_T_values_K
-```
+### Edit ↔ App view
 
-The multiplication is applied element by element. We do not need to write the loop ourselves. This is one form of **vectorization**.
+Press **Ctrl+.** (Windows / Linux) or **⌘.** (macOS) to toggle, or use the button above the notebook.
 
-Useful things to inspect are
+### UI elements you will encounter
 
-```python
-expansion_values_mm.shape
-expansion_values_mm.dtype
-expansion_values_mm[0]
-expansion_values_mm[-1]
-np.min(expansion_values_mm)
-np.max(expansion_values_mm)
-np.mean(expansion_values_mm)
-```
-
-Two common array constructors are
-
-```python
-np.array([1.0, 2.0, 3.0])
-np.linspace(0.0, 100.0, 11)
-```
-
-The first uses values you provide. The second creates 11 evenly spaced values from 0 to 100, including both endpoints.
-
-Arrays introduce questions that ordinary scalar arithmetic can hide:
-
-- What is the array's shape?
-- What numerical type does it store?
-- Are operations element by element or reductions to one value?
-- Are the units consistent across all entries?
-
-When an array expression fails, inspect `shape` and `dtype` before rewriting the whole calculation.
-
-## SciPy supplies algorithms
-
-SciPy collects established numerical methods behind documented interfaces. For example, suppose we want the temperature change that produces a target expansion:
-
-```python
-from scipy.optimize import root_scalar
-
-target_expansion_mm = 0.20
-
-def residual(delta_T_K):
-    predicted_mm = thermal_expansion(
-        length0_mm,
-        alpha_per_K,
-        delta_T_K,
-    )
-    return predicted_mm - target_expansion_mm
-
-solution = root_scalar(residual, bracket=[0.0, 500.0])
-solution.root
-```
-
-The important pieces are visible even before we study root finding:
-
-- `residual` returns zero at the desired answer;
-- `bracket` gives an interval containing the answer;
-- SciPy returns a result object rather than only a number;
-- `solution.root` is the reported root;
-- `solution.converged` tells us whether the algorithm reports success.
-
-Using a library does not remove the need to understand inputs and outputs. It lets us postpone implementation details until they become the subject of the lecture.
-
-## When code fails
-
-An error message is information. Start at the final line, then look upward for the first line referring to code you changed.
-
-| Error | First question to ask |
+| Widget | Purpose |
 |---|---|
-| `NameError` | Did I misspell a name or run the defining cell? |
-| `TypeError` | Did I combine incompatible types or use the wrong operator? |
-| `ValueError` | Is the type acceptable but the value or range invalid? |
-| `IndexError` | Did I request an item outside the list or array? |
-| `ModuleNotFoundError` | Is the package available in this environment? |
+| `mo.ui.slider(...)` | drag to pick a number |
+| `mo.ui.number(...)` | type a number |
+| `mo.ui.dropdown(...)` | pick from a list |
+| `mo.ui.text(...)` | free-form text |
+| `mo.ui.switch(...)` | on / off |
 
-A useful recovery routine is:
+Read the current value with `.value`. Change the widget → downstream cells re-run automatically.
 
-1. undo the most recent change;
-2. reproduce the error with the smallest input you can;
-3. inspect the type, shape, value, and units;
-4. read the official documentation for the function named in the error;
-5. ask a classmate, TA, instructor, or approved coding assistant while showing the exact error and the smallest relevant code.
+### Try it
 
-Do not replace ten lines at once. Change one thing and run again.
+Open **Edit code**, move the sliders, read how the cells depend on each other.
 
-## Try it in the browser
-
-The notebook below combines the same thermal-expansion model with ordinary Python, a NumPy array, and one SciPy solver. Open **Edit code** and work through the five small changes at the end.
-
-::: {.quarto-wasm-local notebook="python_numerics_crash_course.edit.py" title="Python, NumPy, and SciPy: a first numerical calculation" height="1400" loading="eager"}
-**Static fallback.** For $L_0=100\,\mathrm{mm}$ and $\alpha=23\times10^{-6}\,\mathrm{K^{-1}}$, temperature changes of $-50$, $0$, $50$, $100$, and $150\,\mathrm{K}$ produce length changes of $-0.115$, $0$, $0.115$, $0.230$, and $0.345\,\mathrm{mm}$. A target expansion of $0.20\,\mathrm{mm}$ is reached at $\Delta T\approx86.96\,\mathrm{K}$. Setting $\Delta T=0$ returns zero expansion.
+::: {.quarto-wasm-local notebook="first_marimo.edit.py" title="Your first marimo calculation" height="900" loading="eager"}
+**Static fallback.** For $L_0=100\,\mathrm{mm}$, $\alpha=23\times10^{-6}\,\mathrm{K^{-1}}$, and $\Delta T=100\,\mathrm{K}$, the predicted expansion is $0.23\,\mathrm{mm}$.
 :::
 
-## Before the first week of lectures
+---
 
-You are ready if you can do most of the following, with documentation open:
+## Implement your function and plot
 
-- run a supplied cell;
-- change a numerical value and run the cell again;
-- explain what a short function returns;
-- find the first and last values in an array;
-- use the NumPy documentation to look up one function;
-- read the final line of a Python error;
-- state the units of a result;
-- test a simple case such as $\Delta T=0$.
+NumPy handles arrays. Matplotlib draws figures. You will use both in almost every activity.
 
-You do **not** need advanced object-oriented programming, decorators, package development, GPU programming, or a memorized NumPy/SciPy API. Those are not prerequisites for the first week.
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(0, 10, 200)   # 200 points from 0 to 10
+y = np.sin(x)                  # element-wise — no loop
+
+plt.plot(x, y)
+plt.xlabel("x")
+plt.ylabel("sin(x)")
+plt.show()
+```
+
+### Useful NumPy at a glance
+
+| Function | What it does |
+|---|---|
+| `np.linspace(a, b, n)` | `n` evenly spaced points from `a` to `b` |
+| `np.array([...])` | array from a list |
+| `np.zeros(n)` | `n` zeros |
+| `np.sin`, `np.cos`, `np.exp`, `np.log` | element-wise math |
+| `np.pi` | $\pi$ |
+| `np.max(a)`, `np.min(a)`, `np.mean(a)` | reductions |
+
+### Your turn
+
+Fill in the function body below, run the cell, and see your plot.
+
+::: {.quarto-wasm-local notebook="s01_plot_exercise.edit.py" title="Implement a function and plot it" height="1000" loading="eager"}
+**Static fallback.** Students implement $\Delta L = \alpha L_0 \Delta T$ and plot it over a range of $\Delta T$ using NumPy and Matplotlib.
+:::
