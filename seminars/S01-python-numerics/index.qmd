@@ -128,10 +128,16 @@ plt.show()
 | `np.pi` | $\pi$ |
 | `np.max(a)`, `np.min(a)`, `np.mean(a)` | reductions |
 
-### Your turn
+### Your turn — interatomic potentials
 
-Fill in the function body below, run the cell, and see your plot.
+Three classical pair potentials describe how the energy between two atoms varies with separation $r$:
 
-::: {.quarto-wasm-local notebook="s01_plot_exercise.edit.py" title="Implement a function and plot it" height="1000" loading="eager"}
-**Static fallback.** Students implement $\Delta L = \alpha L_0 \Delta T$ and plot it over a range of $\Delta T$ using NumPy and Matplotlib.
+- **Lennard-Jones:** $\displaystyle V(r)=4\varepsilon\!\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^{6}\right]$
+- **Morse:** $\displaystyle V(r)=D_e\!\left[1-e^{-a(r-r_e)}\right]^2 - D_e$
+- **Sutherland:** $\displaystyle V(r)=\begin{cases}-\varepsilon & r \le \sigma \\ -\varepsilon\!\left(\frac{\sigma}{r}\right)^{6} & r > \sigma\end{cases}$
+
+Fill in the function bodies below, run the cells, and compare the three curves on one plot.
+
+::: {.quarto-wasm-local notebook="s01_plot_exercise.edit.py" title="Interatomic potentials: implement and plot" height="1200" loading="eager"}
+**Static fallback.** Students implement the Lennard-Jones, Morse, and Sutherland pair potentials and plot all three on a single figure over a range of interatomic separations.
 :::
