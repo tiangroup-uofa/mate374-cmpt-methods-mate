@@ -136,7 +136,7 @@ Three classical pair potentials describe how the energy between two atoms varies
 - **Morse:** $\displaystyle V(r)=D_e\!\left[1-e^{-a(r-r_e)}\right]^2 - D_e$
 - **Sutherland:** $\displaystyle V(r)=\begin{cases}-\varepsilon & r \le \sigma \\ -\varepsilon\!\left(\frac{\sigma}{r}\right)^{6} & r > \sigma\end{cases}$
 
-Fill in the function bodies below, run the cells, and compare the three curves on one plot.
+Fill in the function bodies, plot all three curves, then use `np.min`, `np.argmin`, and a sign-change check to read the well depth and zero crossing from the discrete grid.
 
 ::: {.quarto-wasm-local notebook="s01_plot_exercise.edit.py" title="Interatomic potentials: implement and plot" height="1200" loading="eager"}
 **Static fallback.** Students implement the Lennard-Jones, Morse, and Sutherland pair potentials and plot all three on a single figure over a range of interatomic separations.

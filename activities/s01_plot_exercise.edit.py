@@ -185,12 +185,51 @@ def _(
 @app.cell
 def _(mo):
     mo.md(r"""
-    ### Stretch goals
+    ### Step 5 — read the curves with NumPy
 
-    1. Find the equilibrium distance (minimum of $V$) for Lennard-Jones from the plot. Verify against $r_{\min} = 2^{1/6}\sigma$.
-    2. Add a slider for $\varepsilon$ or $\sigma$ and see how the curves shift.
-    3. Plot the force $F(r) = -dV/dr$ numerically using `np.gradient(V, r)`.
+    Use `np.min` and `np.argmin` to find the well depth and equilibrium
+    distance from the discrete grid. Then find the approximate zero
+    crossing: the first grid point where $V$ changes sign.
+
+    Fill in the three `...` below.
     """)
+    return
+
+
+@app.cell
+def _(V_lj, mo, np, r):
+    # Well depth and equilibrium distance from the grid
+    V_min = ...          # TODO: np.min of V_lj
+    i_min = ...          # TODO: np.argmin of V_lj
+    r_min = r[i_min] if not isinstance(i_min, type(Ellipsis)) else ...
+
+    # Approximate zero crossing: first index where V_lj changes sign
+    # hint: V_lj[:-1] * V_lj[1:] < 0 gives True at each sign change
+    i_zero = ...         # TODO: np.argmax(V_lj[:-1] * V_lj[1:] < 0)
+    r_zero = r[i_zero] if not isinstance(i_zero, type(Ellipsis)) else ...
+
+    _done = not isinstance(V_min, type(Ellipsis)) and not isinstance(i_zero, type(Ellipsis))
+    if _done:
+        mo.callout(
+            mo.md(
+                f"""
+                **Lennard-Jones on a {len(r)}-point grid**
+
+                - Well depth: $V_{{\\min}} = {V_min:.6f}$ eV at $r = {r_min:.3f}$ $\\mathrm{{\\AA}}$
+                - Analytical equilibrium: $r_{{\\min}} = 2^{{1/6}}\\sigma = {2**(1/6) * 2.55:.3f}$ $\\mathrm{{\\AA}}$
+                - Approximate zero crossing: $r \\approx {r_zero:.3f}$ $\\mathrm{{\\AA}}$
+
+                These are only as accurate as the grid spacing. Later in the
+                course we will find these values with proper numerical methods.
+                """
+            ),
+            kind="success",
+        )
+    else:
+        mo.callout(
+            mo.md("Replace the `...` above with the correct NumPy calls."),
+            kind="warn",
+        )
     return
 
 
