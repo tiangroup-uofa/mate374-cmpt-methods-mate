@@ -346,7 +346,7 @@ Open **Edit code** in the box below to see the names of several controls. Try th
 
 The embedded browser notebook is the default environment for this course. It is enough for the regular activities and assignments, and those assignments will **not** require a Molab account or a local Python installation. Move to another environment only when an activity specifically requires it or when you want to experiment independently.
 
-Treat edits made inside an embedded notebook as temporary. **Open notebook directly** loads a fresh copy in a separate tab with marimo's full editing chrome and sidebar. Edits already made in the embedded copy do not transfer to the new tab, and the browser notebook does not reliably preserve changes across a reload. To keep work from the direct editor, use marimo's own save or download command before closing it. **Reload/reset notebook** discards edits and restores the course version.
+Treat edits made inside an embedded notebook as temporary. **Open notebook directly** loads a fresh copy in a separate tab with marimo's full editing chrome and sidebar. Edits already made in the embedded copy do not transfer to the new tab. In the direct editor, use the **Save** button or press **Cmd+S** (macOS) / **Ctrl+S** (elsewhere) to download the current `.py` notebook before closing it. **Reload/reset notebook** restores the course version.
 
 ### Start a separate notebook in the browser
 
@@ -437,11 +437,7 @@ $$
 
 The Lennard-Jones potential dates to 1924; [Schwerdtfeger and Wales (2024)](https://doi.org/10.1021/acs.jctc.4c00135) review its hundred-year history and continuing use. It models how the interaction energy between two neutral atoms or molecules changes with their separation $r$. The curve below shows the shape you should obtain: strong repulsion at short range, an attractive well, and an interaction that approaches zero at large separation.
 
-![Characteristic shape of the 12–6 Lennard-Jones potential.](../../assets/S01-lennard-jones-potential.png){#fig-lj-potential fig-alt="A Lennard-Jones potential curve that rises steeply at short distance, crosses zero at sigma, reaches a minimum of minus epsilon, and approaches zero from below at large distance" width="62%" fig-align="center"}
-
-::: {.small}
-**Image credit:** [Olaf Lenz and Rainald62](https://commons.wikimedia.org/wiki/File:12-6-Lennard-Jones-Potential.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
-:::
+![Characteristic shape of the 12–6 Lennard-Jones potential. Image credit: [Olaf Lenz and Rainald62](https://commons.wikimedia.org/wiki/File:12-6-Lennard-Jones-Potential.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).](../../assets/S01-lennard-jones-potential.png){#fig-lj-potential fig-alt="A Lennard-Jones potential curve that rises steeply at short distance, crosses zero at sigma, reaches a minimum of minus epsilon, and approaches zero from below at large distance" width="62%" fig-align="center"}
 
 You will see later in this course that the Lennard-Jones potential, and the forces between atoms derived from it, play an important role in our computational studies. For now, take $\varepsilon$ and $\sigma$ as parameters supplied from historical measurements; this example uses representative values for argon.
 

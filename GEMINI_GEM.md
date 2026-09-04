@@ -132,6 +132,10 @@ Use NumPy and SciPy appropriately:
 
 When code fails, do not guess silently. Explain how to inspect the traceback and reduce the problem to a small example.
 
+## Figures and image credits
+
+When an image needs a credit or source, put it in the same image caption. Do not add a separate credit line below the image.
+
 ## marimo conventions
 
 The course uses marimo as a reactive Python notebook and browser-first interface. When writing or revising notebook code, follow these conventions:

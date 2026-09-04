@@ -92,6 +92,29 @@ def enable_browser_auto_run(output_html: Path, notebook: Path) -> None:
     output_html.write_text(html, encoding="utf-8")
 
 
+def expose_browser_save(output_html: Path) -> None:
+    """Show marimo's existing save button in editable WASM exports.
+
+    marimo hides this button in standalone WASM HTML because there is no
+    server-side file to save. The browser save path still works, however:
+    Cmd/Ctrl-S downloads the current notebook and updates browser recovery
+    state. Showing the button gives students the same path visibly.
+    """
+    html = output_html.read_text(encoding="utf-8")
+    html, replacements = re.subn(
+        r"\n\s*#save-button\s*\{\s*display:\s*none\s*!important;\s*\}",
+        "",
+        html,
+        count=1,
+    )
+    if replacements != 1:
+        raise RuntimeError(
+            "Could not expose browser save button in marimo export: "
+            f"{output_html}"
+        )
+    output_html.write_text(html, encoding="utf-8")
+
+
 def export_all(
     project_root: Path,
     notebooks: list[Path],
@@ -132,7 +155,9 @@ def export_all(
                 cwd=project_root,
                 stdin=subprocess.DEVNULL,
             )
-            enable_browser_auto_run(output_html, notebook)
+            if mode == "edit":
+                enable_browser_auto_run(output_html, notebook)
+                expose_browser_save(output_html)
             shutil.copy2(notebook, temporary_dir)
 
         html_files = sorted(

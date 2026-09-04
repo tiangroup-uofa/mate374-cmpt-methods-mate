@@ -97,7 +97,7 @@ function Div(div)
 
   local hint_html = ""
   if editable then
-    hint_html = '<p class="marimo-toggle-hint">Use the <strong>App view / Edit code</strong> button, or click inside the notebook and press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> elsewhere.</p>'
+    hint_html = '<p class="marimo-toggle-hint">Use the <strong>App view / Edit code</strong> button, or click inside the notebook and press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> elsewhere. To keep edits, open the notebook directly and use its <strong>Save</strong> button or press <kbd>⌘S</kbd>/<kbd>Ctrl+S</kbd>.</p>'
   end
 
   src = escape_html(src)
@@ -124,7 +124,7 @@ function Div(div)
       <a href="%s" target="_blank" rel="noopener">Open notebook directly</a>
       <button class="quarto-wasm-reload" type="button">Reload/reset notebook</button>
     </div>
-    <p class="marimo-troubleshooting-note">Reloading resets unsaved changes. If the direct page also fails, send the course page URL, browser name, and a screenshot to the teaching team.</p>
+    <p class="marimo-troubleshooting-note">Reloading the original course embed resets unsaved changes. Save from the direct editor before closing it. If the direct page also fails, send the course page URL, browser name, and a screenshot to the teaching team.</p>
   </details>
 </div>
 <script>

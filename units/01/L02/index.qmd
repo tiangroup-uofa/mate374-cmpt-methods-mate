@@ -81,9 +81,9 @@ N\approx
 \approx2.3\times10^9.
 $$
 
-Requiring an approximate 95% interval of the same half-width raises the estimate to about $8.6\times10^9$ throws. These calculations do not guarantee five correct digits in one trial, but they show why **billions of throws** are the relevant order of magnitude.
+The result clear shows why **billions of throws** are the relevant order of magnitude, and thus we can confidently say the Buffon's method is not a fast-converging algorithm.
 
-When $L/d$ decreases, crossings become less frequent. A fixed number of throws then carries less information, so the estimate becomes noisier and is more likely to be undefined because no crossing occurred.
+When $L/D$ decreases, crossings become less frequent. A fixed number of throws then carries less information, you would expect the error to be higher for a too small choice of $L/D$.
 
 ::: {.callout-tip}
 ## General lesson
@@ -169,11 +169,8 @@ where $N$ is the number of throws and $n$ is the number of crossings. The typica
 
 Polygon approximations to a circle were used by Archimedes in the third century BCE and later by Zu Chongzhi in fifth-century China ([Beckmann, 1971](../references.qmd#ref-beckmann1971pi)). As the number of sides increases, the polygon perimeter approaches the circle circumference.
 
-![Inscribed and circumscribed polygons approaching a circle as the number of sides increases.](../../../assets/L02-polygon-approximation.png){#fig-polygon-pi fig-alt="A sequence from triangles to octagons showing inscribed and circumscribed regular polygons approaching a circle" width="92%" fig-align="center"}
+![Inscribed and circumscribed polygons approaching a circle as the number of sides increases. Image credit: [Guillaume Jacquenot](https://commons.wikimedia.org/wiki/File:Pi_archi_approx.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).](../../../assets/L02-polygon-approximation.png){#fig-polygon-pi fig-alt="A sequence from triangles to octagons showing inscribed and circumscribed regular polygons approaching a circle" width="92%" fig-align="center"}
 
-::: {.small}
-**Image credit:** [Guillaume Jacquenot](https://commons.wikimedia.org/wiki/File:Pi_archi_approx.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
-:::
 
 For a unit circle, start with a hexagon whose side length is $s_6=1$. Repeatedly double the number of sides using
 
@@ -232,13 +229,13 @@ $$
 
 Each additional term contributes roughly eight correct decimal digits. Its error therefore decreases approximately geometrically with the number of retained terms, much faster than any fixed power law $N^{-p}$.
 
-The four signatures are:
+The four signatures are (ranked from slowest to fastest convergence):
 
 | Method | Meaning of $N$ | Deterministic? | Typical initial convergence |
 |---|---|---:|---:|
 | Buffon | random throws | no | $N^{-1/2}$ |
-| Polygon | number of sides | yes | $N^{-2}$ |
 | Basel | retained terms | yes | $N^{-1}$ |
+| Polygon | number of sides | yes | $N^{-2}$ |
 | Ramanujan | retained terms | yes | about eight digits per term |
 
 ## Comparing the methods in Python
