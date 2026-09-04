@@ -346,7 +346,7 @@ Open **Edit code** in the box below to see the names of several controls. Try th
 
 The embedded browser notebook is the default environment for this course. It is enough for the regular activities and assignments, and those assignments will **not** require a Molab account or a local Python installation. Move to another environment only when an activity specifically requires it or when you want to experiment independently.
 
-Edits made inside an embedded notebook may be lost when the page is refreshed. Use **Open, download, or reset notebook** below the notebook to save its `.py` source before leaving the page. A marimo notebook is one ordinary Python file, so the same file can be opened in the browser, on your laptop, or later on a remote computer.
+Treat edits made inside an embedded notebook as temporary. **Open notebook directly** gives the same activity more space while deliberately keeping marimo's standard sidebar hidden; it does not create a saved copy. **Reload/reset notebook** discards your edits and restores the course version.
 
 ### Start a separate notebook in the browser
 
@@ -358,21 +358,7 @@ For a blank notebook, open the free [marimo WebAssembly playground](https://mari
 
 We will use Molab for a guided comparison in [L04](../../units/01/L04/index.qmd). It is not required for ordinary assignments. When Molab is necessary, the course page will provide a direct **Open in Molab** link and state what resource or package the activity needs.
 
-### Run a downloaded notebook on your own computer
-
-Local execution is optional. It is useful when you want a durable copy, prefer your own editor, or need to work without keeping the course page open.
-
-1. Download the notebook's `.py` file from the course page.
-2. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) once on your computer.
-3. Open a terminal in the folder containing the downloaded file and run:
-
-   ```bash
-   uvx marimo edit --sandbox notebook-name.py
-   ```
-
-The `--sandbox` option reads the notebook's dependency list and creates an isolated environment for it. Your browser will open the editable notebook, and saving in marimo updates the same `.py` file. Return to the terminal and press **Ctrl+C** when you are finished.
-
-Later activities may run the same notebook format on a departmental workstation or remote computing system. Those activities will provide connection, storage, and submission instructions; you are not expected to configure remote access during this seminar.
+If a later activity needs a local workstation or remote computing system, the activity will provide the notebook file and the required connection, storage, and submission instructions. You are not expected to configure those environments during this seminar.
 
 ---
 
