@@ -57,9 +57,9 @@ def _(mo):
         show_value=True,
     )
     number_of_needles = mo.ui.slider(
-        start=100,
+        start=10,
         stop=1_000_000,
-        step=100,
+        step=10,
         value=5_000,
         include_input=True,
         label="Number of virtual needles, N",
