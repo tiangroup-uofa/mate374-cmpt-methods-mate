@@ -19,11 +19,12 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
     import matplotlib.pyplot as plt
+    from decimal import Decimal, localcontext
     import math
     import random
     import time
 
-    return math, mo, plt, random, time
+    return Decimal, localcontext, math, mo, plt, random, time
 
 
 @app.cell(hide_code=True)
@@ -42,7 +43,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(math, random):
+def _(Decimal, localcontext, math, random):
     checkpoints = [10**power for power in range(1, 8)]
 
     def buffon_errors():
@@ -82,7 +83,7 @@ def _(math, random):
         side_length = 1.0
         side_counts = [sides]
         errors = [abs(sides * side_length / 2.0 - math.pi)]
-        while 2 * sides <= 10_000_000:
+        while 2 * sides <= checkpoints[-1] + 1:
             side_length = math.sqrt(
                 2.0 - math.sqrt(4.0 - side_length * side_length)
             )
@@ -92,16 +93,26 @@ def _(math, random):
         return side_counts, errors
 
     def ramanujan_errors():
-        term_counts = [1, 2]
+        term_counts = [1, 2, 3, 4]
         errors = []
-        for number_of_terms in term_counts:
-            total = 0.0
-            for k in range(number_of_terms):
-                numerator = math.factorial(4 * k) * (1103 + 26390 * k)
-                denominator = math.factorial(k) ** 4 * 396 ** (4 * k)
-                total += numerator / denominator
-            inverse_pi = 2.0 * math.sqrt(2.0) * total / 9801.0
-            errors.append(abs(1.0 / inverse_pi - math.pi))
+        with localcontext() as context:
+            context.prec = 80
+            pi_reference = Decimal(
+                "3.14159265358979323846264338327950288419716939937510"
+            )
+            for number_of_terms in term_counts:
+                total = Decimal(0)
+                for k in range(number_of_terms):
+                    numerator = Decimal(
+                        math.factorial(4 * k) * (1103 + 26390 * k)
+                    )
+                    denominator = Decimal(
+                        math.factorial(k) ** 4 * 396 ** (4 * k)
+                    )
+                    total += numerator / denominator
+                inverse_pi = Decimal(2) * Decimal(2).sqrt() * total / Decimal(9801)
+                estimate = Decimal(1) / inverse_pi
+                errors.append(float(abs(estimate - pi_reference)))
         return term_counts, errors
 
     return basel_errors, buffon_errors, polygon_errors, ramanujan_errors

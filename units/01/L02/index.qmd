@@ -217,10 +217,10 @@ $$
 
 Srinivasa Ramanujan credited the goddess Namagiri with inspiring mathematical ideas in dreams, an account discussed in his biography by [Kanigel (1991)](../references.qmd#ref-kanigel1991). The formula used here appeared in his 1914 paper, where it was presented as mathematics rather than accepted on inspiration alone ([Ramanujan, 1914](../references.qmd#ref-ramanujan1914)).
 
-![Srinivasa Ramanujan.](../../../assets/L02-ramanujan.jpg){#fig-ramanujan fig-alt="Black-and-white portrait of mathematician Srinivasa Ramanujan wearing a suit and tie" width="24%" fig-align="center"}
+![Srinivasa Ramanujan.](../../../assets/L02-ramanujan.jpg){#fig-ramanujan fig-alt="Stylized monochrome portrait of Srinivasa Ramanujan against a background of handwritten mathematical notation" width="48%" fig-align="center"}
 
 ::: {.small}
-**Image credit:** unknown photographer, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Srinivasa_Ramanujan_Cleanup.jpg), public domain.
+**Image source:** [*It Came to Me in A Dream: the Intuitive Mathematician, Srinivasa Ramanujan*](https://thesublimeblog.org/2022/08/09/it-came-to-me-in-a-dream-the-intuitive-mathematician-srinivasa-ramanujan/), *The Sublime Blog*.
 :::
 
 One of Ramanujan's formulas is
