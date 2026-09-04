@@ -284,4 +284,4 @@ Runtime imposes another limit. Entering $N=10^8$ into an ordinary Python loop ma
 1. Is Buffon's needle a good method for calculating $\pi$? Can its underlying Monte Carlo idea still be useful for other problems?
 2. Here we know the reference value $\pi$. What evidence could we use when the true solution is unknown?
 3. Why might an error curve plateau or increase as $N$ grows?
-4. If an ordinary implementation becomes impractical at $N=10^8$, how might we make it faster without changing the mathematical result?
+4. If an ordinary implementation becomes impractical at $N\gg 10^8$, how might we make it faster without changing the mathematical result?
