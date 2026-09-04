@@ -15,11 +15,10 @@ project:
     - "syllabus/**/*.qmd"
     - "introduction/**/*.qmd"
     - "units/**/*.qmd"
-    - "!units/02/**"
     - "!units/03/**"
     - "assignments/**/*.qmd"
     - "project/**/*.qmd"
-    - "!seminars/S01-python-numerics/**"
+    - "seminars/**/*.qmd"
     - "!templates/**"
 
 website:
@@ -77,8 +76,24 @@ website:
                 text: "L04"
               - href: units/01/references.qmd
                 text: "References"
+          - section: "02 · Finding special points"
+            href: units/02/index.qmd
+            contents:
+              - href: units/02/L05/index.qmd
+                text: "L05"
+              - href: units/02/L06/index.qmd
+                text: "L06"
+              - href: units/02/L07/index.qmd
+                text: "L07"
+              - href: units/02/L08/index.qmd
+                text: "L08"
+              - href: units/02/references.qmd
+                text: "References"
       - href: seminars/index.qmd
         text: "Seminar materials"
+        contents:
+          - href: seminars/S01-python-numerics/index.qmd
+            text: "S01 · Python and marimo"
       - href: assignments/index.qmd
         text: Assignments
       - href: project/index.qmd
@@ -101,6 +116,7 @@ format:
       - assets/class-view.html
     toc: true
     code-tools: true
+    code-copy: true
     code-fold: true
     code-summary: "Show the code"
     link-external-newwindow: true

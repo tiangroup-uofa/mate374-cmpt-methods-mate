@@ -1,68 +1,270 @@
 ---
-title: "S01 · Python, marimo, and your first plot"
-subtitle: "A 50-minute working session"
+title: "S01 · Python foundations for numerical work"
+subtitle: "Basic data types; turning equations into code; scientific plotting"
 body-classes: lecture-page seminar-page
 ---
 
+## Learning outcomes
+
+By the end of this seminar, you should be able to:
+
+1. **Recall** the basic Python types, collections, arithmetic, control flow, and functions used in numerical methods.
+2. **Edit and run** a Python script to implement a short numerical calculation.
+3. **Use** a marimo notebook as a playground for running, changing, and checking Python code.
+4. **Create and label** a scientific plot with Matplotlib.
+
 ## Recap of Python concepts
 
-You do not need to memorize any of this. Skim the blocks — if nothing looks completely alien, you are fine.
+This seminar is not intended to suggest that you need only 15 minutes to relearn Python. Many components of numerical-method implementations can be traced back to a small collection of basic Python types and concepts. We will introduce that collection here and use it throughout the course.
 
-### `int` and `float`
+For a more detailed explanation, examples, and exercises, see Sullivan's [Introduction to Python](https://numericalmethodssullivan.github.io/ch-python.html). Sullivan emphasizes that Python is a general-purpose language that we are using for **scientific computing**: combining programming and mathematics to solve scientific and engineering problems.
 
-```python
-n = 10            # int
-x = 3.14          # float
-y = 2.0e-6        # 2.0 × 10⁻⁶, also float
-7 / 2             # 3.5 — division always gives float
-7 // 2            # 3   — floor division
-2 ** 10           # 1024 — power (not ^)
-```
+### 1. Useful native Python data types
 
-### `list`
+A **data type** tells Python what kind of information a value represents. Python has many built-in, or native, types. We will begin with three:
+
+- An `int` represents a whole number with no decimal part. Counts, indices, and numbers of iterations are often integers.
+- A `float` represents a real number stored in floating-point form. Measured quantities and most values in numerical calculations are floats.
+- A `str` represents text. Material names, axis labels, file names, and messages are strings. Write a string between quotation marks.
 
 ```python
-temps = [300.0, 400.0, 500.0]
-temps[0]           # 300.0
-temps[-1]          # 500.0
-temps.append(600.0)
-len(temps)         # 4
+number_of_atoms = 32       # int
+temperature_K = 873.15     # float
+material = "Al-4.5Cu"      # str
 ```
 
-### `dict`
+A name such as `temperature_K` is a **variable**. The `=` sign assigns the value on its right to the variable on its left. Including a unit in a variable name can make engineering code easier to read.
+
+### 2. Native Python collections of data
+
+Scientific calculations rarely involve only one value. Python provides several ways to collect related values.
+
+#### Lists: an ordered collection
+
+A `list` is an ordered collection of objects. A list can contain numbers, strings, or even other lists. Lists are useful when you need to preserve the order of the items or change the collection later.
 
 ```python
-steel = {"E_GPa": 200.0, "nu": 0.3}
-steel["E_GPa"]     # 200.0
+temperatures_K = [300.0, 400.0, 500.0]
+materials = ["aluminum", "copper", "steel"]
+
+temperatures_K[0]       # first item: 300.0
+temperatures_K[-1]      # last item: 500.0
+temperatures_K.append(600.0)
+len(temperatures_K)     # number of items: 4
 ```
 
-### Loops
+::: {.callout-important}
+## Python indexing starts at zero
+
+Index `0` selects the first item in a list, index `1` selects the second item, and so on. A negative index counts backward from the end, so index `-1` selects the last item.
+:::
+
+#### Dictionaries: a map from keys to values
+
+A `dict`, short for dictionary, maps one object, called a **key**, to another object, called a **value**. Dictionaries are useful for keeping a property together with its name.
 
 ```python
-for T in temps:
-    print(T)
+steel = {
+    "elastic_modulus_GPa": 200.0,
+    "poisson_ratio": 0.30,
+    "crystal_structure": "BCC",
+}
 
-for i in range(5):
-    print(i, i ** 2)
+steel["elastic_modulus_GPa"]    # 200.0
+steel["crystal_structure"]      # "BCC"
 ```
 
-### Functions
+Looking up a value by its key is often clearer than remembering that a property occupies a particular position in a list.
+
+::: {.callout-caution}
+## A dictionary is accessed by key, not by position
+
+Unlike a list, a dictionary does not normally use position indices such as `0`, `1`, and `2`. For example, `steel[0]` will produce a `KeyError` because `0` is not one of the keys in this dictionary.
+
+To inspect every key and value, loop over `dictionary.items()`:
 
 ```python
-def expansion(L0, alpha, dT):
-    return alpha * L0 * dT
-
-expansion(100.0, 23e-6, 80.0)
+for key, value in steel.items():
+    print(key, value)
 ```
+:::
 
-### Type hints
+For now, lists and dictionaries are the two collections we need. We will introduce tuples and sets later if a numerical method or library result gives us a reason to use them.
+
+### 3. Arithmetic and the `math` module
+
+The symbols `+`, `-`, and `*` have their usual meanings of addition, subtraction, and multiplication. Three other symbols deserve attention:
+
+- `/` performs ordinary division and always gives a `float`, so `7 / 2` gives `3.5`.
+- `**` raises a number to a power, so `7 ** 2` gives `49`. Do not use `^` for a power in Python.
+- `//` performs floor division and `%` gives the remainder. For example, `7 // 2` gives `3`, while `7 % 2` gives `1`. We will use these less often.
+
+Python follows the familiar order of operations. Use parentheses when they identify a grouped part of the equation, such as the numerator in a relative change:
 
 ```python
-def expansion(L0: float, alpha: float, dT: float) -> float:
-    return alpha * L0 * dT
+length_0_mm = 100.0
+length_mm = 100.184
+
+relative_change = (length_mm - length_0_mm) / length_0_mm
 ```
 
-Hints do not change behaviour — they document intent.
+The native `math` module provides common mathematical constants and functions. Import the module, then write the module name before the function so that the source of the function remains clear.
+
+```python
+import math
+
+angle_rad = math.pi / 4
+math.sin(angle_rad)
+math.sqrt(2.0)
+math.exp(2.0)         # e raised to the power 2
+math.pow(3.0, 2.0)    # 3 raised to the power 2
+math.log(10.0)        # natural logarithm
+math.log10(10.0)      # base-10 logarithm
+```
+
+Most functions in `math` operate on one numerical value at a time. For example, `math.exp(2.0)` works, but `math.exp([1.0, 2.0, 3.0])` does not apply the exponential to all three list entries. A loop could process the entries one at a time; shortly, we will use NumPy to perform this kind of array calculation directly.
+
+### 4. Loops and conditions
+
+A loop repeats an indented block of code. A `for` loop processes each item in a collection:
+
+```python
+temperatures_K = [300.0, 400.0, 500.0]
+
+for temperature_K in temperatures_K:
+    print(temperature_K)
+```
+
+`range()` is useful when the loop needs a sequence of integers. The ending value is not included: `range(5)` produces 0, 1, 2, 3, and 4.
+
+```python
+for step in range(5):
+    print(step)
+
+for step in range(1, 6):
+    print(step)       # 1, 2, 3, 4, 5
+```
+
+In C and C++, a semicolon ends an individual statement and braces `{...}` mark a block of code. Python normally uses a new line to end a statement and **indentation** to mark each block, or nesting level. The colon after `for` begins the loop's block. Pressing <kbd>Tab</kbd> in most modern editors inserts one indentation level, conventionally four spaces. Returning to the previous indentation level ends the loop's block.
+
+A condition allows code to choose what to do. Python uses `if`, `elif`, and `else` for these choices:
+
+```python
+temperature_K = 1050.0
+
+if temperature_K < 933.0:
+    state = "solid"
+elif temperature_K < 1200.0:
+    state = "partially or fully liquid; check the phase diagram"
+else:
+    state = "liquid for this simplified example"
+
+print(state)
+```
+
+Useful comparisons include `<`, `<=`, `>`, `>=`, `==` (equal to), and `!=` (not equal to). Each comparison produces either `True` or `False`, a value with the `bool` type that a condition can use. Notice that assignment uses one equal sign, `=`, while a comparison uses two, `==`.
+
+### 5. Functions: wrappers for reusable ideas
+
+A Python function wraps a calculation or sequence of instructions and gives it a name. This lets us test an idea once and reuse it with different inputs. The named inputs in a function definition are called **parameters**.
+
+```python
+def thermal_expansion(length_0_mm, alpha_per_K, delta_T_K):
+    expansion_mm = alpha_per_K * length_0_mm * delta_T_K
+    return expansion_mm
+```
+
+The indented lines form the function body. `return` sends the result back to the code that called the function. To use the function, provide one value for each parameter:
+
+```python
+thermal_expansion(100.0, 23e-6, 80.0)    # returns 0.184 mm
+thermal_expansion(250.0, 12e-6, 150.0)   # returns 0.45 mm
+```
+
+A programming function can wrap more than a mathematical formula. It can contain conditions, loops, data processing, and plotting instructions. Giving the function and its parameters descriptive names helps another reader connect the Python code to the physical model.
+
+### 6. Getting help from Python, without AI
+
+Python can describe the values and tools already available in your environment. This documentation corresponds to the version of Python or the library that you are actually running.
+
+#### Check what an object is with `type()`
+
+```python
+type(32)                    # int
+type(873.15)                # float
+type("Al-4.5Cu")            # str
+type([300.0, 400.0])        # list
+```
+
+#### Read documentation with `help()` and docstrings
+
+```python
+import math
+
+help(math.log)              # formatted documentation
+print(math.log.__doc__)     # the function's documentation string
+```
+
+A **docstring** is documentation stored with a function, class, or module. Start with `help()` because its output is usually easier to read.
+
+#### Discover available names with `dir()`
+
+```python
+dir(math)                   # names provided by the math module
+```
+
+The list may be long, but it is useful when you remember that a function exists and have forgotten its exact name. You can then ask for focused help, for example `help(math.sqrt)`.
+
+#### Add type hints to your own functions
+
+Type hints document the kinds of values a function is intended to receive and return. They help editors show useful information and allow type-checking tools to spot some mistakes before the code runs. Python does not normally enforce them while the program is running.
+
+Python 3.10 and later can use built-in collection names such as `list` and the `|` symbol for alternatives:
+
+```python
+def mean_temperature(temperatures_K: list[float]) -> float:
+    return sum(temperatures_K) / len(temperatures_K)
+
+
+def celsius_to_kelvin(temperature_C: float | int) -> float:
+    return temperature_C + 273.15
+```
+
+Here, `list[float]` means a list intended to contain floats. `float | int` means either a float or an integer. The annotation after `->` describes the intended return type.
+
+When code fails, also read the final line of the error message first. It usually names the error and identifies the immediate problem. Then inspect the indicated line, print intermediate values if needed, and use `type()` to check whether those values have the form you expected.
+
+### From native Python to NumPy
+
+Native Python supplies the language: values, collections, arithmetic, loops, conditions, and functions. Its `math` module is useful for calculations with individual numbers, but it does not apply a function to an entire list. We could write a Python loop that processes one list entry at a time, but that becomes cumbersome and can be slow for large numerical datasets.
+
+[NumPy](https://numpy.org/) adds arrays and operations designed for numerical and scientific computing. A NumPy function can act on every value in an array at once. We normally import NumPy using the standard short name `np`:
+
+```python
+import numpy as np
+```
+
+The following correspondences are a useful first guide:
+
+| Native Python | NumPy for scientific computing |
+|---|---|
+| `float` | a numerical type with a defined precision, such as `np.float32` or `np.float64` |
+| `list` of numbers | `np.array` with one numerical data type |
+| `range(start, stop, step)` | `np.arange(start, stop, step)` for numerical values |
+| `math.sin(x)`, `math.exp(x)` | `np.sin(x)`, `np.exp(x)` applied to every array element |
+
+```python
+import numpy as np
+
+temperatures_K = np.array([300.0, 400.0, 500.0])
+time_s = np.arange(0.0, 5.0, 0.5)
+
+decay = np.exp(-time_s)    # evaluates exp(-t) at every time in the array
+```
+
+You normally do not need to convert each value to `np.float64` yourself. NumPy examines the supplied values and chooses a suitable data type automatically. In the examples above, the decimal values lead NumPy to use floating-point arrays. We will specify `np.float32`, `np.float64`, or another data type only when the precision or memory use matters.
+
+Unlike a list, a NumPy array is designed for numerical operations on the whole collection. This is why arrays will be our default representation for sampled coordinates, temperatures, energies, and other numerical data.
 
 ---
 
