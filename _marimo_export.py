@@ -15,6 +15,7 @@ SOURCE_DIR = "activities"
 OUTPUT_DIR = "wasm-local"
 MANIFEST_NAME = ".marimo-export-manifest.json"
 AUTO_RUN_OPT_OUT = "mate374: auto-run = false"
+BUILD_EXECUTION_OPT_OUT = "mate374: build-execute = false"
 
 
 def contains_import_marimo(py_path: Path) -> bool:
@@ -102,6 +103,12 @@ def export_all(
         for notebook in notebooks:
             mode, output_stem = export_mode_and_outstem(notebook)
             output_html = temporary_dir / f"{output_stem}.html"
+            source = notebook.read_text(encoding="utf-8", errors="ignore")
+            execute_flag = (
+                "--no-execute"
+                if BUILD_EXECUTION_OPT_OUT in source
+                else "--execute"
+            )
             command = [
                 "uv",
                 "run",
@@ -112,14 +119,19 @@ def export_all(
                 "--mode",
                 mode,
                 "--force",
-                "--execute",
+                execute_flag,
             ]
             if mode == "run":
                 command.append("--no-show-code")
             command.extend([str(notebook), "-o", str(output_html)])
 
             print(f"Run {' '.join(command)}...")
-            subprocess.run(command, check=True, cwd=project_root)
+            subprocess.run(
+                command,
+                check=True,
+                cwd=project_root,
+                stdin=subprocess.DEVNULL,
+            )
             enable_browser_auto_run(output_html, notebook)
             shutil.copy2(notebook, temporary_dir)
 

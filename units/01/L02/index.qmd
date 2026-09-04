@@ -21,22 +21,43 @@ By the end of this lecture, you should be able to:
 
 ## Return to Buffon's needle
 
-We begin by reopening the Buffon notebook from L01. Do not focus on the Python syntax yet. Use the controls to repeat the four closing investigations:
+### Play with the model again
 
-1. Compare $\widehat{\pi}$ with $\pi$ for $N=10$, $100$, and $10^6$.
-2. Ask how large $N$ must be before five correct significant digits become plausible.
-3. Compare results from different random seeds at the same $N$.
-4. Change the ratio $L/d$ and observe the crossing count and estimate.
+In L01, we used Buffon's needle to show how a physical experiment can become a numerical model for estimating $\pi$. Reopen the same model below and work with one other person for five minutes.
+
+::: {.quarto-wasm-local notebook="buffon_needle.edit.py" title="Buffon's needle experiment" height="880" loading="eager" fullscreen="true"}
+**Static fallback.** For $L=d$, the crossing probability is $2/\pi$. If $n$ of $N$ needles cross a line, the corresponding estimate is $\widehat{\pi}=2N/n$.
+:::
+
+Record enough information to compare your trials:
+
+1. Compare $\widehat{\pi}$ and its absolute error for $N=10$, $100$, and $10^6$.
+2. Keep $N$ fixed and compare several random seeds. Are the errors close to one another?
+3. Change $L/d$ and observe the crossing count. Does the ratio affect the error at small $N$?
+
+This short experiment introduces three recurring practices:
+
+1. **Convergence study:** track the estimate and its error as the amount of work increases.
+2. **Repeatability check:** the same seed reproduces the same simulated experiment, while different seeds reveal sampling variability.
+3. **Parameter study:** change one model parameter, such as $L/d$, and observe its effect while holding the other settings fixed.
+
+::: {.callout-note}
+## Prediction before calculation
+
+How large must $N$ be before **five correct significant digits** of $\pi$ become plausible? Use the results currently available to make an order-of-magnitude estimate.
+:::
+
+### About the convergence
 
 Increasing $N$ generally reduces the spread of the estimates, but an individual run does not move smoothly toward $\pi$. A larger sample can occasionally be farther from the reference than a smaller sample.
 
-For the simple choice $L=d$,
+For $L=d$, the probability of a crossing is
 
 $$
 P(\text{crossing})=\frac{2}{\pi}\approx0.6366.
 $$
 
-A large-sample estimate of the standard deviation of $\widehat{\pi}$ is
+Combining the binomial variance of the crossing count with the estimator $\widehat{\pi}=2N/n$ gives the following large-sample standard deviation:
 
 $$
 \sigma_{\widehat{\pi}}
@@ -44,13 +65,35 @@ $$
 \frac{2.37}{\sqrt{N}}.
 $$
 
-This gives a typical uncertainty of about $0.75$ at $N=10$, $0.24$ at $N=100$, and $0.0024$ at $N=10^6$. The exact error of one run can be smaller or larger.
+The classical probability model is summarized by [Weisstein (n.d.)](../references.qmd#ref-weissteinbuffon). This approximation gives a typical uncertainty of about $0.75$ at $N=10$, $0.24$ at $N=100$, and $0.0024$ at $N=10^6$. The exact error of one run can be smaller or larger.
 
-Rounding $\pi$ to five significant digits requires an absolute error below roughly $5\times10^{-5}$. The scaling above suggests about $2.3\times10^9$ throws merely to make that tolerance comparable to one standard deviation, and about $8.6\times10^9$ throws for an approximate 95% interval of that half-width. If “five digits” means five digits *after* the decimal point, the tolerance is ten times smaller and the required $N$ is about one hundred times larger. The calculation does not guarantee either target; it shows why **billions of throws** are the right order of magnitude even for five significant digits.
+The plot below overlays the observed absolute error from one simulated sequence of up to $10^5$ throws with the analytical $N^{-1/2}$ scale out to $10^9$ throws. Switch between linear and log--log axes. The linear view shows how compressed a wide range can become; the log--log view makes the scaling visible.
 
-When $L/d$ becomes smaller, crossings become less frequent. A fixed number of throws then contains less information, and the estimate is more likely to be noisy or undefined because no crossing occurred.
+::: {.quarto-wasm-local notebook="l02_buffon_convergence.edit.py" title="Observed and analytical Buffon convergence" height="720" loading="eager" fullscreen="true"}
+**Static fallback.** One Buffon sequence fluctuates around an analytical error scale proportional to $N^{-1/2}$. On log--log axes, the analytical line has slope $-1/2$.
+:::
+
+Five significant digits require an absolute error below approximately $5\times10^{-5}$. Setting the one-standard-deviation estimate equal to this target gives
+
+$$
+N\approx
+\left(\frac{2.37}{5\times10^{-5}}\right)^2
+\approx2.3\times10^9.
+$$
+
+Requiring an approximate 95% interval of the same half-width raises the estimate to about $8.6\times10^9$ throws. These calculations do not guarantee five correct digits in one trial, but they show why **billions of throws** are the relevant order of magnitude.
+
+When $L/d$ decreases, crossings become less frequent. A fixed number of throws then carries less information, so the estimate becomes noisier and is more likely to be undefined because no crossing occurred.
+
+::: {.callout-tip}
+## General lesson
+
+Buffon's method converges slowly: reducing its typical sampling error by a factor of 10 requires approximately 100 times as many throws.
+:::
 
 ## Measuring error
+
+L01 introduced several sources of error. We now define the absolute and relative error used in that discussion.
 
 Let $V_{\mathrm{true}}$ be a trusted reference and $V_{\mathrm{calc}}$ a calculated value. The signed true error is
 
@@ -80,11 +123,13 @@ $$
 
 Absolute error has the same units as the quantity. Relative error is dimensionless and is often reported as a percentage.
 
-The name of the error depends on the method. In Buffon's experiment, finite $N$ produces **sampling error** because the crossing fraction is random. If we stop an infinite series after $N$ terms, the omitted tail produces **truncation error**. Both may decrease with $N$, but they should not be given the same name.
+The name of the error depends on the method. In Buffon's experiment, finite $N$ produces **sampling error** because the crossing count is random. If we stop an infinite series after $N$ terms, the omitted tail produces **truncation error**. Both may decrease as $N$ increases, but they arise for different reasons.
 
-## How quickly does the error decrease?
+### How quickly does the error decrease?
 
-The notebook records $N$, the estimate, elapsed time, and absolute error. After downloading the results as a CSV file, we can plot error against $N$. Many methods show an approximate power-law region,
+A numerical study normally records the effort $N$, the calculated result, and an error or other diagnostic. We can plot those values directly in Python, as introduced in [S01](../../../seminars/S01-python-numerics/index.qmd), or download a CSV file and use Excel or another plotting tool.
+
+Many numerical methods have a region where the error is approximated by a power law,
 
 $$
 E(N)\approx C N^{-p}.
@@ -96,63 +141,65 @@ $$
 \log E\approx\log C-p\log N.
 $$
 
-On a log--log plot, the slope is therefore approximately $-p$. A larger $p$ means that error falls more rapidly as $N$ increases.
+On a log--log plot, the slope is therefore approximately $-p$. A larger $p$ means that the error falls more rapidly as $N$ increases.
 
-For a random method such as Buffon's needle, a single run produces a noisy error curve. We need repeated runs and a typical measure such as root-mean-square error. Buffon's sampling error behaves approximately as
+For a random method such as Buffon's needle, one run produces a noisy error curve. Repeated runs and a typical measure such as root-mean-square error reveal the underlying trend:
 
 $$
 E_{\mathrm{RMS}}\propto N^{-1/2}.
 $$
 
-This relationship between increasing effort and decreasing error is **convergence**. Convergence rate is one way to judge a method, but it is not the only one. The cost of each step and the usefulness of the method for the real problem also matter.
+This decrease in error as effort increases is **convergence**. Convergence rate is important, but it is not the only criterion. The cost of each step, memory requirements, robustness, and the information required by the method also matter.
 
-The Wooclap poll asks two questions. First: is Buffon's needle a good method? Second: before running them, which of the alternative equations below appears likely to be better? The activity link will be shown in class and posted on Canvas.
+## Better methods for the same number
 
-## Four methods for the same number
-
-The comparison uses exactly four routes to $\pi$: Buffon's needle, a polygon, the Basel series, and a rapidly convergent Ramanujan series. Each method has a refinement parameter $N$, but $N$ does not represent the same physical action in every case.
+Buffon's experiment is useful for studying sampling, but it is inefficient if the only goal is to calculate $\pi$. We will compare it with three deterministic methods. Each has an effort parameter called $N$, although $N$ represents a different kind of work in each method.
 
 ### 1. Buffon's needle: random sampling
 
-With $L=d$,
+For $L=d$,
 
 $$
-\widehat{\pi}_N=\frac{2N}{n}.
+\widehat{\pi}_N=\frac{2N}{n},
 $$
 
-Here $N$ is the number of random throws. Repeated calculations differ, and the typical error decreases as $N^{-1/2}$.
+where $N$ is the number of throws and $n$ is the number of crossings. The typical error decreases as $N^{-1/2}$.
 
 ### 2. Inscribed polygons: geometric refinement
 
-For a unit circle, begin with an inscribed hexagon whose side length is $s_6=1$. Repeatedly double the number of sides using
+Polygon approximations to a circle were used by Archimedes in the third century BCE and later by Zu Chongzhi in fifth-century China ([Beckmann, 1971](../references.qmd#ref-beckmann1971pi)). As the number of sides increases, the polygon perimeter approaches the circle circumference.
+
+![Inscribed and circumscribed polygons approaching a circle as the number of sides increases.](../../../assets/L02-polygon-approximation.png){#fig-polygon-pi fig-alt="A sequence from triangles to octagons showing inscribed and circumscribed regular polygons approaching a circle" width="92%" fig-align="center"}
+
+::: {.small}
+**Image credit:** [Guillaume Jacquenot](https://commons.wikimedia.org/wiki/File:Pi_archi_approx.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+:::
+
+For a unit circle, start with a hexagon whose side length is $s_6=1$. Repeatedly double the number of sides using
 
 $$
-s_{2N}=\sqrt{2-\sqrt{4-s_N^2}},
+\boxed{
+ s_{2N}=\sqrt{2-\sqrt{4-s_N^2}},
+ \qquad
+ \pi_N=\frac{Ns_N}{2}
+}
 $$
 
-then estimate $\pi$ from half of the perimeter:
-
-$$
-\pi_N=\frac{Ns_N}{2}.
-$$
-
-The geometric error initially behaves as
+The initial geometric error behaves approximately as
 
 $$
 E_N\propto N^{-2}.
 $$
 
-This is related to the polygon method used by Archimedes in the third century BCE to place upper and lower bounds on $\pi$ ([Beckmann, 1971](../references.qmd#ref-beckmann1971pi)).
-
 ### 3. The Basel series: deterministic truncation
 
-Euler's solution of the Basel problem gives the following identity ([Weisstein, n.d.](../references.qmd#ref-weissteinbasel)):
+In the eighteenth century, Euler solved the Basel problem by showing that ([Weisstein, n.d.](../references.qmd#ref-weissteinbasel))
 
 $$
-\sum_{k=1}^{\infty}\frac{1}{k^2}=\frac{\pi^2}{6},
+\sum_{k=1}^{\infty}\frac{1}{k^2}=\frac{\pi^2}{6}.
 $$
 
-so a finite approximation is
+Retaining only the first $N$ terms gives
 
 $$
 \pi_N
@@ -160,21 +207,21 @@ $$
 \sqrt{6\sum_{k=1}^{N}\frac{1}{k^2}}.
 $$
 
-All terms are positive, so the estimate approaches $\pi$ monotonically from below. Although the individual terms decrease as $1/k^2$, the accumulated tail decreases as $1/N$. The leading error therefore behaves as
+The omitted tail produces truncation error that decreases approximately as
 
 $$
 E_N\propto N^{-1}.
 $$
 
-A related historical series is the Gregory--Leibniz formula,
-
-$$
-\frac{\pi}{4}=1-\frac13+\frac15-\frac17+\cdots,
-$$
-
-which is easy to understand but also converges as $N^{-1}$. We use Basel in the activity because its non-negative terms make the accumulation easier to inspect.
-
 ### 4. Ramanujan's series: rapid convergence
+
+Srinivasa Ramanujan credited the goddess Namagiri with inspiring mathematical ideas in dreams, an account discussed in his biography by [Kanigel (1991)](../references.qmd#ref-kanigel1991). The formula used here appeared in his 1914 paper, where it was presented as mathematics rather than accepted on inspiration alone ([Ramanujan, 1914](../references.qmd#ref-ramanujan1914)).
+
+![Srinivasa Ramanujan.](../../../assets/L02-ramanujan.jpg){#fig-ramanujan fig-alt="Black-and-white portrait of mathematician Srinivasa Ramanujan wearing a suit and tie" width="24%" fig-align="center"}
+
+::: {.small}
+**Image credit:** unknown photographer, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Srinivasa_Ramanujan_Cleanup.jpg), public domain.
+:::
 
 One of Ramanujan's formulas is
 
@@ -187,9 +234,9 @@ $$
 {(k!)^4 396^{4k}}.
 $$
 
-Each additional term contributes roughly eight more correct decimal digits ([Ramanujan, 1914](../references.qmd#ref-ramanujan1914)). We will not derive this identity. Its role is to show that not every convergent method follows a slow power law $N^{-p}$.
+Each additional term contributes roughly eight correct decimal digits. Its error therefore decreases approximately geometrically with the number of retained terms, much faster than any fixed power law $N^{-p}$.
 
-The four signatures are now visible:
+The four signatures are:
 
 | Method | Meaning of $N$ | Deterministic? | Typical initial convergence |
 |---|---|---:|---:|
@@ -198,40 +245,35 @@ The four signatures are now visible:
 | Basel | retained terms | yes | $N^{-1}$ |
 | Ramanujan | retained terms | yes | about eight digits per term |
 
-## A common numerical interface
+## Comparing the methods in Python
 
-Despite their different mathematics, all four methods accept some measure of effort $N$. A common Python interface can make the comparison fair:
+Despite their different mathematics, the methods can share one Python interface. See [S01](../../../seminars/S01-python-numerics/index.qmd) for a review of functions and parameters.
 
 ```python
 def estimate_pi(N: int, method: str, **parameters):
-    # select one method and return its estimate
+    # Select one method and return its estimate.
     ...
 ```
 
-The function name and input structure remain the same while the body changes with the algorithm. This lets the notebook apply the same timing and error calculation to every method.
+Keeping the interface fixed allows the same surrounding code to record error and computational effort for every method.
 
-Work with a partner on the Basel method. You do not need to begin from a blank page. Translate the following algorithm into the supplied function:
+### Interactive comparison
 
-```text
-set total to zero
-for k from 1 through N:
-    add 1 / k² to total
-return the square root of 6 × total
-```
+The demonstration below compares the absolute errors of all four methods. The Buffon calculation fixes $L/d=1$. Select the single button to run the supplied pure-Python implementations, including loops as large as $10^7$ steps. The browser may remain busy for a while; L04 will show how changing the implementation can make repeated work faster.
 
-Remember that Python uses `**` for powers. Although Python indexing often begins at zero, this mathematical sum begins at $k=1$, so `range(1, N + 1)` is the relevant sequence. If you do not complete the code, use the supplied implementation and focus on interpreting the comparison.
+::: {.quarto-wasm-local notebook="l02_pi_methods.edit.py" title="Compare four methods for estimating pi" height="760" loading="eager" fullscreen="true"}
+**Static fallback.** Buffon's sampling error decreases approximately as $N^{-1/2}$, the Basel truncation error as $N^{-1}$, and the polygon error initially as $N^{-2}$. Ramanujan's series reaches near machine precision with only a few terms.
+:::
 
-## What should we observe?
+At the same nominal $N$, the methods can have vastly different errors. Buffon fluctuates between runs. Basel approaches from below. The polygon initially improves faster than Basel. Ramanujan reaches high accuracy with only a few terms. Because $N$ means different work for each method, this plot is a convergence comparison rather than a complete runtime comparison.
 
-At the same $N$, the four methods can have vastly different errors. Buffon fluctuates between runs. Basel approaches from below. The polygon initially improves faster than Basel. Ramanujan reaches high accuracy with only a few terms.
+The error curves also contain a surprise. For sufficiently large $N$, a deterministic method may stop improving, plateau, or even become less accurate. In the polygon recurrence, the subtraction combines two nearly equal numbers when $N$ becomes large. L03 will explain why this can destroy useful floating-point digits.
 
-The error curves also contain a surprise. For sufficiently large $N$, a deterministic method may stop improving, plateau, or even become less accurate. In particular, the polygon recurrence subtracts two nearly equal numbers when $N$ becomes very large. We will leave the cause unresolved for the moment; it is the starting point for L03.
-
-A runtime limit is equally real. Entering $N=10^8$ into an ordinary browser loop may freeze the page for an inconvenient length of time. The activity therefore caps some inputs and may use precomputed data for the largest comparison. L04 will show how the same calculation can be implemented more efficiently.
+Runtime imposes another limit. Entering $N=10^8$ into an ordinary Python loop may occupy the browser for an inconvenient length of time. L04 will ask how we can perform the same mathematical work more efficiently.
 
 ## Closing questions
 
-1. Compared with the other methods, is Buffon's needle a fast way to calculate $\pi$? Is its underlying Monte Carlo idea still useful?
-2. Our error calculation used a known reference value. What evidence could replace it when the true solution is unknown?
-3. Why might an error curve plateau or begin to increase as $N$ grows?
-4. Why would entering $N=10^8$ hang an ordinary browser implementation, and how could a demonstration show that regime without asking every browser to perform all the work?
+1. Is Buffon's needle a good method for calculating $\pi$? Can its underlying Monte Carlo idea still be useful for other problems?
+2. Here we know the reference value $\pi$. What evidence could we use when the true solution is unknown?
+3. Why might an error curve plateau or increase as $N$ grows?
+4. If an ordinary implementation becomes impractical at $N=10^8$, how might we make it faster without changing the mathematical result?

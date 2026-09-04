@@ -50,7 +50,7 @@ Enter your name and move the entirely unofficial GPA slider. The result should u
 
 Use **Edit code** above the notebook to reveal the Python cells. Select **App view** to hide the cells and return to the interactive display. You can also click inside the notebook and press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> on Windows or Linux to switch views.
 
-::: {.quarto-wasm-local notebook="welcome_mate374.edit.py" title="Welcome to MATE 374: browser-notebook check" height="620" loading="eager"}
+::: {.quarto-wasm-local notebook="welcome_mate374.edit.py" title="Welcome to MATE 374: browser-notebook check" height="620" loading="eager" fullscreen="true"}
 **Printable fallback.** In the browser version, enter a preferred name and move the unofficial GPA slider. The greeting should update immediately. The GPA control is only a joke and has no connection to assessment.
 :::
 

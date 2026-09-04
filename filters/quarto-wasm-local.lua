@@ -54,6 +54,7 @@ function Div(div)
   local offset = quarto.project.offset or "."
   local output_name = exported_stem(notebook) .. ".html"
   local src = pandoc.path.join({ offset, "wasm-local", output_name })
+  local source_href = pandoc.path.join({ offset, "activities", notebook })
   local editable = notebook:match("%.edit%.py$") ~= nil
   if editable then
     src = src .. "?show-chrome=false"
@@ -98,6 +99,7 @@ function Div(div)
   end
 
   src = escape_html(src)
+  source_href = escape_html(source_href)
   local iframe = string.format(
     [[<div class="marimo-embed-frame quarto-wasm-local-frame">
   %s
@@ -114,10 +116,11 @@ function Div(div)
   ></iframe>
   %s
   <details class="marimo-troubleshooting">
-    <summary>Notebook not loading?</summary>
+    <summary>Open, download, or reset notebook</summary>
     <p>The first start may take up to a minute while the browser downloads Python and the required packages.</p>
     <div class="marimo-troubleshooting-actions">
       <a href="%s" target="_blank" rel="noopener">Open notebook directly</a>
+      <a href="%s" download>Download notebook (.py)</a>
       <button class="quarto-wasm-reload" type="button">Reload/reset notebook</button>
     </div>
     <p class="marimo-troubleshooting-note">Reloading resets unsaved changes. If the direct page also fails, send the course page URL, browser name, and a screenshot to the teaching team.</p>
@@ -205,7 +208,8 @@ function Div(div)
     height,
     loading,
     hint_html,
-    src
+    src,
+    source_href
   )
 
   return pandoc.RawBlock("html", iframe)

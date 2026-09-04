@@ -169,16 +169,17 @@ Useful comparisons include `<`, `<=`, `>`, `>=`, `==` (equal to), and `!=` (not 
 A Python function wraps a calculation or sequence of instructions and gives it a name. This lets us test an idea once and reuse it with different inputs. The named inputs in a function definition are called **parameters**.
 
 ```python
-def thermal_expansion(length_0_mm, alpha_per_K, delta_T_K):
-    expansion_mm = alpha_per_K * length_0_mm * delta_T_K
-    return expansion_mm
+def elastic_strain(stress_MPa, modulus_GPa):
+    stress_GPa = stress_MPa / 1000.0
+    strain = stress_GPa / modulus_GPa
+    return strain
 ```
 
 The indented lines form the function body. `return` sends the result back to the code that called the function. To use the function, provide one value for each parameter:
 
 ```python
-thermal_expansion(100.0, 23e-6, 80.0)    # returns 0.184 mm
-thermal_expansion(250.0, 12e-6, 150.0)   # returns 0.45 mm
+elastic_strain(100.0, 200.0)    # returns 0.0005
+elastic_strain(250.0, 70.0)     # returns about 0.00357
 ```
 
 A programming function can wrap more than a mathematical formula. It can contain conditions, loops, data processing, and plotting instructions. Giving the function and its parameters descriptive names helps another reader connect the Python code to the physical model.
@@ -270,76 +271,208 @@ Unlike a list, a NumPy array is designed for numerical operations on the whole c
 
 ## Working with marimo
 
-Course activities run in [marimo](https://docs.marimo.io/) notebooks embedded on the site. Nothing to install — they run in the browser via WebAssembly.
+Course activities run in [marimo](https://docs.marimo.io/) notebooks embedded on the site. They use ordinary Python and run in your browser through WebAssembly, so there is nothing to install for these activities.
 
-### Variable scope is per-cell
+A marimo notebook is **reactive**. When you change a value or run a cell, marimo automatically runs the cells that depend on it. This behaviour lets a slider update a calculation and plot without requiring you to find and rerun every later cell yourself.
 
-Each cell sees variables **returned by other cells**. A name defined but not returned stays local to that cell. If two cells return the same name, marimo flags the conflict.
+### One definition, one place
 
-### Edit ↔ App view
+A normal Python script can assign a new value to the same variable many times. In a traditional notebook, it is also possible to run cells in an arbitrary order and leave old values hidden in memory. The visible code and the stored values can then disagree.
 
-Press **Ctrl+.** (Windows / Linux) or **⌘.** (macOS) to toggle, or use the button above the notebook.
 
-### UI elements you will encounter
+::: {.callout-important}
+## Do not redefine global names
 
-| Widget | Purpose |
-|---|---|
-| `mo.ui.slider(...)` | drag to pick a number |
-| `mo.ui.number(...)` | type a number |
-| `mo.ui.dropdown(...)` | pick from a list |
-| `mo.ui.text(...)` | free-form text |
-| `mo.ui.switch(...)` | on / off |
-
-Read the current value with `.value`. Change the widget → downstream cells re-run automatically.
-
-### Try it
-
-Open **Edit code**, move the sliders, read how the cells depend on each other.
-
-::: {.quarto-wasm-local notebook="first_marimo.edit.py" title="Your first marimo calculation" height="900" loading="eager"}
-**Static fallback.** For $L_0=100\,\mathrm{mm}$, $\alpha=23\times10^{-6}\,\mathrm{K^{-1}}$, and $\Delta T=100\,\mathrm{K}$, the predicted expansion is $0.23\,\mathrm{mm}$.
+**Define** each shared variable or function in **one cell only**. To change it, edit that original cell rather than assigning the same name again in a later cell.
 :::
+
+The small notebook below deliberately defines `i` in two cells. Open **Edit code**, read the error, and follow the instruction between the two code cells. The name `i` is intentionally vague so that the conflict is easy to see; it is not a naming pattern to copy into engineering calculations.
+
+::: {.quarto-wasm-local notebook="s01_name_clash.edit.py" title="A deliberate marimo name clash" height="780" loading="eager" fullscreen="true"}
+**Static fallback.** This demonstration intentionally defines `i` in two cells. Changing both occurrences in the lower cell to `_i` makes that value private to the cell and removes the conflict.
+:::
+
+Global names are normal in marimo. The rule is simply that each global name has one defining cell. Use descriptive names, and edit the defining cell when a value needs to change.
+
+For a calculation-heavy cell, a function can keep short-lived intermediate names together:
+
+```python
+def calculate_mean(values):
+    total = sum(values)
+    return total / len(values)
+
+mean_value = calculate_mean([2.1, 2.4, 2.2])
+mean_value
+```
+
+Here, `calculate_mean` and `mean_value` are descriptive global names, each defined once. The temporary name `total` exists only while the function runs.
+
+Why does marimo enforce this rule? In a traditional notebook, cells can be run in an arbitrary order, leaving values in memory that no longer match the visible code. Marimo instead builds a dependency graph from the names each cell defines and uses. Rejecting competing definitions helps keep automatic recalculation reproducible. Marimo's post [*Lessons learned reinventing the Python notebook*](https://marimo.io/blog/lessons-learned) gives more background. The rule cannot prevent every kind of messy program, but it blocks one common route to “spaghetti code.”[^spaghetti-code]
+
+![Without a clean dependency structure, code can become difficult to trace: spaghetti code.](../../assets/S01-spaghetti-code.jpg){#fig-spaghetti-code fig-alt="A dense rack of tangled black cables resembling strands of spaghetti" width="60%" fig-align="center"}
+
+
+[^spaghetti-code]: The locally stored photograph *Spaghetti Code* is by Kuba Bożanowski, obtained from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Spaghetti_Code_%284116825468%29.jpg), and used under [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+
+### Edit view and App view
+
+Select **Edit code** above an embedded notebook when you need to inspect or change its Python cells. Select **App view** when you want to use only the controls and results. You can also click inside the notebook and press **Ctrl+.** on Windows or Linux, or **⌘.** on macOS, to switch views.
+
+### Ready-to-use UI controls
+
+Marimo includes controls for common inputs. Some names you will encounter are:
+
+- `mo.ui.slider(...)` and `mo.ui.number(...)` for numerical values;
+- `mo.ui.dropdown(...)`, `mo.ui.radio(...)`, and `mo.ui.multiselect(...)` for choices;
+- `mo.ui.text(...)` and `mo.ui.text_area(...)` for text;
+- `mo.ui.switch(...)` and `mo.ui.checkbox(...)` for on/off choices; and
+- `mo.ui.button(...)` for an explicit action.
+
+A control's current input is available through its `.value`. When a cell uses that value, changing the control causes the dependent calculation to update.
+
+::: {.callout-note}
+## Your job is the numerical part
+
+Most course notebooks will provide the UI code. You are not expected to memorize every control or build the interface from scratch. Your main job is to identify and edit the numerical model, algorithm, or interpretation requested by the activity.
+:::
+
+Open **Edit code** in the box below to see the names of several controls. Try them if you wish; this gallery is only an introduction to what is available.
+
+::: {.quarto-wasm-local notebook="s01_ui_gallery.edit.py" title="A small gallery of marimo UI controls" height="950" loading="eager" fullscreen="true"}
+**Static fallback.** Common marimo controls include sliders, number and text inputs, dropdowns, radio buttons, multiple selections, switches, and checkboxes.
+:::
+
+## Running a marimo notebook elsewhere
+
+The embedded browser notebook is the default environment for this course. It is enough for the regular activities and assignments, and those assignments will **not** require a Molab account or a local Python installation. Move to another environment only when an activity specifically requires it or when you want to experiment independently.
+
+Edits made inside an embedded notebook may be lost when the page is refreshed. Use **Open, download, or reset notebook** below the notebook to save its `.py` source before leaving the page. A marimo notebook is one ordinary Python file, so the same file can be opened in the browser, on your laptop, or later on a remote computer.
+
+### Start a separate notebook in the browser
+
+For a blank notebook, open the free [marimo WebAssembly playground](https://marimo.app/). It runs locally in the browser and does not require an account. Save your work with the download button before closing the page; the playground should not be treated as permanent storage.
+
+### Use Molab when an activity requires native computing
+
+[Molab](https://molab.marimo.io/) is marimo's hosted notebook service. Unlike the WebAssembly notebooks embedded here, it runs notebooks in a native cloud environment and can support packages or computational features that are unavailable in the browser. It requires sign-in and stores notebooks in an online workspace.
+
+We will use Molab for a guided comparison in [L04](../../units/01/L04/index.qmd). It is not required for ordinary assignments. When Molab is necessary, the course page will provide a direct **Open in Molab** link and state what resource or package the activity needs.
+
+### Run a downloaded notebook on your own computer
+
+Local execution is optional. It is useful when you want a durable copy, prefer your own editor, or need to work without keeping the course page open.
+
+1. Download the notebook's `.py` file from the course page.
+2. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) once on your computer.
+3. Open a terminal in the folder containing the downloaded file and run:
+
+   ```bash
+   uvx marimo edit --sandbox notebook-name.py
+   ```
+
+The `--sandbox` option reads the notebook's dependency list and creates an isolated environment for it. Your browser will open the editable notebook, and saving in marimo updates the same `.py` file. Return to the terminal and press **Ctrl+C** when you are finished.
+
+Later activities may run the same notebook format on a departmental workstation or remote computing system. Those activities will provide connection, storage, and submission instructions; you are not expected to configure remote access during this seminar.
 
 ---
 
-## Implement your function and plot
+## Scientific plotting with Matplotlib
 
-NumPy handles arrays. Matplotlib draws figures. You will use both in almost every activity.
+[Matplotlib](https://matplotlib.org/) is Python's standard library for scientific plotting. A basic plot requires only a few steps: import Matplotlib, prepare the data, draw each data series, and add the labels that make the figure interpretable.
+
+### A plot in a Python script
+
+The following script plots two temperature histories from a small illustrative dataset:
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(0, 10, 200)   # 200 points from 0 to 10
-y = np.sin(x)                  # element-wise — no loop
+time_s = np.array([0, 10, 20, 30, 40, 50])
+surface_temperature_K = np.array([1100, 970, 860, 770, 700, 650])
+core_temperature_K = np.array([1100, 1050, 970, 880, 800, 740])
 
-plt.plot(x, y)
-plt.xlabel("x")
-plt.ylabel("sin(x)")
+fig, ax = plt.subplots()
+ax.plot(time_s, surface_temperature_K, marker="o", label="surface")
+ax.plot(time_s, core_temperature_K, marker="s", label="core")
+
+ax.set_xlabel("Time (s)")
+ax.set_ylabel("Temperature (K)")
+ax.set_title("Cooling histories")
+ax.legend()
+ax.grid(alpha=0.3)
+fig.tight_layout()
+
 plt.show()
 ```
 
-### Useful NumPy at a glance
+Each call to `ax.plot(...)` adds one data series. The first input supplies the horizontal coordinates and the second supplies the vertical coordinates. `marker` changes how the sampled points are drawn, while `label` supplies the name shown by `ax.legend()`.
 
-| Function | What it does |
-|---|---|
-| `np.linspace(a, b, n)` | `n` evenly spaced points from `a` to `b` |
-| `np.array([...])` | array from a list |
-| `np.zeros(n)` | `n` zeros |
-| `np.sin`, `np.cos`, `np.exp`, `np.log` | element-wise math |
-| `np.pi` | $\pi$ |
-| `np.max(a)`, `np.min(a)`, `np.mean(a)` | reductions |
+The title, axis labels, units, legend, and grid do not change the data, but they make the figure readable. In engineering plots, always state what each axis represents and include its units.
 
-### Your turn — interatomic potentials
+### The same plot in a marimo cell
 
-Three classical pair potentials describe how the energy between two atoms varies with separation $r$:
+The Matplotlib instructions are unchanged in marimo. The main difference is at the end: instead of calling `plt.show()`, return the figure from a function and make that figure the cell's final expression.
 
-- **Lennard-Jones:** $\displaystyle V(r)=4\varepsilon\!\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^{6}\right]$
-- **Morse:** $\displaystyle V(r)=D_e\!\left[1-e^{-a(r-r_e)}\right]^2 - D_e$
-- **Sutherland:** $\displaystyle V(r)=\begin{cases}-\varepsilon & r \le \sigma \\ -\varepsilon\!\left(\frac{\sigma}{r}\right)^{6} & r > \sigma\end{cases}$
+```python
+import numpy as np
+import matplotlib.pyplot as plt
 
-Fill in the function bodies, plot all three curves, then use `np.min`, `np.argmin`, and a sign-change check to read the well depth and zero crossing from the discrete grid.
 
-::: {.quarto-wasm-local notebook="s01_plot_exercise.edit.py" title="Interatomic potentials: implement and plot" height="1200" loading="eager"}
-**Static fallback.** Students implement the Lennard-Jones, Morse, and Sutherland pair potentials and plot all three on a single figure over a range of interatomic separations.
+def plot_temperature_histories():
+    time_s = np.array([0, 10, 20, 30, 40, 50])
+    surface_K = np.array([1100, 970, 860, 770, 700, 650])
+    core_K = np.array([1100, 1050, 970, 880, 800, 740])
+
+    fig, ax = plt.subplots()
+    ax.plot(time_s, surface_K, marker="o", label="surface")
+    ax.plot(time_s, core_K, marker="s", label="core")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Temperature (K)")
+    ax.set_title("Cooling histories")
+    ax.legend()
+    ax.grid(alpha=0.3)
+    fig.tight_layout()
+    return fig
+
+
+plot_temperature_histories()
+```
+
+Marimo displays the returned `fig` as the output of the cell. The descriptive function name `plot_temperature_histories` can be shared with other cells; it simply needs to be defined in one place. Variables such as `fig` and `ax` remain ordinary temporary values inside the function.
+
+### From equation to code to plot: the Lennard-Jones potential
+
+This final demo shows a pattern that will recur throughout the course:
+
+$$
+\text{equation} \longrightarrow \text{Python function} \longrightarrow \text{plot}.
+$$
+
+The Lennard-Jones potential dates to 1924; [Schwerdtfeger and Wales (2024)](https://doi.org/10.1021/acs.jctc.4c00135) review its hundred-year history and continuing use. It models how the interaction energy between two neutral atoms or molecules changes with their separation $r$. The curve below shows the shape you should obtain: strong repulsion at short range, an attractive well, and an interaction that approaches zero at large separation.
+
+![Characteristic shape of the 12–6 Lennard-Jones potential.](../../assets/S01-lennard-jones-potential.png){#fig-lj-potential fig-alt="A Lennard-Jones potential curve that rises steeply at short distance, crosses zero at sigma, reaches a minimum of minus epsilon, and approaches zero from below at large distance" width="62%" fig-align="center"}
+
+::: {.small}
+**Image credit:** [Olaf Lenz and Rainald62](https://commons.wikimedia.org/wiki/File:12-6-Lennard-Jones-Potential.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+:::
+
+You will see later in this course that the Lennard-Jones potential, and the forces between atoms derived from it, play an important role in our computational studies. For now, take $\varepsilon$ and $\sigma$ as parameters supplied from historical measurements; this example uses representative values for argon.
+
+The equation is
+
+$$
+V(r)=4\varepsilon\left[
+\left(\frac{\sigma}{r}\right)^{12}
+-
+\left(\frac{\sigma}{r}\right)^6
+\right],
+$$
+
+where $V$ is the pair interaction energy, $r$ is the separation, $\varepsilon$ sets the well depth, and $\sigma$ is the separation where $V=0$.
+
+The notebook already contains the distance range, the supplied argon values of $\varepsilon$ and $\sigma$, and the complete plotting code. Open **Edit code**, find `LJ_potential`, and replace the `...` with the expression above. That is the only code you need to add. Once the function is correct, marimo recalculates the dependent cell and displays the plot automatically.
+
+::: {.quarto-wasm-local notebook="s01_plot_exercise.edit.py" title="Implement the Lennard-Jones potential" height="760" loading="eager" fullscreen="true"}
+**Static fallback.** In the browser activity, students complete one `LJ_potential` function. The supplied code then plots the potential over the predefined distance range.
 :::
