@@ -346,7 +346,7 @@ Open **Edit code** in the box below to see the names of several controls. Try th
 
 The embedded browser notebook is the default environment for this course. It is enough for the regular activities and assignments, and those assignments will **not** require a Molab account or a local Python installation. Move to another environment only when an activity specifically requires it or when you want to experiment independently.
 
-Treat edits made inside an embedded notebook as temporary. **Open a fresh copy in marimo.app** loads the original course notebook in a separate tab while keeping marimo's standard sidebar hidden. Edits already made in the embedded copy do not transfer to the new tab. **Reload/reset notebook** discards your edits and restores the course version.
+Treat edits made inside an embedded notebook as temporary. **Open notebook directly** loads a fresh copy in a separate tab with marimo's full editing chrome and sidebar. Edits already made in the embedded copy do not transfer to the new tab, and the browser notebook does not reliably preserve changes across a reload. To keep work from the direct editor, use marimo's own save or download command before closing it. **Reload/reset notebook** discards edits and restores the course version.
 
 ### Start a separate notebook in the browser
 
