@@ -96,6 +96,9 @@ website:
             text: "S01 · Python and marimo"
       - href: assignments/index.qmd
         text: Assignments
+        contents:
+          - href: assignments/A1/index.qmd
+            text: "A1 · Trust a computational result"
       - href: project/index.qmd
         text: Project
 

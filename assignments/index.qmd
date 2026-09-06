@@ -14,6 +14,10 @@ format:
 Use **five focused computational investigations plus one staged team project**. A1–A3 are individual; A4–A5 are completed in pairs with a short individual interpretation. This gives each major topic a roughly two-week assessment cycle without creating five full sets of individual marking. The recommended partition is **20% assignments + 20% project + 20% midterm + 40% final**. Exact due dates still require confirmation.
 :::
 
+## Current assignment briefs
+
+- [**A1 · Trust a computational result**](A1/index.qmd) — error sources, floating-point precision, Lennard-Jones cutoff error, and a NumPy regular-solution map.
+
 ## Evidence from Fall 2025
 
 The available Fall 2025 archive contains:
@@ -68,12 +72,11 @@ A4 should be released early enough that the October 28 midterm does not consume 
 
 ## Common submission form
 
-Each assignment should be a focused marimo investigation, normally completable in about **2–3 hours per student**, submitted as:
+Assignments remain **PDF-based** and should normally be completable in about **2–3 hours per student**. Linked marimo playgrounds and code scaffolds support the work, but they are opened directly rather than embedded in the assignment brief. Unless an individual brief says otherwise, students submit:
 
-1. an executable marimo `.py` notebook or approved exported artifact;
-2. a concise static HTML/PDF view for reliable grading and accessibility;
-3. a short engineering conclusion embedded in the notebook—not a separate long report;
-4. for A4–A5, clearly identified individual interpretation cells from both partners.
+1. one PDF containing the requested calculations, figures, code evidence, and concise interpretation;
+2. enough code and output in the PDF to make each computational result reproducible; and
+3. for A4–A5, clearly identified individual interpretations from both partners.
 
 Every assignment must show:
 

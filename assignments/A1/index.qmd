@@ -1,0 +1,316 @@
+---
+title: "MAT E 374 Assignment 1"
+subtitle: "Error, floating-point precision, pair interactions, and vectorized free energy"
+format:
+  html:
+    toc: true
+  pdf:
+    output-file: A1.pdf
+    toc: false
+---
+
+<clearly state the deadline: Monday Sept 21, 12:00 pm (noon)>
+
+::: {.content-visible when-format="html"}
+::: {.callout-note}
+## Printable assignment
+
+- [Open or download the PDF handout](A1.pdf)
+- Submit the assignment as **one PDF** through Canvas.
+:::
+:::
+
+<previous purpose is deleted, no need to bring back>
+
+## Submission
+
+<make concise instructions of the submission, no need to make complex>
+
+Submit **one PDF** containing your calculations, plots, and written responses. Include your name and student ID. Place relevant code next to the result it produces or include a clearly labelled code appendix. Every physical quantity and plot axis must include units where applicable.
+
+You may work in the browser-based marimo editor, a local Python environment, or another appropriate tool. Keep a copy of your working code until the assignment has been graded, but only the PDF is submitted unless Canvas states otherwise.
+
+This is an individual assignment. You may reuse general patterns supplied in lectures, S01, and the playgrounds below, but the assigned calculations, figures, and interpretations must be your own.
+
+## Playable code and scaffold
+
+The following browser notebooks are reference playgrounds, not answer keys. They open directly in marimo rather than being embedded in this handout. Use **Save** or **Cmd+S/Ctrl+S** in the direct editor to download a `.py` copy before closing the tab.
+
+1. [Floating-point increment playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_float_precision.html)
+2. [Lennard-Jones cutoff playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_lj_cutoff.html)
+3. [Regular-solution free-energy playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_regular_solution.html)
+
+The Lennard-Jones playground uses a small one-dimensional chain, while the assignment uses a three-dimensional cluster. The regular-solution playground draws a one-dimensional curve, while the assignment requires a two-dimensional map. You must make the required extensions and report the assigned systems yourself.
+
+---
+
+## Problem 1 (15 marks)
+
+This is a conceptual question that only requires *qualitative
+answers*. Write your answers in concise sentences.
+
+### 1.1 Sources of error — 9 marks
+
+Read Lectures 01 to 04, identify at least **three distinct sources of error** that can affect a numerical or computational result. For each source:
+
+1. name the error source;
+2. explain it in one or two sentences; and
+3. give one example of how it could appear in a calculation.
+
+
+### 1.2 Computational effort — 6 marks
+
+A computer program is used to calculate the total energy of a system containing many millions of atoms. Two algorithms use this program to obtain the same result:
+
+- **Algorithm A** calls the program many times, each time with a small input.
+- **Algorithm B** calls the program far fewer times, but each call uses a much larger input.
+
+Would Algorithm B necessarily finish sooner? Explain your reasoning. What information would you need to compare the computational effort of the two algorithms?
+
+---
+
+## Problem 2 · Binary and floating-point numbers — 20 marks
+
+### 2.1 Binary to decimal — 4 marks
+
+Convert
+
+$$
+(1011)_2
+$$
+
+to decimal form. Show the conversion manually using powers of two, then verify your answer with Python. You may use
+
+```python
+int("1011", 2)
+```
+
+for the verification.
+
+### 2.2 Decimal to binary — 4 marks
+
+Convert the decimal integer
+
+$$
+27_{10}
+$$
+
+to binary form. Show the manual conversion, then verify it using `bin(27)` or an equivalent Python method.
+
+### 2.3 When does a small increment disappear? — 12 marks
+
+IEEE binary32 (`float32`) carries approximately **7--8 significant decimal digits**, while binary64 (`float64`) carries approximately **15--17 significant decimal digits**. This does not mean that either format has one fixed absolute error at every magnitude.
+
+Use NumPy to inspect the machine epsilon near 1.0:
+
+```python
+import numpy as np
+
+print(np.finfo(np.float32).eps)
+print(np.finfo(np.float64).eps)
+```
+
+Now run:
+
+```python
+x32 = np.float32(1.0)
+
+print(x32 + np.float32(1e-6))
+print(x32 + np.float32(1e-7))
+print(x32 + np.float32(1e-8))
+```
+
+Compare it with:
+
+```python
+x64 = np.float64(1.0)
+
+print(x64 + np.float64(1e-8))
+print(x64 + np.float64(1e-12))
+print(x64 + np.float64(1e-16))
+```
+
+Report the machine epsilon values and all six addition results. Explain why a sufficiently small increment can disappear when added to a floating-point number. Relate your observation to the approximate significant-digit counts above.
+
+[Open the floating-point playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_float_precision.html) to vary the increment and compare it with the spacing near 1.0.
+
+---
+
+## Problem 3 · Lennard-Jones energy and a truncation study — 40 marks
+
+The 12--6 Lennard-Jones pair potential is
+
+$$
+V(r)=4\varepsilon\left[
+\left(\frac{\sigma}{r}\right)^{12}
+-
+\left(\frac{\sigma}{r}\right)^6
+\right].
+$$
+
+Use the representative argon parameters introduced in S01:
+
+$$
+\varepsilon=0.0103\ \mathrm{eV},
+\qquad
+\sigma=3.40\ \text{\AA}.
+$$
+
+### 3.1 Three atoms: calculate every pair — 12 marks
+
+Consider three atoms at these Cartesian coordinates, in \AA:
+
+| Atom | $x$ | $y$ | $z$ |
+|---|---:|---:|---:|
+| 1 | 0.0 | 0.0 | 0.0 |
+| 2 | 4.0 | 0.0 | 0.0 |
+| 3 | 0.0 | 4.5 | 0.0 |
+
+For every unique pair:
+
+1. calculate the distance $r_{ij}$ from the coordinates;
+2. calculate the pair energy $V(r_{ij})$; and
+3. calculate the total energy
+
+$$
+E_{\mathrm{tot}}=\sum_{i<j}V(r_{ij}).
+$$
+
+Show the three pair distances and three pair energies clearly. As one check on the distance calculation, $r_{12}=4.000$ \AA.
+
+### 3.2 How many unique pairs? — 6 marks
+
+For a system of $N$ atoms, state or derive the number of unique pairs $i<j$ when every atom interacts with every other atom. Evaluate it for:
+
+1. $N=3$;
+2. $N=125$; and
+3. $N=10{,}000$.
+
+Briefly describe how the pair count grows with $N$.
+
+### 3.3 A finite argon cluster — 8 marks
+
+Construct a $5\times5\times5$ cubic cluster with spacing $a=4.0$ \AA. **Do not use periodic boundary conditions.** The following code is one way to generate the coordinates:
+
+```python
+import numpy as np
+
+a = 4.0  # Angstrom
+coords = np.array(
+    [
+        (i * a, j * a, k * a)
+        for i in range(5)
+        for j in range(5)
+        for k in range(5)
+    ],
+    dtype=float,
+)
+```
+
+Calculate the total Lennard-Jones energy using **all unique atom pairs**. Treat this all-pairs value as the reference for the truncation study.
+
+### 3.4 Cutoff radius and truncation error — 14 marks
+
+The interaction approaches zero as $r$ becomes large. Approximate the total energy by omitting interactions beyond a cutoff radius $r_c$:
+
+$$
+E(r_c)=\sum_{i<j,\ r_{ij}\le r_c}V(r_{ij}).
+$$
+
+For this assignment, simply omit pairs with $r_{ij}>r_c$. Do not apply an energy shift or another cutoff correction.
+
+Repeat the calculation for
+
+$$
+r_c=5,\ 6,\ 7,\ 8,\ 9,\ 10,\ 12,\ 16\ \text{\AA}.
+$$
+
+For each cutoff, report:
+
+1. the number of retained pair interactions;
+2. the truncated total energy $E(r_c)$;
+3. the absolute error $|E(r_c)-E_{\mathrm{ref}}|$; and
+4. the relative error $100|E(r_c)-E_{\mathrm{ref}}|/|E_{\mathrm{ref}}|$ in percent.
+
+Make **one plot** showing truncation error versus the number of retained pair interactions. A logarithmic vertical axis is optional if it makes the trend clearer.
+
+In two or three sentences, answer:
+
+> **How much pair-interaction work can be discarded before the cluster energy changes appreciably?**
+
+[Open the cutoff playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_lj_cutoff.html) to inspect the same idea in a smaller one-dimensional system before implementing the assigned cluster.
+
+::: {.callout-important}
+## Cutoff radius is not a neighbour-search algorithm
+
+In this exercise, count the number of retained pair-energy evaluations as the work being approximated. A naïve program may still calculate every pairwise distance before applying the cutoff. Production molecular-dynamics codes use neighbour lists or spatial searches; you do not need to implement one here.
+:::
+
+---
+
+## Problem 4 · A two-dimensional regular-solution map — 25 marks
+
+Consider the regular-solution free energy of mixing
+
+$$
+\Delta G_{\mathrm{mix}}(x,T)
+=
+\Omega x(1-x)
++RT\left[x\ln x+(1-x)\ln(1-x)\right],
+$$
+
+where $x$ is the mole fraction of component B. Use
+
+$$
+\Omega=20.0\ \mathrm{kJ\,mol^{-1}},
+\qquad
+R=8.314\times10^{-3}\ \mathrm{kJ\,mol^{-1}\,K^{-1}}.
+$$
+
+### 4.1 Build and verify the NumPy grid — 13 marks
+
+Create
+
+```python
+x = np.linspace(0.01, 0.99, 200)
+T = np.linspace(300.0, 1500.0, 250)
+```
+
+Use NumPy broadcasting or `np.meshgrid` to evaluate $\Delta G_{\mathrm{mix}}$ over **all combinations of composition and temperature**, without an explicit Python loop over the grid points.
+
+Before constructing the full grid, verify your formula at one point:
+
+$$
+\Delta G_{\mathrm{mix}}(x=0.5,T=300\ \mathrm{K})
+\approx3.27\ \mathrm{kJ\,mol^{-1}}.
+$$
+
+Report the shape of the resulting two-dimensional free-energy array. Explain which array dimension corresponds to temperature and which corresponds to composition.
+
+### 4.2 Plot and interpret the map — 12 marks
+
+Make one two-dimensional heatmap, `pcolormesh`, or filled-contour plot of $\Delta G_{\mathrm{mix}}(x,T)$. The figure must include:
+
+- composition $x$ on the horizontal axis;
+- temperature $T$ in K on the vertical axis;
+- a colour scale labelled in $\mathrm{kJ\,mol^{-1}}$; and
+- an informative title or caption.
+
+In one or two sentences, describe the main change in the free-energy landscape as temperature increases.
+
+[Open the regular-solution playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_regular_solution.html) to inspect the one-dimensional array calculation that you will extend to two dimensions.
+
+---
+
+## Submission checklist
+
+Before uploading your PDF, confirm that it contains:
+
+- all requested manual conversions, numerical values, and short explanations;
+- the three-atom distance and pair-energy calculation;
+- the all-pairs cluster reference and cutoff table;
+- the truncation-error plot;
+- the regular-solution array shape and checkpoint value;
+- the labelled two-dimensional free-energy plot;
+- units and sensible numerical precision throughout; and
+- enough relevant code to make each computational result reproducible.

@@ -87,6 +87,8 @@ For each class, author only what that medium does best:
 
 A class does not automatically require all three. “No notebook needed” and “no slides needed” are valid decisions.
 
+For each lecture, target **4–5 main figures, counting interactive demos toward that total, with no more than 3 demos**. Use L01, L02, and S01 as prose-style references: explain the question, show the equation or code, and ask students to predict or interpret a result.
+
 ## Delivery-model options and weights
 
 Weights reflect fit to pedagogical goals, maintainability, print quality, classroom interactivity, and migration cost.
