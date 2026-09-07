@@ -1,192 +1,299 @@
 ---
 title: "L04 · How do I make a computer faster?"
-subtitle: "The same Buffon algorithm on Python, NumPy, compiled CPUs, and a GPU"
+subtitle: "From interpreted loops to NumPy arrays, Numba JIT, parallelism, and GPUs"
 body-classes: lecture-page
 ---
 
 ::: {.callout-note}
 ## Central question
 
-**How can we make a numerical program practical when the required number of steps becomes very large?**
+**Given a typical numerical program, how can we make it run faster when problem sizes scale up?**
 :::
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to:
 
-1. **Run** a supplied numerical experiment in a full Python environment on Molab.
-2. **Measure** execution time and estimate how runtime changes with problem size.
-3. **Recognize** vectorization, batching, just-in-time compilation, CPU parallelism, and GPU acceleration as different implementation strategies.
-4. **Explain** why an optimization can help one problem size or numerical structure but not another.
-5. **Compare** methods using total cost and accuracy rather than iteration count alone.
+1. **Profile** execution time and estimate how computational cost scales with problem size $N$.
+2. **Distinguish** five acceleration mechanisms: pure interpreted loops, NumPy array vectorization, Numba JIT compilation, multi-core CPU parallelism, and GPU hardware acceleration.
+3. **Analyze** the trade-off between memory overhead and execution speed in vectorized calculations.
+4. **Explain** why JIT compilation incurs first-call warmup latency and how random seeds must be managed across parallel workers.
+5. **Connect** these acceleration paradigms to large-scale materials grid simulations, including the 2D Ising and Potts microstructure models.
 
-## From $10^6$ to $10^8$ steps
+## The motivation: from $10^6$ to $10^9$ steps
 
-In L03 we explained why an error curve can stop improving. You may also have noticed that the earlier notebooks limited some calculations to approximately $N=10^6$. The limitation was partly practical: a transparent Python loop can keep a browser busy for too long.
-
-We begin by timing the original Buffon function at several manageable values of $N$. If $10^6$ throws take $t$ seconds and the cost per throw remains similar, a first estimate is
+In L02 and L03 we learned that calculating numerical $\pi$ via Buffon's needle has a sampling error scaling as:
 
 $$
-T(10^8)\approx100t.
+\sigma_{\widehat{\pi}} \approx \frac{2.37}{\sqrt{N}}.
 $$
 
-This estimate introduces **scaling**: how runtime or memory changes as the size of the calculation changes. We should measure the relationship rather than assume it remains exact, but it gives us a prediction before we attempt the expensive run.
-
-There are two broad ways to finish sooner:
+To achieve five trustworthy decimal digits (an absolute error below $5 \times 10^{-5}$), we determined that we need:
 
 $$
-\boxed{\text{choose an algorithm that needs less work}}
-\qquad\text{or}\qquad
-\boxed{\text{execute the same work more efficiently}}.
+N \approx \left(\frac{2.37}{5 \times 10^{-5}}\right)^2 \approx 2.3 \times 10^9\ \text{throws}.
 $$
 
-L02 compared algorithms with different convergence rates. In this lecture, we keep the mathematical Buffon method and focus on how its repeated operations are executed.
+If a standard Python loop processes $10^6$ needles in approximately $0.35$ seconds, how long would $10^9$ needles take?
 
-## Moving to Molab
+$$
+T(10^9) \approx 1000 \times 0.35\ \mathrm{s} = 350\ \mathrm{seconds} \approx 6\ \mathrm{minutes}.
+$$
 
-The performance activity uses Molab, a hosted environment for full Python marimo notebooks ([marimo team, n.d.](../references.qmd#ref-marimomolab)). Unlike the small browser-only notebooks, Molab can provide native packages and, when available, access to accelerator hardware.
+In a materials engineering context—whether following billions of molecular dynamics timesteps, simulating grain boundary coarsening on a $2048 \times 2048$ grid, or computing pairwise interatomic potentials—computational speed is not just convenience. It determines whether an engineering calculation is practical.
 
-Open the activity link supplied in class and on Canvas. Sign in with a Google account when prompted; a Gmail address can be used. Do not place private or restricted information in the notebook. The first run may take time while the environment starts and installs or loads its dependencies.
+This will be our final exploration of the Buffon needle problem before applying our numerical toolkit to nonlinear equations and materials systems. We keep the exact same mathematical method and examine how to make it run faster.
 
-Record the environment shown by the notebook, the problem size, and whether a timing includes first-time setup. A fair benchmark must distinguish useful calculation time from startup or compilation time.
+---
 
-## The original Python loop
+## 1. The baseline: pure Python loop
 
-The direct Buffon algorithm follows one needle at a time:
+The direct implementation follows one needle at a time:
 
-```text
-draw a random position
-draw a random orientation
-test whether the needle crosses a line
-update the crossing count
-repeat N times
+```python
+import math
+import random
+
+def buffon_python(N: int) -> int:
+    crossings = 0
+    for _ in range(N):
+        d = 0.5 * random.random()
+        theta = 0.5 * math.pi * random.random()
+        if d <= 0.5 * math.sin(theta):
+            crossings += 1
+    return crossings
 ```
 
-This form is readable, but the Python interpreter manages every loop iteration. The arithmetic per needle is small, so interpreter overhead can become a large part of the runtime.
+This code is readable and transparent. However, at every single iteration, the standard Python interpreter must:
+- dynamically inspect variable types;
+- dispatch function calls (`random.random()`, `math.sin()`);
+- manage integer arithmetic and loop counters.
 
-Time the function for increasing $N$ and predict the time for $10^8$ throws. Do not run an input that would occupy the shared environment for an unreasonable time merely to confirm the prediction.
+The actual arithmetic ($d \le 0.5 \sin\theta$) requires only a few CPU clock cycles, but the Python interpreter overhead consumes over 90% of the runtime!
 
-Before optimizing, retain the original implementation as a reference. Every faster version must still estimate the same quantity and produce statistically consistent results.
+---
 
-## Vectorization and memory
+## 2. Operating on array data: NumPy vectorization
 
-NumPy allows us to generate arrays of positions and orientations, evaluate the crossing test over those arrays, and count all crossings using compiled numerical operations ([Harris et al., 2020](../references.qmd#ref-harris2020numpy)). The expensive repetition then occurs inside compiled library code instead of an interpreted Python loop.
+Instead of handing the CPU one needle at a time, **vectorization** expresses operations over entire continuous arrays of numbers in memory:
+
+```python
+import numpy as np
+
+def buffon_numpy(N: int) -> int:
+    rng = np.random.default_rng(374)
+    d = 0.5 * rng.random(N)
+    theta = 0.5 * np.pi * rng.random(N)
+    crossings = np.count_nonzero(d <= 0.5 * np.sin(theta))
+    return int(crossings)
+```
+
+In NumPy, the loop over $N$ items runs in pre-compiled C routines with contiguous memory layout and modern SIMD (Single Instruction, Multiple Data) processor instructions.
+
+### The memory trade-off and batching
+
+Vectorization is fast, but it is not free: it trades **memory for speed**. 
+
+For $N = 10^8$ binary64 (`float64`) numbers:
+- `d` takes $10^8 \times 8\ \text{bytes} = 800\ \text{MB}$;
+- `theta` takes $800\ \text{MB}$;
+- intermediate sine evaluation and boolean masks take several hundred additional megabytes.
+
+Attempting to allocate $N = 10^9$ elements at once would demand over 10 GB of RAM, causing memory errors or slow disk swapping. The engineering solution is **batching** (chunking):
+
+```python
+def buffon_numpy_batched(N: int, batch_size: int = 1_000_000) -> int:
+    rng = np.random.default_rng(374)
+    remaining = N
+    crossings = 0
+    while remaining > 0:
+        cur = min(remaining, batch_size)
+        d = 0.5 * rng.random(cur)
+        theta = 0.5 * np.pi * rng.random(cur)
+        crossings += int(np.count_nonzero(d <= 0.5 * np.sin(theta)))
+        remaining -= cur
+    return crossings
+```
+
+Batching keeps peak memory capped at the batch size (e.g., $10^6$ elements $\approx 16\ \text{MB}$) while preserving compiled array speed.
+
+---
+
+## 3. Just-in-Time compilation: Numba
+
+What if your algorithm cannot be neatly vectorized with array operations—for example, when each step depends on the previous step?
+
+We can keep the transparent `for` loop and compile it directly to native machine code at runtime using **Numba**:
+
+```python
+import numba
+import numpy as np
+
+@numba.njit(fastmath=True)
+def buffon_numba(N: int, seed: int = 374) -> int:
+    np.random.seed(seed)
+    crossings = 0
+    for _ in range(N):
+        d = 0.5 * np.random.random()
+        theta = 0.5 * np.pi * np.random.random()
+        if d <= 0.5 * np.sin(theta):
+            crossings += 1
+    return crossings
+```
+
+### Is it really fast?
+
+Yes: Numba uses LLVM to generate optimized machine instructions, achieving speeds comparable to native C or Fortran with **$O(1)$ memory overhead** (no large arrays allocated).
+
+However, two critical engineering factors must be understood:
+
+1. **JIT compilation latency (warmup):**  
+   The first time `buffon_numba` is called, Numba must inspect the argument types, compile LLVM IR, and generate machine code:
+   $$
+   T_{\text{first call}} = T_{\text{compile}} + T_{\text{run}}.
+   $$
+   Subsequent calls reuse the compiled machine code in memory ($T_{\text{later}} \approx T_{\text{run}}$). In benchmarking, always run a small "warmup" call first to measure pure execution time.
+
+2. **Random seeds in compiled code:**  
+   Notice `np.random.seed(seed)` inside the function. Numba maintains its own internal random number generator state separate from Python's global state.
+
+---
+
+## 4. Multi-core CPU parallelization
+
+Modern computers have multiple physical CPU cores (typically 4 to 64 cores). Because each needle throw in Buffon's experiment is completely independent, we can divide the work across cores:
+
+```python
+@numba.njit(parallel=True, fastmath=True)
+def buffon_numba_parallel(N: int, n_threads: int, base_seed: int = 374) -> int:
+    chunk = N // n_threads
+    crossings = 0
+    for t in numba.prange(n_threads):
+        # Distinct random seed per thread is essential!
+        np.random.seed(base_seed + t)
+        local_c = 0
+        for _ in range(chunk):
+            d = 0.5 * np.random.random()
+            theta = 0.5 * np.pi * np.random.random()
+            if d <= 0.5 * np.sin(theta):
+                local_c += 1
+        crossings += local_c
+    return crossings
+```
+
+::: {.callout-warning}
+## Parallel random seed trap
+If every worker thread initialized the same random seed, each thread would generate the exact same sequence of needle throws! You would do $4\times$ or $8\times$ the work to compute the exact same numbers. In parallel stochastic calculations, **each worker must receive an independent random stream**.
+:::
+
+---
+
+## 5. Hardware accelerators: GPUs
+
+A CPU contains a few powerful cores optimized for sequential logic and branching. A **Graphics Processing Unit (GPU)** contains thousands of smaller, simpler cores designed for massive data-parallel throughput:
+
+```python
+import torch
+
+def buffon_pytorch_gpu(N: int, device: str = "cuda", batch_size: int = 5_000_000) -> int:
+    dev = torch.device(device)
+    remaining = N
+    total_crossings = 0
+    while remaining > 0:
+        cur = min(remaining, batch_size)
+        d = 0.5 * torch.rand(cur, device=dev)
+        theta = 0.5 * torch.pi * torch.rand(cur, device=dev)
+        total_crossings += (d <= 0.5 * torch.sin(theta)).sum().item()
+        remaining -= cur
+    if dev.type == "cuda":
+        torch.cuda.synchronize()
+    return total_crossings
+```
+
+### The crossover size
+
+A GPU requires transferring instructions and synchronizing data between host CPU memory and device GPU memory (PCIe bus latency). 
+
+For small $N \le 10^4$, launching a GPU kernel can be *slower* than a simple CPU loop! But as $N$ climbs toward $10^7$ or $10^8$, the GPU outpaces CPU cores by orders of magnitude. The problem size where the GPU becomes faster is called the **crossover size**.
+
+---
+
+## Performance benchmark summary
+
+![Runtime scaling across problem sizes $N$ (left) and effective speedup relative to pure Python at $N = 10^7$ throws (right).](../../../assets/L04-benchmark-scaling.png){#fig-benchmark-scaling fig-cap="Performance benchmark comparing five implementation strategies on modern hardware."}
+
+| Implementation | Primary mechanism | Best suited for | Key limitation / trade-off |
+|---|---|---|---|
+| **Pure Python** | Interpreted bytecode | Quick prototyping | High interpreter overhead |
+| **NumPy array** | Precompiled C/SIMD arrays | Expressive vectorized math | High memory consumption ($O(N)$) |
+| **Numba JIT** | LLVM machine code | Loops that cannot be vectorized | First-call compilation delay |
+| **Numba parallel** | Multi-threaded CPU (`prange`) | Independent CPU chunks | Thread coordination & PRNG stream care |
+| **PyTorch GPU** | Thousands of accelerator cores | Massive data-parallel arrays | Launch overhead & memory transfer |
+
+---
+
+## Interactive in-browser benchmark
+
+Explore how problem size and batching affect performance:
+
+::: {.quarto-wasm-local notebook="l04_speed_benchmark.edit.py" title="Buffon speed benchmark explorer" height="650" loading="eager" fullscreen="true"}
+**Static fallback.** Compares execution times across pure Python, batched NumPy, and reference timings for compiled JIT and GPU implementations.
+:::
+
+---
+
+## Materials connection: 2D Ising & Potts microstructure simulation
+
+Why do these acceleration strategies matter in materials science?
+
+Consider the **2D Ising model**, the foundation of magnetic domain evolution, order–disorder transitions in binary alloys, and grain growth (Potts model).
+
+Each site on an $L \times L$ square lattice represents an atomic spin or species $s_i \in \{-1, +1\}$. The total energy is:
 
 $$
-\boxed{
-\text{vectorization}
-=
-\text{describing operations over whole arrays}
-}
+E = -J \sum_{\langle i, j \rangle} s_i s_j.
 $$
 
-This does not mean that NumPy “packs the numbers into the CPU,” and vectorization is not automatically the same as parallel computing. NumPy moves the repeated low-level operations out of the Python interpreter. Depending on the operation and installation, the compiled implementation may also use optimized processor instructions or numerical libraries.
+Under the Metropolis Monte Carlo algorithm, individual spin updates depend on the 4 nearest neighbors. If updated sequentially in a double Python loop for a $1024 \times 1024$ lattice (over 1 million sites), one single sweep can take seconds!
 
-Vectorization introduces a memory trade-off. At $N=10^8$, one binary64 array requires
+### Checkerboard decomposition
 
-$$
-10^8\times8\ \mathrm{bytes}=800\ \mathrm{MB}.
-$$
+Notice that on a square lattice, the sites can be divided into a **checkerboard** of black ($i+j$ even) and white ($i+j$ odd) sites:
+- All neighbors of a black site are white sites.
+- All neighbors of a white site are black sites.
 
-The positions, angles, trigonometric results, crossing mask, and temporary arrays may require several gigabytes. A vectorized method can therefore be fast at moderate $N$ and fail at larger $N$ because it runs out of memory.
+Because black sites do not interact directly with each other, **all black sites can be updated simultaneously in parallel**, followed by all white sites! 
 
-The solution is **batching**, also called **chunking**. Instead of storing all $10^8$ needles, process perhaps $10^6$ at a time and add each batch's crossing count to a running total.
+This checkerboard decomposition allows us to transform a sequential materials simulation into a massively parallel GPU kernel running millions of updates per second.
 
-$$
-\boxed{\text{batch size balances repeated overhead against memory use}}
-$$
+::: {.quarto-wasm-local notebook="l04_ising_gpu.edit.py" title="2D Ising microstructure evolution" height="750" loading="eager" fullscreen="true"}
+**Static fallback.** Checkerboard Metropolis Monte Carlo simulation showing magnetic domain coarsening at and below the critical temperature $T_c \approx 2.269\ J/k_B$.
+:::
 
-Very small batches spend more time starting operations. Very large batches consume more memory. The best size depends on the machine and should be measured rather than memorized.
+---
 
-## Compiling and parallelizing the loop
+## Run on Molab (Live GPU & JIT Environment)
 
-Vectorization changes the way we express the algorithm. Just-in-time compilation offers another route: keep the intuitive loop and compile suitable numerical Python code into machine instructions when the function first runs.
+Browser-based WASM runs inside your client's web browser on a single thread. To run genuine multi-core Numba compilation and PyTorch GPU hardware acceleration, use the hosted Molab notebooks:
 
-With a JIT compiler such as Numba ([Lam, Pitrou, and Seibert, 2015](../references.qmd#ref-lam2015numba)), the first call contains two costs:
+::: {.callout-tip}
+## Live Molab interactive notebooks
 
-$$
-T_{\mathrm{first}}
-=
-T_{\mathrm{compile}}+T_{\mathrm{run}}.
-$$
+1. [**Buffon Speed Benchmark on Molab**](https://molab.marimo.io/?from=github&url=https://github.com/tiangroup-uofa/mate374-cmpt-methods-mate/blob/main/activities/l04_speed_benchmark.molab.py)  
+   Test live Numba JIT compilation, multi-threaded `prange`, and PyTorch CUDA tensors.
+2. [**Massive-Scale 2D Ising Microstructure on GPU**](https://molab.marimo.io/?from=github&url=https://github.com/tiangroup-uofa/mate374-cmpt-methods-mate/blob/main/activities/l04_ising_gpu.molab.py)  
+   Simulate up to $2048 \times 2048$ lattices (over 4.2 million spins) with real-time domain coarsening on accelerator hardware.
+:::
 
-Later calls can reuse the compiled version:
+---
 
-$$
-T_{\mathrm{later}}\approx T_{\mathrm{run}}.
-$$
+## Summary of Unit 01
 
-The second call can approach compiled-language performance, although the result depends on whether the function uses operations supported well by the compiler. This leads to a useful lesson:
+Across Unit 01, we established the fundamental computational mindset for materials engineers:
 
-$$
-\boxed{\text{an explicit loop is not necessarily a slow loop}}
-$$
+1. **L01:** The three layers—mathematical model, numerical method, and computational simulation.
+2. **L02:** Measuring error, distinguishing truncation from statistical sampling, and analyzing convergence ($N^{-p}$).
+3. **L03:** Floating-point precision, machine epsilon, binary representation, and catastrophic cancellation.
+4. **L04:** Making code practical—vectorization, memory batching, JIT compilation, multi-core parallelism, and GPU acceleration.
 
-Buffon throws are also independent. Reordering the throws does not change the crossing count, and one throw does not need the result of the previous throw. Different CPU workers can process separate groups and combine their integer counts.
-
-$$
-\boxed{\text{independent work can often be performed in parallel}}
-$$
-
-Parallelism still has overhead. Work must be divided, workers must be coordinated, and results must be combined. It may slow down a small calculation. Random simulations also require appropriate independent random-number streams; using the same seed independently on every worker would duplicate work rather than create a larger sample.
-
-## Using a GPU
-
-A GPU contains many simpler computational units designed to apply similar operations to large collections of data. Buffon's needle is a reasonable demonstration because every needle requires the same sequence: generate a position and orientation, evaluate one crossing condition, and reduce the Boolean results to a count.
-
-The Molab notebook uses a small PyTorch implementation ([Paszke et al., 2019](../references.qmd#ref-paszke2019pytorch)). Students are not expected to memorize PyTorch or GPU syntax. The purpose is to compare the same mathematical algorithm on a CPU and an accelerator.
-
-A GPU does not guarantee a speedup. Creating or transferring arrays, launching operations, and synchronizing results all take time. For small $N$, the CPU may finish before the GPU overhead is repaid. For sufficiently large batches, the GPU can process the independent throws at much higher throughput. The problem size where the preferred device changes is the **crossover size**.
-
-Precision also affects the comparison. Lower-precision arrays use less memory and may run faster, but L03 showed that fewer significand bits can change accumulation and final accuracy. Report the dtype with the timing.
-
-## Where these strategies matter in materials computation
-
-The same numerical structures appear in larger materials calculations:
-
-- **large grids and repeated local updates:** heat transfer, diffusion, and phase-field models;
-- **many particles with repeated force calculations:** molecular dynamics;
-- **dense matrix and tensor operations:** electronic-structure calculations and machine-learning models;
-- **many independent samples or parameter sets:** Monte Carlo, screening, and uncertainty studies.
-
-Many modern PDE solvers, molecular-dynamics packages, quantum-chemistry programs, and machine-learning tools can use parallel CPUs or GPUs. The benefit depends on the algorithm, data movement, problem size, precision, and software implementation. “Runs on a GPU” does not by itself mean “runs faster.”
-
-A useful comparison table for the Buffon notebook is:
-
-| Implementation | What changes? | Main trade-off to observe |
-|---|---|---|
-| Python loop | baseline interpreted execution | readable but high per-step overhead |
-| NumPy arrays | compiled array operations | speed versus temporary memory |
-| Batched NumPy | fixed-size array blocks | batch overhead versus memory |
-| JIT loop | loop compiled to machine code | first-call compilation cost |
-| Parallel JIT | independent work split across CPU cores | coordination and random-stream handling |
-| PyTorch GPU | many array operations on an accelerator | setup cost and crossover size |
-
-The numerical check is that all versions give statistically consistent estimates of $\pi$ for the same $N$ and $L/d$. Because the experiment is random, identical output is not required unless the random stream is deliberately controlled.
-
-## Closing question for Unit 01
-
-Across the first four lectures, we have seen:
-
-1. how a materials question becomes a mathematical and computational model;
-2. how to quantify error and distinguish several sources;
-3. how to compare convergence when a reference is known and seek other evidence when it is not;
-4. how finite precision can limit a calculation;
-5. how vectorization, batching, compilation, parallelism, and accelerators can make a program more practical.
-
-Now compare two methods:
-
-- Method A converges slowly, but each step is inexpensive.
-- Method B converges rapidly, or may even be exact, but each step is expensive.
-
-Which method is better?
-
-There is no answer from convergence rate or per-step time alone. We need the required accuracy, the number and cost of steps, memory use, robustness, available hardware, and the evidence used to check the result. The meaningful quantity is closer to
-
-$$
-\boxed{
-\text{total time and memory required to reach a trustworthy answer}
-}
-$$
-
-We will meet this trade-off repeatedly: bisection versus Newton's method, low- versus high-order integration, explicit versus implicit time stepping, and simple versus detailed materials models.
+In Unit 02, we will use these tools to solve our first major class of engineering problems: finding roots and relaxed states in nonlinear materials systems.
