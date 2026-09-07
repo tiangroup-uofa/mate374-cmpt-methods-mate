@@ -2,6 +2,7 @@
 /_site/
 /wasm-local/
 /.venv/
+/instructor-private/
 __marimo__/
 **/__marimo__/
 __pycache__/

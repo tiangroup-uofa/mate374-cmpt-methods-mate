@@ -1,6 +1,6 @@
 ---
 title: "MAT E 374 Assignment 1"
-subtitle: "Error, floating-point precision, pair interactions, and vectorized free energy"
+subtitle: "Error, floating-point precision, convergence, and pair interactions"
 format:
   html:
     toc: true
@@ -9,7 +9,7 @@ format:
     toc: false
 ---
 
-<clearly state the deadline: Monday Sept 21, 12:00 pm (noon)>
+**Due:** Monday, September 21, 2026, at 12:00 pm (noon) via Canvas
 
 ::: {.content-visible when-format="html"}
 ::: {.callout-note}
@@ -20,27 +20,19 @@ format:
 :::
 :::
 
-<previous purpose is deleted, no need to bring back>
-
 ## Submission
 
-<make concise instructions of the submission, no need to make complex>
-
-Submit **one PDF** containing your calculations, plots, and written responses. Include your name and student ID. Place relevant code next to the result it produces or include a clearly labelled code appendix. Every physical quantity and plot axis must include units where applicable.
-
-You may work in the browser-based marimo editor, a local Python environment, or another appropriate tool. Keep a copy of your working code until the assignment has been graded, but only the PDF is submitted unless Canvas states otherwise.
-
-This is an individual assignment. You may reuse general patterns supplied in lectures, S01, and the playgrounds below, but the assigned calculations, figures, and interpretations must be your own.
+Submit **one PDF** on Canvas with your calculations, code snippets, plots, and written answers. Put your name and student ID at the top. Include units for all physical quantities.
 
 ## Playable code and scaffold
 
 The following browser notebooks are reference playgrounds, not answer keys. They open directly in marimo rather than being embedded in this handout. Use **Save** or **Cmd+S/Ctrl+S** in the direct editor to download a `.py` copy before closing the tab.
 
-1. [Floating-point increment playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_float_precision.html)
+1. [L03 binary conversion and IEEE bit explorers](../../units/01/L03/index.qmd)
 2. [Lennard-Jones cutoff playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_lj_cutoff.html)
-3. [Regular-solution free-energy playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_regular_solution.html)
+3. [π-method scaffold](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_pi_method.html)
 
-The Lennard-Jones playground uses a small one-dimensional chain, while the assignment uses a three-dimensional cluster. The regular-solution playground draws a one-dimensional curve, while the assignment requires a two-dimensional map. You must make the required extensions and report the assigned systems yourself.
+The π scaffold supplies the error calculation and plotting code; you implement the numerical method. The Lennard-Jones playground uses a small one-dimensional chain, while the assignment uses a three-dimensional cluster. You must make that extension and report the assigned system yourself.
 
 ---
 
@@ -71,72 +63,94 @@ Would Algorithm B necessarily finish sooner? Explain your reasoning. What inform
 
 ## Problem 2 · Binary and floating-point numbers — 20 marks
 
-### 2.1 Binary to decimal — 4 marks
+### 2.1 Integers to binary — 4 marks
 
-Convert
+Convert **27 and −27** from decimal to binary. Show the conversion manually, then verify with Python's `bin()` and convert back using `int(..., 2)`.
 
-$$
-(1011)_2
-$$
+For the negative number, use a minus sign in front of the binary digits, as `bin()` does. A fixed-width two's-complement encoding is not required here.
 
-to decimal form. Show the conversion manually using powers of two, then verify your answer with Python. You may use
+### 2.2 Fractions to binary — 6 marks
 
-```python
-int("1011", 2)
-```
+Convert **0.25, 0.75, and 0.1** to binary by hand. If an expansion repeats, show the first eight digits after the binary point and identify the repeating pattern.
 
-for the verification.
-
-### 2.2 Decimal to binary — 4 marks
-
-Convert the decimal integer
-
-$$
-27_{10}
-$$
-
-to binary form. Show the manual conversion, then verify it using `bin(27)` or an equivalent Python method.
-
-### 2.3 When does a small increment disappear? — 12 marks
-
-IEEE binary32 (`float32`) carries approximately **7--8 significant decimal digits**, while binary64 (`float64`) carries approximately **15--17 significant decimal digits**. This does not mean that either format has one fixed absolute error at every magnitude.
-
-Use NumPy to inspect the machine epsilon near 1.0:
+Which values have finite binary expansions? Do you expect 0.1 to be rounded when stored as `float32` or `float64`? Explain your reasoning, then check the stored values using the integer-ratio method from L03:
 
 ```python
 import numpy as np
 
-print(np.finfo(np.float32).eps)
-print(np.finfo(np.float64).eps)
+for text in ["0.25", "0.75", "0.1"]:
+    for dtype in [np.float32, np.float64]:
+        x = dtype(text)
+        print(dtype.__name__, text, float(x).as_integer_ratio())
 ```
 
-Now run:
+Report the ratios and explain whether they equal the intended decimal fractions exactly. Converting a `float32` value to Python's `float` here preserves its already-stored value exactly; it does not restore digits lost to rounding.
 
-```python
-x32 = np.float32(1.0)
+### 2.3 Sign, significand, and exponent — 10 marks
 
-print(x32 + np.float32(1e-6))
-print(x32 + np.float32(1e-7))
-print(x32 + np.float32(1e-8))
-```
+Consider the decimal number **−13.625**. Use the procedure and IEEE bit explorer from [L03](../../units/01/L03/index.qmd) to investigate its representation.
 
-Compare it with:
+1. Obtain its stored integer ratio in `float32` and `float64`. Use the ratio to recover the binary number, then write it in normalized form $(-1)^s(1.Z)_2\times2^p$.
+2. Identify the sign $s$, the significand $(1.Z)_2$ (often called the mantissa), and the exponent $p$.
+3. For each format, give the **stored exponent bits** and **stored fraction bits**. Distinguish the exponent $p$ from the biased exponent $E$, and remember that the leading 1 is not stored for a normal number. You may describe a long run of zeros rather than writing every zero individually.
+4. Is this value represented exactly in each format? How many significant binary digits does it require, and how many does each format provide? Explain why a wider format does or does not improve this particular stored value.
 
-```python
-x64 = np.float64(1.0)
-
-print(x64 + np.float64(1e-8))
-print(x64 + np.float64(1e-12))
-print(x64 + np.float64(1e-16))
-```
-
-Report the machine epsilon values and all six addition results. Explain why a sufficiently small increment can disappear when added to a floating-point number. Relate your observation to the approximate significant-digit counts above.
-
-[Open the floating-point playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_float_precision.html) to vary the increment and compare it with the spacing near 1.0.
+Use the IEEE field widths and exponent biases given in L03; you do not need to memorize them.
 
 ---
 
-## Problem 3 · Lennard-Jones energy and a truncation study — 40 marks
+## Problem 3 · Find and test a method for computing π — 25 marks
+
+The number $\pi$ has infinitely many non-repeating digits. A numerical calculation can approximate it, but a finite floating-point value cannot store it exactly. In L02 we compared several ways to calculate this same number. Now find a method and investigate its convergence yourself.
+
+### 3.1 Find and explain a method — 6 marks
+
+Use an **AI tool, a search engine, or the literature** to find a numerical method for computing $\pi$. You may investigate a method from L02 or choose another one.
+
+State the equation or algorithm, explain it briefly in your own words, and identify what its effort parameter $N$ counts. Give the source you used. If you use an AI tool, include its name and the relevant prompt. Check the proposed method rather than treating the supplied answer or code as evidence that it works.
+
+### 3.2 Implement the method — 8 marks
+
+Open the [π-method scaffold](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_pi_method.html) and complete:
+
+```python
+def estimate_pi(N: int, **parameters):
+    return ...
+```
+
+The function should return one numerical estimate of $\pi$. Use `N` to control the amount of work and add other parameters if your method needs them, such as a random seed. Returning a stored constant such as `np.pi` is not a numerical method for this task.
+
+As in the S01 plotting exercise, the scaffold displays a reminder while your function returns `...`. Once it returns numerical values, the supplied code generates an error table and convergence plot. You may use AI assistance for the implementation, but you must be able to explain the calculation and how `N` changes it.
+
+### 3.3 Investigate convergence — 11 marks
+
+Choose several values of $N$ suited to your method. Start small and increase the work enough to reveal a trend without making the calculation impractical. For each value, report the estimate and its absolute error against `np.pi`, the reference used in the L02 comparison notebook.
+
+Make one plot of error versus $N$ and explain what it shows. If the error follows approximately
+
+$$
+E(N)\approx C N^{-p},
+$$
+
+estimate $p$ over the decreasing region. For example, two representative points give
+
+$$
+p\approx-\frac{\log(E_2/E_1)}{\log(N_2/N_1)}.
+$$
+
+Do not force a power-law fit if your method converges differently. A rapid method may reach floating-point precision after only a few steps; explain that behaviour instead. For a random method, repeat the calculation with several seeds to distinguish the overall trend from fluctuations.
+
+The supplied comparison uses binary64, including conversion of your returned estimates to that format. A reported error of zero means agreement with the stored reference, **not an exact value of mathematical $\pi$**. Exclude zero errors and precision-limited points when estimating a convergence rate.
+
+::: {.callout-note}
+## If you get stuck
+
+If you cannot find or implement a suitable method, ask the instructor for a fallback method. You can then complete the same implementation and convergence study with that guidance.
+:::
+
+---
+
+## Problem 4 · Lennard-Jones energy and a truncation study — 40 marks
 
 The 12--6 Lennard-Jones pair potential is
 
@@ -156,7 +170,7 @@ $$
 \sigma=3.40\ \text{\AA}.
 $$
 
-### 3.1 Three atoms: calculate every pair — 12 marks
+### 4.1 Three atoms: calculate every pair — 12 marks
 
 Consider three atoms at these Cartesian coordinates, in \AA:
 
@@ -178,7 +192,7 @@ $$
 
 Show the three pair distances and three pair energies clearly. As one check on the distance calculation, $r_{12}=4.000$ \AA.
 
-### 3.2 How many unique pairs? — 6 marks
+### 4.2 How many unique pairs? — 6 marks
 
 For a system of $N$ atoms, state or derive the number of unique pairs $i<j$ when every atom interacts with every other atom. Evaluate it for:
 
@@ -188,7 +202,7 @@ For a system of $N$ atoms, state or derive the number of unique pairs $i<j$ when
 
 Briefly describe how the pair count grows with $N$.
 
-### 3.3 A finite argon cluster — 8 marks
+### 4.3 A finite argon cluster — 8 marks
 
 Construct a $5\times5\times5$ cubic cluster with spacing $a=4.0$ \AA. **Do not use periodic boundary conditions.** The following code is one way to generate the coordinates:
 
@@ -209,7 +223,7 @@ coords = np.array(
 
 Calculate the total Lennard-Jones energy using **all unique atom pairs**. Treat this all-pairs value as the reference for the truncation study.
 
-### 3.4 Cutoff radius and truncation error — 14 marks
+### 4.4 Cutoff radius and truncation error — 14 marks
 
 The interaction approaches zero as $r$ becomes large. Approximate the total energy by omitting interactions beyond a cutoff radius $r_c$:
 
@@ -248,69 +262,15 @@ In this exercise, count the number of retained pair-energy evaluations as the wo
 
 ---
 
-## Problem 4 · A two-dimensional regular-solution map — 25 marks
-
-Consider the regular-solution free energy of mixing
-
-$$
-\Delta G_{\mathrm{mix}}(x,T)
-=
-\Omega x(1-x)
-+RT\left[x\ln x+(1-x)\ln(1-x)\right],
-$$
-
-where $x$ is the mole fraction of component B. Use
-
-$$
-\Omega=20.0\ \mathrm{kJ\,mol^{-1}},
-\qquad
-R=8.314\times10^{-3}\ \mathrm{kJ\,mol^{-1}\,K^{-1}}.
-$$
-
-### 4.1 Build and verify the NumPy grid — 13 marks
-
-Create
-
-```python
-x = np.linspace(0.01, 0.99, 200)
-T = np.linspace(300.0, 1500.0, 250)
-```
-
-Use NumPy broadcasting or `np.meshgrid` to evaluate $\Delta G_{\mathrm{mix}}$ over **all combinations of composition and temperature**, without an explicit Python loop over the grid points.
-
-Before constructing the full grid, verify your formula at one point:
-
-$$
-\Delta G_{\mathrm{mix}}(x=0.5,T=300\ \mathrm{K})
-\approx3.27\ \mathrm{kJ\,mol^{-1}}.
-$$
-
-Report the shape of the resulting two-dimensional free-energy array. Explain which array dimension corresponds to temperature and which corresponds to composition.
-
-### 4.2 Plot and interpret the map — 12 marks
-
-Make one two-dimensional heatmap, `pcolormesh`, or filled-contour plot of $\Delta G_{\mathrm{mix}}(x,T)$. The figure must include:
-
-- composition $x$ on the horizontal axis;
-- temperature $T$ in K on the vertical axis;
-- a colour scale labelled in $\mathrm{kJ\,mol^{-1}}$; and
-- an informative title or caption.
-
-In one or two sentences, describe the main change in the free-energy landscape as temperature increases.
-
-[Open the regular-solution playground](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_regular_solution.html) to inspect the one-dimensional array calculation that you will extend to two dimensions.
-
----
-
 ## Submission checklist
 
 Before uploading your PDF, confirm that it contains:
 
 - all requested manual conversions, numerical values, and short explanations;
+- the source, explanation, and implementation of your π method;
+- its error table, convergence plot, and interpretation;
 - the three-atom distance and pair-energy calculation;
 - the all-pairs cluster reference and cutoff table;
 - the truncation-error plot;
-- the regular-solution array shape and checkpoint value;
-- the labelled two-dimensional free-energy plot;
 - units and sensible numerical precision throughout; and
 - enough relevant code to make each computational result reproducible.

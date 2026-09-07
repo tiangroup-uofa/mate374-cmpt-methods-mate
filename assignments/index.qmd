@@ -16,7 +16,7 @@ Use **five focused computational investigations plus one staged team project**. 
 
 ## Current assignment briefs
 
-- [**A1 · Trust a computational result**](A1/index.qmd) — error sources, floating-point precision, Lennard-Jones cutoff error, and a NumPy regular-solution map.
+- [**A1 · Trust a computational result**](A1/index.qmd) — error sources, floating-point precision, a student-selected π method and convergence study, and Lennard-Jones cutoff error.
 
 ## Evidence from Fall 2025
 

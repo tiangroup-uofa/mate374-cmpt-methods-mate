@@ -223,7 +223,7 @@ $$
 =(1.10011001100110011001101)_2\times2^{-4}.
 $$
 
-Count from the leading 1: there are **24 significant binary digits**. Repeat the procedure for `x64` and you obtain **53**. Both are rounded versions of the repeating binary expansion of $1/10$.
+Count from the leading 1: this binary32 value requires **24 significant binary digits**. Binary64 provides **53 significant bit positions**, but its stored approximation to 0.1 ends in a zero bit, so the reduced-ratio procedure needs only 52 digits to write that particular value. The format's capacity and the digits needed by one value are not always the same. Both formats store rounded versions of the repeating binary expansion of $1/10$.
 
 ::: {.quarto-wasm-local notebook="l03_stored_number.edit.py" title="Recover the exact stored number from its integer ratio" height="900" loading="eager" fullscreen="true"}
 **Static example.** Both formats store 0.75 exactly as $3/4$. For 0.1, `float32` stores $13421773/2^{27}$, while `float64` stores $3602879701896397/2^{55}$. Convert the numerator to binary and shift the point by the denominator's exponent to recover each stored binary value.
