@@ -94,6 +94,8 @@ website:
         contents:
           - href: seminars/S01-python-numerics/index.qmd
             text: "S01 · Python and marimo"
+          - href: seminars/S02-number-conversion/index.qmd
+            text: "S02 · Number systems & IEEE floats"
       - href: assignments/index.qmd
         text: Assignments
         contents:
