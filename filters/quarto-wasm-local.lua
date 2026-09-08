@@ -33,18 +33,18 @@ function Div(div)
   if not notebook or notebook == "" then
     error("A .quarto-wasm-local Div requires a notebook attribute")
   end
-  if notebook:find("[/\\]") then
-    error(
-      ".quarto-wasm-local notebook must be a filename relative to activities/: "
-        .. notebook
-    )
+  if notebook:find("..", 1, true) or notebook:sub(1, 1) == "/" or notebook:find("\\", 1, true) then
+    error("Notebook must be a project-relative path without parent traversal: " .. notebook)
   end
   if not notebook:match("%.py$") then
     error("A .quarto-wasm-local notebook must end in .py: " .. notebook)
   end
 
   local project_dir = quarto.project.directory or "."
-  local source_path = pandoc.path.join({ project_dir, "activities", notebook })
+  -- Bare filenames retain the activities/ convention; paths are project-relative.
+  local source_path = notebook:find("/", 1, true)
+    and pandoc.path.join({ project_dir, notebook })
+    or pandoc.path.join({ project_dir, "activities", notebook })
   local handle = io.open(source_path, "rb")
   if not handle then
     error("Cannot read local WASM notebook: " .. source_path)
@@ -52,7 +52,7 @@ function Div(div)
   handle:close()
 
   local offset = quarto.project.offset or "."
-  local output_name = exported_stem(notebook) .. ".html"
+  local output_name = exported_stem(notebook:match("([^/]+)$")) .. ".html"
   local src = pandoc.path.join({ offset, "wasm-local", output_name })
   local editable = notebook:match("%.edit%.py$") ~= nil
   local direct_src = src

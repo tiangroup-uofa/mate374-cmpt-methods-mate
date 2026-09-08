@@ -189,7 +189,7 @@ def main() -> None:
 
     notebooks = sorted(
         path
-        for path in source_dir.iterdir()
+        for path in [*source_dir.iterdir(), *(project_root / "assignments").rglob("*.py")]
         if path.is_file()
         and path.suffix == ".py"
         and not path.name.endswith(".molab.py")
