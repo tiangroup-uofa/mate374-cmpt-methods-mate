@@ -4,11 +4,21 @@ subtitle: "A little practice with number conversion"
 body-classes: lecture-page seminar-page
 ---
 
+## Learning outcomes
+
+<still add a learning outcome, basically it's just practice seminar.>
+
+## Conversion between binary and decimal numbers
+
 Computers store numbers using bits, so a decimal number such as 22.375 must be rewritten using powers of 2. The same idea works for whole numbers and for fractions, but the hand calculations run in opposite directions.
 
-Work through the examples on paper first. The interactive tool at the end lets you check each step without replacing the calculation.
+In this seminar, we will review what we have learned in Lecture 03 about decimal to binary conversions. We will work through the examples on paper / board first. The interactive tool at the end lets you check each step without replacing the calculation.
 
-Let us start with a whole number. To convert a positive decimal integer to binary, divide by 2 repeatedly. At each step, keep the quotient and record the remainder. Stop when the quotient becomes zero. The binary digits are the remainders read from bottom to top.
+Converting from binary to decimal is usually easier, just sum the digits. to convert decimal to binary formats (including both integer and fractional parts), you can use the schem below
+
+<use the figure S02-conversion-mindmap.png in assets here>
+
+Let us start with a integer number. To convert a positive decimal integer to binary, **divide by 2** repeatedly. At each step, keep the quotient and record the remainder. Stop when the quotient becomes zero. The binary digits are the remainders read from **bottom to top**.
 
 For 45, the calculation is:
 
@@ -39,11 +49,9 @@ $$
 -45_{10}=-(101101)_2.
 $$
 
-This is ordinary signed notation, not a fixed-width two's-complement representation.
 
-Now try $45_{10}$ and $(101101)_2$ in the other direction. The conversion tool can check both answers after you have written out the steps.
 
-For a fraction between zero and one, use a similar process, but multiply by 2 instead. The integer part of each product is the next binary digit. Keep the new fractional remainder and continue. This time, read the bits from top to bottom.
+For a fraction between zero and one, use a similar process, but **multiply by 2** instead. The integer part of each product is the next binary digit. Keep the new fractional remainder and continue. This time, read the bits from top to bottom.
 
 For example, begin with 0.375:
 
@@ -61,13 +69,13 @@ $$
 
 A fraction does not always end. If a remainder appears again, the following bits repeat. A fraction in lowest terms has a finite binary expansion only when its denominator is a power of 2.
 
-Try 0.375 first. Then convert 0.2 and keep only the first eight digits after the binary point. Do not round the eighth digit; discard everything after it. Convert those eight bits back to decimal and calculate
+Your turn! Convert decimal number 0.2 to binary, and keep only the first eight digits after the binary point. Do not round the eighth digit; discard everything after it. Convert those eight bits back to decimal and calculate
 
 $$
 \left|x_{\mathrm{approx}}-0.2\right|.
 $$
 
-This error comes from truncating the repeating binary expansion. It is different from the rounding used when a computer stores a number in an IEEE floating-point format.
+<just show the result here>
 
 Once the two parts are familiar, put them together. Convert the whole-number part and fractional part separately, then join them at the binary point. For example,
 
@@ -75,18 +83,24 @@ $$
 -22.375_{10}=-(10110.011)_2.
 $$
 
-Floating-point notation moves that point so there is one nonzero bit to its left:
+
+## Real numbers in floating-point notations
+
+Take the example of -22.375 above. We know how to write this number in a binary format, but it's not yet the floating-point format used in computer yet. Remember in decimal (base-10) number system where we will move the decimal point left and right to make the significand between 1 and 10? We basically do the same for binary numbers.
+
+starting with $-(10110.011)_2$, we need to move the binary point **4 places** to the left, so there is one nonzero bit to its left. In other words, a "binary scientific notation" will write it as:
 
 $$
 -(10110.011)_2=(-1)^1(1.0110011)_2\times2^4.
 $$
 
-For a normal finite IEEE floating-point number,
+This is basically the rule behind the IEEE-754 floating-point standard, or formally, for a normal finite IEEE floating-point number
 
 $$
 x=(-1)^s(1.F)_2\times2^p.
 $$
 
+(see lecture 03 for more details).
 The sign bit is $s$. The exponent is $p$. The stored fraction field contains the bits after the leading 1. The exponent is stored with a bias:
 
 $$
@@ -98,11 +112,9 @@ $$
 | `float32` | 8 | 127 | 23 | 24 |
 | `float64` | 11 | 1023 | 52 | 53 |
 
-Try normalizing 0.375 and 0.2 by hand. Then use the last section of the tool to compare their `float32` and `float64` representations. The important question is not simply whether `float64` is wider. It is whether the number being stored needs those extra bits.
+We will first try normalizing 0.375 and 0.2 by hand, and then use the last section of the tool to compare their `float32` and `float64` representations. 
 
-Use the tool below to check your work. Enter a decimal number or a finite binary number, complete the calculation on paper first, then select **Prepare checks** and open the relevant section. The conversion steps use exact rational arithmetic, so the repeating decimal 0.2 is not accidentally replaced by a rounded machine value.
 
-Long expansions stop after 32 fractional digits. Eight digits are enough for this exercise.
 
 ::: {.quarto-wasm-local notebook="s02_number_converter.edit.py" title="Check decimal and binary conversions" height="900" loading="eager" fullscreen="true"}
 **Print/offline checks.**
@@ -113,4 +125,6 @@ Long expansions stop after 32 fractional digits. Eight digits are enough for thi
 - The stored approximation to 0.2 has exponent $p=-3$ in both formats. `float32` stores $13421773/2^{26}$; `float64` stores $3602879701896397/2^{54}$. The binary64 value is closer to $1/5$, but neither format stores it exactly.
 :::
 
-The two rules to remember are simple: integer remainders are read upward, while fractional bits are read downward.
+## Work out the assignment 1
+
+You can use the above rules and tools to try our answers for assignment 1, question 2. good luck!
