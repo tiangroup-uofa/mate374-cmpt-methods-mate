@@ -5,7 +5,7 @@ toc: false
 
 Seminars are practical support sessions. Dates, rooms, and section-specific instructions will be posted on Canvas rather than maintained as a public planning schedule.
 
-- [S01 · A crash course in Python for numerical work](S01-python-numerics/index.qmd)
-- [S02 · Decimal and binary by hand](S02-number-conversion/index.qmd)
+- [S01 · Python, marimo, and your first plot](S01-python-numerics/index.qmd)
+- [S02 · How computers write numbers in binary](S02-number-conversion/index.qmd)
 
 Additional seminar pages will be added when their activities are ready for students.
