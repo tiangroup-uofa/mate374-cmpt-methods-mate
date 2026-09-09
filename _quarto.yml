@@ -8,6 +8,9 @@ project:
   resources:
     - "wasm-local/**"
     - "assets/L01-fast16-implosion-poster.png"
+    - "scripts/l03_error_figures.py"
+    - "scripts/binary_place_values.py"
+    - "scripts/polygon_precision.py"
   preview:
     port: 7777
   render:

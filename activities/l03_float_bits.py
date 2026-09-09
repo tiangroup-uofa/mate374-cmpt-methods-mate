@@ -9,7 +9,7 @@ __generated_with = "0.24.0"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import anywidget
     import traitlets
@@ -20,19 +20,18 @@ def _():
     return Decimal, anywidget, math, mo, struct, traitlets
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
-    # Flip a bit. Predict the number.
+    ### Flip a bit. Predict the number.
 
-    Start at **0.75**. Change the sign, then one fraction bit, then one
-    exponent bit. Which change has the largest effect? Switch between
-    float32 and float64 to compare their fields.
+    Choose an example or type a value. Then change the sign, an exponent bit,
+    or a fraction bit. The decimal readout follows the bits immediately.
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(anywidget, traitlets):
     class FloatBits(anywidget.AnyWidget):
         # One synchronized state keeps the format and its bits together.
@@ -43,6 +42,7 @@ def _(anywidget, traitlets):
         function render({model, el}) {
           el.classList.add('float-bits');
           const controls = document.createElement('div');
+          controls.className = 'toolbar';
           const label = document.createElement('label');
           label.textContent = 'Format ';
           const select = document.createElement('select');
@@ -52,10 +52,42 @@ def _(anywidget, traitlets):
             select.append(option);
           }
           label.append(select); controls.append(label);
+          const entry = document.createElement('form');
+          entry.className = 'entry';
+          const inputLabel = document.createElement('label');
+          inputLabel.textContent = 'Decimal value';
+          const input = document.createElement('input');
+          input.type = 'text'; input.spellcheck = false;
+          input.autocomplete = 'off';
+          inputLabel.append(input);
+          const store = document.createElement('button');
+          store.type = 'submit'; store.textContent = 'Store value';
+          entry.append(inputLabel, store);
+          const message = document.createElement('div');
+          message.className = 'message'; message.setAttribute('role', 'status');
+          const readout = document.createElement('output');
+          readout.className = 'readout'; readout.setAttribute('aria-live', 'polite');
           const fields = document.createElement('div');
-          el.append(controls, fields);
+          el.append(controls, entry, message, readout, fields);
+          entry.onsubmit = event => {
+            event.preventDefault();
+            const text = input.value.trim();
+            const decimal = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+            const special = /^[+-]?(?:inf(?:inity)?|nan)$/i;
+            if (!decimal.test(text) && !special.test(text)) {
+              message.textContent = 'Enter a decimal number, such as -0.3 or 1e-30 (or Infinity / NaN).';
+              input.setAttribute('aria-invalid', 'true');
+              return;
+            }
+            const value = /nan/i.test(text) ? NaN
+              : /inf/i.test(text) ? (text.startsWith('-') ? -Infinity : Infinity)
+              : Number(text);
+            const width = model.get('state').width;
+            commit(width, encode(value, width));
+          };
           function commit(width, bits) {
             model.set('state', {width, bits}); model.save_changes();
+            draw(); // Also reset the input when the bit pattern is unchanged.
           }
           function encode(value, width) {
             const view = new DataView(new ArrayBuffer(width / 8));
@@ -76,7 +108,7 @@ def _(anywidget, traitlets):
             const width = Number(select.value);
             commit(width, encode(decode(state.bits), width));
           };
-          for (const [name, value] of [['0.75', 0.75], ['0.1', 0.1], ['1', 1], ['0', 0]]) {
+          for (const [name, value] of [['0.75', 0.75], ['0.3', 0.3], ['0.1', 0.1], ['1', 1], ['0', 0]]) {
             const button = document.createElement('button');
             button.textContent = name;
             button.onclick = () => {
@@ -88,6 +120,14 @@ def _(anywidget, traitlets):
           function draw() {
             const {width, bits} = model.get('state');
             select.value = width;
+            const value = decode(bits);
+            const display = Object.is(value, -0) ? '-0'
+              : Number.isFinite(value) ? value.toPrecision(width === 32 ? 9 : 17)
+              : String(value);
+            input.value = display;
+            input.removeAttribute('aria-invalid');
+            message.textContent = '';
+            readout.textContent = 'Stored float' + width + ': ' + display;
             // Keep keyboard focus on the flipped bit after rebuilding.
             const focused = fields.contains(document.activeElement)
               ? document.activeElement.dataset.index : null;
@@ -126,35 +166,53 @@ def _(anywidget, traitlets):
         export default {render};
         """
         _css = """
-        .float-bits { color: #243443; font: 15px system-ui; }
-        .float-bits button, .float-bits select { font: inherit; padding: .35rem .55rem;
-          margin: .15rem; border: 1px solid #8796a3; border-radius: 4px;
-          background: #fff; color: inherit; cursor: pointer; }
-        .float-bits fieldset { margin: .7rem 0; border: 1px solid #8796a3;
-          border-radius: 6px; padding: .4rem; }
-        .float-bits fieldset button { font-family: monospace; min-width: 2rem; }
-        .float-bits .sign { border-left: 5px solid #b54d32; }
-        .float-bits .exponent { border-left: 5px solid #277897; }
-        .float-bits .fraction { border-left: 5px solid #65833d; }
-        .float-bits button[aria-pressed=true] { background: #dcebf4; font-weight: bold; }
-        .float-bits button:focus-visible { outline: 3px solid #d48b16; outline-offset: 1px; }
+        .float-bits { color: #243443; font: 15px system-ui; padding: 1rem;
+          border: 1px solid #d9e1e7; border-radius: 14px; background: #f8fafb; }
+        .float-bits .toolbar, .float-bits .entry { display: flex; flex-wrap: wrap;
+          gap: .4rem; align-items: end; margin-bottom: .8rem; }
+        .float-bits label { display: flex; gap: .4rem; align-items: center; }
+        .float-bits .entry label { flex: 1; min-width: 12rem; flex-direction: column;
+          align-items: stretch; font-size: .85rem; }
+        .float-bits button, .float-bits select, .float-bits input { font: inherit;
+          padding: .45rem .6rem; border: 1px solid #b7c6d1; border-radius: 7px;
+          background: #fff; color: inherit; }
+        .float-bits button, .float-bits select { cursor: pointer; }
+        .float-bits input { min-width: 0; font-family: monospace; }
+        .float-bits .entry button { background: #28618a; color: white; }
+        .float-bits .readout { display: block; padding: .8rem; background: #eaf1f6;
+          border-radius: 8px; font: 600 1.05rem monospace; overflow-wrap: anywhere; }
+        .float-bits .message { color: #b54d32; margin-bottom: .4rem; }
+        .float-bits fieldset { margin: .8rem 0 0; border: 1px solid #d9e1e7;
+          border-radius: 8px; padding: .5rem; min-width: 0; }
+        .float-bits legend { font-size: .85rem; font-weight: 600; padding: 0 .3rem; }
+        .float-bits fieldset button { font-family: monospace; width: 2rem;
+          padding: .4rem 0; margin: .15rem; }
+        .float-bits .sign { --bit-color: #aa472f; border-left: 4px solid var(--bit-color); }
+        .float-bits .exponent { --bit-color: #28618a; border-left: 4px solid var(--bit-color); }
+        .float-bits .fraction { --bit-color: #487333; border-left: 4px solid var(--bit-color); }
+        .float-bits button[aria-pressed=true] { background: var(--bit-color);
+          color: white; font-weight: bold; border-color: var(--bit-color); }
+        .float-bits :focus-visible { outline: 3px solid #d48b16; outline-offset: 2px; }
         @media (prefers-color-scheme: dark) {
-          .float-bits { color: #e3eaf0; }
-          .float-bits button, .float-bits select { background: #202c36; }
-          .float-bits button[aria-pressed=true] { background: #385568; }
+          .float-bits { color: #e3eaf0; background: #18232c; border-color: #465764; }
+          .float-bits button, .float-bits select, .float-bits input { background: #202c36;
+            border-color: #607381; }
+          .float-bits .readout { background: #263b4b; }
+          .float-bits fieldset { border-color: #607381; }
+          .float-bits .message { color: #ffb099; }
         }
         """
     return (FloatBits,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(FloatBits, mo):
     bit_widget = mo.ui.anywidget(FloatBits())
     bit_widget
     return (bit_widget,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(Decimal, bit_widget, math, mo, struct):
     def explain_bits(state):
         width, bits = state["width"], state["bits"]
@@ -194,7 +252,7 @@ def _(Decimal, bit_widget, math, mo, struct):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md("""
     **Try these checks:**
@@ -208,7 +266,10 @@ def _(mo):
 
     Switching format preserves the current value when possible, rounding
     if needed. It does not reinterpret the old bit string or recover lost digits.
-    Reset to **0.1** after switching to compare fresh decimal inputs.
+    Choose **0.3** again after switching to compare fresh decimal inputs.
+    Typed decimal input is first parsed at the browser's float64 precision,
+    then rounded to float32 if selected. The readout uses 9 or 17 significant
+    decimal digits; open **Exact stored value** for the full decimal expansion.
     """)
     return
 
