@@ -81,7 +81,7 @@ $$
 This sub-second error displaced the radar's predicted search window enough to prevent successful tracking and interception.
 
 ::: {.callout-important}
-A tiny representation error can matter when multiplied by a large count. For a specified format, rounding mode, and sequence of operations, round-off is **deterministic**, not random noise. We can inspect individual stored values exactly, although predicting how their errors propagate through a long calculation can be difficult. The Patriot case involved fixed-point conversion rather than Python's floating-point format.
+A tiny representation error can matter when multiplied by a large count. For a specified format, rounding mode, and sequence of operations, round-off is **deterministic**, not random noise. We can inspect individual stored values exactly, although predicting how their errors propagate through a long calculation can be difficult.
 :::
 
 ## Seeing a number in binary
@@ -357,15 +357,21 @@ where $s$ is the sign bit (0 for positive, 1 for negative), $E$ is the unsigned 
 Adding the bias, $E=p+b$, lets an unsigned exponent field encode both negative and positive exponents; the values of $b$ below are written in decimal.
 :::
 
-The common formats allocate their bits as follows:
+Floating-point encodings typically place the **sign**, **exponent**, and **significand field** from left to right. Use Wikipedia's [*Internal representation* section](https://en.wikipedia.org/wiki/Floating-point_arithmetic#Internal_representation) alongside this table to take notes on the difference between **storage bits** and **precision**.
 
-| Format | Sign bits | Exponent bits | Fraction bits $t$ | Bias $b$ | Significant binary digits |
-|---|---:|---:|---:|---:|---:|
-| `float16` | 1 | 5 | 10 | 15 | 11 |
-| `float32` | 1 | 8 | 23 | 127 | 24 |
-| `float64` | 1 | 11 | 52 | 1023 | 53 |
+| Format | Sign bits | Exponent bits | Stored significand bits |  Exponent bias $b$ | Precision (bits) | Approx. decimal digits |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Half (`float16` / binary16) | 1 | 5 | 10 |  15 | 11 | **3.3** |
+| Single (`float32` / binary32) | 1 | 8 | 23 |  127 | 24 | **7.2** |
+| Double (`float64` / binary64) | 1 | 11 | 52 | 1023 | 53 | **15.9** |
 
-The leading 1 is implicit for normal numbers, so it does not require a stored bit. The exponent uses a **bias**, not two's complement. Floats also use a separate sign bit rather than the two's-complement integer encoding above.
+For normal values in these formats, the leading 1 is implicit: the stored significand field contains only the $t$ fraction bits, giving $t+1$ bits of precision.
+
+The decimal-digit estimates are the bit precision multiplied by $\log_{10}2$; they are not guarantees of correct digits in a calculation. For comparison, the 128-bit and 256-bit binary formats provide approximately **34.0** and **71.3 significant decimal digits**, respectively; their availability depends on platform and software support.
+
+The exponent uses a **bias**, not two's complement. Floats also use a separate sign bit rather than the two's-complement integer encoding above.
+
+As you take notes, check that the three stored fields sum to the total width, and explain why `float64` has 52 stored fraction bits but 53 bits of precision.
 
 For example, we already know $(0.75)_{10}=(1.1)_2\times2^{-1}$. In `float32`, $s=0$ and $E=-1+127=126$, giving
 
@@ -462,6 +468,9 @@ Start with 0.75, then 0.3. Next compare `1e20` and `1e-30`. Does a very large or
 
 ## Return to the polygon
 
+::: {.callout-note collapse="true"}
+## Polygon analysis: why the recurrence loses accuracy
+
 Now we can identify what failed in L02. Recall
 
 $$
@@ -481,15 +490,17 @@ print(4.0 - s * s)    # 4.0: the small change is lost
 
 The recurrence then returns $\sqrt{2-\sqrt4}=0$. The computer could represent the small side length by itself. It could not preserve the much smaller change to a number near 4.
 
-### Does higher precision delay the breakdown?
-
 Keep the polygon recurrence unchanged and vary only the arithmetic precision. Higher precision should reduce the rounding introduced at each step, but does it remove the recurrence's sensitivity? Predict which curve should improve longest before inspecting the plot.
+:::
 
 ![Absolute error in the polygon estimate using 11, 24, 53, and 113 significant binary bits. Higher precision delays the eventual rise in error.](../../../assets/L03-polygon-precision.png){#fig-polygon-precision fig-alt="Polygon error first decreases and then increases for each precision; the minimum moves later and lower as precision increases."}
 
 
 
-Here $k$ counts side doublings, so $N=6\times2^k$. The observed results are:
+:::: {.callout-note collapse="true"}
+## Polygon experiment: numerical results
+
+This table reports results for the polygon recurrence, not floating-point format specifications. Here $k$ counts side doublings, so $N=6\times2^k$.
 
 | Arithmetic | Significant bits | Doubling with smallest observed error | Smallest absolute error | First doubling with zero side length |
 |---|---:|---:|---:|---:|
@@ -505,6 +516,7 @@ Higher precision **delays the point of diminished return**: we can refine furthe
 
 Using floating-point formats wider than 64 bits may require platform support.
 :::
+::::
 
 
 ## Before the next lecture
