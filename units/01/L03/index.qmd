@@ -512,5 +512,4 @@ Using floating-point formats wider than 64 bits may require platform support.
 1. Practice converting integers and fractions between decimal and binary. Which fractions terminate?
 2. If Python prints `0.3`, how would you find out what value is actually stored?
 3. Why can `float64` represent a value near $10^{-300}$ while retaining only about 16 significant decimal digits?
-4. Why does the polygon's `float64` error stop improving well before reaching 15 correct decimal digits?
-5. In a materials calculation, two total energies may be large while their difference is small. What would you check before trusting the digits in that difference?
+4. In a materials calculation, two total energies may be large while their difference is small. What would you check before trusting the digits in that difference?
