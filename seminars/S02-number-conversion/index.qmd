@@ -6,19 +6,26 @@ body-classes: lecture-page seminar-page
 
 ## Learning outcomes
 
-<still add a learning outcome, basically it's just practice seminar.>
+By the end of this seminar, you should be able to:
+
+1. **Convert** a positive decimal integer to binary using repeated division by 2.
+2. **Convert** a decimal fraction to binary using repeated multiplication by 2.
+3. **Recognize** that some fractions (like 0.2) have no finite binary expansion.
+4. **Normalize** a binary number into IEEE-754 floating-point form and identify the sign, exponent, and fraction fields.
 
 ## Conversion between binary and decimal numbers
 
 Computers store numbers using bits, so a decimal number such as 22.375 must be rewritten using powers of 2. The same idea works for whole numbers and for fractions, but the hand calculations run in opposite directions.
 
-In this seminar, we will review what we have learned in Lecture 03 about decimal to binary conversions. We will work through the examples on paper / board first. The interactive tool at the end lets you check each step without replacing the calculation.
+In this seminar, we will review what we learned in Lecture 03 about decimal-to-binary conversions. We will work through the examples on paper first. The interactive tool at the end lets you check each step without replacing the calculation.
 
-Converting from binary to decimal is usually easier, just sum the digits. to convert decimal to binary formats (including both integer and fractional parts), you can use the schem below
+Converting from binary to decimal is usually easier — just sum the place values. To convert decimal to binary (including both integer and fractional parts), use the scheme below.
 
-<use the figure S02-conversion-mindmap.png in assets here>
+![Conversion between decimal and binary formats.](../../assets/S02-conversion-mindmap.png)
 
-Let us start with a integer number. To convert a positive decimal integer to binary, **divide by 2** repeatedly. At each step, keep the quotient and record the remainder. Stop when the quotient becomes zero. The binary digits are the remainders read from **bottom to top**.
+### Integer part: repeated division
+
+To convert a positive decimal integer to binary, **divide by 2** repeatedly. At each step, keep the quotient and record the remainder. Stop when the quotient becomes zero. The binary digits are the remainders read from **bottom to top**.
 
 For 45, the calculation is:
 
@@ -37,23 +44,23 @@ $$
 45_{10}=(101101)_2.
 $$
 
-We can check this by adding the place values:
+We can check by adding the place values:
 
 $$
 (101101)_2=1(2^5)+0(2^4)+1(2^3)+1(2^2)+0(2^1)+1(2^0)=32+8+4+1=45.
 $$
 
-For a negative integer, convert its magnitude and then restore the minus sign. Thus,
+For a negative integer, convert its magnitude and then restore the minus sign:
 
 $$
 -45_{10}=-(101101)_2.
 $$
 
+### Fractional part: repeated multiplication
 
+For a fraction between zero and one, **multiply by 2** instead. The integer part of each product is the next binary digit. Keep the new fractional remainder and continue. This time, read the bits from **top to bottom**.
 
-For a fraction between zero and one, use a similar process, but **multiply by 2** instead. The integer part of each product is the next binary digit. Keep the new fractional remainder and continue. This time, read the bits from top to bottom.
-
-For example, begin with 0.375:
+For 0.375:
 
 | Fraction | Multiply by 2 | Bit | New fraction |
 |---:|---:|---:|---:|
@@ -61,60 +68,60 @@ For example, begin with 0.375:
 | 0.75 | 1.50 | 1 | 0.50 |
 | 0.50 | 1.00 | 1 | 0.00 |
 
-The remainder reaches zero, so the expansion ends:
+The remainder reaches zero, so the expansion terminates:
 
 $$
 0.375_{10}=(0.011)_2=2^{-2}+2^{-3}=0.25+0.125.
 $$
 
-A fraction does not always end. If a remainder appears again, the following bits repeat. A fraction in lowest terms has a finite binary expansion only when its denominator is a power of 2.
+A fraction does not always terminate. If a remainder repeats, the following bits repeat. A fraction in lowest terms has a finite binary expansion only when its denominator is a power of 2.
 
-Your turn! Convert decimal number 0.2 to binary, and keep only the first eight digits after the binary point. Do not round the eighth digit; discard everything after it. Convert those eight bits back to decimal and calculate
+### Your turn: convert 0.2
+
+Convert $0.2_{10}$ to binary and keep only the first eight digits after the binary point. Do not round the eighth digit; discard everything after it. Convert those eight bits back to decimal and calculate
 
 $$
 \left|x_{\mathrm{approx}}-0.2\right|.
 $$
 
-<just show the result here>
+You should find $(0.00110011)_2 = 51/256 = 0.19921875$, giving an absolute error of $0.00078125$. This is the kind of representation error that L03 discussed — 0.2 simply cannot be stored exactly in binary.
 
-Once the two parts are familiar, put them together. Convert the whole-number part and fractional part separately, then join them at the binary point. For example,
+### Putting both parts together
+
+Convert the whole-number part and fractional part separately, then join them at the binary point:
 
 $$
 -22.375_{10}=-(10110.011)_2.
 $$
 
+## Real numbers in floating-point notation
 
-## Real numbers in floating-point notations
+We now know how to write $-22.375$ in binary, but this is not yet the floating-point format used inside a computer. In the decimal system we move the decimal point so the significand sits between 1 and 10. We do the same in binary.
 
-Take the example of -22.375 above. We know how to write this number in a binary format, but it's not yet the floating-point format used in computer yet. Remember in decimal (base-10) number system where we will move the decimal point left and right to make the significand between 1 and 10? We basically do the same for binary numbers.
-
-starting with $-(10110.011)_2$, we need to move the binary point **4 places** to the left, so there is one nonzero bit to its left. In other words, a "binary scientific notation" will write it as:
-
-$$
--(10110.011)_2=(-1)^1(1.0110011)_2\times2^4.
-$$
-
-This is basically the rule behind the IEEE-754 floating-point standard, or formally, for a normal finite IEEE floating-point number
+Starting with $-(10110.011)_2$, move the binary point **4 places** to the left so that exactly one nonzero bit remains to its left:
 
 $$
-x=(-1)^s(1.F)_2\times2^p.
+-(10110.011)_2=(-1)^1\times(1.0110011)_2\times2^4.
 $$
 
-(see lecture 03 for more details).
-The sign bit is $s$. The exponent is $p$. The stored fraction field contains the bits after the leading 1. The exponent is stored with a bias:
+This is the rule behind the IEEE-754 floating-point standard. For a normal finite number:
+
+$$
+x=(-1)^s\,(1.F)_2\times2^p.
+$$
+
+The sign bit is $s$. The exponent is $p$. The stored fraction field $F$ contains the bits after the leading 1 (which is implicit). The exponent is stored with a bias:
 
 $$
 E=p+b.
 $$
 
-| Format | Exponent bits | Bias $b$ | Fraction bits | Significant bits, including the leading 1 |
+| Format | Exponent bits | Bias $b$ | Fraction bits | Total significant bits |
 |---|---:|---:|---:|---:|
 | `float32` | 8 | 127 | 23 | 24 |
 | `float64` | 11 | 1023 | 52 | 53 |
 
-We will first try normalizing 0.375 and 0.2 by hand, and then use the last section of the tool to compare their `float32` and `float64` representations. 
-
-
+Try normalizing 0.375 and 0.2 by hand, then use the interactive tool below to compare their `float32` and `float64` representations.
 
 ::: {.quarto-wasm-local notebook="s02_number_converter.edit.py" title="Check decimal and binary conversions" height="900" loading="eager" fullscreen="true"}
 **Print/offline checks.**
@@ -125,6 +132,6 @@ We will first try normalizing 0.375 and 0.2 by hand, and then use the last secti
 - The stored approximation to 0.2 has exponent $p=-3$ in both formats. `float32` stores $13421773/2^{26}$; `float64` stores $3602879701896397/2^{54}$. The binary64 value is closer to $1/5$, but neither format stores it exactly.
 :::
 
-## Work out the assignment 1
+## Work on Assignment 1
 
-You can use the above rules and tools to try our answers for assignment 1, question 2. good luck!
+Use the rules and tools above to check your answers for Assignment 1, Question 2.
