@@ -254,10 +254,10 @@ def _(anywidget, conversion_steps, traitlets):
         export default {render};
         """
         _css = """
-        .conversion-board {font: 17px/1.5 system-ui,sans-serif; color:inherit; background:transparent; padding:16px; border:1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius:8px; color-scheme:light dark;}
+        .conversion-board {font: 17px/1.5 system-ui,sans-serif; color:inherit; padding:16px; border:1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius:8px; color-scheme:light dark;}
         .conversion-board .controls,.conversion-board .examples {display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin:12px 0;}
         .conversion-board label {display:flex; flex-direction:column; gap:4px;}
-        .conversion-board input,.conversion-board select,.conversion-board button {font:inherit; color:inherit; background:transparent; border:1px solid color-mix(in srgb, currentColor 45%, transparent); border-radius:4px; padding:6px 10px;}
+        .conversion-board input,.conversion-board select,.conversion-board button {font:inherit; color:inherit; border:1px solid color-mix(in srgb, currentColor 45%, transparent); border-radius:4px; padding:6px 10px;}
         .conversion-board button,.conversion-board summary {cursor:pointer;}
         .conversion-board summary {font-weight:600; padding:12px 0;}
         .conversion-board details {border-top:1px solid color-mix(in srgb, currentColor 25%, transparent);}
