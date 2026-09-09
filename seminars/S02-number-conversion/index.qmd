@@ -1,252 +1,109 @@
 ---
-title: "S02 · Number systems, binary conversions, and IEEE floating-point arithmetic"
-subtitle: "Manual algorithms, Python bitwise tools, and floating-point dissection"
+title: "S02 · Decimal and binary by hand"
+subtitle: "A TA-led walkthrough of Assignment 1, Question 2"
 body-classes: lecture-page seminar-page
 ---
 
-## Learning outcomes
+The TA works through the conversions on the board, then uses the checker below to verify each step. Follow along on paper. No coding is required.
 
-By the end of this seminar, you should be able to:
+By the end, you should be able to convert integers and fractions between decimal and binary, calculate the error from keeping a finite number of bits, and explain why a wider floating-point format helps some numbers but not others.
 
-1. **Convert** positive and negative decimal integers to and from binary using repeated division by 2 and Python's `bin()` / `int(..., 2)`.
-2. **Convert** decimal fractions to binary using repeated multiplication by 2, distinguishing terminating from repeating expansions.
-3. **Inspect** exact stored values and rounding in Python using `float.as_integer_ratio()`.
-4. **Dissect** arbitrary floating-point numbers into IEEE 754 `float32` and `float64` fields: sign bit, biased exponent, and fraction/mantissa bits.
-5. **Recognize** why wider floating-point formats increase precision for repeating numbers but leave already-exact dyadic fractions unchanged.
+## Plan for 50 minutes
 
----
+| Time | Board work | Assignment connection |
+|---|---|---|
+| 0–15 min | Integers: divide by 2; convert back using place values | Q2.1: `2026` and binary `1100111` |
+| 15–30 min | Fractions: multiply by 2; keep eight bits and check the error | Q2.2: `0.75` and `0.10` |
+| 30–45 min | Combine the parts, normalize, and compare stored values | Q2.3: `float32` and `float64` |
+| 45–50 min | Finish a calculation and take questions | [Assignment 1, Question 2](../../assignments/A1/index.qmd#problem-2-binary-and-floating-point-numbers-20-marks) |
 
-## 1. Converting integers to binary
+## 1. Integers: divide by 2
 
-An integer in decimal uses powers of 10:
+For a positive integer, divide by 2 and record the quotient and remainder. Continue with the quotient until it reaches zero. **Read the remainders from bottom to top.**
 
-$$
-27_{10} = 2 \times 10^1 + 7 \times 10^0.
-$$
+For example, converting 13:
 
-In binary (base 2), each position represents a power of 2 ($2^0=1, 2^1=2, 2^2=4, 2^3=8, 2^4=16, \dots$):
+| Value | Quotient | Remainder |
+|---:|---:|---:|
+| 13 | 6 | 1 |
+| 6 | 3 | 0 |
+| 3 | 1 | 1 |
+| 1 | 0 | 1 |
 
-$$
-27_{10} = 16 + 8 + 2 + 1 = 1\times 2^4 + 1\times 2^3 + 0\times 2^2 + 1\times 2^1 + 1\times 2^0 = (11011)_2.
-$$
-
-### The manual algorithm: repeated division by 2
-
-To find the binary digits of any decimal integer:
-1. Divide the integer by 2.
-2. Record the integer quotient and the remainder (0 or 1).
-3. Repeat with the quotient until it reaches 0.
-4. **Read the remainders from bottom to top** (from least significant bit to most significant bit).
-
-For $27$:
-
-| Value | Quotient ($\div 2$) | Remainder | Bit position |
-|---:|---:|:---:|---|
-| 27 | 13 | **1** | $2^0 = 1$ |
-| 13 | 6 | **1** | $2^1 = 2$ |
-| 6 | 3 | **0** | $2^2 = 4$ |
-| 3 | 1 | **1** | $2^3 = 8$ |
-| 1 | 0 | **1** | $2^4 = 16$ |
-
-Reading upward gives $(11011)_2$.
-
-### Python verification: `bin()` and `int()`
-
-In Python, verify the conversion with `bin()`:
-
-```python
-bin(27)        # '0b11011'
-bin(-27)       # '-0b11011'
-```
-
-The prefix `0b` indicates binary. Notice that Python represents negative integers by displaying a minus sign before the binary digits.
-
-To convert back from binary string to decimal:
-
-```python
-int("11011", 2)    # 27
-int("-11011", 2)   # -27
-```
-
----
-
-## 2. Converting fractions to binary
-
-A fractional number has digits to the right of the radix point representing negative powers of the base ($2^{-1}=0.5, 2^{-2}=0.25, 2^{-3}=0.125, 2^{-4}=0.0625, \dots$).
-
-### The manual algorithm: repeated multiplication by 2
-
-To convert a fraction between 0 and 1 to binary:
-1. Multiply the fraction by 2.
-2. The integer part (0 or 1) of the product becomes the next binary digit.
-3. Keep the fractional part and multiply by 2 again.
-4. Repeat until the fractional part becomes 0 (**terminating**) or a previous remainder reappears (**repeating**).
-5. **Read the bits from top to bottom**.
-
-#### Example 1: Terminating fraction ($0.625$)
-
-| Fraction | Multiplied by 2 | Integer bit | New fraction |
-|---:|---:|:---:|---:|
-| 0.625 | 1.25 | **1** | 0.25 |
-| 0.250 | 0.50 | **0** | 0.50 |
-| 0.500 | 1.00 | **1** | 0.00 |
-
-The fractional part hit 0, so the expansion terminates:
+Thus $13_{10}=(1101)_2$. Check by adding the place values:
 
 $$
-0.625_{10} = (0.101)_2 = \frac{1}{2} + \frac{0}{4} + \frac{1}{8}.
+(1101)_2=1(2^3)+1(2^2)+0(2^1)+1(2^0)=8+4+1=13.
 $$
 
-#### Example 2: Repeating fraction ($0.1_{10}$)
+For a negative number, convert its magnitude and restore the minus sign: $-13_{10}=-(1101)_2$. This is signed mathematical notation, not a fixed-width two's-complement encoding.
 
-Now try decimal $0.1$:
+**Board task:** apply the same division steps to 2026, then convert $(1100111)_2$ to decimal using place values. Reveal checker sections 1 and 3 afterward.
 
-| Fraction | Multiplied by 2 | Integer bit | New fraction |
-|---:|---:|:---:|---:|
-| 0.1 | 0.2 | **0** | 0.2 |
-| 0.2 | 0.4 | **0** | 0.4 |
-| 0.4 | 0.8 | **0** | 0.8 |
-| 0.8 | 1.6 | **1** | 0.6 |
-| 0.6 | 1.2 | **1** | 0.2 (repeats!) |
+## 2. Fractions: multiply by 2
 
-The fraction $0.2$ reappears on step 5, establishing a repeating block `0011`:
+For a fraction between zero and one, multiply by 2. Record the integer part as the next bit, then continue with the fractional remainder. **Read these bits from top to bottom.**
+
+For example, converting 0.625:
+
+| Fraction | Multiply by 2 | Bit | New fraction |
+|---:|---:|---:|---:|
+| 0.625 | 1.25 | 1 | 0.25 |
+| 0.25 | 0.5 | 0 | 0.5 |
+| 0.5 | 1.0 | 1 | 0 |
+
+The remainder is zero, so the expansion ends:
 
 $$
-0.1_{10} = (0.0001100110011\dots)_2 = (0.0\overline{0011})_2.
+0.625_{10}=(0.101)_2=2^{-1}+2^{-3}=0.5+0.125.
 $$
 
-::: {.callout-important}
-## When is a fraction exact in binary?
-In base 10, a fraction $p/q$ terminates if and only if the prime factors of $q$ are 2 or 5 (e.g., $1/10 = 0.1$, $1/4 = 0.25$).
+If a remainder repeats, the subsequent bits repeat too. A fraction in lowest terms has a finite binary expansion only if its denominator is a power of two.
 
-In base 2, a fraction $p/q$ terminates if and only if the prime factors of $q$ are powers of 2 (dyadic rationals: $1/2, 1/4, 1/8, \dots$). Because $10 = 2 \times 5$, **$0.1_{10}$ cannot be represented with a finite number of binary bits** and must be rounded when stored in computer memory!
+**Board task:** convert 0.75, then 0.10. For 0.10, write eight digits after the binary point and **discard** all later digits, as Q2.2 requests. Convert that finite binary fraction back to decimal and calculate
+
+$$
+\text{absolute error}=|x_{\mathrm{eight\ bits}}-0.10|.
+$$
+
+Use checker sections 2–4 to verify the bits, place values, and error. Discarding bits here is **truncation**; it is not the nearest-value rounding used by IEEE floating point.
+
+## 3. Combine, normalize, and compare
+
+Handle the integer and fractional parts separately, then join them at the binary point:
+
+$$
+-13.625_{10}=-(1101.101)_2=-(1.101101)_2\times2^3.
+$$
+
+For a normal, finite IEEE value,
+
+$$
+x=(-1)^s(1.F)_2\,2^p,\qquad E=p+b.
+$$
+
+Here $s$ is the sign bit, $F$ contains the stored fraction bits, $p$ is the actual exponent, and $E$ is the stored exponent with bias $b$.
+
+| Format | Sign bits | Exponent bits | Bias $b$ | Fraction bits | Significant bits, including the leading 1 |
+|---|---:|---:|---:|---:|---:|
+| `float32` | 1 | 8 | 127 | 23 | 24 |
+| `float64` | 1 | 11 | 1023 | 52 | 53 |
+
+**Board task:** normalize the binary expansion of 0.75, then that of 0.10. Open checker section 5 and compare the significands and exponents in both formats. The full fields are provided for checking; there is no need to copy out 64 bits.
+
+Ask: **Which number benefits from `float64`, and why? Can either format store 0.10 exactly?**
+
+## Board-work checker
+
+Choose an example or enter a decimal or finite binary number. Click **Prepare checks**, then open only the section matching the board work. Conversion tables use exact rational arithmetic, so a repeating decimal input is not accidentally replaced by its machine approximation. Long expansions stop after 32 fractional digits; Q2 needs only eight.
+
+::: {.quarto-wasm-local notebook="s02_number_converter.edit.py" title="Decimal and binary: reveal manual conversion checks" height="900" loading="eager" fullscreen="true"}
+**Print/offline checks.** Use these after completing the board work:
+
+- $2026_{10}=(11111101010)_2$; $(1100111)_2=103_{10}$.
+- $0.75_{10}=(0.11)_2=(1.1)_2\times2^{-1}$, exactly in both formats.
+- $0.10_{10}=(0.0001100110011\ldots)_2$. Keeping eight fractional bits gives $(0.00011001)_2=25/256=0.09765625$, with absolute error $0.00234375$.
+- The stored approximation to 0.10 has exponent $p=-4$ in both formats. `float32` stores $13421773/2^{27}$; `float64` stores $3602879701896397/2^{55}$. The latter is closer to $1/10$, but neither equals it.
 :::
 
-### Recovering the stored rational: `as_integer_ratio()`
-
-Python floats are binary64 numbers. We can inspect the exact rational value stored by the computer using `.as_integer_ratio()`:
-
-```python
-import numpy as np
-
-# Exact binary fractions:
-print(float(np.float32("0.25")).as_integer_ratio())   # (1, 4) -> 1/4 exactly!
-print(float(np.float64("0.75")).as_integer_ratio())   # (3, 4) -> 3/4 exactly!
-
-# Repeating fraction 0.1:
-print(float(np.float32("0.1")).as_integer_ratio())    # (13421773, 134217728)
-print(float(np.float64("0.1")).as_integer_ratio())    # (3602879701896397, 36028797018963968)
-```
-
-Notice that $13421773 / 134217728 = 13421773 / 2^{27} \approx 0.10000000149$. It is not $1/10$. Both `float32` and `float64` store truncated approximations.
-
----
-
-## 3. Dissecting IEEE 754 floating-point numbers
-
-A normalized IEEE 754 floating-point number represents a real value as:
-
-$$
-\boxed{x = (-1)^s \times (1.F)_2 \times 2^{E - b}}
-$$
-
-where:
-- $s$ is the **sign bit** ($0$ for positive, $1$ for negative);
-- $E$ is the **biased exponent**, stored as an unsigned integer;
-- $b$ is the **exponent bias** ($127$ for `float32`, $1023$ for `float64`);
-- $p = E - b$ is the **actual power of 2**;
-- $(1.F)_2 = 1 + \sum_{i=1}^t F_i 2^{-i}$ is the **significand** (mantissa). The leading `1.` is implicit and not stored for normal numbers.
-
-| Format | Sign ($s$) | Exponent bits | Bias ($b$) | Fraction bits ($t$) | Total bits |
-|---|:---:|:---:|:---:|:---:|:---:|
-| `float32` (binary32) | 1 bit | 8 bits | 127 | 23 bits | 32 bits |
-| `float64` (binary64) | 1 bit | 11 bits | 1023 | 52 bits | 64 bits |
-
-### Step-by-step example: dissecting $-13.625$
-
-#### Step 1: Convert integer and fraction to binary
-- Integer $13 = 8 + 4 + 1 = (1101)_2$.
-- Fraction $0.625 = 0.5 + 0.125 = (0.101)_2$.
-- Combined binary value: $-(1101.101)_2$.
-
-#### Step 2: Normalize to scientific form
-Shift the binary point 3 places to the left:
-
-$$
--(1101.101)_2 = (-1)^1 \times (1.101101)_2 \times 2^3.
-$$
-
-We now identify:
-- Sign: $s = 1$.
-- Actual exponent: $p = 3$.
-- Significand: $(1.101101)_2$.
-- Fraction bits to store: `101101` (drop the leading 1).
-
-#### Step 3: Compute the biased exponent $E$
-- For `float32`: $E = p + 127 = 3 + 127 = 130$. In 8-bit binary: $130 = 128 + 2 = (10000010)_2$.
-- For `float64`: $E = p + 1023 = 3 + 1023 = 1026$. In 11-bit binary: $1026 = 1024 + 2 = (10000000010)_2$.
-
-#### Step 4: Assemble the stored bitstring
-- **`float32` (32 bits):**
-  - Sign (1 bit): `1`
-  - Exponent (8 bits): `10000010`
-  - Fraction (23 bits): `101101` followed by 17 zeros (`10110100000000000000000`)
-- **`float64` (64 bits):**
-  - Sign (1 bit): `1`
-  - Exponent (11 bits): `10000000010`
-  - Fraction (52 bits): `101101` followed by 46 zeros
-
-Notice that because $-13.625$ terminates cleanly in binary, it is **represented exactly** in both formats. Moving from `float32` to `float64` simply adds trailing zeros to the fraction.
-
-### Python tool: inspecting IEEE bits with `struct`
-
-Python's built-in `struct` module lets you inspect raw memory bytes directly:
-
-```python
-import struct
-
-def dissect_float(val: float, is_double=False):
-    fmt = ">d" if is_double else ">f"
-    exp_len = 11 if is_double else 8
-    packed = struct.pack(fmt, val)
-    bits = "".join(f"{b:08b}" for b in packed)
-    
-    s = bits[0]
-    exp = bits[1 : 1 + exp_len]
-    frac = bits[1 + exp_len :]
-    print(f"Sign: {s} | Exponent: {exp} | Fraction: {frac}")
-
-dissect_float(-13.625, is_double=False)
-```
-
----
-
-## Interactive playground: number converter & dissector
-
-Type any decimal number (positive, negative, integer, or floating-point) to see its full division/multiplication steps, exact stored ratio, and complete IEEE 754 bit decomposition:
-
-::: {.quarto-wasm-local notebook="s02_number_converter.edit.py" title="Interactive number converter and IEEE dissector" height="850" loading="eager" fullscreen="true"}
-**Static fallback.** Converts arbitrary numbers into division/multiplication steps and shows sign, exponent, and fraction bit fields for `float32` and `float64`.
-:::
-
----
-
-## In-seminar practice exercises
-
-Work in pairs on the following problems. Calculate the answers by hand first, then verify using the interactive tool above or Python.
-
-### Exercise 1: Integer and fraction manual conversion
-1. Convert $45_{10}$ and $-45_{10}$ to binary using repeated division by 2.
-2. Convert $0.375_{10}$ to binary using repeated multiplication by 2. Is the expansion finite or repeating?
-3. Convert $0.2_{10}$ to binary. Show the first 8 bits after the binary point and identify the repeating pattern.
-
-### Exercise 2: IEEE 754 bit dissection
-Consider the number $x = -22.375$:
-1. Write $x$ as an exact binary fraction.
-2. Normalize it into scientific binary notation $(-1)^s (1.F)_2 \times 2^p$.
-3. Compute the biased exponent $E$ in decimal and 8-bit binary for `float32`.
-4. Write out the 32-bit pattern for `float32` (sign, 8 exponent bits, 23 fraction bits).
-5. Does `float64` represent this number more accurately than `float32`? Why or why not?
-
-### Exercise 3: Connecting to Assignment 1
-Open [Assignment 1 Problem 2](../../assignments/A1/index.qmd). Use the methods practiced today to complete the required integer conversions ($27, -27$), fraction analysis ($0.25, 0.75, 0.1$), and full IEEE dissection of $-13.625$.
+**Before leaving:** explain to a partner why we read integer remainders upward but fractional bits downward.
