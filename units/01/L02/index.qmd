@@ -268,7 +268,7 @@ The figure separates three ideas that we will use throughout the course:
 
 1. **Modeling error**, also called **model-form error**, occurs when the equations or assumptions do not adequately represent the relevant physics or reality. It cannot be repaired simply by increasing $N$. Model-form error is not included in @fig-pi-error-comparison: all four methods are treated as valid mathematical routes to the same ideal target, $\pi$.
 
-2. **Finite-$N$ error** remains because a calculation uses a finite amount of work. For the Basel and Ramanujan series, stopping after $N$ terms produces **truncation error** from the omitted tail. For the polygon, a finite number of sides produces geometric approximation error. For Buffon's needle, finite $N$ produces **sampling error**, not truncation error, because different random samples give different estimates. These errors dominate the initially decreasing parts of the curves.
+2. **Truncation error** remains because a calculation uses a finite amount of work ($N$). For the Basel and Ramanujan series, stopping after $N$ terms produces  from the omitted tail. For the polygon, a finite number of sides produces geometric approximation error. For Buffon's needle, finite $N$ produces **sampling error**, not truncation error, because different random samples give different estimates. These errors dominate the initially decreasing parts of the curves.
 
 3. **Round-off error** comes from storing numbers and carrying out arithmetic with finite precision. The polygon recurrence is especially sensitive because it eventually subtracts two nearly equal numbers. Its green curve first flattens and then rises even though $N$ continues to increase. L03 will explain this behaviour in detail.
 
