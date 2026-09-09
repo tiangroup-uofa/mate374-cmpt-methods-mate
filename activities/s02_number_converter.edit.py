@@ -31,18 +31,18 @@ def _(Fraction, np, re, struct):
             raise ValueError("Please use at most 100 characters.")
         if base == "decimal":
             if not re.fullmatch(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d{1,2})?", text):
-                raise ValueError("Enter a finite decimal, such as -13.625 or 0.10.")
+                raise ValueError("Enter a finite decimal, such as -22.375 or 0.2.")
             exact = Fraction(text)
         else:
             if not re.fullmatch(r"[+-]?(?:[01]+(?:\.[01]*)?|\.[01]+)", text):
-                raise ValueError("Enter binary digits with an optional sign and point, e.g. 1101.101.")
+                raise ValueError("Enter binary digits with an optional sign and point, e.g. 10110.011.")
             unsigned = text.lstrip("+-")
             whole, _, tail = unsigned.partition(".")
             exact = Fraction(int((whole or "0") + tail, 2), 2 ** len(tail))
             if text.startswith("-"):
                 exact = -exact
         if abs(exact) > 10**30 or (exact and abs(exact) < Fraction(1, 10**30)):
-            raise ValueError("For readable board work, use zero or a magnitude from 1e-30 to 1e30.")
+            raise ValueError("For readable calculations, use zero or a magnitude from 1e-30 to 1e30.")
 
         def decimal_string(value):
             # All displayed rationals here have terminating decimal expansions.
@@ -156,14 +156,14 @@ def _(Fraction, np, re, struct):
 @app.cell(hide_code=True)
 def _(anywidget, conversion_steps, traitlets):
     class ConversionBoard(anywidget.AnyWidget):
-        text = traitlets.Unicode("2026").tag(sync=True)
+        text = traitlets.Unicode("45").tag(sync=True)
         base = traitlets.Unicode("decimal").tag(sync=True)
         result = traitlets.Dict().tag(sync=True)
         _esm = r"""
         function render({model, el}) {
           el.classList.add('conversion-board');
           el.innerHTML = `
-            <p>Work on the board first, then reveal a check. Changing the input hides all checks.</p>
+            <p>Work through the calculation first, then reveal a check. Changing the input hides all checks.</p>
             <form class="controls">
               <label>Input base <select name="base"><option value="decimal">Decimal</option><option value="binary">Binary</option></select></label>
               <label>Number <input name="number" type="text" maxlength="100" spellcheck="false"></label>
@@ -186,7 +186,7 @@ def _(anywidget, conversion_steps, traitlets):
             if (unchanged) draw();
           }
           form.addEventListener('submit', event => {event.preventDefault(); submit(input.value, base.value);});
-          for (const [text, radix] of [['2026','decimal'],['1100111','binary'],['0.75','decimal'],['0.10','decimal'],['-13.625','decimal']]) {
+          for (const [text, radix] of [['45','decimal'],['101101','binary'],['0.375','decimal'],['0.2','decimal'],['-22.375','decimal']]) {
             const button = document.createElement('button'); button.type = 'button';
             button.textContent = text + (radix === 'binary' ? ' (binary)' : '');
             button.addEventListener('click', () => submit(text, radix));
