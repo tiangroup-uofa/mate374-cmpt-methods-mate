@@ -1,27 +1,16 @@
 ---
-title: "S02 · Decimal and binary by hand"
-subtitle: "A TA-led walkthrough of Assignment 1, Question 2"
+title: "S02 · How computers write numbers in binary"
+subtitle: "Working through Assignment 1, Question 2"
 body-classes: lecture-page seminar-page
 ---
 
-The TA works through the conversions on the board, then uses the checker below to verify each step. Follow along on paper. No coding is required.
+Computers store numbers using bits, so a decimal number such as 13.625 must be rewritten using powers of 2. The same idea works for whole numbers and for fractions, but the hand calculations run in opposite directions.
 
-By the end, you should be able to convert integers and fractions between decimal and binary, calculate the error from keeping a finite number of bits, and explain why a wider floating-point format helps some numbers but not others.
+Work through the examples on paper first. The interactive tool at the end lets you check each step without replacing the calculation.
 
-## Plan for 50 minutes
+Let us start with a whole number. To convert a positive decimal integer to binary, divide by 2 repeatedly. At each step, keep the quotient and record the remainder. Stop when the quotient becomes zero. The binary digits are the remainders read from bottom to top.
 
-| Time | Board work | Assignment connection |
-|---|---|---|
-| 0–15 min | Integers: divide by 2; convert back using place values | Q2.1: `2026` and binary `1100111` |
-| 15–30 min | Fractions: multiply by 2; keep eight bits and check the error | Q2.2: `0.75` and `0.10` |
-| 30–45 min | Combine the parts, normalize, and compare stored values | Q2.3: `float32` and `float64` |
-| 45–50 min | Finish a calculation and take questions | [Assignment 1, Question 2](../../assignments/A1/index.qmd#problem-2-binary-and-floating-point-numbers-20-marks) |
-
-## 1. Integers: divide by 2
-
-For a positive integer, divide by 2 and record the quotient and remainder. Continue with the quotient until it reaches zero. **Read the remainders from bottom to top.**
-
-For example, converting 13:
+For 13, the calculation is:
 
 | Value | Quotient | Remainder |
 |---:|---:|---:|
@@ -30,80 +19,96 @@ For example, converting 13:
 | 3 | 1 | 1 |
 | 1 | 0 | 1 |
 
-Thus $13_{10}=(1101)_2$. Check by adding the place values:
+Therefore,
+
+$$
+13_{10}=(1101)_2.
+$$
+
+We can check this by adding the place values:
 
 $$
 (1101)_2=1(2^3)+1(2^2)+0(2^1)+1(2^0)=8+4+1=13.
 $$
 
-For a negative number, convert its magnitude and restore the minus sign: $-13_{10}=-(1101)_2$. This is signed mathematical notation, not a fixed-width two's-complement encoding.
+For a negative integer, convert its magnitude and then restore the minus sign. Thus,
 
-**Board task:** apply the same division steps to 2026, then convert $(1100111)_2$ to decimal using place values. Reveal checker sections 1 and 3 afterward.
+$$
+-13_{10}=-(1101)_2.
+$$
 
-## 2. Fractions: multiply by 2
+This is ordinary signed notation, not a fixed-width two's-complement representation.
 
-For a fraction between zero and one, multiply by 2. Record the integer part as the next bit, then continue with the fractional remainder. **Read these bits from top to bottom.**
+Now try the integer parts from Question 2: convert $2026_{10}$ to binary, and convert $(1100111)_2$ back to decimal by adding its powers of 2. The conversion tool can check both answers after you have written out the steps.
 
-For example, converting 0.625:
+For a fraction between zero and one, use a similar process, but multiply by 2 instead. The integer part of each product is the next binary digit. Keep the new fractional remainder and continue. This time, read the bits from top to bottom.
+
+For example, begin with 0.625:
 
 | Fraction | Multiply by 2 | Bit | New fraction |
 |---:|---:|---:|---:|
 | 0.625 | 1.25 | 1 | 0.25 |
-| 0.25 | 0.5 | 0 | 0.5 |
-| 0.5 | 1.0 | 1 | 0 |
+| 0.25 | 0.50 | 0 | 0.50 |
+| 0.50 | 1.00 | 1 | 0.00 |
 
-The remainder is zero, so the expansion ends:
+The remainder reaches zero, so the expansion ends:
 
 $$
 0.625_{10}=(0.101)_2=2^{-1}+2^{-3}=0.5+0.125.
 $$
 
-If a remainder repeats, the subsequent bits repeat too. A fraction in lowest terms has a finite binary expansion only if its denominator is a power of two.
+A fraction does not always end. If a remainder appears again, the following bits repeat. A fraction in lowest terms has a finite binary expansion only when its denominator is a power of 2.
 
-**Board task:** convert 0.75, then 0.10. For 0.10, write eight digits after the binary point and **discard** all later digits, as Q2.2 requests. Convert that finite binary fraction back to decimal and calculate
-
-$$
-\text{absolute error}=|x_{\mathrm{eight\ bits}}-0.10|.
-$$
-
-Use checker sections 2–4 to verify the bits, place values, and error. Discarding bits here is **truncation**; it is not the nearest-value rounding used by IEEE floating point.
-
-## 3. Combine, normalize, and compare
-
-Handle the integer and fractional parts separately, then join them at the binary point:
+For Question 2, convert 0.75 first. Then convert 0.10 and keep only the first eight digits after the binary point. Do not round the eighth digit; discard everything after it. Convert those eight bits back to decimal and calculate
 
 $$
--13.625_{10}=-(1101.101)_2=-(1.101101)_2\times2^3.
+\left|x_{\mathrm{approx}}-0.10\right|.
 $$
 
-For a normal, finite IEEE value,
+This error comes from truncating the repeating binary expansion. It is different from the rounding used when a computer stores a number in an IEEE floating-point format.
+
+Once the two parts are familiar, put them together. Convert the whole-number part and fractional part separately, then join them at the binary point. For example,
 
 $$
-x=(-1)^s(1.F)_2\,2^p,\qquad E=p+b.
+-13.625_{10}=-(1101.101)_2.
 $$
 
-Here $s$ is the sign bit, $F$ contains the stored fraction bits, $p$ is the actual exponent, and $E$ is the stored exponent with bias $b$.
+Floating-point notation moves that point so there is one nonzero bit to its left:
 
-| Format | Sign bits | Exponent bits | Bias $b$ | Fraction bits | Significant bits, including the leading 1 |
-|---|---:|---:|---:|---:|---:|
-| `float32` | 1 | 8 | 127 | 23 | 24 |
-| `float64` | 1 | 11 | 1023 | 52 | 53 |
+$$
+-(1101.101)_2=(-1)^1(1.101101)_2\times2^3.
+$$
 
-**Board task:** normalize the binary expansion of 0.75, then that of 0.10. Open checker section 5 and compare the significands and exponents in both formats. The full fields are provided for checking; there is no need to copy out 64 bits.
+For a normal finite IEEE floating-point number,
 
-Ask: **Which number benefits from `float64`, and why? Can either format store 0.10 exactly?**
+$$
+x=(-1)^s(1.F)_2\times2^p.
+$$
 
-## Board-work checker
+The sign bit is $s$. The exponent is $p$. The stored fraction field contains the bits after the leading 1. The exponent is stored with a bias:
 
-Choose an example or enter a decimal or finite binary number. Click **Prepare checks**, then open only the section matching the board work. Conversion tables use exact rational arithmetic, so a repeating decimal input is not accidentally replaced by its machine approximation. Long expansions stop after 32 fractional digits; Q2 needs only eight.
+$$
+E=p+b.
+$$
 
-::: {.quarto-wasm-local notebook="s02_number_converter.edit.py" title="Decimal and binary: reveal manual conversion checks" height="900" loading="eager" fullscreen="true"}
-**Print/offline checks.** Use these after completing the board work:
+| Format | Exponent bits | Bias $b$ | Fraction bits | Significant bits, including the leading 1 |
+|---|---:|---:|---:|---:|
+| `float32` | 8 | 127 | 23 | 24 |
+| `float64` | 11 | 1023 | 52 | 53 |
 
-- $2026_{10}=(11111101010)_2$; $(1100111)_2=103_{10}$.
+Try normalizing 0.75 and 0.10 by hand. Then use the last section of the tool to compare their `float32` and `float64` representations. The important question is not simply whether `float64` is wider. It is whether the number being stored needs those extra bits.
+
+Use the tool below to check your work. Enter a decimal number or a finite binary number, complete the calculation on paper first, then select **Prepare checks** and open the relevant section. The conversion steps use exact rational arithmetic, so the repeating decimal 0.10 is not accidentally replaced by a rounded machine value.
+
+Long expansions stop after 32 fractional digits. The assignment needs only the first eight digits of 0.10.
+
+::: {.quarto-wasm-local notebook="s02_number_converter.edit.py" title="Check decimal and binary conversions" height="900" loading="eager" fullscreen="true"}
+**Print/offline checks.**
+
+- $2026_{10}=(11111101010)_2$ and $(1100111)_2=103_{10}$.
 - $0.75_{10}=(0.11)_2=(1.1)_2\times2^{-1}$, exactly in both formats.
-- $0.10_{10}=(0.0001100110011\ldots)_2$. Keeping eight fractional bits gives $(0.00011001)_2=25/256=0.09765625$, with absolute error $0.00234375$.
-- The stored approximation to 0.10 has exponent $p=-4$ in both formats. `float32` stores $13421773/2^{27}$; `float64` stores $3602879701896397/2^{55}$. The latter is closer to $1/10$, but neither equals it.
+- $0.10_{10}=(0.0001100110011\ldots)_2$. The first eight fractional bits give $(0.00011001)_2=25/256=0.09765625$, with absolute error $0.00234375$.
+- The stored approximation to 0.10 has exponent $p=-4$ in both formats. `float32` stores $13421773/2^{27}$; `float64` stores $3602879701896397/2^{55}$. The binary64 value is closer to $1/10$, but neither format stores it exactly.
 :::
 
-**Before leaving:** explain to a partner why we read integer remainders upward but fractional bits downward.
+The two rules to remember are simple: integer remainders are read upward, while fractional bits are read downward.
