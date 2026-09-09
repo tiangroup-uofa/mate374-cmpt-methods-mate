@@ -7,177 +7,134 @@ format:
   pdf:
     output-file: A1.pdf
     toc: false
+    fontsize: 10pt
+    geometry:
+      - margin=0.75in
+    include-in-header:
+      text: |
+        \RedeclareSectionCommand[beforeskip=.8\baselineskip,afterskip=.3\baselineskip]{subsection}
+        \RedeclareSectionCommand[beforeskip=.6\baselineskip,afterskip=.2\baselineskip]{subsubsection}
+        \setlength{\parskip}{3pt}
 ---
 
 **Due:** Wednesday, September 23, 2026, at 12:00 pm (noon) via Canvas
 
 ::: {.content-visible when-format="html"}
-::: {.callout-note}
-## Printable assignment
-
-- [Open or download the PDF handout](A1.pdf)
-:::
+[Download the PDF handout](A1.pdf)
 :::
 
-## Instructions
+Submit **one PDF answering all four problems** (100 marks), including calculations, requested code snippets, plots, and concise explanations. Keep your full Python scripts; do not submit them.
 
-There are FOUR (4) questions in this assignment. Please make sure you included each of them in the answers.
-
-Submit **one PDF** on Canvas with your calculations, code snippets, plots, and written answers.  Include units for all physical quantities. Put your name and student ID at the top. You **DO NOT** need to submit the full python scripts, however we kindlyask you to keep a copy of them in case of further debugging.
-
-## Problem 1 (15 marks)
-
-Similar conceptual questions may appear on the midterm exam. Write your answers in concise sentences.
+## Problem 1 · Error and computational effort — 15 marks
 
 ### 1.1 Sources of error
 
-Review Lectures 01–04 and identify at least **three distinct sources of error** that can affect a numerical or computational result. For each source:
-
-1. Name the source of error.
-2. Explain it in one or two sentences.
-3. Give one example of how it could arise in a calculation.
+Identify **three distinct sources of error** from Lectures 01–04. For each, give its name, a one- or two-sentence explanation, and an example from a calculation.
 
 ### 1.2 Computational effort
 
-Consider two algorithms for calculating the total energy of a materials system containing many millions of atoms. For this comparison, assume that both algorithms produce the **same result**:
+Two algorithms calculate the same total energy for a system containing millions of atoms:
 
-- **Algorithm A** calls a computational routine many times, each time with a small input, such as calculating the interaction energy of a single pair of atoms.
-- **Algorithm B** makes far fewer calls, but each call uses a much larger input, such as calculating the energy of the entire system using a quantum chemistry method.
+- **A:** many routine calls, each with a small input, such as one atom pair.
+- **B:** fewer calls, each with a larger input, such as a whole-system quantum chemistry calculation.
 
-1. Would Algorithm B necessarily finish sooner? How would you estimate the total computation time for each algorithm?
-2. Would your answer to part 1 change if the system contained 10, 100, or 10,000 atoms? Briefly explain your reasoning and state any assumptions.
-
----
+1. Must B finish sooner? How would you estimate the total runtime of each algorithm?
+2. Would your conclusion change for 10, 100, or 10,000 atoms? Explain briefly and state your assumptions.
 
 ## Problem 2 · Binary and floating-point numbers — 20 marks
 
-### 2.1 Converting between decimal and binary integers
+### 2.1 Integers
 
-1. Convert the decimal integer **2026** to binary. Show the conversion **step-by-step**.
-2. Convert the binary integer **1100111** to decimal. Show the conversion **step-by-step**.
+Convert **2026** from decimal to binary and **1100111** from binary to decimal. Show each step. You may check with Python; `0b110 == 6`, for example, is `True`.
 
-*Python check:* The prefix `0b` indicates a binary integer literal. For example:
+### 2.2 Fractions
 
-```python
-0b110 == 6  # True: both represent the same integer
-```
+1. Convert **0.75** to binary by hand, showing all digits.
+2. Convert **0.10** to binary by hand. Keep the first **eight digits after the binary point**, discarding the rest without rounding.
+3. Convert that eight-digit approximation back to decimal. Does it equal 0.10? Calculate $|x_{\mathrm{approx}}-0.10|$.
 
-Python normally displays integers in decimal, regardless of how you enter them. `bin(n)` returns a string showing the integer in binary notation; it does not change the integer's value.
+### 2.3 Stored representations
 
-### 2.2 Fractions to binary
+Use the [L03 bit explorer](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/l03_float_bits.html) to compare **3.75** and **3.14** in `float32` and `float64`. Re-enter each decimal input after switching formats.
 
-1. Convert **0.75** to binary by hand. Show all digits.
-2. Convert **0.10** to binary by hand. Its binary expansion *repeats indefinitely*; show the first **eight digits after the binary point**, discarding the remaining digits.
-3. Convert your eight-digit approximation from part 2 back to decimal. Does it equal 0.10 exactly? Calculate its absolute error, $|x_{\mathrm{approx}}-0.10|$.
+1. For each number and format, identify the significand and exponent $p$ in its normalized binary representation.
+2. Does `float64` improve the accuracy of each number? Explain.
 
-
-### 2.3 Exact and approximate floating-point representations
-
-Compare how **0.75** and **0.10** are stored in `float32` and `float64` using the **[A1 IEEE bit explorer](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_float_bits.html)** below. After switching formats, click the number's button again to start from a fresh decimal input.
-
-1. For each number in each format, identify the significand and the exponent $p$ in the normalized binary representation.
-2. Does using `float64` instead of `float32` improve the accuracy of each number? Explain your answer using the binary expansions from 2.2 and the number of significant binary digits available in each format. Can either format represent 0.10 exactly?
-
-::: {.quarto-wasm-local notebook="assignments/A1/a1_float_bits.edit.py" title="Assignment 1: IEEE floating-point explorer" height="980" loading="eager" fullscreen="true"}
-**Browser activity:** [Open the A1 IEEE bit explorer](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_float_bits.html). Select each number in each format and inspect its representation. This is a separate assignment copy of the explorer.
+::: {.content-visible when-format="html"}
+::: {.quarto-wasm-local notebook="l03_float_bits.py" title="L03 IEEE floating-point explorer" height="980" fullscreen="true"}
+:::
 :::
 
----
+```{=latex}
+\newpage
+```
 
 ## Problem 3 · Find and test a method for computing π — 25 marks
 
-The number $\pi$ has infinitely many non-repeating digits. A numerical calculation can approximate it, but a finite floating-point value cannot store it exactly. In L02, we compared several numerical methods for calculating $\pi$. Now find a different method and investigate its convergence.
+### 3.1 Find a method
 
-### 3.1 Find and explain a method
+Find a method for computing $\pi$ **not covered in L02**, using a search engine, literature, or an AI tool. State the equation or algorithm, explain it briefly, define the effort parameter $N$ (e.g. terms or trials), and identify your source or AI tool.
 
-Use a **search engine**, the **literature**, or an **AI tool** to find a numerical method for computing $\pi$ that is **different from the examples in L02**. State the equation or algorithm, briefly explain it in your own words, and identify what the parameter $N$ means (i.e. $N$ terms or $N$ experiemnts). Give the source or AI tool you used.
+### 3.2 Implement it
 
-### 3.2 Implement the method
-
-Open the A1 [π-method demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_pi_exercise.html) and implement your method from 3.1 by completing this function:
+Complete this function in the [A1 π-method demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_pi_exercise.html):
 
 ```python
 def estimate_pi(N: int, **parameters):
-    # Implement your method below.
-    # Return a floating-point approximation of pi.
-    return ...
+    return ...  # Replace with your approximation of pi.
 ```
 
-Use `N` to control the computational effort and `parameters` for any additional inputs your method needs. As in the S01 plotting exercise, once your function returns numerical values, the supplied code generates an error table and convergence plot. Include your completed `estimate_pi` function in your answers.
+Use `N` to control effort and `parameters` for additional inputs. Include your completed function in your submission. The supplied code generates an error table and convergence plot; a switch adds the four L02 methods for comparison.
 
-::: {.quarto-wasm-local notebook="assignments/A1/a1_pi_exercise.edit.py" title="Assignment 1: implement a method for pi" height="850" fullscreen="true"}
-**Browser activity:** [Open the A1 π-method demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_pi_exercise.html). Complete the function above; the supplied code produces an absolute/relative error table and convergence plot.
+::: {.content-visible when-format="html"}
+::: {.quarto-wasm-local notebook="assignments/A1/a1_pi_exercise.edit.py" title="A1 Q3 · Estimate pi" height="850" fullscreen="true"}
+:::
 :::
 
-### 3.3 Investigate convergence
+### 3.3 Test convergence
 
-For several values of $N$, report the **absolute error** and **relative error** of your estimates using `np.pi` as the reference value. Does the error decrease as $N$ increases? Briefly explain the trend you observe.
+For several values of $N$, include the convergence plot and a table of estimates, **absolute errors**, and **relative errors**, using `np.pi` as the reference. (You can copy and paste the table in the demo!)
 
-Remember that `np.pi` is a finite-precision reference, not the exact mathematical value of $\pi$. An error of zero means agreement with that stored reference.
+- Does the error decrease as $N$ increases?
+- Is there evidence of round-off effects over your chosen range of $N$?
 
-
-::: {.callout-note}
-## If you get stuck
-
-If you cannot find or implement a suitable method, ask the instructor for a fallback method. You can then complete the same implementation and convergence study with that guidance.
-:::
-
----
+If you cannot find or implement a method, ask the instructor or TA for one.
 
 ## Problem 4 · What shape does an atom cluster prefer? — 40 marks
 
-As discussed in Seminar 01, the 12–6 Lennard-Jones (LJ) pair potential models the interaction energy between two neutral atoms separated by a distance $r$:
+Use the [A1 cluster demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_lj_clusters.html) and the Lennard-Jones pair potential
 
 $$
-V(r)=4\varepsilon\left[
-\left(\frac{\sigma}{r}\right)^{12}
--
-\left(\frac{\sigma}{r}\right)^6
-\right].
+V(r)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right],
+\qquad \varepsilon=0.0103\ \mathrm{eV},\quad \sigma=3.40\ \text{Å}.
 $$
 
-Use these representative parameters for argon–argon interactions:
+Include all unique pairs in each isolated cluster, with no cutoff or periodic boundaries.
+
+### 4.1 Pair energy
+
+Complete `calculate_LJ(r)`: take a positive distance in Å and return energy in eV. Submit the function and its plot. Check the shape against the reference below.
+
+![Lennard-Jones potential. [Olaf Lenz and Rainald62](https://commons.wikimedia.org/wiki/File:12-6-Lennard-Jones-Potential.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).](../../assets/S01-lennard-jones-potential.png){fig-alt="Lennard-Jones potential: short-range repulsion, an attractive minimum, and a tail approaching zero" width="35%"}
+
+### 4.2 Root and minimum
+
+Find analytically the finite positive root $r_0$ satisfying $V(r_0)=0$ and the minimum location $r_m$ satisfying $V'(r_m)=0$. Express both in terms of the model parameters, calculate their values in Å, and check against your plot or function. The demo's 4.2 checker shows the sampled point nearest the zero crossing and the sampled minimum; vary the number of points to check resolution. No numerical derivative or root-finding code is required.
+
+```{=latex}
+\newpage
+```
+
+### 4.3 Three-atom cluster
+
+Complete `calculate_LJ_cluster(coords)` using **two nested loops** and your pair function. Each row of `coords` is an atom's `[x, y, z]` position in Å. Return the total energy in eV, excluding self-pairs and counting each pair once:
 
 $$
-\varepsilon=0.0103\ \mathrm{eV},
-\qquad
-\sigma=3.40\ \text{\AA}.
+r_{ij}=\sqrt{(x_i-x_j)^2+(y_i-y_j)^2+(z_i-z_j)^2},
+\qquad E_{\mathrm{tot}}=\sum_{i<j}V(r_{ij}).
 $$
 
-Use the **[A1 cluster demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_lj_clusters.html)** throughout this problem. It is a separate assignment notebook, not the Seminar 01 exercise. All clusters are isolated: include every unique pair, with **no cutoff or periodic boundaries**.
-
-### 4.1 Implement the LJ function
-
-Complete `calculate_LJ(r)` in the demo. It should take one positive distance in Å and return the pair interaction energy in eV. Include your completed function and its plot in your answers. Your plot should show the characteristic shape below.
-
-![Reference shape of the Lennard-Jones pair potential. Image: [Olaf Lenz and Rainald62](https://commons.wikimedia.org/wiki/File:12-6-Lennard-Jones-Potential.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).](../../assets/S01-lennard-jones-potential.png){fig-alt="Lennard-Jones pair potential with short-range repulsion, an attractive minimum, and a tail approaching zero" width="55%"}
-
-### 4.2 Root and minimum of the LJ function
-
-Find analytically:
-
-1. The finite positive separation $r_0$ where $V(r_0)=0$.
-2. The separation $r_m$ that minimizes the pair energy, where $\left.\mathrm{d}V/\mathrm{d}r\right|_{r_m}=0$.
-
-Express both distances in terms of the model parameters, then calculate their numerical values in Å. Check them against your plot and evaluate `calculate_LJ` at each distance. You do not need to implement a numerical derivative or a root-finding algorithm.
-
-### 4.3 Three atoms: calculate every pair
-
-For atoms $i$ and $j$ at coordinates $(x_i,y_i,z_i)$ and $(x_j,y_j,z_j)$, their separation is
-
-$$
-r_{ij}=\sqrt{(x_i-x_j)^2+(y_i-y_j)^2+(z_i-z_j)^2}.
-$$
-
-Complete `calculate_LJ_cluster(coords)` using **two nested loops** and your `calculate_LJ` function. Each row of `coords` contains one atom's `[x, y, z]` coordinates in Å. Return the total cluster energy in eV.
-
-Exclude self-interactions ($i=j$) and count each pair only once:
-
-$$
-E_{\mathrm{tot}}=\sum_{i<j}V(r_{ij}).
-$$
-
-Test your function on these three atoms:
+Test these coordinates:
 
 | Atom | $x$ (Å) | $y$ (Å) | $z$ (Å) |
 |---|---:|---:|---:|
@@ -185,30 +142,21 @@ Test your function on these three atoms:
 | 2 | 4.0 | 0.0 | 0.0 |
 | 3 | 0.0 | 4.5 | 0.0 |
 
-The expected total energy is approximately **−0.017209784665 eV**. Include your completed function, the three pair distances and energies, and your total energy.
+Expected total: **−0.017209784665 eV**. Submit the function, three pair distances and energies, and total energy.
 
-### 4.4 Compare four-atom shapes
+### 4.4 Four-atom shapes
 
-The demo arranges four atoms in a **line, square, and regular tetrahedron**. Predict which shape will have the lowest energy, then use your cluster function to compare them.
+Use the supplied energy-versus-spacing scan for a **line, square, and regular tetrahedron**. The static geometry plots show each shape at its lowest sampled energy. Report these three energies and include the energy plot. Which shape is most stable among these candidates?
 
-Vary the spacing $a$: the nearest-neighbour separation for the line, or the edge length for the square and tetrahedron. The supplied scan varies $a$ while preserving each shape.
+### 4.5 Optimize a cluster
 
-Report the approximate best spacing and lowest energy for each shape, and include the energy-versus-spacing plot. Which geometry has the lowest energy among these candidates? Explain whether the result makes sense in terms of the distances between atom pairs.
+The supplied SciPy optimizer moves atoms to lower your cluster energy; you need not implement the optimizer or gradient. Use **7 atoms** with seeds **1, 2, and 3**. For each run, report the initial energy, final energy, and success status. Do the runs reach the same energy? Discuss briefly. Other cluster sizes are optional.
 
-### 4.5 Let an optimizer move the atoms
+### 4.6 Reduce runtime
 
-The demo supplies a SciPy optimizer that changes atom positions to try to lower the energy calculated by your `calculate_LJ_cluster` function. You do not need to implement the optimizer or its gradient.
+The optimizer calls your cluster function repeatedly. Suggest **one way** to reduce computation time and explain why it could help. No implementation or timing measurements are required.
 
-Use **7 atoms** and run the optimizer with random seeds **1, 2, and 3**. For each run, report the initial energy, final energy, and whether the optimizer reports success. Include **screenshots of the initial and final structures for one run**, with its seed. Rotate and zoom the interactive viewers to inspect the geometry.
-
-Do the runs reach the same final energy or different energies? Briefly discuss what you observe. An optimizer may reach a local minimum, and a success message does not prove that it found the global minimum. It is also possible for several seeds to reach the same energy.
-
-You may explore other cluster sizes if you wish; this is optional.
-
-### 4.6 Make the calculation faster
-
-The optimizer calls your cluster function many times, and each call loops over all unique atom pairs. Suggest **one way to reduce the computation time without changing the LJ model**. Briefly explain why it could help. No implementation or timing measurements are required.
-
-::: {.quarto-wasm-local notebook="assignments/A1/a1_lj_clusters.edit.py" title="Assignment 1: Lennard-Jones cluster experiments" height="1000" fullscreen="true"}
-**Browser activity:** [Open the A1 cluster demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a1_lj_clusters.html). Complete the pair and cluster functions, then use the supplied shape scan and optimizer. The optimizer displays initial/final structures, coordinates, energies, and convergence status. The equation, reference curve, and three-atom benchmark above provide the printable checks.
+::: {.content-visible when-format="html"}
+::: {.quarto-wasm-local notebook="assignments/A1/a1_lj_clusters.edit.py" title="A1 Q4 · Lennard-Jones clusters" height="1000" fullscreen="true"}
+:::
 :::

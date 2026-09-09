@@ -1,0 +1,8 @@
+project:
+  type: default
+  output-dir: render
+  render:
+    - A1/answers.qmd
+format:
+  pdf:
+    toc: false

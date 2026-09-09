@@ -3,6 +3,9 @@
 /wasm-local/
 /.venv/
 /instructor-private/
+/answer-keys/.quarto/
+/answer-keys/render/
+/assignments/A1/A1-answers.pdf
 __marimo__/
 **/__marimo__/
 __pycache__/

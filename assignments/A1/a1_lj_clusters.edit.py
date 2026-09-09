@@ -23,7 +23,7 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # A1: what shape does an atom cluster prefer?
+    # A1 Q4 · Lennard-Jones clusters
 
     **Predict:** will four atoms prefer a line, a square, or a tetrahedron?
     Complete the two functions below, then use the supplied experiments.
@@ -58,19 +58,49 @@ def _(epsilon, sigma):
 
 
 @app.cell(hide_code=True)
-def _(calculate_LJ, mo, np, plt, sigma):
+def _(mo):
+    pair_points = mo.ui.slider(50, 2000, step=50, value=400,
+                               label="4.2 checker: number of sampled distances", show_value=True)
+    pair_points
+    return (pair_points,)
+
+
+@app.cell(hide_code=True)
+def _(calculate_LJ, mo, np, pair_points, plt, sigma):
     mo.stop(calculate_LJ(sigma) is ..., mo.md("**4.1:** Complete `calculate_LJ` to display the pair-potential plot."))
 
     def plot_pair_potential():
-        distances = np.linspace(3.1, 10.0, 400)
-        energies = [calculate_LJ(float(r)) for r in distances]
+        distances = np.linspace(3.1, 10.0, pair_points.value)
+        energies = np.array([calculate_LJ(float(r)) for r in distances])
+        best = int(np.argmin(energies))
+        # Restrict the zero check to a sign change, not the tail approaching zero.
+        crossings = np.flatnonzero(energies[:-1] * energies[1:] <= 0)
+        root = None
+        if len(crossings):
+            bracket = int(crossings[0])
+            root = bracket + int(np.argmin(np.abs(energies[bracket:bracket + 2])))
+        rows = [
+            {"Sampled check": "Closest to finite zero crossing", "r (Å)": None if root is None else float(distances[root]),
+             "V(r) (eV)": None if root is None else float(energies[root])},
+            {"Sampled check": "Currently minimal", "r (Å)": float(distances[best]),
+             "V(r) (eV)": float(np.min(energies))},
+        ]
         fig, ax = plt.subplots(figsize=(7, 3.5))
         ax.plot(distances, energies)
+        ax.plot(distances[best], energies[best], "o", label="Sampled minimum")
+        if root is not None:
+            ax.plot(distances[root], energies[root], "s", label="Nearest sampled zero crossing")
+        ax.legend(fontsize=9)
         ax.axhline(0, color="grey", lw=0.8)
         ax.set(xlabel="Pair separation r (Å)", ylabel="Pair energy V(r) (eV)")
         ax.grid(alpha=0.25)
         fig.tight_layout()
-        return fig
+        return mo.vstack([
+            fig, mo.md("### 4.2 · Sampled-point checker"), mo.ui.table(rows, selection=None),
+            mo.md(f"Spacing: **{distances[1] - distances[0]:.5f} Å**. These are sampled points, "
+                  "not analytical roots or minima. Increase the point count to check resolution. "
+                  + ("No zero crossing was found in the sampled interval." if root is None else "")),
+        ])
 
     plot_pair_potential()
     return
@@ -167,46 +197,60 @@ def _(mo):
     mo.md("""
     ## 4.4: a four-atom shape competition
 
-    Change **a**: nearest-neighbour spacing for the line, or edge length
-    for the square and tetrahedron. Every pair still contributes, including
-    the square's diagonals. The scan keeps each shape fixed and varies only a;
-    it is not an unrestricted search over atom positions. Grey lines connect
-    pairs within 1.35σ only to make the geometry visible; **all pairs** are
-    included in every energy calculation.
+    The scan varies **a**: nearest-neighbour spacing for the line, or edge
+    length for the square and tetrahedron. All unique pairs contribute.
+    Compare the lowest sampled energy of each shape; the static geometry
+    plots show the corresponding structures. These are fixed-shape scans,
+    not unrestricted optimizations.
     """)
-    shape_spacing = mo.ui.slider(3.2, 5.0, step=0.01, value=3.82, label="a (Å)", show_value=True)
-    shape_spacing
-    return (shape_spacing,)
+    return
 
 
 @app.cell(hide_code=True)
-def _(benchmark_ok, calculate_LJ_cluster, draw_structures, four_atom_shapes, mo, np, plt, shape_spacing):
+def _(benchmark_ok, calculate_LJ_cluster, four_atom_shapes, mo, np, plt):
     mo.stop(not benchmark_ok, mo.md("Fix the three-atom benchmark before comparing shapes."))
 
-    def compare_shapes(a):
-        shapes = four_atom_shapes(a)
+    def compare_shapes():
         lengths = np.linspace(3.2, 5.0, 361)
         fig, ax = plt.subplots(figsize=(7, 3.5))
+        geometry = plt.figure(figsize=(9, 3.2))
         rows = []
-        for name in shapes:
+        for panel, name in enumerate(four_atom_shapes(1.0), start=1):
             energies = np.array([calculate_LJ_cluster(four_atom_shapes(length)[name]) for length in lengths])
             best = int(np.argmin(energies))
-            ax.plot(lengths, energies, label=name)
-            ax.plot(lengths[best], energies[best], "o")
-            rows.append({"Shape": name, "Energy at selected a (eV)": float(calculate_LJ_cluster(shapes[name])),
-                         "Best sampled a (Å)": float(lengths[best]), "Lowest sampled energy (eV)": float(energies[best])})
-        ax.axvline(a, color="grey", ls=":", label="Selected a")
+            minimum = float(np.min(energies))
+            spacing = float(lengths[best])
+            curve, = ax.plot(lengths, energies, label=name)
+            ax.plot(spacing, minimum, "o", color=curve.get_color())
+            rows.append({"Shape": name, "Best sampled a (Å)": spacing,
+                         "Lowest sampled energy (eV)": minimum})
+
+            coords = four_atom_shapes(spacing)[name]
+            coords = coords - coords.mean(axis=0)
+            view = geometry.add_subplot(1, 3, panel, projection="3d")
+            view.scatter(*coords.T, s=130, color=curve.get_color(), depthshade=False)
+            for i in range(len(coords)):
+                for j in range(i + 1, len(coords)):
+                    if np.isclose(np.linalg.norm(coords[i] - coords[j]), spacing):
+                        view.plot(*coords[[i, j]].T, color="grey", lw=1.5)
+            radius = max(float(np.abs(coords).max()), spacing / 2) * 1.25
+            view.set(xlim=(-radius, radius), ylim=(-radius, radius), zlim=(-radius, radius),
+                     title=f"{name}\na = {spacing:.3f} Å")
+            view.set_box_aspect((1, 1, 1))
+            view.view_init(elev=22, azim=-65)
+            view.set_axis_off()
         ax.set(xlabel="Spacing / edge length a (Å)", ylabel="Total energy (eV)")
         ax.legend()
         ax.grid(alpha=0.25)
         fig.tight_layout()
+        geometry.subplots_adjust(left=.01, right=.99, bottom=.02, top=.78, wspace=.05)
         return mo.vstack([
-            mo.ui.table(rows, selection=None), fig,
-            draw_structures(list(shapes.values()), list(shapes)),
-            mo.md("Scan spacing: **0.005 Å**. These are sampled minima, not exact minimizers. Which pair distances explain the ranking?"),
+            mo.ui.table(rows, selection=None), fig, geometry,
+            mo.md("Sampled minima on a **0.005 Å** grid. Structure panels are scaled separately; "
+                  "grey lines show nearest neighbours, but all pairs enter the energy."),
         ])
 
-    compare_shapes(shape_spacing.value)
+    compare_shapes()
     return
 
 
@@ -234,7 +278,7 @@ def _(mo):
     return (optimizer_controls,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(calculate_LJ_cluster, epsilon, minimize, np, sigma):
     def random_cluster(n, seed):
         rng = np.random.default_rng(seed)

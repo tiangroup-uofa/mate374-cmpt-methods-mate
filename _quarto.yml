@@ -3,10 +3,12 @@ project:
   output-dir: _site
   pre-render:
     - _marimo_export.py
+    - python scripts/render_answer_pdfs.py
   post-render:
     - python scripts/generate_llms_txt.py
   resources:
     - "wasm-local/**"
+    - "assignments/A1/A1-answers.pdf"
     - "assets/L01-fast16-implosion-poster.png"
     - "scripts/l03_error_figures.py"
     - "scripts/binary_place_values.py"
