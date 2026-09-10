@@ -1,5 +1,5 @@
 ---
-title: "L04 · How do I make a computer faster?"
+title: "L04 · How do I make a computer program faster?"
 subtitle: "From interpreted loops to NumPy arrays, Numba JIT, parallelism, and GPUs"
 body-classes: lecture-page
 ---
@@ -22,31 +22,58 @@ By the end of this lecture, you should be able to:
 
 ## The motivation: from $10^6$ to $10^9$ steps
 
-In L02 and L03 we learned that calculating numerical $\pi$ via Buffon's needle has a sampling error scaling as:
+![Buffon's needle simulation from Lecture 02: can your program actually handle a very large number?](../../../assets/L04-buffon-number-roast.png){#fig-buffon-roast fig-alt="A humorous illustration challenging the Buffon simulation to handle a very large number of throws." width="85%"}
+
+In [L02](../L02/index.qmd), we learned that calculating numerical $\pi$ via Buffon's needle has a sampling error scaling as:
 
 $$
-\sigma_{\widehat{\pi}} \approx \frac{2.37}{\sqrt{N}}.
+\sigma_{\widehat{\pi}} \propto \frac{1}{\sqrt{N}}.
 $$
 
-To achieve five trustworthy decimal digits (an absolute error below $5 \times 10^{-5}$), we determined that we need:
+For needle length equal to line spacing, setting the typical uncertainty to $5 \times 10^{-5}$ (the five-significant-digit target from L02) gives:
 
 $$
 N \approx \left(\frac{2.37}{5 \times 10^{-5}}\right)^2 \approx 2.3 \times 10^9\ \text{throws}.
 $$
 
-If a standard Python loop processes $10^6$ needles in approximately $0.35$ seconds, how long would $10^9$ needles take?
+This is a one-standard-deviation estimate, not a guarantee that any particular run reaches the target.
 
-$$
-T(10^9) \approx 1000 \times 0.35\ \mathrm{s} = 350\ \mathrm{seconds} \approx 6\ \mathrm{minutes}.
-$$
+*Question:* from a run with $10^5$ or $10^6$ throws, can you estimate how long $10^9$ throws would take?
 
-In a materials engineering context—whether following billions of molecular dynamics timesteps, simulating grain boundary coarsening on a $2048 \times 2048$ grid, or computing pairwise interatomic potentials—computational speed is not just convenience. It determines whether an engineering calculation is practical.
+The experiment in L02 can be summarized by this pseudocode:
 
-This will be our final exploration of the Buffon needle problem before applying our numerical toolkit to nonlinear equations and materials systems. We keep the exact same mathematical method and examine how to make it run faster.
+```text
+Set crossings = 0
+Repeat N times:
+    Draw a random needle centre and orientation
+    Find the distance from the centre to the nearest line
+    If that distance ≤ the needle's vertical half-length:
+        Add 1 to crossings
+Estimate π = 2 × (needle length / line spacing) × N / crossings
+```
 
----
+Each throw is **independent** of the others. In a sequential implementation, the time spent on the throws adds up. Independence will also let us divide the work later; it is not required for linear runtime scaling.
 
-## 1. The baseline: pure Python loop
+### Measuring computation time in Python
+
+Measuring a block's elapsed time is **timing**; repeating measurements under controlled conditions is **benchmarking**. **Profiling** goes further by identifying which functions or lines consume the time.
+
+Use `time.perf_counter()` for elapsed time. It is a high-resolution, monotonic clock: it does not jump backwards when the system clock is adjusted. `time.time()` gives a wall-clock timestamp, useful for dates and logs but less suitable for timing short calculations.
+
+```python
+from time import perf_counter
+
+start = perf_counter()
+crossings = buffon_python(N)
+elapsed = perf_counter() - start
+print(f"{elapsed:.4f} s total; {elapsed / N:.3e} s per throw")
+```
+
+Only the function call is inside the timed interval, not imports, plotting, or displaying results.
+
+### How long would a billion throws take?
+
+Use the same crossing test as L02, with needle length and line spacing both set to 1. By symmetry, we can sample the distance to the nearest line directly in $[0, 1/2]$ and fold the angle into $[0, \pi/2]$. We do not need needle coordinates or running estimates when all we want is the final crossing count.
 
 The direct implementation follows one needle at a time:
 
@@ -55,27 +82,75 @@ import math
 import random
 
 def buffon_python(N: int) -> int:
+    rng = random.Random(374)
     crossings = 0
     for _ in range(N):
-        d = 0.5 * random.random()
-        theta = 0.5 * math.pi * random.random()
+        d = 0.5 * rng.random()
+        theta = 0.5 * math.pi * rng.random()
         if d <= 0.5 * math.sin(theta):
             crossings += 1
     return crossings
 ```
 
-This code is readable and transparent. However, at every single iteration, the standard Python interpreter must:
-- dynamically inspect variable types;
-- dispatch function calls (`random.random()`, `math.sin()`);
-- manage integer arithmetic and loop counters.
+The L02 notebook already used NumPy arrays. Here we deliberately write a Python loop as the baseline, keeping the same probability model but removing visualization work. A fixed seed repeats the samples, not the elapsed time.
 
-The actual arithmetic ($d \le 0.5 \sin\theta$) requires only a few CPU clock cycles, but the Python interpreter overhead consumes over 90% of the runtime!
+Before moving the slider, predict what happens to total time and time per throw when $N$ increases tenfold. Record three sizes.
 
----
+::: {.quarto-wasm-local notebook="l04_speed_benchmark.edit.py" title="Time a Buffon loop" height="420" loading="eager" fullscreen="true"}
+**Static fallback.** Time `buffon_python(N)` with `perf_counter()`, then divide elapsed seconds by $N$. For approximately linear scaling, multiplying $N$ by ten multiplies total time by ten while time per throw stays nearly constant.
+:::
 
-## 2. Operating on array data: NumPy vectorization
+Record the timings **from the WASM demo above**, using the same browser and device for every size. Timing varies between runs; repeat each size a few times and use a representative value.
 
-Instead of handing the CPU one needle at a time, **vectorization** expresses operations over entire continuous arrays of numbers in memory:
+| Throws, $N$ | WASM elapsed time (s) | Average time per throw (µs) |
+|---:|---:|---:|
+| $10^3$ | — | — |
+| $10^4$ | — | — |
+| $10^5$ | — | — |
+| $5\times10^5$ | — | — |
+| $10^6$ | — | — |
+
+<!-- Instructor: fill with timings from the WASM demo, then insert a static time-versus-N plot here. Label any extrapolation beyond the measured range. -->
+
+A simple runtime model is
+
+$$
+t_{\mathrm{total}} \approx N\,\langle t_{\mathrm{step}}\rangle + t_{\mathrm{overhead}},
+$$
+
+where $\langle t_{\mathrm{step}}\rangle$ is the average time per throw. The fixed overhead here includes the function call and random-generator initialization. Imports and plots are outside our timer; a different timed block would include different costs.
+
+If the WASM demo takes $t_6$ seconds for $10^6$ throws, the same-rate projection is
+
+$$
+t(10^9)\approx1000\,t_6,
+\qquad
+t(2.3\times10^9)\approx2300\,t_6.
+$$
+
+These are projections, not billion-throw measurements. Fill in $t_6$ from the table before deciding how long you would have to wait. Browser timings describe this WASM runtime on your device, not native Python or another computer.
+
+*Check:* is time per throw nearly constant at the larger sizes? What would make the extrapolation unreliable? Consider competing programs, processor temperature, and a change in memory requirements.
+
+## Why are Python loops slow?
+
+Python is excellent for prototyping and versatile for scientific calculations. But a tight numerical loop in the standard Python interpreter does more than the arithmetic we wrote down. It executes bytecode, handles dynamically typed objects, dispatches function calls, and manages the loop counter at every iteration.
+
+For a small amount of work per throw, that overhead can be a substantial part of the runtime. We have measured total time here, not profiled its breakdown, so we cannot assign a percentage to interpreter overhead.
+
+::: {.callout-important}
+## A loop is not the problem; where it runs matters
+
+Most numerical methods involve repeated operations. Python loops are useful for explaining and testing an algorithm, but large numerical workloads often benefit from moving those loops into compiled code. Measure first: a loop that already finishes quickly may need no optimization.
+:::
+
+For a grain-growth simulation on a $2048\times2048$ grid or a calculation of millions of interatomic forces, execution speed can decide whether the calculation is practical.
+
+We will keep the Buffon probability model fixed and change its implementation. You do not need to memorize every trick; return to these examples when your own program needs a speedup. A better mathematical method for calculating $\pi$ would be a separate, often larger improvement.
+
+## Optimization 1: operate on arrays with NumPy
+
+The crossing test is the same for every throw. Instead of executing it in a Python loop, **vectorization** expresses it as operations on entire arrays of numbers:
 
 ```python
 import numpy as np
@@ -88,7 +163,9 @@ def buffon_numpy(N: int) -> int:
     return int(crossings)
 ```
 
-In NumPy, the loop over $N$ items runs in pre-compiled C routines with contiguous memory layout and modern SIMD (Single Instruction, Multiple Data) processor instructions.
+The loop has not disappeared: it runs inside NumPy's compiled routines. These arrays store numbers contiguously, and some operations can use SIMD (Single Instruction, Multiple Data) instructions. Array notation does not automatically mean multiple CPU cores or a GPU.
+
+*Check before comparing speed:* both implementations should give a crossing fraction near $2/\pi$. Their random generators differ, so the same seed does not mean identical throws or exactly equal crossing counts.
 
 ### The memory trade-off and batching
 
@@ -115,11 +192,13 @@ def buffon_numpy_batched(N: int, batch_size: int = 1_000_000) -> int:
     return crossings
 ```
 
-Batching keeps peak memory capped at the batch size (e.g., $10^6$ elements $\approx 16\ \text{MB}$) while preserving compiled array speed.
+Batching makes working memory scale with the batch size rather than total $N$. With batches of $10^6$, `d` and `theta` together occupy about 16 MB; temporary arrays require additional memory.
+
+*Predict:* if available RAM stays fixed but $N$ increases a thousandfold, which quantity must remain bounded: the total throw count or the batch size?
 
 ---
 
-## 3. Just-in-Time compilation: Numba
+## Optimization 2: Just-in-Time compilation with Numba
 
 What if your algorithm cannot be neatly vectorized with array operations—for example, when each step depends on the previous step?
 
@@ -159,7 +238,7 @@ However, two critical engineering factors must be understood:
 
 ---
 
-## 4. Multi-core CPU parallelization
+## Optimization 3: multi-core CPU parallelization
 
 Modern computers have multiple physical CPU cores (typically 4 to 64 cores). Because each needle throw in Buffon's experiment is completely independent, we can divide the work across cores:
 
@@ -188,7 +267,7 @@ If every worker thread initialized the same random seed, each thread would gener
 
 ---
 
-## 5. Hardware accelerators: GPUs
+## Optimization 4: hardware accelerators (GPUs)
 
 A CPU contains a few powerful cores optimized for sequential logic and branching. A **Graphics Processing Unit (GPU)** contains thousands of smaller, simpler cores designed for massive data-parallel throughput:
 
@@ -229,16 +308,6 @@ For small $N \le 10^4$, launching a GPU kernel can be *slower* than a simple CPU
 | **Numba JIT** | LLVM machine code | Loops that cannot be vectorized | First-call compilation delay |
 | **Numba parallel** | Multi-threaded CPU (`prange`) | Independent CPU chunks | Thread coordination & PRNG stream care |
 | **PyTorch GPU** | Thousands of accelerator cores | Massive data-parallel arrays | Launch overhead & memory transfer |
-
----
-
-## Interactive in-browser benchmark
-
-Explore how problem size and batching affect performance:
-
-::: {.quarto-wasm-local notebook="l04_speed_benchmark.edit.py" title="Buffon speed benchmark explorer" height="650" loading="eager" fullscreen="true"}
-**Static fallback.** Compares execution times across pure Python, batched NumPy, and reference timings for compiled JIT and GPU implementations.
-:::
 
 ---
 
