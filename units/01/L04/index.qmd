@@ -40,67 +40,70 @@ This is a one-standard-deviation estimate, not a guarantee that any particular r
 
 *Question:* from a run with $10^5$ or $10^6$ throws, can you estimate how long $10^9$ throws would take?
 
-The experiment in L02 can be summarized by this pseudocode:
+The experiment in L02 can be simplified in Python as follows. The function `throw_needle(L, D)` randomly throws one needle and returns 1 if it crosses a line, or 0 otherwise. We can leave its details aside for now.
 
-```text
-Set crossings = 0
-Repeat N times:
-    Draw a random needle centre and orientation
-    Find the distance from the centre to the nearest line
-    If that distance ≤ the needle's vertical half-length:
-        Add 1 to crossings
-Estimate π = 2 × (needle length / line spacing) × N / crossings
+```python
+def buffon_experiment(N: int, L: float, D: float):
+    # Run independent needle throwing N times
+    crossings = 0
+    for i in range(N):
+        crossings += throw_needle(L, D)
+    estimate = 2 * L / D * N / crossings
+    return estimate
 ```
 
-Each throw is **independent** of the others. In a sequential implementation, the time spent on the throws adds up. Independence will also let us divide the work later; it is not required for linear runtime scaling.
+
+As can be observed, each needle throw is **independent** of the others. In a sequential implementation, the time spent on the throws adds up. Independence will also let us divide the work later. The first question we want to ask is how long each step takes.
 
 ### Measuring computation time in Python
 
-Measuring a block's elapsed time is **timing**; repeating measurements under controlled conditions is **benchmarking**. **Profiling** goes further by identifying which functions or lines consume the time.
+Measuring a block of code's elapsed time is called **timing**. Repeating measurements under controlled conditions is called **benchmarking**. **Profiling** tools help identify which functions or lines of code take the most computation time.
 
-Use `time.perf_counter()` for elapsed time. It is a high-resolution, monotonic clock: it does not jump backwards when the system clock is adjusted. `time.time()` gives a wall-clock timestamp, useful for dates and logs but less suitable for timing short calculations.
+For simple timing, use Python's `time.perf_counter()` to measure elapsed time. For our Buffon experiment:
 
 ```python
 from time import perf_counter
 
+N = 100_000
+L = D = 1.0
+
 start = perf_counter()
-crossings = buffon_python(N)
+estimate = buffon_experiment(N, L, D)
 elapsed = perf_counter() - start
 print(f"{elapsed:.4f} s total; {elapsed / N:.3e} s per throw")
 ```
 
-Only the function call is inside the timed interval, not imports, plotting, or displaying results.
+::: {.callout-tip}
+`time.perf_counter()` is designed for timing short intervals, with a high-resolution clock that is not affected by system-clock adjustments. This makes it a better choice than `time.time()` for measuring execution time. See the [Python timing documentation](https://docs.python.org/3/library/time.html#time.perf_counter).
+:::
+
+To measure the computation itself, keep only the function call inside the timed interval. Put imports, print statements, and plots outside it.
 
 ### How long would a billion throws take?
 
-Use the same crossing test as L02, with needle length and line spacing both set to 1. By symmetry, we can sample the distance to the nearest line directly in $[0, 1/2]$ and fold the angle into $[0, \pi/2]$. We do not need needle coordinates or running estimates when all we want is the final crossing count.
-
-The direct implementation follows one needle at a time:
+We use the same crossing test as L02, with needle length $L$ and line spacing $D$ both set to 1. Below is a simple implementation of `throw_needle(L, D)` for $L\leq D$. By symmetry, we sample the distance to the nearest line in $[0,D/2]$ and the angle in $[0,\pi/2]$.
 
 ```python
 import math
 import random
 
-def buffon_python(N: int) -> int:
-    rng = random.Random(374)
-    crossings = 0
-    for _ in range(N):
-        d = 0.5 * rng.random()
-        theta = 0.5 * math.pi * rng.random()
-        if d <= 0.5 * math.sin(theta):
-            crossings += 1
-    return crossings
+rng = random.Random(374)
+
+def throw_needle(L: float, D: float) -> int:
+    distance = 0.5 * D * rng.random()
+    angle = 0.5 * math.pi * rng.random()
+    return int(distance <= 0.5 * L * math.sin(angle))
 ```
 
-The L02 notebook already used NumPy arrays. Here we deliberately write a Python loop as the baseline, keeping the same probability model but removing visualization work. A fixed seed repeats the samples, not the elapsed time.
+The random-number generator is initialized outside both functions. Each call to `throw_needle` returns only 0 or 1, which `buffon_experiment` adds to the crossing count.
 
-Before moving the slider, predict what happens to total time and time per throw when $N$ increases tenfold. Record three sizes.
+Use the demo below to measure the timing. Move the slider to change $N$ and see how the total time and average time per throw change.
 
 ::: {.quarto-wasm-local notebook="l04_speed_benchmark.edit.py" title="Time a Buffon loop" height="420" loading="eager" fullscreen="true"}
-**Static fallback.** Time `buffon_python(N)` with `perf_counter()`, then divide elapsed seconds by $N$. For approximately linear scaling, multiplying $N$ by ten multiplies total time by ten while time per throw stays nearly constant.
+**Static fallback.** Time `buffon_experiment(N, L, D)` with `perf_counter()`, then divide elapsed seconds by $N$. For approximately linear scaling, multiplying $N$ by ten multiplies total time by ten while time per throw stays nearly constant.
 :::
 
-Record the timings **from the WASM demo above**, using the same browser and device for every size. Timing varies between runs; repeat each size a few times and use a representative value.
+On a browser notebook like this, I actually records the following timing
 
 | Throws, $N$ | WASM elapsed time (s) | Average time per throw (µs) |
 |---:|---:|---:|
@@ -120,15 +123,7 @@ $$
 
 where $\langle t_{\mathrm{step}}\rangle$ is the average time per throw. The fixed overhead here includes the function call and random-generator initialization. Imports and plots are outside our timer; a different timed block would include different costs.
 
-If the WASM demo takes $t_6$ seconds for $10^6$ throws, the same-rate projection is
 
-$$
-t(10^9)\approx1000\,t_6,
-\qquad
-t(2.3\times10^9)\approx2300\,t_6.
-$$
-
-These are projections, not billion-throw measurements. Fill in $t_6$ from the table before deciding how long you would have to wait. Browser timings describe this WASM runtime on your device, not native Python or another computer.
 
 *Check:* is time per throw nearly constant at the larger sizes? What would make the extrapolation unreliable? Consider competing programs, processor temperature, and a change in memory requirements.
 

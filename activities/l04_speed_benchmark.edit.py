@@ -20,18 +20,23 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(math, random):
-    def buffon_python(N):
-        rng = random.Random(374)
-        crossings = 0
-        for _ in range(N):
-            d = 0.5 * rng.random()
-            theta = 0.5 * math.pi * rng.random()
-            if d <= 0.5 * math.sin(theta):
-                crossings += 1
-        return crossings
+def _(N, math, random):
+    # Initialize outside both functions, before the timed call.
+    rng = random.Random(374)
 
-    return (buffon_python,)
+    def throw_needle(L: float, D: float) -> int:
+        distance = 0.5 * D * rng.random()
+        angle = 0.5 * math.pi * rng.random()
+        return int(distance <= 0.5 * L * math.sin(angle))
+
+    def buffon_experiment(N: int, L: float, D: float):
+        crossings = 0
+        for i in range(N):
+            crossings += throw_needle(L, D)
+        estimate = 2 * L / D * N / crossings
+        return estimate
+
+    return buffon_experiment, throw_needle
 
 
 @app.cell(hide_code=True)
@@ -50,15 +55,16 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(number_of_needles):
     N = number_of_needles.value
-    return (N,)
+    L = D = 1.0
+    return D, L, N
 
 
 @app.cell
-def _(N, buffon_python, perf_counter):
+def _(D, L, N, buffon_experiment, perf_counter):
     start = perf_counter()
-    crossings = buffon_python(N)
+    estimate = buffon_experiment(N, L, D)
     elapsed = perf_counter() - start
-    return crossings, elapsed
+    return elapsed, estimate
 
 
 @app.cell(hide_code=True)
