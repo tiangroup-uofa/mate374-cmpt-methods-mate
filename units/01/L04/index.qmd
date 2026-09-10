@@ -122,7 +122,7 @@ $$
 t_{\mathrm{total}} \approx N\,\langle t_{\mathrm{step}}\rangle + t_{\mathrm{overhead}},
 $$
 
-where $\langle t_{\mathrm{step}}\rangle$ is the marginal cost of one additional throw and $t_{\mathrm{overhead}}$ is fixed startup cost (function call, random-generator initialization). Imports and plots are outside our timer; a different timed block would include different costs.
+where $\langle t_{\mathrm{step}}\rangle$ is the marginal cost of one additional throw and $t_{\mathrm{overhead}}$ is fixed startup cost (function call, loop setup, final division). The random-number generator is initialized before the timer starts; imports and plots are also outside it. A different timed block would include different costs.
 
 We estimate both parameters from the two largest measurements, where the overhead is a smaller fraction of total time:
 
