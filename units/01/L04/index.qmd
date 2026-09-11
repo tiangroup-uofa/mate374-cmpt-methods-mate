@@ -114,48 +114,33 @@ On a browser notebook like this, I recorded the following timing:
 | $10^7$ | 7.1560 | 0.72 |
 | $10^8$ | 78.6260 | 0.79 |
 
-### The simple runtime model
+### Scaling analysis
 
-A first model for the total time is
+A simple runtime model is
 
 $$
 t_{\mathrm{total}} \approx N\,\langle t_{\mathrm{step}}\rangle + t_{\mathrm{overhead}},
 $$
 
-where $\langle t_{\mathrm{step}}\rangle$ is a constant per-throw cost and $t_{\mathrm{overhead}}$ is a fixed startup cost (function call, loop setup, final division). The random-number generator is initialized before the timer starts; imports and plots are also outside it.
+where $\langle t_{\mathrm{step}}\rangle$ is the per-throw cost and $t_{\mathrm{overhead}}$ is a fixed startup cost (function call, loop setup, final division — the random-number generator is initialized before the timer starts). Since the entire $N = 10^3$ run finishes in 2 ms, the overhead is negligible compared with the computation at large $N$.
 
-If this model held exactly, $t_{\mathrm{total}}/N$ would converge to $\langle t_{\mathrm{step}}\rangle$ as $N$ grows. What do the measurements show?
+A log–log plot of the measured data reveals the scaling directly:
 
-The per-throw average first **drops** — from $2.0\ \mu$s at $10^3$ to $0.65\ \mu$s at $10^6$ — then **rises** slightly — to $0.79\ \mu$s at $10^8$. Neither trend matches a constant $\langle t_{\mathrm{step}}\rangle$:
+![Log–log plot of Buffon loop elapsed time vs. number of throws. The dashed line shows perfect linear scaling ($t \propto N$). The open square is the extrapolated time at $10^9$.](../../../assets/L04-wasm-scaling.png){#fig-wasm-scaling fig-alt="Log-log plot showing elapsed time vs N from 10^3 to 10^8, closely following a slope-1 reference line, with an extrapolated point at 10^9." width="75%"}
 
-- **Small $N$:** the per-throw time is inflated, but the total time at $N = 10^3$ is only 2 ms, so the startup overhead is at most a few milliseconds — far too small to explain a $3\times$ drop to $0.65\ \mu$s. The WASM engine optimizes the hot loop during execution, so later iterations run faster and longer runs benefit more from this warmup.
-- **Large $N$:** the per-throw time rises from $0.65$ to $0.79\ \mu$s. Possible causes include processor thermal throttling, browser garbage-collection pauses, or other background work accumulating over a longer run.
-
-### Where the linear model does work
-
-Despite the non-constant per-throw time, the scaling at large $N$ is close to linear. Check the ratio of total time when $N$ increases tenfold:
-
-| Step | $t(10N) / t(N)$ |
-|---|---:|
-| $10^5 \to 10^6$ | $0.653 / 0.091 = 7.2$ |
-| $10^6 \to 10^7$ | $7.156 / 0.653 = 11.0$ |
-| $10^7 \to 10^8$ | $78.63 / 7.156 = 11.0$ |
-
-For $N \ge 10^6$ the ratio has settled near $\approx 11$: each tenfold increase in throws costs about $11\times$ the time. This is close to the $10\times$ expected from pure linear scaling, with a small extra factor from the rising per-step cost.
+On a log–log plot, $t \propto N$ is a straight line with slope 1. The measured points track this reference line closely: the scaling is approximately linear with the per-throw cost around $0.65$–$0.79\ \mu$s. The slight curvature at small $N$ reflects engine warmup; the mild steepening at large $N$ may reflect thermal throttling or garbage-collection pauses.
 
 ### Extrapolating to $10^9$ throws
 
-We can extrapolate from the largest measured point using the stabilized ratio:
+From $10^6$ onward, each tenfold increase in $N$ multiplies the runtime by about $11\times$. Extrapolating from the largest measurement:
 
 $$
 t(10^9) \approx 78.6\ \text{s} \times 11 \approx 860\ \text{s} \approx \mathbf{14\ \text{min}}.
 $$
 
-Alternatively, using the per-throw time at $10^8$ directly: $10^9 \times 0.79\ \mu\text{s} \approx 790$ s $\approx 13$ min. Both estimates agree on the order of magnitude.
-
 Fourteen minutes in a browser notebook is feasible but slow, and this is only the Buffon experiment. A grain-growth simulation on a $1024\times1024$ grid or a molecular dynamics calculation performs far more work per step.
 
-*Check:* the ratio extrapolation assumed the $\approx 11\times$ factor continues to $10^9$. What could change it? Consider thermal throttling over a 14-minute run, memory-access patterns, and competition from other browser tabs.
+*Check:* what could make this extrapolation unreliable? Consider thermal throttling over a 14-minute run, memory-access patterns, and competition from other browser tabs.
 
 ## Why are Python loops slow?
 
