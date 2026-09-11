@@ -107,12 +107,12 @@ On a browser notebook like this, I recorded the following timing:
 
 | Throws, $N$ | WASM elapsed time (s) | Average time per throw (µs) |
 |---:|---:|---:|
-| $10^3$ | 0.0020 | 2.0 |
-| $10^4$ | 0.0170 | 1.7 |
+| $10^3$ | 0.0020 | 2.00 |
+| $10^4$ | 0.0170 | 1.70 |
 | $10^5$ | 0.0910 | 0.91 |
 | $10^6$ | 0.6530 | 0.65 |
-
-Notice the average time per throw **decreases** as $N$ grows: from $2.0\ \mu$s at $10^3$ down to $0.65\ \mu$s at $10^6$. Part of this is a fixed startup cost being spread over more throws, but the drop is too large to explain by overhead alone — the *entire* run at $N = 10^3$ finishes in 2 ms, so the startup overhead is at most a few milliseconds.
+| $10^7$ | 7.1560 | 0.72 |
+| $10^8$ | 78.6260 | 0.79 |
 
 ### The simple runtime model
 
@@ -124,29 +124,38 @@ $$
 
 where $\langle t_{\mathrm{step}}\rangle$ is a constant per-throw cost and $t_{\mathrm{overhead}}$ is a fixed startup cost (function call, loop setup, final division). The random-number generator is initialized before the timer starts; imports and plots are also outside it.
 
-If this model held exactly, the ratio $t_{\mathrm{total}} / N$ would converge to $\langle t_{\mathrm{step}}\rangle$ from above as $N$ grows. The table shows the right trend, but the per-throw time drops by a factor of three from $10^3$ to $10^6$ — more than a few-millisecond overhead can account for.
+If this model held exactly, $t_{\mathrm{total}}/N$ would converge to $\langle t_{\mathrm{step}}\rangle$ as $N$ grows. What do the measurements show?
 
-::: {.callout-important}
-## When the model does not fit
+The per-throw average first **drops** — from $2.0\ \mu$s at $10^3$ to $0.65\ \mu$s at $10^6$ — then **rises** slightly — to $0.79\ \mu$s at $10^8$. Neither trend matches a constant $\langle t_{\mathrm{step}}\rangle$:
 
-A two-point fit using $N = 10^5$ and $10^6$ would give $t_{\mathrm{overhead}} \approx 29$ ms. But the entire $N = 10^3$ run takes only 2 ms, so a 29 ms overhead is impossible. The per-step cost itself is not constant: the WASM engine optimizes the hot loop during execution, so later iterations run faster than early ones. At larger $N$ a bigger fraction of the loop benefits from this warmup, lowering the average.
+- **Small $N$:** the per-throw time is inflated, but the total time at $N = 10^3$ is only 2 ms, so the startup overhead is at most a few milliseconds — far too small to explain a $3\times$ drop to $0.65\ \mu$s. The WASM engine optimizes the hot loop during execution, so later iterations run faster and longer runs benefit more from this warmup.
+- **Large $N$:** the per-throw time rises from $0.65$ to $0.79\ \mu$s. Possible causes include processor thermal throttling, browser garbage-collection pauses, or other background work accumulating over a longer run.
 
-The simple linear model is still a useful approximation at large $N$, where the per-throw time has nearly stabilized — but we should not trust it to extrapolate backward to small $N$.
-:::
+### Where the linear model does work
+
+Despite the non-constant per-throw time, the scaling at large $N$ is close to linear. Check the ratio of total time when $N$ increases tenfold:
+
+| Step | $t(10N) / t(N)$ |
+|---|---:|
+| $10^5 \to 10^6$ | $0.653 / 0.091 = 7.2$ |
+| $10^6 \to 10^7$ | $7.156 / 0.653 = 11.0$ |
+| $10^7 \to 10^8$ | $78.63 / 7.156 = 11.0$ |
+
+For $N \ge 10^6$ the ratio has settled near $\approx 11$: each tenfold increase in throws costs about $11\times$ the time. This is close to the $10\times$ expected from pure linear scaling, with a small extra factor from the rising per-step cost.
 
 ### Extrapolating to $10^9$ throws
 
-Since the per-throw time is still decreasing at $10^6$, we use the value at our largest measured $N$ as a conservative upper bound:
+We can extrapolate from the largest measured point using the stabilized ratio:
 
 $$
-t(10^9) \lesssim 10^9 \times 0.65\ \mu\text{s} \approx 650\ \text{s} \approx \mathbf{11\ \text{min}}.
+t(10^9) \approx 78.6\ \text{s} \times 11 \approx 860\ \text{s} \approx \mathbf{14\ \text{min}}.
 $$
 
-The actual time is likely somewhat less, because the per-throw cost may continue to decrease slightly at larger $N$. But the order of magnitude — minutes, not seconds or hours — is reliable enough for planning whether a computation is practical.
+Alternatively, using the per-throw time at $10^8$ directly: $10^9 \times 0.79\ \mu\text{s} \approx 790$ s $\approx 13$ min. Both estimates agree on the order of magnitude.
 
-Eleven minutes in a browser notebook is feasible but slow, and this is only the Buffon experiment. A grain-growth simulation on a $1024\times1024$ grid or a molecular dynamics calculation performs far more work per step.
+Fourteen minutes in a browser notebook is feasible but slow, and this is only the Buffon experiment. A grain-growth simulation on a $1024\times1024$ grid or a molecular dynamics calculation performs far more work per step.
 
-*Check:* what would make even this upper-bound extrapolation unreliable? Consider competing programs, processor thermal throttling, and changes in memory access patterns at very large $N$.
+*Check:* the ratio extrapolation assumed the $\approx 11\times$ factor continues to $10^9$. What could change it? Consider thermal throttling over a 14-minute run, memory-access patterns, and competition from other browser tabs.
 
 ## Why are Python loops slow?
 
