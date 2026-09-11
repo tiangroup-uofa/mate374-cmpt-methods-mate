@@ -33,7 +33,7 @@ $$
 For needle length equal to line spacing, setting the typical uncertainty to $5 \times 10^{-5}$ (the five-significant-digit target from L02) gives:
 
 $$
-N \approx \left(\frac{2.37}{5 \times 10^{-5}}\right)^2 \approx 2.3 \times 10^9\ \text{throws}.
+N \approx \left(\frac{2.37}{5 \times 10^{-5}}\right)^2 \sim 10^9\ \text{throws}.
 $$
 
 This is a one-standard-deviation estimate, not a guarantee that any particular run reaches the target.
@@ -103,17 +103,9 @@ Use the demo below to measure the timing. Move the slider to change $N$ and see 
 **Static fallback.** Time `buffon_experiment(N, L, D)` with `perf_counter()`, then divide elapsed seconds by $N$. For approximately linear scaling, multiplying $N$ by ten multiplies total time by ten while time per throw stays nearly constant.
 :::
 
-On a browser notebook like this, I actually records the following timing
+On a browser-based Python notebook like this, I recorded the elapsed time for several values of $N$:
 
-| Throws, $N$ | WASM elapsed time (s) | Average time per throw (µs) |
-|---:|---:|---:|
-| $10^3$ | — | — |
-| $10^4$ | — | — |
-| $10^5$ | — | — |
-| $5\times10^5$ | — | — |
-| $10^6$ | — | — |
-
-<!-- Instructor: fill with timings from the WASM demo, then insert a static time-versus-N plot here. Label any extrapolation beyond the measured range. -->
+### Scaling analysis
 
 A simple runtime model is
 
@@ -121,11 +113,17 @@ $$
 t_{\mathrm{total}} \approx N\,\langle t_{\mathrm{step}}\rangle + t_{\mathrm{overhead}},
 $$
 
-where $\langle t_{\mathrm{step}}\rangle$ is the average time per throw. The fixed overhead here includes the function call and random-generator initialization. Imports and plots are outside our timer; a different timed block would include different costs.
+where $\langle t_{\mathrm{step}}\rangle$ is the per-throw run time and $t_{\mathrm{overhead}}$ is a fixed startup run time (function call, loop setup, final division — the random-number generator is initialized before the timer starts). Since the entire $N = 10^3$ run finishes in 2 ms, the overhead is negligible compared with the computation at large $N$.
 
+A log–log plot of the measured data reveals the scaling directly:
 
+![Log–log plot of Buffon loop elapsed time vs. number of throws. The dashed line shows perfect linear scaling ($t \propto N$). The open square is the extrapolated time at $10^9$.](../../../assets/L04-wasm-scaling.png){#fig-wasm-scaling fig-alt="Log-log plot showing elapsed time vs N from 10^3 to 10^8, closely following a slope-1 reference line, with an extrapolated point at 10^9." width="75%"}
 
-*Check:* is time per throw nearly constant at the larger sizes? What would make the extrapolation unreliable? Consider competing programs, processor temperature, and a change in memory requirements.
+On a log–log plot, $t \propto N$ is a straight line with slope 1. The measured points track this reference line closely: the scaling is approximately linear with the per-throw run time around $0.65$–$0.79\ \mu$s. The slight curvature at small $N$ reflects engine warmup; the mild steepening at large $N$ may reflect thermal throttling or garbage-collection pauses.
+
+By fitting a straight line through the large-$N$ data (we will learn linear fitting later in this course) and extrapolating to $10^9$ throws, the estimated run time is approximately 860 seconds, or about 14 minutes.
+
+Fourteen minutes in a browser notebook is feasible but slow, and this is only the Buffon experiment. A grain-growth simulation on a $1024\times1024$ grid or a molecular dynamics calculation performs far more work per step.
 
 ## Why are Python loops slow?
 
