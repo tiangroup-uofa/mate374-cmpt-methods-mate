@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650">
+  <rect width="1200" height="650" fill="#fffdf8"/>
+  <style>
+    .ink{stroke:#252525;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;fill:none}
+    .thin{stroke:#252525;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;fill:none}
+    .title{font-family:Arial,sans-serif;font-size:34px;font-weight:700;fill:#252525}
+    .head{font-family:Arial,sans-serif;font-size:25px;font-weight:700;fill:#252525}
+    .body{font-family:Arial,sans-serif;font-size:21px;fill:#252525}
+    .small{font-family:Arial,sans-serif;font-size:18px;fill:#252525}
+    .code{font-family:Menlo,monospace;font-size:20px;fill:#252525}
+  </style>
+
+  <text x="600" y="48" text-anchor="middle" class="title">One throw, many interpreter chores</text>
+
+  <!-- left panel -->
+  <rect x="35" y="78" width="700" height="520" rx="18" fill="#eef5fb" stroke="#252525" stroke-width="4"/>
+  <text x="385" y="116" text-anchor="middle" class="head">Each trip around a Python loop</text>
+  <rect x="70" y="145" width="630" height="54" rx="9" fill="#ffffff" stroke="#252525" stroke-width="3"/>
+  <text x="385" y="179" text-anchor="middle" class="code">crossings += throw_needle(L, D)</text>
+
+  <!-- winding path -->
+  <path d="M130 238 H615 M615 238 V330 H130 M130 330 V422 H615 M615 422 V512 H130" class="ink"/>
+  <path d="M130 512 l15 -10 M130 512 l15 10" class="ink"/>
+
+  <!-- checkpoints -->
+  <g>
+    <rect x="180" y="210" width="150" height="56" rx="8" fill="#ffdca8" stroke="#252525" stroke-width="3"/>
+    <text x="255" y="233" text-anchor="middle" class="small">read the next</text>
+    <text x="255" y="254" text-anchor="middle" class="small">bytecode</text>
+
+    <rect x="420" y="210" width="155" height="56" rx="8" fill="#ffdca8" stroke="#252525" stroke-width="3"/>
+    <text x="498" y="233" text-anchor="middle" class="small">look up names</text>
+    <text x="498" y="254" text-anchor="middle" class="small">and objects</text>
+
+    <rect x="415" y="302" width="165" height="56" rx="8" fill="#ffdca8" stroke="#252525" stroke-width="3"/>
+    <text x="498" y="325" text-anchor="middle" class="small">dispatch Python</text>
+    <text x="498" y="346" text-anchor="middle" class="small">function calls</text>
+
+    <rect x="175" y="302" width="165" height="56" rx="8" fill="#ffdca8" stroke="#252525" stroke-width="3"/>
+    <text x="258" y="325" text-anchor="middle" class="small">check and handle</text>
+    <text x="258" y="346" text-anchor="middle" class="small">dynamic types</text>
+
+    <rect x="180" y="394" width="150" height="56" rx="8" fill="#bde8c7" stroke="#252525" stroke-width="3"/>
+    <text x="255" y="417" text-anchor="middle" class="small">do the actual</text>
+    <text x="255" y="438" text-anchor="middle" class="small">calculation</text>
+
+    <rect x="420" y="394" width="155" height="56" rx="8" fill="#ffdca8" stroke="#252525" stroke-width="3"/>
+    <text x="498" y="417" text-anchor="middle" class="small">update objects</text>
+    <text x="498" y="438" text-anchor="middle" class="small">and loop counter</text>
+  </g>
+
+  <!-- stick figure on route -->
+  <circle cx="632" cy="483" r="14" fill="#fff" stroke="#252525" stroke-width="3"/>
+  <path d="M632 497 v35 M632 509 l-18 15 M632 509 l18 15 M632 532 l-16 23 M632 532 l16 23" class="thin"/>
+  <rect x="650" y="493" width="42" height="30" fill="#bde8c7" stroke="#252525" stroke-width="3"/>
+  <text x="671" y="515" text-anchor="middle" class="small">+</text>
+
+  <text x="385" y="574" text-anchor="middle" class="body">Repeat all of this N times</text>
+
+  <!-- right panel -->
+  <rect x="770" y="78" width="395" height="520" rx="18" fill="#f8f0df" stroke="#252525" stroke-width="4"/>
+  <text x="968" y="116" text-anchor="middle" class="head">The key idea</text>
+
+  <circle cx="968" cy="204" r="54" fill="#fff" stroke="#252525" stroke-width="4"/>
+  <path d="M968 162 v84 M926 204 h84 M938 174 l60 60 M998 174 l-60 60" class="thin"/>
+  <text x="968" y="286" text-anchor="middle" class="body">The arithmetic is small.</text>
+
+  <path d="M825 330 H1110" class="ink"/>
+  <path d="M1090 318 l20 12 -20 12" class="ink"/>
+  <g fill="#ffdca8" stroke="#252525" stroke-width="3">
+    <circle cx="850" cy="330" r="14"/><circle cx="900" cy="330" r="14"/>
+    <circle cx="950" cy="330" r="14"/><circle cx="1000" cy="330" r="14"/>
+    <circle cx="1050" cy="330" r="14"/>
+  </g>
+  <text x="968" y="382" text-anchor="middle" class="body">The bookkeeping is repeated.</text>
+
+  <rect x="810" y="424" width="315" height="112" rx="12" fill="#ffffff" stroke="#252525" stroke-width="3"/>
+  <text x="968" y="458" text-anchor="middle" class="body">Speedups come from doing</text>
+  <text x="968" y="486" text-anchor="middle" class="body">more numerical work inside</text>
+  <text x="968" y="514" text-anchor="middle" class="body">compiled code.</text>
+
+  <text x="1160" y="633" text-anchor="end" class="small">Conceptual illustration</text>
+</svg>

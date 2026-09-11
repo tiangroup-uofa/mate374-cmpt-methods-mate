@@ -7,30 +7,30 @@ body-classes: lecture-page
 ::: {.callout-note}
 ## Central question
 
-**Given a typical numerical program, how can we make it run faster when problem sizes scale up?**
+**Given a numerical program, how can we make it run faster as the problem size grows?**
 :::
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to:
 
-1. **Profile** execution time and estimate how computational cost scales with problem size $N$.
-2. **Distinguish** five acceleration mechanisms: pure interpreted loops, NumPy array vectorization, Numba JIT compilation, multi-core CPU parallelism, and GPU hardware acceleration.
-3. **Analyze** the trade-off between memory overhead and execution speed in vectorized calculations.
-4. **Explain** why JIT compilation incurs first-call warmup latency and how random seeds must be managed across parallel workers.
-5. **Connect** these acceleration paradigms to large-scale materials grid simulations, including the 2D Ising and Potts microstructure models.
+1. **Measure** execution time and estimate how computational cost scales with problem size $N$.
+2. **Distinguish** a pure Python loop from four acceleration strategies: NumPy vectorization, Numba JIT compilation, multi-core CPU parallelism, and GPU acceleration.
+3. **Analyze** the trade-off between memory use and execution speed in vectorized calculations.
+4. **Explain** why JIT compilation incurs first-call warmup time and why parallel workers need independent random-number streams.
+5. **Connect** these acceleration strategies to large materials simulations, including 2D Ising and Potts microstructure models.
 
 ## The motivation: from $10^6$ to $10^9$ steps
 
 ![Buffon's needle simulation from Lecture 02: can your program actually handle a very large number?](../../../assets/L04-buffon-number-roast.png){#fig-buffon-roast fig-alt="A humorous illustration challenging the Buffon simulation to handle a very large number of throws." width="85%"}
 
-In [L02](../L02/index.qmd), we learned that calculating numerical $\pi$ via Buffon's needle has a sampling error scaling as:
+In [L02](../L02/index.qmd), we learned that the sampling uncertainty in a Buffon's needle estimate of $\pi$ scales as
 
 $$
 \sigma_{\widehat{\pi}} \propto \frac{1}{\sqrt{N}}.
 $$
 
-For needle length equal to line spacing, setting the typical uncertainty to $5 \times 10^{-5}$ (the five-significant-digit target from L02) gives:
+When the needle length equals the line spacing, setting the typical uncertainty to $5 \times 10^{-5}$, the five-significant-digit target from L02, gives
 
 $$
 N \approx \left(\frac{2.37}{5 \times 10^{-5}}\right)^2 \sim 10^9\ \text{throws}.
@@ -38,9 +38,9 @@ $$
 
 This is a one-standard-deviation estimate, not a guarantee that any particular run reaches the target.
 
-*Question:* from a run with $10^5$ or $10^6$ throws, can you estimate how long $10^9$ throws would take?
+*Question:* If we time a run with $10^5$ or $10^6$ throws, can we estimate how long $10^9$ throws would take?
 
-The experiment in L02 can be simplified in Python as follows. The function `throw_needle(L, D)` randomly throws one needle and returns 1 if it crosses a line, or 0 otherwise. We can leave its details aside for now.
+The experiment from L02 can be summarized with the function below. `throw_needle(L, D)` simulates one needle and returns 1 if it crosses a line, or 0 otherwise. We can leave the details of that function aside for now.
 
 ```python
 def buffon_experiment(N: int, L: float, D: float):
@@ -53,13 +53,13 @@ def buffon_experiment(N: int, L: float, D: float):
 ```
 
 
-As can be observed, each needle throw is **independent** of the others. In a sequential implementation, the time spent on the throws adds up. Independence will also let us divide the work later. The first question we want to ask is how long each step takes.
+Each needle throw is **independent** of the others. In this sequential implementation, the time spent on each throw adds to the total. Independence will also allow us to divide the work later. For now, we first ask: how long does one throw take?
 
 ### Measuring computation time in Python
 
-Measuring a block of code's elapsed time is called **timing**. Repeating measurements under controlled conditions is called **benchmarking**. **Profiling** tools help identify which functions or lines of code take the most computation time.
+Measuring how long a block of code takes is called **timing**. Repeating the measurement under controlled conditions is called **benchmarking**. **Profiling** goes one step further: it identifies which functions or lines consume the most time.
 
-For simple timing, use Python's `time.perf_counter()` to measure elapsed time. For our Buffon experiment:
+For a simple timing measurement, use Python's `time.perf_counter()`. For our Buffon experiment:
 
 ```python
 from time import perf_counter
@@ -74,14 +74,14 @@ print(f"{elapsed:.4f} s total; {elapsed / N:.3e} s per throw")
 ```
 
 ::: {.callout-tip}
-`time.perf_counter()` is designed for timing short intervals, with a high-resolution clock that is not affected by system-clock adjustments. This makes it a better choice than `time.time()` for measuring execution time. See the [Python timing documentation](https://docs.python.org/3/library/time.html#time.perf_counter).
+`time.perf_counter()` uses a high-resolution clock designed for measuring short intervals. Unlike a wall clock, it is not affected when the system time is adjusted, so it is a better choice than `time.time()` for measuring execution time. See the [Python documentation for `time.perf_counter()`](https://docs.python.org/3/library/time.html#time.perf_counter).
 :::
 
 To measure the computation itself, keep only the function call inside the timed interval. Put imports, print statements, and plots outside it.
 
 ### How long would a billion throws take?
 
-We use the same crossing test as L02, with needle length $L$ and line spacing $D$ both set to 1. Below is a simple implementation of `throw_needle(L, D)` for $L\leq D$. By symmetry, we sample the distance to the nearest line in $[0,D/2]$ and the angle in $[0,\pi/2]$.
+We use the same crossing test as L02, setting the needle length $L$ and line spacing $D$ to 1. The function below implements `throw_needle(L, D)` for $L\leq D$. By symmetry, we only need to sample the distance to the nearest line in $[0,D/2]$ and the angle in $[0,\pi/2]$.
 
 ```python
 import math
@@ -95,15 +95,15 @@ def throw_needle(L: float, D: float) -> int:
     return int(distance <= 0.5 * L * math.sin(angle))
 ```
 
-The random-number generator is initialized outside both functions. Each call to `throw_needle` returns only 0 or 1, which `buffon_experiment` adds to the crossing count.
+The random-number generator is initialized outside both functions. Each call to `throw_needle` returns either 0 or 1, and `buffon_experiment` adds these results to obtain the crossing count.
 
-Use the demo below to measure the timing. Move the slider to change $N$ and see how the total time and average time per throw change.
+Use the demo below to measure the runtime. Move the slider to change $N$, and watch the total time and average time per throw.
 
 ::: {.quarto-wasm-local notebook="l04_speed_benchmark.edit.py" title="Time a Buffon loop" height="420" loading="eager" fullscreen="true"}
 **Static fallback.** Time `buffon_experiment(N, L, D)` with `perf_counter()`, then divide elapsed seconds by $N$. For approximately linear scaling, multiplying $N$ by ten multiplies total time by ten while time per throw stays nearly constant.
 :::
 
-On a browser-based Python notebook like this, I recorded the elapsed time for several values of $N$:
+Using this browser-based Python notebook, I recorded the elapsed time for several values of $N$.
 
 ### Scaling analysis
 
@@ -113,33 +113,31 @@ $$
 t_{\mathrm{total}} \approx N\,\langle t_{\mathrm{step}}\rangle + t_{\mathrm{overhead}},
 $$
 
-where $\langle t_{\mathrm{step}}\rangle$ is the per-throw run time and $t_{\mathrm{overhead}}$ is a fixed startup run time (function call, loop setup, final division — the random-number generator is initialized before the timer starts). Since the entire $N = 10^3$ run finishes in 2 ms, the overhead is negligible compared with the computation at large $N$.
-
-A log–log plot of the measured data reveals the scaling directly:
+where $\langle t_{\mathrm{step}}\rangle$ is the average runtime per throw and $t_{\mathrm{overhead}}$ is the fixed startup cost, including the function call, loop setup, and final division. The random-number generator is initialized before the timer starts. A log–log plot of the measurements shows the **scaling** of computational time: how $t_{\mathrm{total}}$ changes as $N$ increases.
 
 ![Log–log plot of Buffon loop elapsed time vs. number of throws. The dashed line shows perfect linear scaling ($t \propto N$). The open square is the extrapolated time at $10^9$.](../../../assets/L04-wasm-scaling.png){#fig-wasm-scaling fig-alt="Log-log plot showing elapsed time vs N from 10^3 to 10^8, closely following a slope-1 reference line, with an extrapolated point at 10^9." width="75%"}
 
-On a log–log plot, $t \propto N$ is a straight line with slope 1. The measured points track this reference line closely: the scaling is approximately linear with the per-throw run time around $0.65$–$0.79\ \mu$s. The slight curvature at small $N$ reflects engine warmup; the mild steepening at large $N$ may reflect thermal throttling or garbage-collection pauses.
+For large $N$, the fixed overhead $t_{\mathrm{overhead}}$ becomes small compared with the time spent throwing needles. We can therefore use the large-$N$ measurements to predict the runtime at $N\approx10^9$. Fitting a straight line to those data (we will learn linear fitting later in the course) and **extrapolating** to $10^9$ throws gives approximately 860 seconds, or about 14 minutes.
 
-By fitting a straight line through the large-$N$ data (we will learn linear fitting later in this course) and extrapolating to $10^9$ throws, the estimated run time is approximately 860 seconds, or about 14 minutes.
-
-Fourteen minutes in a browser notebook is feasible but slow, and this is only the Buffon experiment. A grain-growth simulation on a $1024\times1024$ grid or a molecular dynamics calculation performs far more work per step.
+Fourteen minutes in a browser notebook is feasible, but it is slow and certainly not optimized. And this is only the Buffon experiment. A grain-growth simulation on a $1024\times1024$ grid or a molecular dynamics calculation performs far more work at each step.
 
 ## Why are Python loops slow?
 
-Python is excellent for prototyping and versatile for scientific calculations. But a tight numerical loop in the standard Python interpreter does more than the arithmetic we wrote down. It executes bytecode, handles dynamically typed objects, dispatches function calls, and manages the loop counter at every iteration.
+Python is excellent for prototyping and scientific computing. However, each pass through a Python loop involves more than the arithmetic we wrote. The interpreter reads bytecode, looks up and handles Python objects, dispatches function calls, updates the loop counter, and then moves to the next iteration.
 
-For a small amount of work per throw, that overhead can be a substantial part of the runtime. We have measured total time here, not profiled its breakdown, so we cannot assign a percentage to interpreter overhead.
+![Why a short Python loop can spend more time on interpreter bookkeeping than on arithmetic. The repeated chores are shown conceptually; this is not a measured breakdown of the Buffon program.](../../../assets/L04-python-loop-overhead.png){#fig-python-loop-overhead fig-alt="A comic-style diagram follows one Python loop iteration through bytecode reading, name lookup, function dispatch, dynamic type handling, calculation, and object updates. It emphasizes that the small arithmetic operation is accompanied by interpreter work on every iteration." width="92%"}
+
+A single needle throw contains only a small amount of numerical work, so the repeated interpreter bookkeeping can become a substantial part of the runtime. We timed the whole function rather than profiling individual operations, so the illustration does not claim a percentage for each task.
 
 ::: {.callout-important}
-## A loop is not the problem; where it runs matters
+##### Be careful with pure Python loops!
 
-Most numerical methods involve repeated operations. Python loops are useful for explaining and testing an algorithm, but large numerical workloads often benefit from moving those loops into compiled code. Measure first: a loop that already finishes quickly may need no optimization.
+Most numerical methods repeat operations many times. A Python loop is often the clearest way to explain and test an algorithm, but a large workload usually runs faster when the repeated work is moved into compiled code.
 :::
 
-For a grain-growth simulation on a $2048\times2048$ grid or a calculation of millions of interatomic forces, execution speed can decide whether the calculation is practical.
+This is the catch behind our earlier advice to "just use Python." Python makes an algorithm easy to express, but a pure Python loop may be too slow for a realistic simulation: tens of thousands of diffusion time steps, grain growth on a $2048\times2048$ grid, or millions of interatomic-force calculations. In such cases, the cost of one step determines whether the full calculation is practical.
 
-We will keep the Buffon probability model fixed and change its implementation. You do not need to memorize every trick; return to these examples when your own program needs a speedup. A better mathematical method for calculating $\pi$ would be a separate, often larger improvement.
+For the rest of the lecture, we will keep the Buffon model fixed and change only its implementation. This lets us compare several ways to **make the program faster** without changing the numerical experiment. You do not need to memorize every technique; return to these examples when your own program needs a speedup.
 
 ## Optimization 1: operate on arrays with NumPy
 
