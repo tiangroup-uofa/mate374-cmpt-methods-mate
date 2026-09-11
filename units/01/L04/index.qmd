@@ -33,7 +33,7 @@ $$
 For needle length equal to line spacing, setting the typical uncertainty to $5 \times 10^{-5}$ (the five-significant-digit target from L02) gives:
 
 $$
-N \approx \left(\frac{2.37}{5 \times 10^{-5}}\right)^2 \approx 2.3 \times 10^9\ \text{throws}.
+N \approx \left(\frac{2.37}{5 \times 10^{-5}}\right)^2 \sim 10^9\ \text{throws}.
 $$
 
 This is a one-standard-deviation estimate, not a guarantee that any particular run reaches the target.
@@ -103,16 +103,7 @@ Use the demo below to measure the timing. Move the slider to change $N$ and see 
 **Static fallback.** Time `buffon_experiment(N, L, D)` with `perf_counter()`, then divide elapsed seconds by $N$. For approximately linear scaling, multiplying $N$ by ten multiplies total time by ten while time per throw stays nearly constant.
 :::
 
-On a browser notebook like this, I recorded the following timing:
-
-| Throws, $N$ | WASM elapsed time (s) | Average time per throw (µs) |
-|---:|---:|---:|
-| $10^3$ | 0.0020 | 2.00 |
-| $10^4$ | 0.0170 | 1.70 |
-| $10^5$ | 0.0910 | 0.91 |
-| $10^6$ | 0.6530 | 0.65 |
-| $10^7$ | 7.1560 | 0.72 |
-| $10^8$ | 78.6260 | 0.79 |
+On a browser-based Python notebook like this, I recorded the elapsed time for several values of $N$:
 
 ### Scaling analysis
 
@@ -122,25 +113,17 @@ $$
 t_{\mathrm{total}} \approx N\,\langle t_{\mathrm{step}}\rangle + t_{\mathrm{overhead}},
 $$
 
-where $\langle t_{\mathrm{step}}\rangle$ is the per-throw cost and $t_{\mathrm{overhead}}$ is a fixed startup cost (function call, loop setup, final division — the random-number generator is initialized before the timer starts). Since the entire $N = 10^3$ run finishes in 2 ms, the overhead is negligible compared with the computation at large $N$.
+where $\langle t_{\mathrm{step}}\rangle$ is the per-throw run time and $t_{\mathrm{overhead}}$ is a fixed startup run time (function call, loop setup, final division — the random-number generator is initialized before the timer starts). Since the entire $N = 10^3$ run finishes in 2 ms, the overhead is negligible compared with the computation at large $N$.
 
 A log–log plot of the measured data reveals the scaling directly:
 
 ![Log–log plot of Buffon loop elapsed time vs. number of throws. The dashed line shows perfect linear scaling ($t \propto N$). The open square is the extrapolated time at $10^9$.](../../../assets/L04-wasm-scaling.png){#fig-wasm-scaling fig-alt="Log-log plot showing elapsed time vs N from 10^3 to 10^8, closely following a slope-1 reference line, with an extrapolated point at 10^9." width="75%"}
 
-On a log–log plot, $t \propto N$ is a straight line with slope 1. The measured points track this reference line closely: the scaling is approximately linear with the per-throw cost around $0.65$–$0.79\ \mu$s. The slight curvature at small $N$ reflects engine warmup; the mild steepening at large $N$ may reflect thermal throttling or garbage-collection pauses.
+On a log–log plot, $t \propto N$ is a straight line with slope 1. The measured points track this reference line closely: the scaling is approximately linear with the per-throw run time around $0.65$–$0.79\ \mu$s. The slight curvature at small $N$ reflects engine warmup; the mild steepening at large $N$ may reflect thermal throttling or garbage-collection pauses.
 
-### Extrapolating to $10^9$ throws
-
-From $10^6$ onward, each tenfold increase in $N$ multiplies the runtime by about $11\times$. Extrapolating from the largest measurement:
-
-$$
-t(10^9) \approx 78.6\ \text{s} \times 11 \approx 860\ \text{s} \approx \mathbf{14\ \text{min}}.
-$$
+By fitting a straight line through the large-$N$ data (we will learn linear fitting later in this course) and extrapolating to $10^9$ throws, the estimated run time is approximately 860 seconds, or about 14 minutes.
 
 Fourteen minutes in a browser notebook is feasible but slow, and this is only the Buffon experiment. A grain-growth simulation on a $1024\times1024$ grid or a molecular dynamics calculation performs far more work per step.
-
-*Check:* what could make this extrapolation unreliable? Consider thermal throttling over a 14-minute run, memory-access patterns, and competition from other browser tabs.
 
 ## Why are Python loops slow?
 
