@@ -1,21 +1,28 @@
 ---
-title: "Unit 02 · Finding special points"
+title: "Unit 02 · Working with Functions"
 toc: false
 ---
 
-**Unit question:** How can we locate a physically meaningful root or minimum, and how do we know the method has succeeded?
+In this part of the course, we will use numerical methods to find states that satisfy a condition we care about. What volume will a gas occupy under pressure? What atomic spacing gives the lowest energy? What can we predict from a few measurements?
 
-::: {.callout-warning}
-## Prototype status
+We will start with a **function** of one input, $f(x)$, and ask four kinds of questions:
 
-L05–L08 are early text prototypes. Materials examples, figures, activities, and dataset provenance are not final. See the [Unit 02 references and source notes](references.qmd) for the initial bibliography.
-:::
+1. **Where does $f(x)=0$?** This is a **root-finding** problem. Examples include finding the volume of a gas at a given pressure, the strain of a metal at a given stress, or the alloy composition with a specified melting temperature. We write the difference between the predicted and desired value as $f(x)$, then look for zero.
+2. **Where is $f(x)$ smallest or largest?** This is **optimization**. We might find the most stable atomic spacing by minimizing energy, locate the eutectic composition at the minimum of a liquidus curve, or find the energy barrier along a reaction path.
+3. **Given only a few data points, what lies between them?** This is **interpolation**. For example, we might estimate a property at an alloy composition we have not measured yet.
+4. **Can we fit a function to the data?** This is **regression** or **fitting**. We use the measurements to find a trend, such as how a phase-boundary temperature changes with composition.
 
-This unit stays mostly in one dimension so that graphs, intervals, slopes, and energy curves remain visible. Matrices are deferred until several-variable problems make them necessary.
 
-5. [L05 · Brackets, bisection, and fixed points](L05/index.qmd)
+
+We will mainly work with one-dimensional functions to build the foundations. You will edit some code, but explaining why a method works, in your own words, matters more than remembering Python syntax. Many of these algorithms already have fast implementations that we can use!
+
+L05–L08 begin with roots and extrema. Interpolation and fitting follow in the data unit.
+
+5. [L05 · Finding a desired state by root finding](L05/index.qmd)
 6. [L06 · Faster root finding: secant and Newton methods](L06/index.qmd)
 7. [L07 · Finding a minimum in one dimension](L07/index.qmd)
-8. [L08 · Optimization landscapes](L08/index.qmd)
+8. [L08 · Interpolation: what lies between the data?](L08/index.qmd)
+9. [L09 · Piecewise interpolation and splines](L09/index.qmd)
+10. [L10 · Fitting noisy data](L10/index.qmd)
 
-[Unit 02 references and source notes](references.qmd)
+[Unit 02 references](references.qmd)

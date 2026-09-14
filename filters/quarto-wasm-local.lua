@@ -55,11 +55,17 @@ function Div(div)
   local output_name = exported_stem(notebook:match("([^/]+)$")) .. ".html"
   local src = pandoc.path.join({ offset, "wasm-local", output_name })
   local editable = notebook:match("%.edit%.py$") ~= nil
+  local initial_view = div.attributes.view or "edit"
+  if initial_view ~= "app" and initial_view ~= "edit" then
+    error("A .quarto-wasm-local view must be app or edit")
+  end
   local direct_src = src
   if editable then
-    -- Keep the embedded view compact. The direct link uses direct_src without
-    -- this query parameter, so marimo opens with its full editing chrome.
+    -- The direct link still opens the full editor.
     src = src .. "?show-chrome=false"
+    if initial_view == "app" then
+      src = src .. "&view-as=present"
+    end
   end
 
   local title = escape_html(div.attributes.title or "Locally hosted marimo notebook")
@@ -78,7 +84,8 @@ function Div(div)
   if editable then
     table.insert(
       controls,
-      '<button class="quarto-wasm-view-toggle" type="button" disabled>App view</button>'
+      '<button class="quarto-wasm-view-toggle" type="button" disabled>'
+        .. (initial_view == "app" and "Edit code" or "App view") .. '</button>'
     )
   end
   if fullscreen == "true" then
