@@ -1,0 +1,11 @@
+# Complete local/CI build: quarto render --profile full
+# Profile lists extend the shared hooks and resources in _quarto.yml.
+project:
+  pre-render:
+    - python scripts/render_answer_pdfs.py
+  resources:
+    - "assignments/A1/A1-answers.pdf"
+
+format:
+  html:
+    format-links: true

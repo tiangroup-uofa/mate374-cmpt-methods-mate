@@ -1,14 +1,13 @@
 project:
   type: website
   output-dir: _site
+  # Daily preview/HTML builds skip answer PDFs; use --profile full to build them.
   pre-render:
     - _marimo_export.py
-    - python scripts/render_answer_pdfs.py
   post-render:
     - python scripts/generate_llms_txt.py
   resources:
     - "wasm-local/**"
-    - "assignments/A1/A1-answers.pdf"
     - "assets/L01-fast16-implosion-poster.png"
     - "scripts/l03_error_figures.py"
     - "scripts/binary_place_values.py"
@@ -132,7 +131,8 @@ format:
     code-fold: true
     code-summary: "Show the code"
     link-external-newwindow: true
-    format-links: true
+    # Full builds enable PDF links after rendering both formats.
+    format-links: false
   pdf:
     toc: false
     mainfont: "TeX Gyre Heros"

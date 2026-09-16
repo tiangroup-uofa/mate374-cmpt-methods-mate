@@ -10,19 +10,30 @@ Quarto source for the redesigned University of Alberta MATE 374 course. Quarto o
 
 ## Preview or render
 
+For everyday writing, preview HTML or build the HTML site without compiling PDFs:
+
 ```bash
 quarto preview
-# or
-quarto render
+quarto render --to html
 ```
 
-The pre-render hook exports notebooks from `activities/` into the ignored `wasm-local/` resource directory. Quarto then copies the complete bundle into the built site.
+For a complete local check, use the same command as CI:
+
+```bash
+quarto render --profile full
+```
+
+Both paths export notebooks from `activities/` into the ignored `wasm-local/` resource directory. Unchanged exports are reused; Quarto copies the complete bundle into the built site.
+
+The `full` profile also builds and stages answer PDFs and enables the HTML pages' PDF download links. Plain preview and HTML-only builds skip the answer-PDF hook and hide those format links. Explicit handout links in the page text may still point to PDFs from an earlier full build; run the full build to refresh them.
+
+Keep both output-format definitions in `_quarto.yml` so page-specific PDF settings remain available. A bare `quarto render` renders both formats but omits the answer-PDF hook; use `--to html` for daily builds and `--profile full` for complete builds.
 
 ## Deployment
 
-Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/render_pages.yml). The workflow installs the locked `uv` environment, Quarto, and TinyTeX, runs the pre-render notebook and answer-PDF hooks, renders the complete site, and deploys `_site/` with GitHub Pages. The post-render hook generates the agent-facing `llms.txt` index.
+Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/render_pages.yml). The workflow installs the locked `uv` environment, Quarto, and TinyTeX, then runs `quarto render --profile full` to export notebooks, stage answer PDFs, render all HTML and PDF pages, and deploy `_site/` with GitHub Pages. The post-render hook generates the agent-facing `llms.txt` index.
 
-The workflow follows the CHE 318 and MATE 664 Pages pattern, with `uv sync --locked` added so local and CI Python environments use the same dependency resolution. Because `_quarto.yml` declares both `html` and `pdf` output formats, the workflow also installs `librsvg2-bin` for SVG-to-PDF image conversion.
+The workflow follows the CHE 318 and MATE 664 Pages pattern, with `uv sync --locked` added so local and CI Python environments use the same dependency resolution. The full build also needs `librsvg2-bin` for SVG-to-PDF image conversion. CI still produces the complete site on every push; the HTML-only path speeds up local iteration.
 
 ## Course identity
 
