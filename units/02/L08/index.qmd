@@ -1,5 +1,5 @@
 ---
-title: "L08 · Optimization landscapes"
+title: "L08 · "
 subtitle: "Moving from one variable to several without hiding the geometry"
 body-classes: lecture-page
 ---
