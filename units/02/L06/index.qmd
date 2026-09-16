@@ -379,7 +379,7 @@ Start at $x_0=0.20$. Compare the constant-$c$ map with $\lambda=0.10$ and $\lamb
 The notebook opens in **Edit code**, with `student_map` in its own visible cell and the other code cells collapsed. Edit this function, then select **Your map** in the dropdown. First predict the behaviour from the displayed equation, then inspect the cobweb and the **Converged / Not converged** result.
 
 ::: {.quarto-wasm-local notebook="l06_fixed_point.edit.py" view="edit" title="Compare fixed-point rearrangements and check the original residual" height="880" loading="lazy" fullscreen="true"}
-![Two rearrangements of the same residual produce an approaching and a departing cobweb.](../../../assets/L06-fixed-point.png){fig-alt="Side-by-side cobweb diagrams for a convergent relaxation and a divergent rearrangement."}
+![Two rearrangements produce an approaching and a departing cobweb; slope ±1 cones compare each update's distance to a fixed point.](../../../assets/L06-fixed-point.png){fig-alt="Side-by-side cobweb diagrams for convergent and divergent rearrangements, with local cones bounded by slopes plus and minus one at the fixed points."}
 
 **Static example.** From $x_0=0.20$, $g=x-0.10f$ approaches the positive root $x_s\approx0.3438532$. The choice $g=x+f$ moves away. The negative square-root branch approaches the other root, $x_s\approx-0.6046845$. With $c=-x/2$ and $x_0=0$, the iterate never moves, yet $f(0)=-1$.
 :::
@@ -398,7 +398,9 @@ Near an attracting fixed point, an input error becomes a smaller error after app
 
 This local slope test is related to a **Lipschitz condition**, which bounds how much $g$ can stretch the distance between any two inputs in an interval. A Lipschitz constant below one makes $g$ a **contraction** ([Burden, Faires, and Burden, 2016](../references.qmd#ref-burden2016numerical), §2.2). The interval conditions are given below.
 
-Near the fixed point, a negative slope produces alternating errors; a positive slope preserves their sign. The green bands in the demo show where sampled values satisfy $|g'(x)|<1$.
+Near the fixed point, a negative slope produces alternating errors; a positive slope preserves their sign.
+
+The demo draws **slope ±1 cones** centred at the marked fixed points $(x_s,x_s)$. Their boundaries are $y=x_s\pm(x-x_s)$. If $(x,g(x))$ lies strictly inside a cone, then $|g(x)-x_s|<|x-x_s|$: that update brings the iterate closer to its tip. Compare the curve with these boundaries **near the fixed point**. The displayed cone width is chosen for visibility; it does not identify an interval of guaranteed convergence.
 
 ::: {.callout-note collapse="true"}
 ## Local slope versus a convergence guarantee on an interval
@@ -416,7 +418,7 @@ A standard sufficient condition on a closed interval $I$ is:
 
 The second condition is a **contraction**, a Lipschitz bound with constant below one. For a continuously differentiable map, a uniform bound $|g'(x)|\le q<1$ on $I$ is sufficient. Together these conditions give a unique fixed point in $I$ and convergence from any starting point there ([Burden, Faires, and Burden, 2016](../references.qmd#ref-burden2016numerical)).
 
-A few sampled derivatives do not prove a uniform bound or that the interval maps into itself. Also, $|g'(x_s)|<1$ is sufficient for local attraction, but is not necessary for every possible convergent iteration.
+The cone compares $g(x)$ with one fixed point. The interval-wide Lipschitz bound above compares **every pair** of inputs. A plot can illustrate this geometry; proving the bound and interval invariance requires more than visual inspection. Also, $|g'(x_s)|<1$ is sufficient for local attraction, but is not necessary for every possible convergent iteration.
 :::
 
 For the Newton–Raphson fixed-point map, the slope at a simple root is zero. The calculation below connects this to its rapid local convergence.

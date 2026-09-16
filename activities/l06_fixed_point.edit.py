@@ -125,37 +125,50 @@ def fixed_plot(
     plt,
     trace_fixed,
 ):
-    def draw_fixed_trace(choice, start, relaxation, steps):
+    def draw_fixed_trace(choice, start, relaxation, steps, ax=None):
         seq, status = trace_fixed(choice, start, relaxation)
-        fig, ax = plt.subplots(figsize=(7, 4.1), layout="constrained")
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(7, 5.3), layout="constrained")
+        else:
+            fig = ax.figure
         xx = np.linspace(-1.0, 1.0, 2001)
         with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
             yy = fixed_map(xx, choice, relaxation)
-            derivative = (fixed_map(xx+1e-5, choice, relaxation) - fixed_map(xx-1e-5, choice, relaxation)) / 2e-5
         ax.plot(xx, yy, color="#007c41", label="g(x)")
-        ax.plot(xx, xx, color="0.4", ls="--", label="y = x")
-        # Sampled slope bands illustrate local attraction; they are not a proof
-        # that g maps the entire band back into itself.
-        attractive = np.isfinite(yy) & np.isfinite(derivative) & (np.abs(derivative) < 1)
-        shade_label = "Sampled |g′| < 1 near a true fixed point"
-        for root in fixed_roots:
+        ax.plot(xx, xx, color="0.4", ls="--", label="y = x (slope +1)")
+        # Cones compare distance to a fixed point, not sampled derivatives.
+        # Their displayed width is a visual guide, not a certified interval.
+        candidates = list(fixed_roots)
+        if choice == "c = −x/2":
+            candidates.append(0.0)
+        cone_label = "Slope −1 through a fixed point"
+        for fixed_point in candidates:
             with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
-                maps_root = abs(fixed_map(root, choice, relaxation) - root) < 1e-6
-            idx = int(np.argmin(abs(xx-root)))
-            if maps_root and attractive[idx]:
-                left = right = idx
-                while left > 0 and attractive[left-1]:
-                    left -= 1
-                while right < len(xx)-1 and attractive[right+1]:
-                    right += 1
-                ax.axvspan(xx[left], xx[right], alpha=0.10, color="#007c41", label=shade_label)
-                shade_label = None
-            if maps_root:
-                ax.scatter([root], [root], color="black", s=35, zorder=5)
+                maps_point = abs(fixed_map(fixed_point, choice, relaxation) - fixed_point) < 1e-10
+            if not maps_point:
+                continue
+            cone_x = fixed_point + np.linspace(-0.22, 0.22, 101)
+            distance = np.abs(cone_x - fixed_point)
+            ax.fill_between(
+                cone_x, fixed_point - distance, fixed_point + distance,
+                color="0.5", alpha=0.12, zorder=0,
+            )
+            ax.plot(cone_x, cone_x, color="0.4", ls="--", lw=1)
+            ax.plot(
+                cone_x, 2*fixed_point - cone_x, color="0.4", ls=":",
+                lw=1.3, label=cone_label,
+            )
+            cone_label = None
+            if choice == "c = −x/2" and fixed_point == 0:
+                ax.scatter([0], [0], color="#a32638", marker="x", s=55,
+                           zorder=5, label="Extra fixed point: F(0) = −1")
+            else:
+                ax.scatter([fixed_point], [fixed_point], color="black", s=35, zorder=5)
         shown = seq[:steps+1]
         for x, y in zip(shown[:-1], shown[1:]):
             ax.plot([x, x, y], [x, y, y], "o-", color="#d87700", lw=1.1, markersize=3)
         ax.set(xlim=(-1,1), ylim=(-1,1), xlabel="x", ylabel="g(x)", title="Vertical to g(x), horizontal to y = x")
+        ax.set_aspect("equal", adjustable="box")
         ax.legend(fontsize=8, loc="upper left")
         ax.grid(alpha=0.2)
         return fig
@@ -218,8 +231,15 @@ def fixed_plot(
         fixed_equations,
         fixed_outcome,
         fixed_figure,
-        mo.md(f"The cobweb shows the first **{min(fixed_steps.value, len(fixed_sequence)-1)}** updates. "
-              "Green bands show a **sampled local slope condition** near a true fixed point. A convergence guarantee also needs an interval that maps into itself. The plot stays on [−1, 1]; divergent iterates may leave it."),
+        mo.md(
+            f"The cobweb shows the first **{min(fixed_steps.value, len(fixed_sequence)-1)}** updates.\n\n"
+            r"**Slope cones:** the lines $y=x_s\pm(x-x_s)$ meet at each marked fixed point $(x_s,x_s)$. "
+            r"If $(x,g(x))$ lies strictly inside its grey cone, then $|g(x)-x_s|<|x-x_s|$: "
+            "that update shrinks the error relative to this fixed point. "
+            r"Compare the curve near the tip: $|g'(x_s)|<1$ gives local attraction. "
+            "The cone width is chosen for visibility. To apply the interval contraction theorem, also check a uniform Lipschitz bound below one and that updates stay in the interval. "
+            "The plot stays on [−1, 1]; divergent iterates may leave it."
+        ),
         mo.accordion({"Experiments": mo.md("Compare **λ = 0.10** and **λ = −1.00** from x₀ = 0.20. Then select **c = −x/2** with x₀ = 0: does a motionless cobweb solve F(x)=0? Compare the two square-root branches. To try your own function, edit `student_map` and select **Your map**; verify its algebra and check F at the result.")}),
     ])
     return

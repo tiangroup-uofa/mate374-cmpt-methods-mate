@@ -226,26 +226,22 @@ def plot_two_step_comparison():
     return fig
 
 
+def save_fixed_point_figure():
+    fixed = notebook_definitions("l06_fixed_point.edit.py")
+    fig, axes = plt.subplots(1, 2, figsize=(10, 5.1), layout="constrained")
+    for ax, relaxation, label in zip(axes, [0.1, -1.0], ["Approaches the root", "Moves away from the root"]):
+        fixed["draw_fixed_trace"]("Constant c = λ", 0.2, relaxation, 10, ax=ax)
+        ax.set_title(f"λ = {relaxation:g}: {label}")
+    save(fig, "L06-fixed-point.png")
+
+
 def main():
     roots = notebook_definitions("l06_open_methods.edit.py")
     save_regula_falsi_secant_animation()
     points, lines, _ = roots["trace_open"]("Secant", 0.20, 0.21)
     save(roots["draw_open_trace"](points, lines, 5, "Secant"), "L06-open-methods.png")
 
-    fixed = notebook_definitions("l06_fixed_point.edit.py")
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4), layout="constrained")
-    xx = np.linspace(-0.7, 0.8, 1000)
-    for ax, relaxation, label in zip(axes, [0.1, -1.0], ["Approaches the root", "Moves away from the root"]):
-        yy = fixed["fixed_map"](xx, "Constant c = λ", relaxation)
-        seq, _ = fixed["trace_fixed"]("Constant c = λ", 0.2, relaxation, maxiter=12)
-        ax.plot(xx, yy, color="#007c41", label="g(x)")
-        ax.plot(xx, xx, "--", color="0.4", label="y = x")
-        for x, y in zip(seq[:10], seq[1:11]):
-            ax.plot([x, x, y], [x, y, y], "o-", lw=1.1, markersize=3, color="#d87700")
-        ax.set(xlim=(-0.7,0.8), ylim=(-0.7,0.8), xlabel="x", ylabel="g(x)", title=f"λ = {relaxation:g}: {label}")
-        ax.legend(fontsize=8)
-        ax.grid(alpha=0.2)
-    save(fig, "L06-fixed-point.png")
+    save_fixed_point_figure()
 
     energy = notebook_definitions("l07_co2_free_energy.edit.py")
     temperature = 280.0
