@@ -422,4 +422,42 @@ Starting from $x_0=1$, just three updates give $x_3\approx1.414216$. The rapid l
 
 ## Before you leave
 
-Can you use fixed-point iteration to approach the other two CO₂ roots? Try starting near $0.08767$ and $0.1141\ \mathrm{L/mol}$. Does the same choice of $g(v)$ work for both? Use its slope and the original residual to explain what happens.
+Can you use fixed-point iteration to approach the other two CO₂ roots? Start at $0.05$ and $0.10\ \mathrm{L/mol}$ using our original choice, $g(v)=b+RT/(P+a/v^2)$. Do the two starts approach different roots? Use the slope and the original residual to explain what happens.
+
+::: {.callout-note collapse="true"}
+## Worked comparison: small steps, persistent pressure errors
+
+These calculations use the same stopping tolerances, $\varepsilon_v=0.001\ \mathrm{L/mol}$ and $\varepsilon_P=0.2\ \mathrm{bar}$. Intermediate values are kept unrounded; the selected rows below show four significant digits. The later rows are supplied for comparison.
+
+### Start at $v_0=0.05\ \mathrm{L/mol}$
+
+| $k$ | $v_k$ (L/mol) | Step (L/mol) | Residual $F(v_k)$ (bar) |
+|---:|---:|---:|---:|
+| 0 | 0.05000 | — | +1689 |
+| 1 | 0.05833 | 0.008328 | +381.0 |
+| 10 | 0.07952 | 0.0009426 | +13.71 |
+| 52 | 0.08743 | 0.00001960 | +0.2108 |
+| 53 | 0.08744 | 0.00001815 | +0.1950 |
+
+The step first passes its tolerance at **$k=10$**, while the predicted pressure is still $13.71\ \mathrm{bar}$ too high. Both checks first pass at **$k=53$**. The sequence approaches the liquid-like root near $0.08767\ \mathrm{L/mol}$ from below.
+
+The pressure is very sensitive to volume near this root, so even a small volume error can leave a substantial pressure mismatch. Also, $g'(v_s)\approx0.9274$: each sufficiently small error retains about 93% of its size after an update. This is slower than the gas-like case, where the factor is about 0.746.
+
+### Start at $v_0=0.10\ \mathrm{L/mol}$
+
+| $k$ | $v_k$ (L/mol) | Step (L/mol) | Residual $F(v_k)$ (bar) |
+|---:|---:|---:|---:|
+| 0 | 0.1000 | — | −3.121 |
+| 1 | 0.09956 | 0.0004373 | −3.162 |
+| 6 | 0.09741 | 0.0004226 | −3.263 |
+| 62 | 0.08793 | 0.00001963 | −0.2073 |
+| 63 | 0.08791 | 0.00001824 | −0.1928 |
+
+The step passes its tolerance after the **first update**, yet the residual magnitude initially grows. Both checks first pass at **$k=63$**. This sequence approaches the **same liquid-like root**, now from above.
+
+### Why do we miss the middle root?
+
+At the middle root near $0.1141\ \mathrm{L/mol}$, our choice of $g$ has $g'(v_s)\approx1.060$. Nearby errors grow by about 6% per update. Departure can look slow, but the middle root is locally repelling.
+
+To approach it, try the constant-$c$ formula again, this time with **$c=+0.001\ \mathrm{L\,mol^{-1}\,bar^{-1}}$** in $g_c(v)=v-cF(v)$. Its slope at the middle root is about $0.7266$. Starting from $0.10\ \mathrm{L/mol}$, both stopping checks first pass after 10 updates, at $v\approx0.1134\ \mathrm{L/mol}$ with $F(v)\approx-0.1842\ \mathrm{bar}$.
+:::

@@ -57,26 +57,13 @@ def update_formula(P, R, T, a, b):
 @app.cell(hide_code=True)
 def volume_input(P, R, T, mo):
     current_volume = mo.ui.number(
-        value=R * T / P, step=0.0001, label="Current v (L/mol)"
+        value=R * T / P, step=1.e-8, label="Current v (L/mol)"
     )
     current_volume
     return (current_volume,)
 
 
-@app.cell(hide_code=True)
-def single_update(F, b, g, math):
-    def evaluate_update(v):
-        if v is None or not math.isfinite(v) or v <= b:
-            raise ValueError(f"Enter a finite volume greater than b = {b} L/mol.")
-        next_v = g(v)
-        if not math.isfinite(next_v) or next_v <= b:
-            raise ValueError(f"The proposed volume must be finite and greater than b = {b} L/mol.")
-        residual = F(next_v)
-        if not math.isfinite(residual):
-            raise ValueError("The pressure residual is not finite at the proposed volume.")
-        return next_v, abs(next_v - v), residual
 
-    return (evaluate_update,)
 
 
 @app.cell(hide_code=True)
@@ -108,6 +95,21 @@ def result(current_volume, evaluate_update, mo, pressure_tolerance, volume_toler
         ])
     calculation_output
     return (calculation_output,)
+
+@app.cell(hide_code=True)
+def single_update(F, b, g, math):
+    def evaluate_update(v):
+        if v is None or not math.isfinite(v) or v <= b:
+            raise ValueError(f"Enter a finite volume greater than b = {b} L/mol.")
+        next_v = g(v)
+        if not math.isfinite(next_v) or next_v <= b:
+            raise ValueError(f"The proposed volume must be finite and greater than b = {b} L/mol.")
+        residual = F(next_v)
+        if not math.isfinite(residual):
+            raise ValueError("The pressure residual is not finite at the proposed volume.")
+        return next_v, abs(next_v - v), residual
+
+    return (evaluate_update,)
 
 
 if __name__ == "__main__":
