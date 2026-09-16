@@ -85,7 +85,7 @@ $$
 \boxed{F(V)=P(V)-P_{\mathrm{target}}=0.}
 $$
 
-We call $F(V)$ the **residual**. A positive residual means the calculated pressure is too high; a negative one means it is too low. We want to find a volume where this difference is zero. For van der Waals, keep the search at $V>nb$; the pressure is undefined at $V=nb$.
+In general, we write a function as $f(x)$. When we express a specific physical condition as a zero, we use $F(x)$ for the problem-specific **residual**. Here $F(V)$ is the van der Waals residual. A positive residual means the calculated pressure is too high; a negative one means it is too low. We want to find a volume where this difference is zero. For van der Waals, keep the search at $V>nb$; the pressure is undefined at $V=nb$.
 
 ## First try: grid search
 

@@ -1,0 +1,410 @@
+---
+title: "L06 · Root finding in open domain"
+subtitle: "Secant / Newton and Fixed-point methods"
+body-classes: lecture-page
+---
+
+## The question
+
+**In case we cannot bracket the solution, what methods do we use to converge to the solution?**
+
+<revise in the unit 2, lecture 5 that we indicate f(x) as a general function we want to use. in Lecture 5 / 6, F(x) may usually mean the residual function, if it was not conventionally a nice function. this name sake should be consistent>
+
+## Learning outcomes
+
+<LLM construct afterwards>
+
+us fix, then immediately ask what information we are wasting. That naturally creates the need for open methods.
+I would write this section roughly as follows:
+Motivation for open methods
+There are many problems where we do not know in advance where a suitable bracket is. Even worse, if several roots exist, a large bracket can easily hide some of them.
+Let's return to the van der Waals equation of state from the previous lecture.
+At a suitable temperature and pressure, the van der Waals equation
+\[
+P(V)=\frac{nRT}{V-nb}-\frac{an^2}{V^2}
+\]can have three real roots for \(V\). The smallest-volume root corresponds to the liquid-like state, the largest-volume root to the gas-like state, while the middle root is mechanically unstable.
+Suppose we define
+\[
+F(V)=P(V)-P_{\mathrm{target}}
+\]and search over one very large interval.
+<add L06-bracet-method-missed roots.png>
+The interval may contain all three roots, but a bracketing method such as bisection can still converge to only one of them.
+So how could we make bracketing work if we do not already know where the roots are?
+One straightforward solution is to first scan the domain.
+For example, divide the domain into points
+\[
+x_0,x_1,x_2,\ldots,x_N,
+\qquad x_{i+1}-x_i=\Delta x,
+\]evaluate \(F(x)\) on this grid, and look for neighboring points satisfying
+\[
+F(x_i)F(x_{i+1})<0.
+\]Each sign change gives us a candidate bracket. We can then:
+1. scan the domain with a sufficiently small spacing \(\Delta x\);
+2. identify intervals containing sign changes;
+3. apply a reliable bracketing method to each interval.
+This combination of incremental search + bracketing is a perfectly reasonable strategy. [Kiusalaas citation]
+
+<comment from Tian, this is actually the example we wanted them to do in Assignment 2>
+
+### But do we really want to search the entire domain first?
+
+In the refined search + bracket case, we have to go to each of the point. suppose we're even dealing with a very high dimensional problem, where we have $m$ dimensions of data, even go get the bracket itself can be very hard! 
+
+The open domain method basically wanted to ask this quesiton: whenever we're evaluatiing the function $F(x)$, we wanted such information (and the shape of the function) to tell us where the next point should be. Hopefully this gives us a faster method of getting that root. 
+
+The open domain methods vs bracketing method basically work in 2 different mindsets: (narrowing the search interval vs explore the next point)
+
+<Tian will give a scheme, or you may have a better illustration?>
+
+## The Secant method: regula-falsi in open domain
+
+We have actually seen the idea of using the function information from earlier bracketing methods. The regula-falsi method takes the past 2 points on a function to determine the "new intermediate point". 
+
+the same idea can be applied to an open domain method, which is known as the secant method. We have seen that if we can actually approximate the curve by a linear equation near the root, drawing a line should make ius very close to eher!
+
+The secand method works by given 2 points (1 initial and 2 second step) x_1 and x_2, you evaluate f(x_1) and f(x_2), and draw a line to get the step3 ... so forth.
+
+or formally
+Given two prior evaluated points $x_{k-1}$ and $x_k$, the next point to work on $x_{k+1}$ is:
+
+$$
+x_{k+1}
+=
+x_k-F(x_k)
+\frac{x_k-x_{k-1}}{F(x_k)-F(x_{k-1})}.
+$$
+
+The secant method does require the initial 2 points of search. The step size may actually matter in this case.
+
+<below should be an interactive demo for the secand method. the vdw example above is fine, just distill the equation to be fixed (i.e. do not need to actually say you are working on co2). the implementation uses a own secant method, not the scipy one>
+
+<can you observe the case where the secant method diverges? can we approximate the case of newton when x2 is very close?>
+
+The secant method has a slightly faster speed of finding the root (if it finds). Mathematically, the next error approximated to be power of 1.618 of previous error, while if remembered from last lecture, bisection method divides the error in half.
+
+
+<call out: common problem with open domain method: not always works!>
+depending on how "good" your initial guess(es) are, secant method may give you the root, or not)
+
+
+## The Newton-Raphson method: secant to the limit
+
+In secant method we showed that the solution is dependent on the next step as well. 
+
+$$
+x_{k+1}
+=
+x_k-F(x_k)
+\frac{x_k-x_{k-1}}{F(x_k)-F(x_{k-1})}.
+$$
+
+if we do not limit ourselves to x_k - x_k-1, but actually make that infinitely small, we end up with the derivative of f(x) at x_k 
+
+f'(x_k) = lim(\Delta x-> 0) <finite>
+
+in that case the secant line become **tangent** to each point of evaluation, k. This is the idea behind the newton-raphson method. 
+
+But the reason behind newton-raphson is different from the secant (linear appriximation method), that it uses the local gradient information to find the solution. Remember that the deritive in 1D means how fast a function changes w.r.t. to the input x? Newton-Raphson is basically using the intuition that: next position to find should follow the direction where the function grows or shinks currently.
+
+Why newton works is because, as you may have learned in calculus, the value of a function f(x) close to the original point x_k, can be approximated by the Taylor expansion <link to just one math wiki>
+
+f(x_k+1) = f(x_k) + f'(x_k)(x_k+1 - x_k) + O((\Delta)^2)
+
+if f(x_k+1) is the root where f(x_k+1) = 0, reagrange will give
+
+f(xk) + f'(x_k)(x_k+1 - x_k) + O(deta^2) = 0
+
+drop the higher order term and solve for x give s the formula. Mathematically newton-raphson has error
+
+e_k+1 = -f''/2f' * e_k^2 (proved, cite kiusalaas)
+
+That means newton-raphson is really fast (even faster than secant!)
+
+<call out: newton-raphson is not just secant with step size to 0! there will be a folded region below this say 1) the error convergence is different, 2) newton-raphson always uses local measurement, while secand used older points, even if initial point Delta x is small to approximate>
+
+### Caveat of newton raphson
+
+from the kiusalass book the newton-raphson definitely diverges in many cases where the initial point is not close to the root. Also, if analytical gradient is not available, numerical estimation (or so called finite difference) is needed.
+thires, it requires deviding the gradient! the gradient must not be zero. 
+
+## Using Scipy optimize open domain methods
+
+
+We can now see the case of our vdw eos. If choosing a different start point. In secant or newton they may land on different roots. a clever combination with grid search may help us get to the answer faster, tthan doing bisecting on each.
+
+The secant / newtons method belong to a family of methods that uses the shape information (secant) or heading information (1st to higher order) to get to next point. It has broader applications in other fields like optimization. In fact if a method already can give you the second or third order derivatives, there are even faster methods available like Halle.
+
+Very similar to what the bracketing methods, the root finding methods in scipy also use the same finger print <please complete>
+
+```python
+root_scalar(...)
+```
+
+Here need to cite the usable methods on scipy documentation, but only the table for usable things.
+
+
+
+
+
+
+## Generalization of iterative methods
+
+The secant method, the newton-raphson methods can all be categorized as iterative methods in open domain, that is
+
+given one (or two) initial points, the algorithm finds where to get the next points. A successful algorithm may produce a series of points like follows
+
+$$
+x_0, x_1, .... x_i ... x_n (converged)
+$$
+
+More generally speaking, we are looking for another **iterative function** g(x) that gives the next point (in newton's case)
+
+x_{k+1} = g(x_k)
+
+if indeed our solution converge at the final solution $x_s$, we should get $x_s = g(x_s)$, i.e. the iterative function does indeed being "fixed" on the point $x_s$. This is called a fixed point, and using the iterative method to find the solution is usually called an **fixed point iteration** method, which you might have seen from other engineering courses.
+
+Using python to solve a fixed point iteration is very simple <below is my example in a worked demo, but can be better written>
+
+```python
+def iter_x(x0, func=fun_a, eps=1e-3, max_iter=100):
+    """return max
+    """
+    x_seq = []
+    x_ = x0
+    converged = False
+    for i in range(max_iter):
+        x_seq.append(x_)
+        next_x_ = func(x_)
+        if np.isclose(x_, next_x_, atol=eps):
+            converged = True
+            break
+        else:
+            x_ = next_x_
+    return x_seq, converged
+```
+
+What are we doing exactly? It can be illustrated in following 2 figures 
+
+<side-by-side: one converged, one diverges>
+
+
+### constructing the iterative function
+
+Since our target function to solve the root, $f(x) = 0$ and the iteration  $x - g(x) = 0$ are trying to solve the same thing, we can actually express the construction of the iterative function g(x) as
+
+$$
+x - g(x) = c(x)f(x)
+$$
+
+which directly gives $g(x) = x - c(x)f(x)$, where $c(x)$ is a function that is not zero everywhere <I may need a proper citation for this. I just worked out this format but this is usually not taught in numerical textbooks>.
+
+There are actually *infinite* options where you can choose $c(x)$, the implications is g(x) the iteractive function is not unique!
+<call out block: there a family of c(x) and g(x) we can choose! But only some of them will make the fixed-point iteraction converge>
+
+For example, for a nonlinear equation $3x^2 - x + e^{2x} - 2 = 0$, let's work out how to make the fixed point iterative. The method itself says $f(x) = 3x^2 - x + e^{2x} - 2$,  we can construct many such g(x). (we just choose some easier to write ones, try to eliminate some terms)
+
+1. constant $c(x) = \lambda$
+$$
+g(x) = x - \lambda(3x^2 - x + e^{2x} - 2)
+$$
+
+where if \lambda = -1, its just g(x) = 3x^2 + e^2x - 2
+
+2. $c(x) = -1/2x$
+
+$$
+g(x) = 3/2 x^3 - 1/2x^2 + 1/2 x e^{2x}
+$$
+
+3. $c(x) = 1/3 x^{-1}$
+<please work out for me>
+
+Of course you could just rearrange f(x) to move one term of x to the LHS and create $x=g(x)$, for example
+
+4. e^{2x} = -3x^2 + x + 2 --> x = 1/2\ln(...)
+
+5. x^2 = ... --> x = \pm\sqrt{...}
+
+Does each one of them converge? let's see the interactive example.
+
+
+<interactive example, use dropdown list of the above 5 functions, plus one more using newton-raphson (so that c(x) = f'). the student can choose to see how the initial point matters for the final convergence. Always show the Lipshitz limit around the root as transparennt box. the cobweb can be just simple lines plus dots
+
+The example could also ask student to input one method that implements their own solution, by given the function takes input x. (but how do we check it's working function not a wrong derivation??)
+
+>
+
+<this is my current solution on a marimo notebook, but you decide how much to adapt, the function choice is different import marimo
+
+__generated_with = "0.24.0"
+app = marimo.App()
+
+
+@app.cell
+def _():
+    import sympy as sp
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    return np, plt
+
+
+@app.cell
+def _(np):
+    #fun_a = lambda x: x - 0.5 * (x ** 3 - np.exp(-x ** 2))
+    # def fun_a(x):
+    #     f = x**3 - np.exp(-x**2)
+    #     df = 3*x**2 + 2*x*np.exp(-x**2)
+    #     return x - f / df
+    fun_a = lambda x: np.exp(-x ** 2) / x ** 2
+    #fun_a = lambda x: np.exp(-(x ** 2) / 3)
+    return (fun_a,)
+
+
+@app.cell
+def _(converged, fun_a, mo, np, plt, seq, slider):
+    def plot_func():
+        xx = np.linspace(-2, 2)
+        fig = plt.figure()
+        plt.plot(xx, fun_a(xx), label="g(x)")
+        plt.plot(xx, xx)
+        plt.xlim(xx[0], xx[-1])
+        plt.ylim(xx[0], xx[-1])
+    
+    
+        plot_seq = [[seq[0], seq[0]]]
+    
+        for x0, x1 in zip(seq[:-1], seq[1:]):
+            plot_seq.extend([[x0, x1], [x1, x1]])
+    
+        plot_seq = np.atleast_2d(plot_seq)
+        colors = plt.cm.viridis(np.linspace(0.15, 0.9, len(seq) - 1))
+
+        for k, (x0, x1) in enumerate(zip(seq[:-1], seq[1:])):
+            plt.plot(
+                [x0, x0, x1],
+                [x0, x1, x1],
+                color=colors[k],
+                lw=1.1,
+                alpha=0.7,
+                marker="o",
+                markersize=2.5,
+            )
+
+        #plt.plot(plot_seq[:, 0], plot_seq[:, 1], "ko--", alpha=0.75)
+        plt.title(f"{seq[-1]:.4f} - -{len(seq)} -- {converged}")
+        return mo.vstack([slider, fig])
+
+    plot_func()
+    
+    # fig
+    return
+
+
+@app.cell
+def _():
+    import marimo as mo
+
+    return (mo,)
+
+
+@app.cell
+def _(mo):
+    slider = mo.ui.number(value=0.0, step=0.1, label="initial value")
+    return (slider,)
+
+
+@app.cell
+def _(iter_x, slider):
+    seq, converged = iter_x(slider.value)
+    return converged, seq
+
+
+@app.cell
+def _(fun_a, np):
+    def iter_x(x0, func=fun_a, eps=1e-3, max_iter=100):
+        """return max
+        """
+        x_seq = []
+        x_ = x0
+        converged = False
+        for i in range(max_iter):
+            x_seq.append(x_)
+            next_x_ = func(x_)
+            if np.isclose(x_, next_x_, atol=eps):
+                converged = True
+                break
+            else:
+                x_ = next_x_
+        return x_seq, converged
+
+    return (iter_x,)
+
+
+@app.cell
+def _():
+    return
+
+
+if __name__ == "__main__":
+    app.run()
+>
+
+
+### When fixed point method fail?
+
+We should have seen enough examples from above, that the fixed point method sometimes does not work at all (the points will diverge). From the common failed examples, can you see a common feature?
+
+Since the fixed point works by having fixed point $x_s$ between two curves $y=x$ and $y=g(x)$, a nice math proof is that the converged case must follow the Lipschitz condition, so that the absolute value of the derivative of $g(x)$, $|g'(x_s)|<1$. 
+
+### Special condition: newton-raphson
+
+if we use the notation $x_k+1 = g(x_k) = x_k - c(x_k)f(x_k)$, there is a special where c(x_k) = 1/f'(f_k), the fixed point iteration become just the newton-raphson method!
+
+what is the derivative of g? g = x - f/f', so g' = 1 - (f'*f' - f''*f)/f'2. --> g'(x_s) = 0. In this sense, we can prove that newton-raphson method ALWAYS converges near the fixed point! That's directly coming from the Lipschitz conditions.
+
+### Different stopping criteria
+
+This can be directly taken from the older 374, just need to rephrase 
+
+As in the case of a generalized iteration
+
+x_k+1 = g(x_k)
+
+there are 2 kinds of stopping criteria
+
+1) the magnitude of the function f(x_k) is sufficiently small 
+2) the change from x_k to x_k+1 is sufficiently small 
+
+Actual convergence require **BOTH** to be satisfied
+
+<older from 374
+
+Summary - when to stop iterations
+The numerical methods for the solution of non-linear equations
+are all iterative. Thus, the condition for terminating the
+iterative process is therefore important.
+For the indication that the solution has become suﬃciently
+accurate there use two common criterion:
+1. suﬃciently small magnitude of the function f (xs,i ),
+2. suﬃciently small change in the estimated solution2 from one iteration to
+the next xi−xi−1
+xi.
+Correct procedure for monitoring convergence must include
+the control of both parameters: the change in the iterated
+solution and the magnitude of the function.
+2Sometimes the small change in the estimated solution cab be due to extremely
+slow convergence.
+
+>
+
+## Going back to the vdW EOS
+
+Application notes:
+
+we shall go back to the vdW EOS, what is useful now, is that we indeed can identify 3 roots. How do we find the 3 roots? we can solve now with either bracketing method or open domain methods to get them!
+
+Are they physical? We briefly said that the middle root is unstable, because at that point, increase pressure also raises volume, likely not a physical state.
+
+Actually the vdW equation of state itself can be connected to the gibbs free energy, that we know is a determining factor in materials properties (to determine wether liq or gas is more stable). We will inspect in next lecture.
+

@@ -1,10 +1,11 @@
 project:
   type: website
   output-dir: _site
-  # Full-site render targets restored; whole-project WASM, answer-PDF,
-  # and llms.txt hooks remain disabled pending agreement.
-  pre-render: []
-  post-render: []
+  pre-render:
+    - _marimo_export.py
+    - python scripts/render_answer_pdfs.py
+  post-render:
+    - python scripts/generate_llms_txt.py
   resources:
     - "wasm-local/**"
     - "assignments/A1/A1-answers.pdf"
@@ -100,8 +101,6 @@ website:
             text: "S01 · Python and marimo"
           - href: seminars/S02-number-conversion/index.qmd
             text: "S02 · Decimal and binary by hand"
-          - href: seminars/S03-fixed-point/index.qmd
-            text: "S03 · Fixed-point iteration by hand"
       - href: assignments/index.qmd
         text: Assignments
         contents:

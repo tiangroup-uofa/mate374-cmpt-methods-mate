@@ -34,13 +34,6 @@ The course uses [Quarto](https://quarto.org/) for durable explanations and print
 
 The course materials are open source and published on [GitHub](https://github.com/tiangroup-uofa/mate374-cmpt-methods-mate). If you find a typo, please email [ttian7@ualberta.ca](mailto:ttian7@ualberta.ca) or [open an issue](https://github.com/tiangroup-uofa/mate374-cmpt-methods-mate/issues).
 
-## Unit 02 · Working with Functions
-
-Which volumes satisfy a gas equation, and which state has the lowest free energy? [Unit 02](units/02/index.qmd) connects root finding, minimization, and phase stability before moving to interpolation and fitting.
-
-- [L06 · Root finding in an open domain](units/02/L06/index.qmd): secant, Newton, and fixed-point methods.
-- [L07 · Finding extrema in one dimension](units/02/L07/index.qmd): minima, maxima, and the preferred material state.
-
 ## Start here
 
 - [Syllabus](syllabus/index.qmd)

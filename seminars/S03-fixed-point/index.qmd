@@ -1,0 +1,485 @@
+---
+title: "S03 · When does repeated updating settle?"
+subtitle: "Fixed-point iteration by hand: rearrange, repeat, and check"
+body-classes: lecture-page seminar-page
+---
+
+## Learning outcomes
+
+By the end of this seminar, you should be able to:
+
+1. **Derive** a fixed-point update from a nonlinear equation, keeping track of its domain.
+2. **Calculate** successive iterates and the original residual by hand, using a calculator for arithmetic.
+3. **Predict** local convergence or departure using the slope of the iteration map and a cobweb sketch.
+4. **Check** an apparent solution using both the change between iterates and the original equation.
+
+## Return to the CO₂ equation
+
+What molar volume can CO₂ occupy at a specified temperature and pressure? In [Lecture 7](../../units/02/L07/index.qmd), we saw these possible volumes as stationary points of a free-energy curve. Here we will find one of them by repeatedly updating a volume estimate.
+
+We will work through the algebra and a short iteration table on paper. A calculator is enough for the arithmetic. Keep at least eight significant digits in intermediate values, and round only when writing the table.
+
+Use the **same conditions as the L07 demo**:
+
+| Quantity | Value |
+|---|---:|
+| Temperature, $T$ | $280\ \mathrm{K}$ |
+| Imposed pressure, $P$ | $50\ \mathrm{bar}$ |
+| vdW parameter, $a$ | $3.592\ \mathrm{L^2\,bar\,mol^{-2}}$ |
+| vdW parameter, $b$ | $0.04267\ \mathrm{L\,mol^{-1}}$ |
+| Gas constant, $R$ | $0.08314462618\ \mathrm{L\,bar\,mol^{-1}\,K^{-1}}$ |
+
+We use litres and bar throughout this calculation, so $RT=23.2804953304\ \mathrm{L\,bar\,mol^{-1}}$. The molar volume must satisfy $v>b$.
+
+The van der Waals pressure and its residual are
+
+$$
+P_{\mathrm{EOS}}(v)=\frac{RT}{v-b}-\frac{a}{v^2},
+\qquad
+\boxed{F(v)=\frac{RT}{v-b}-\frac{a}{v^2}-P.}
+$$
+
+A solution has $F(v)=0$: the pressure predicted by the equation matches the imposed pressure. A positive residual means that the predicted pressure is too high.
+
+**Before calculating:** what does $F(v)=0.5\ \mathrm{bar}$ tell you? Does it mean that the volume error is $0.5\ \mathrm{L/mol}$?
+
+The residual is a **pressure mismatch**. Its units and meaning differ from those of a volume error.
+
+## From an equation to an update
+
+### What is a fixed point?
+
+Suppose a function $g$ takes the current estimate and returns the next one:
+
+$$
+v_0\ \longrightarrow\ v_1=g(v_0)\ \longrightarrow\ v_2=g(v_1)\ \longrightarrow\ \cdots.
+$$
+
+We write this as
+
+$$
+\boxed{v_{k+1}=g(v_k).}
+$$
+
+The subscript $k$ counts updates. A **fixed point** $v_s$ satisfies $g(v_s)=v_s$: applying the update leaves that value unchanged. If the sequence converges and $g$ is continuous at its limit, that limit must be a fixed point.
+
+Our job is to choose $g$ so that its fixed points solve the original equation, then check whether repeated updates approach one of them.
+
+### Derive the first map
+
+Start with the pressure equation and isolate $v-b$:
+
+$$
+\begin{aligned}
+\frac{RT}{v-b}-\frac{a}{v^2}&=P,\\[4pt]
+\frac{RT}{v-b}&=P+\frac{a}{v^2},\\[4pt]
+v-b&=\frac{RT}{P+a/v^2},\\[4pt]
+v&=b+\frac{RT}{P+a/v^2}.
+\end{aligned}
+$$
+
+The unknown still appears on both sides. Use the current estimate on the right to calculate a new estimate on the left:
+
+$$
+\boxed{v_{k+1}=g(v_k)=b+\frac{RT}{P+a/v_k^2}.}
+$$
+
+All occurrences of $v_k$ on the right use the **same old value**. Finish the calculation before replacing it with $v_{k+1}$.
+
+For these positive parameters and $v_k>b$, the denominator is positive. The result is also greater than $b$, so this map preserves the physical domain.
+
+**Your turn:** put $v_s=g(v_s)$ into the boxed expression and reverse the algebra. Show that $F(v_s)=0$. State why the divisions are allowed.
+
+::: {.callout-note collapse="true"}
+## Check the reverse algebra
+
+For $v_s>b>0$,
+
+$$
+v_s-b=\frac{RT}{P+a/v_s^2}
+\quad\Longrightarrow\quad
+\frac{RT}{v_s-b}=P+\frac{a}{v_s^2}
+\quad\Longrightarrow\quad
+F(v_s)=0.
+$$
+
+Both $v_s-b$ and $P+a/v_s^2$ are positive. Every fixed point in this physical domain is a root of the original residual, and every physical root is a fixed point of this map.
+:::
+
+### Work through the first update
+
+Start near the gas-like volume with
+
+$$
+v_0=0.30000000\ \mathrm{L/mol}.
+$$
+
+The first update is
+
+$$
+\begin{aligned}
+v_1
+&=0.04267+\frac{23.2804953304}{50+3.592/(0.30000000)^2}\\[4pt]
+&=0.04267+\frac{23.2804953304}{89.91111111\ldots}\\[4pt]
+&\approx0.30159790\ \mathrm{L/mol}.
+\end{aligned}
+$$
+
+Now check this **new** volume in the original equation:
+
+$$
+\begin{aligned}
+F(v_1)
+&=\frac{23.2804953304}{v_1-0.04267}-\frac{3.592}{v_1^2}-50\\[4pt]
+&\approx+0.42179\ \mathrm{bar}.
+\end{aligned}
+$$
+
+The initial residual was $F(v_0)\approx+0.55831\ \mathrm{bar}$. One update has reduced the pressure mismatch to about $0.422\ \mathrm{bar}$.
+
+### Your turn: complete the table
+
+Calculate $v_2$, $v_3$, and $v_4$. In every row, evaluate $F$ at the volume in that row.
+
+| $k$ | $v_k$ (L/mol) | Step $\lvert v_k-v_{k-1}\rvert$ (L/mol) | Residual $F(v_k)$ (bar) |
+|---:|---:|---:|---:|
+| 0 | 0.30000000 | — | +0.55831 |
+| 1 | 0.30159790 | 0.00159790 | +0.42179 |
+| 2 | | | |
+| 3 | | | |
+| 4 | | | |
+
+Compare your table with a neighbour before opening the worked values. If the values disagree, check the parentheses around $P+a/v_k^2$ and the units used for $R$.
+
+::: {.callout-note collapse="true"}
+## Worked values
+
+These entries were calculated with unrounded intermediate values.
+
+| $k$ | $v_k$ (L/mol) | Step (L/mol) | Residual $F(v_k)$ (bar) |
+|---:|---:|---:|---:|
+| 0 | 0.30000000 | — | +0.55831 |
+| 1 | 0.30159790 | 0.00159790 | +0.42179 |
+| 2 | 0.30281830 | 0.00122040 | +0.31765 |
+| 3 | 0.30374501 | 0.00092672 | +0.23866 |
+| 4 | 0.30444563 | 0.00070061 | +0.17899 |
+
+Continuing the same calculation gives:
+
+| $k$ | $v_k$ (L/mol) | Step (L/mol) | Residual $F(v_k)$ (bar) |
+|---:|---:|---:|---:|
+| 5 | 0.30497354 | 0.00052791 | +0.13405 |
+| 6 | 0.30537031 | 0.00039677 | +0.10029 |
+| 7 | 0.30566795 | 0.00029764 | +0.07498 |
+
+The iterates approach the gas-like root $v_s\approx0.3065501\ \mathrm{L/mol}$ shown in L07. The extra rows are supplied for checking; you do not need to calculate them all by hand.
+:::
+
+## When should we stop?
+
+For this hand exercise, use the deliberately coarse tolerances
+
+$$
+\varepsilon_v=0.001\ \mathrm{L/mol},
+\qquad
+\varepsilon_P=0.2\ \mathrm{bar}.
+$$
+
+Accept an iterate when **both** conditions hold:
+
+$$
+\boxed{
+|v_k-v_{k-1}|<\varepsilon_v
+\quad\text{and}\quad
+|F(v_k)|<\varepsilon_P.
+}
+$$
+
+**Your turn:** which row first passes both checks? Which row would you accept too early if you checked only the step?
+
+::: {.callout-note collapse="true"}
+## Check the stopping decision
+
+At $k=3$, the step is about $0.000927\ \mathrm{L/mol}$, which passes the volume-step tolerance. The residual is still about $0.239\ \mathrm{bar}$, which fails the pressure tolerance.
+
+At $k=4$, both checks pass. We can report $v\approx0.30445\ \mathrm{L/mol}$ with a pressure residual of about $+0.179\ \mathrm{bar}$ under the stated stopping rule. Tighter tolerances require more updates.
+
+The step tolerance measures the change between successive estimates. It does **not** guarantee that $|v_k-v_s|<\varepsilon_v$. Here the actual volume error at $k=4$ is still about $0.00210\ \mathrm{L/mol}$.
+:::
+
+A practical calculation should also check that each value is finite and remains in the physical domain. Reaching a maximum iteration count without meeting the tolerances should produce a failure report.
+
+### Why a small step can mislead us
+
+Another valid family of maps is
+
+$$
+g_c(v)=v+cF(v),
+$$
+
+where the nonzero constant $c$ has units $\mathrm{L\,mol^{-1}\,bar^{-1}}$. At a fixed point, $cF(v_s)=0$, so $F(v_s)=0$.
+
+But if we choose $c=10^{-8}\ \mathrm{L\,mol^{-1}\,bar^{-1}}$, the first step from $v_0=0.3\ \mathrm{L/mol}$ is only
+
+$$
+|v_1-v_0|=|cF(v_0)|\approx5.58\times10^{-9}\ \mathrm{L/mol}.
+$$
+
+The pressure residual remains about $0.558\ \mathrm{bar}$. The tiny step comes from the tiny multiplier. Always return to the original equation when checking a result.
+
+## Why does the rearrangement matter?
+
+### The slope tells us what happens to a nearby error
+
+At a fixed point, the graphs of $y=g(v)$ and $y=v$ intersect. Imagine starting a little to one side of that intersection. Does one update bring you closer or push you farther away?
+
+For a continuously differentiable map near $v_s$, the local rule is:
+
+| Slope at the fixed point | Expected behaviour for sufficiently nearby starts |
+|---|---|
+| $0<g'(v_s)<1$ | Errors shrink and keep their sign |
+| $-1<g'(v_s)<0$ | Errors shrink and alternate in sign |
+| $|g'(v_s)|>1$ | The fixed point repels nearby errors |
+| $g'(v_s)=0$ | Locally attracting; higher-order terms control the error |
+| $|g'(v_s)|=1$ | This slope test is inconclusive |
+
+A slope of $0.75$, for example, means that a small error becomes about three quarters as large after one update. This is a **local** test. A starting point far away may behave differently.
+
+::: {.callout-note collapse="true"}
+## Hand derivation: the error after one update
+
+Define the signed error $e_k=v_k-v_s$. Since $v_s=g(v_s)$,
+
+$$
+\begin{aligned}
+e_{k+1}
+&=g(v_k)-g(v_s)\\
+&=g(v_s+e_k)-g(v_s)\\
+&\approx g'(v_s)e_k.
+\end{aligned}
+$$
+
+The last line uses the tangent-line approximation near $v_s$. Taking absolute values gives
+
+$$
+|e_{k+1}|\approx|g'(v_s)|\,|e_k|.
+$$
+
+This explains why the magnitude of the slope controls whether a small error shrinks, while its sign controls whether the error changes sign.
+
+For our vdW map, differentiate after writing the fraction without $v^{-2}$:
+
+$$
+g(v)=b+\frac{RTv^2}{Pv^2+a}.
+$$
+
+The quotient rule gives
+
+$$
+\begin{aligned}
+g'(v)
+&=RT\frac{2v(Pv^2+a)-v^2(2Pv)}{(Pv^2+a)^2}\\[4pt]
+&=\boxed{\frac{2aRTv}{(Pv^2+a)^2}}.
+\end{aligned}
+$$
+
+At the gas-like root $v_s\approx0.3065501\ \mathrm{L/mol}$,
+
+$$
+g'(v_s)\approx0.74590.
+$$
+
+It is positive and below one, consistent with the approach from below in our table. You may use the supplied root to check the slope; the iteration itself does not need the root in advance.
+:::
+
+### Sketch two cobweb steps
+
+On paper, label the horizontal axis $v$ and the vertical axis $y$, both in L/mol. Sketch $y=v$ and the increasing curve $y=g(v)$ near their intersection at $0.30655\ \mathrm{L/mol}$. The slope of $g$ there is about $0.746$, so it crosses the diagonal less steeply.
+
+1. Start at $(v_0,v_0)$ on the diagonal.
+2. Move vertically to $(v_0,g(v_0))=(v_0,v_1)$ on the curve.
+3. Move horizontally to $(v_1,v_1)$ on the diagonal.
+4. Repeat with $v_1$ to reach $(v_1,v_2)$, then $(v_2,v_2)$.
+
+Use the values in your table to label the first two steps. The horizontal move puts the new value in position to become the next input.
+
+**Discuss:** do these steps approach the intersection from one side or cross back and forth? How would the sketch change if the slope near the intersection were $-0.75$?
+
+### A second rearrangement of the same equation
+
+This time, isolate the attraction term:
+
+$$
+\begin{aligned}
+\frac{a}{v^2}&=\frac{RT}{v-b}-P,\\[4pt]
+v^2&=\frac{a}{RT/(v-b)-P}.
+\end{aligned}
+$$
+
+Since physical molar volumes are positive, take the positive square root:
+
+$$
+\boxed{v_{k+1}=h(v_k)=\sqrt{\frac{a}{RT/(v_k-b)-P}}.}
+$$
+
+This map needs a positive denominator. With our parameters, its physical input domain is
+
+$$
+b<v_k<b+\frac{RT}{P}\approx0.50828\ \mathrm{L/mol}.
+$$
+
+An update can leave this interval, so the domain must be checked again before the next update.
+
+**Your turn:** start again at $v_0=0.30000000\ \mathrm{L/mol}$ and calculate just one update. Does it move toward the gas-like root near $0.30655\ \mathrm{L/mol}$?
+
+::: {.callout-note collapse="true"}
+## Check the second map
+
+The first two updates are
+
+$$
+v_1\approx0.29792345\ \mathrm{L/mol},
+\qquad
+v_2\approx0.29525077\ \mathrm{L/mol}.
+$$
+
+Their residuals are approximately $+0.73599$ and $+0.96509\ \mathrm{bar}$. The sequence initially moves away from the gas-like root, and its pressure mismatch grows.
+
+At that root, the second map has slope
+
+$$
+h'(v_s)\approx1.34065>1.
+$$
+
+The gas-like root is still a fixed point of this algebraically valid map, but it is locally repelling. Departure from this root does not establish that the whole sequence grows without bound; it may approach a different fixed point.
+:::
+
+Both rearrangements describe the same physical roots within their domains. Their updates can behave differently because the maps have different slopes.
+
+### What does this tell us about the material?
+
+The convergent table approaches the gas-like root from L07. That lecture's free-energy comparison identifies it as the favoured homogeneous state at these conditions. **Convergence by itself establishes neither a minimum nor the lowest free energy.** Other roots of the EOS must be considered when deciding which phase is stable.
+
+You can revisit the [L07 CO₂ demo](../../units/02/L07/index.qmd#hands-on-compare-the-vdw-minima) after the seminar to compare the volumes. All calculations needed here are on this page.
+
+## Heron's method: finding $\sqrt{2}$
+
+How long is the diagonal of a square with side length one? Pythagoras gives $x^2=2$, so the positive length is $\sqrt{2}$.
+
+The Babylonian clay tablet **YBC 7289**, dated approximately 1800–1600 BCE, records a remarkably accurate early approximation to this number. Written in base 60, it is
+
+$$
+1;24,51,10
+=1+\frac{24}{60}+\frac{51}{60^2}+\frac{10}{60^3}
+\approx1.414212963.
+$$
+
+Its absolute error is about $6\times10^{-7}$. In S02 we used powers of 2 to read binary fractions; here the place values are powers of 60. See Wikipedia's [*YBC 7289*](https://en.wikipedia.org/wiki/YBC_7289) and [*Square root of 2*, History](https://en.wikipedia.org/wiki/Square_root_of_2#History).
+
+To approximate $\sqrt{2}$, **Heron's method** repeatedly averages an estimate $x$ with $2/x$.
+
+### Derive an update by averaging
+
+If $x>0$ overestimates $\sqrt{2}$, then $2/x$ underestimates it, and vice versa. A natural next guess is their average:
+
+$$
+\boxed{x_{k+1}=g_H(x_k)=\frac12\left(x_k+\frac{2}{x_k}\right),\qquad x_k>0.}
+$$
+
+Check its fixed point:
+
+$$
+x_s=\frac12\left(x_s+\frac{2}{x_s}\right)
+\quad\Longrightarrow\quad
+2x_s^2=x_s^2+2
+\quad\Longrightarrow\quad
+x_s^2=2.
+$$
+
+The positive domain selects $x_s=\sqrt{2}$.
+
+For comparison, simply rearranging $x^2=2$ as $x=2/x$ gives the update $x_{k+1}=2/x_k$. Starting from $x_0=1$, that sequence is $1,2,1,2,\ldots$. It has the right positive fixed point, but this start never approaches it. Averaging changes the iteration's behaviour.
+
+### Your turn: three updates without a square-root button
+
+Start from $x_0=1$. The first two updates are
+
+$$
+x_1=\frac12(1+2)=\frac32,
+\qquad
+x_2=\frac12\left(\frac32+\frac43\right)=\frac{17}{12}.
+$$
+
+Calculate $x_3$ as a fraction, then evaluate the residual $r(x_3)=x_3^2-2$. Keeping fractions makes this check exact.
+
+::: {.callout-note collapse="true"}
+## Worked values and residuals
+
+$$
+x_3=\frac12\left(\frac{17}{12}+\frac{24}{17}\right)
+=\frac12\left(\frac{289+288}{204}\right)
+=\frac{577}{408}.
+$$
+
+| $k$ | Exact iterate $x_k$ | Decimal approximation | Residual $x_k^2-2$ |
+|---:|---:|---:|---:|
+| 0 | $1$ | 1.000000000 | $-1$ |
+| 1 | $3/2$ | 1.500000000 | $1/4$ |
+| 2 | $17/12$ | 1.416666667 | $1/144$ |
+| 3 | $577/408$ | 1.414215686 | $1/166464\approx6.01\times10^{-6}$ |
+
+For the final row,
+
+$$
+577^2-2(408)^2=332929-332928=1,
+$$
+
+so the residual is exactly $1/408^2$. Three short updates already give a close approximation. One more gives $665857/470832\approx1.414213562375$, with residual about $4.51\times10^{-12}$.
+
+:::
+
+::: {.callout-note collapse="true"}
+## Why does averaging work so well?
+
+Differentiate the averaging map:
+
+$$
+g_H'(x)=\frac12-\frac{1}{x^2}.
+$$
+
+At $x_s=\sqrt{2}$, the slope is zero. The first-order error term vanishes. In fact, we can find the next error exactly:
+
+$$
+\begin{aligned}
+x_{k+1}-\sqrt{2}
+&=\frac{x_k^2+2-2\sqrt{2}\,x_k}{2x_k}\\[4pt]
+&=\boxed{\frac{(x_k-\sqrt{2})^2}{2x_k}}.
+\end{aligned}
+$$
+
+For $x_k>0$, this error is nonnegative: after one update the estimate is at or above $\sqrt{2}$. When the current error is small, squaring it makes the next error much smaller.
+
+Once $x_k\ge\sqrt{2}$, we also have $2/x_k\le x_k$, so $x_{k+1}\le x_k$. The estimates decrease while remaining bounded below by $\sqrt{2}$. Their limit must be the positive fixed point.
+
+Wikipedia's [*Methods of computing square roots*, Heron's method](https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method) describes this iteration. It is also Newton's method applied to $r(x)=x^2-2$:
+
+$$
+x_{k+1}=x_k-\frac{x_k^2-2}{2x_k}
+=\frac12\left(x_k+\frac{2}{x_k}\right).
+$$
+
+:::
+
+## Before you leave
+
+Answer these three questions in a few lines:
+
+1. An update has stopped changing, but the original pressure residual is $+0.56\ \mathrm{bar}$. With a pressure tolerance of $0.2\ \mathrm{bar}$, should you accept the result? Explain.
+2. Two valid maps have slopes $0.75$ and $1.34$ at the same fixed point. Which should approach it from a sufficiently nearby starting value?
+3. What equation must you check after using Heron's method to approximate $\sqrt{2}$?
+
+The working habit to keep is:
+
+$$
+\boxed{\text{rearrange}\ \longrightarrow\ \text{repeat}\ \longrightarrow\ \text{check the original equation}.}
+$$
