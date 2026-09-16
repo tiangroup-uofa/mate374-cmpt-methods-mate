@@ -16,6 +16,6 @@ toc: false
 From possible gas volumes to the lowest free-energy state, then from calculated points to interpolation and fitting.
 
 5. [L05 · Finding a desired state by root finding](02/L05/index.qmd)
-6. [L06 · Root finding in an open domain](02/L06/index.qmd) — secant, Newton, and fixed-point methods.
+6. [L06 · Root finding in an open domain](02/L06/index.qmd) — secant, Newton–Raphson, and fixed-point methods.
 7. [L07 · Finding extrema in one dimension](02/L07/index.qmd) — minimization and phase stability.
 8. [L08 · Interpolation: what lies between the data?](02/L08/index.qmd)

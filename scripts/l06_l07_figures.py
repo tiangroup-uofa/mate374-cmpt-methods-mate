@@ -3,8 +3,11 @@
 Run: uv run python scripts/l06_l07_figures.py
 No Quarto render or WASM build is required.
 """
+from io import BytesIO
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+
+from PIL import Image
 
 import matplotlib
 matplotlib.use("Agg")
@@ -24,7 +27,7 @@ def notebook_definitions(filename):
 
 
 def save(fig, name):
-    fig.savefig(ASSETS / name, dpi=160, bbox_inches="tight")
+    fig.savefig(ASSETS / name, dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(ASSETS / name)
 
@@ -81,10 +84,106 @@ def plot_simple_sequence(ax, sequence, title, bracket=None):
         value = simple_root_function(point)
         ax.plot([point, point], [0, value], color=colour, ls=":", lw=0.9)
         ax.scatter([point], [value], color=colour, s=34, zorder=5)
-        ax.annotate(f"$x_{{{index}}}$", (point, value), xytext=(3, 5), textcoords="offset points", fontsize=8)
+        ax.annotate(f"$x_{{{index}}}$", (point, value), xytext=(3, 5), textcoords="offset points", fontsize=10)
     ax.set(xlim=(-0.02, 1.45), ylim=(-0.3, 1.15), xlabel="$x$", ylabel="$f(x)$", title=title)
     ax.grid(alpha=0.2)
     ax.legend(fontsize=8, loc="upper right")
+
+
+def regula_falsi_sequence(left=0.0, right=1.4, steps=7):
+    states = []
+    for _ in range(steps):
+        f_left, f_right = simple_root_function(left), simple_root_function(right)
+        trial = (left * f_right - right * f_left) / (f_right - f_left)
+        if f_left * simple_root_function(trial) < 0:
+            next_left, next_right = left, trial
+        else:
+            next_left, next_right = trial, right
+        states.append((left, right, trial, next_left, next_right))
+        left, right = next_left, next_right
+    return states
+
+
+def secant_update_states(first=0.0, second=0.5, steps=7):
+    states = []
+    for _ in range(steps):
+        f_first, f_second = simple_root_function(first), simple_root_function(second)
+        trial = second - f_second * (second - first) / (f_second - f_first)
+        states.append((first, second, trial))
+        first, second = second, trial
+    return states
+
+
+def draw_root_method_frame(ax, title):
+    x = np.linspace(-0.02, 1.45, 700)
+    ax.clear()
+    ax.plot(x, simple_root_function(x), color="#007c41", label="$f(x)$")
+    ax.axhline(0, color="0.35", lw=1)
+    ax.scatter([1], [0], marker="*", s=75, color="#303f9f", zorder=4, label="root $x=1$")
+    ax.set(xlim=(-0.02, 1.45), ylim=(-0.3, 1.15), xlabel="$x$", ylabel="$f(x)$", title=title)
+    ax.grid(alpha=0.2)
+
+
+def draw_regula_falsi_secant_frame(axes, frame, regula_states, secant_states):
+    left, right, trial, next_left, next_right = regula_states[frame]
+    draw_root_method_frame(axes[0], f"Closed domain (regula falsi) · step {frame + 1}")
+    axes[0].axvspan(next_left, next_right, color="#007c41", alpha=0.12, label="retained bracket")
+    axes[0].plot([left, right], [simple_root_function(left), simple_root_function(right)],
+                 "--", color="#d87700", lw=1.5, label="line through bracket")
+    axes[0].scatter([left, right], [simple_root_function(left), simple_root_function(right)],
+                    color="#303f9f", s=35, zorder=5)
+    axes[0].scatter([trial], [simple_root_function(trial)], color="#d87700", s=48, zorder=6,
+                    label="next point")
+    axes[0].axvline(trial, color="#d87700", ls=":", lw=1)
+    axes[0].annotate("next point", (trial, simple_root_function(trial)),
+                     xytext=(4, 6), textcoords="offset points", fontsize=9)
+    axes[0].legend(fontsize=8, loc="upper right")
+
+    first, second, trial = secant_states[frame]
+    draw_root_method_frame(axes[1], f"Open domain (secant) · step {frame + 1}")
+    line_left = min(first, second, trial)
+    line_right = max(first, second, trial)
+    f_first, f_second = simple_root_function(first), simple_root_function(second)
+    slope = (f_second - f_first) / (second - first)
+    intercept = f_first - slope * first
+    line_x = np.linspace(line_left, line_right, 100)
+    axes[1].plot(line_x, slope * line_x + intercept, "--", color="#d87700", lw=1.5,
+                 label="line through newest pair")
+    axes[1].scatter([first, second], [f_first, f_second], color="#303f9f", s=35, zorder=5,
+                    label="newest pair")
+    axes[1].scatter([trial], [simple_root_function(trial)], color="#d87700", s=48, zorder=6,
+                    label="next point")
+    axes[1].axvline(trial, color="#d87700", ls=":", lw=1)
+    axes[1].annotate("next point", (trial, simple_root_function(trial)),
+                     xytext=(4, 6), textcoords="offset points", fontsize=9)
+    axes[1].legend(fontsize=8, loc="upper right")
+
+
+def save_regula_falsi_secant_animation():
+    regula_states = regula_falsi_sequence()
+    secant_states = secant_update_states()
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), layout="constrained")
+    frames = []
+    for frame in range(len(regula_states)):
+        draw_regula_falsi_secant_frame(axes, frame, regula_states, secant_states)
+        fig.suptitle("Two methods for $f(x)=x^3-2x^2+1$")
+        image_bytes = BytesIO()
+        fig.savefig(image_bytes, format="png", dpi=300, bbox_inches="tight")
+        image_bytes.seek(0)
+        frames.append(Image.open(image_bytes).convert("P", palette=Image.Palette.ADAPTIVE))
+        image_bytes.close()
+    gif_path = ASSETS / "L06-bracketing-vs-open.gif"
+    frames[0].save(gif_path, save_all=True, append_images=frames[1:], duration=1200,
+                   loop=0, optimize=True)
+    print(gif_path)
+    fallback_frame = min(1, len(regula_states) - 1)
+    draw_regula_falsi_secant_frame(axes, fallback_frame, regula_states, secant_states)
+    fig.suptitle("Two methods for $f(x)=x^3-2x^2+1$")
+    fig.savefig(ASSETS / "L06-bracketing-vs-open.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    for frame in frames:
+        frame.close()
+    print(ASSETS / "L06-bracketing-vs-open.png")
 
 
 def plot_simple_line(ax, first, second, label, colour):
@@ -129,12 +228,7 @@ def plot_two_step_comparison():
 
 def main():
     roots = notebook_definitions("l06_open_methods.edit.py")
-    fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), layout="constrained")
-    plot_simple_sequence(axes[0], bisection_sequence(), "Bracketing: bisection", bracket=(0, 1.4))
-    plot_simple_sequence(axes[1], secant_sequence(), "Open: secant")
-    fig.suptitle("Same equation, different next-point rules")
-    save(fig, "L06-bracketing-vs-open.png")
-    save(plot_two_step_comparison(), "L06-regula-falsi-vs-secant.png")
+    save_regula_falsi_secant_animation()
     points, lines, _ = roots["trace_open"]("Secant", 0.20, 0.21)
     save(roots["draw_open_trace"](points, lines, 5, "Secant"), "L06-open-methods.png")
 

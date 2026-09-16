@@ -38,7 +38,7 @@ The course materials are open source and published on [GitHub](https://github.co
 
 Which volumes satisfy a gas equation, and which state has the lowest free energy? [Unit 02](units/02/index.qmd) connects root finding, minimization, and phase stability before moving to interpolation and fitting.
 
-- [L06 · Root finding in an open domain](units/02/L06/index.qmd): secant, Newton, and fixed-point methods.
+- [L06 · Root finding in an open domain](units/02/L06/index.qmd): secant, Newton–Raphson, and fixed-point methods.
 - [L07 · Finding extrema in one dimension](units/02/L07/index.qmd): minima, maxima, and the preferred material state.
 
 ## Start here
