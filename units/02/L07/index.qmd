@@ -16,18 +16,22 @@ By the end of this lecture, you should be able to:
 
 1. **Classify** a stationary point using the local shape and second derivative of a function.
 2. **Trace** a golden-section update and explain which part of a unimodal interval can be discarded.
-3. **Compare** bounded minimization, Newton iteration, and gradient descent by their information requirements, including numerical derivative estimates, and their failure modes.
+3. **Compare** bounded minimization, Newton–Raphson iteration, and gradient descent by their information requirements, including numerical derivative estimates, and their failure modes.
 4. **Identify** stable, metastable, and unstable homogeneous vdW states from their free energies and curvatures at fixed temperature and pressure.
 
 ## From the vdW equation to a free-energy curve
 
-For a one-component material at a specified temperature $T$ and pressure $P$, which state is most stable: liquid or gas?
+In materials science and engineering, a commonly asked question is: for a one-component material at a specified temperature $T$ and pressure $P$, which state is most stable: liquid or gas? This is linked to the unary (one-component) phase diagram.
 
-In L05 and L06, the van der Waals equation gave us **possible volumes**. At some conditions, we found a liquid-like root and a gas-like root, with a mechanically unstable root between them. To choose between the two candidates, compare their **molar Gibbs free energies** at the same $T$ and $P$.
+In L05 and L06, the van der Waals equation of state gave us **possible volumes** for a real gas like CO$_2$. At some conditions, we found a liquid-like root and a gas-like root, with a mechanically unstable root between them. But we know from thermodynamics that, at a given temperature $T$ where liquid–gas coexistence is possible, there is only one pressure, the **saturation pressure** $P_{\mathrm{sat}}$, at which the liquid and gas coexist in equilibrium. Take water as an example: $T\approx373$ K and $P=1$ atm.
 
-We now use **molar volume** $v=V/n$. Its units are volume per mole; the numerical values in L05's one-mole example stay the same when expressed in L/mol.
+::: {.callout-tip}
+Two phases can both satisfy the equation of state at the same $T$ and $P$. For them to coexist in equilibrium, their molar Gibbs free energies must also be equal!
+:::
 
-The free-energy landscape for a homogeneous vdW fluid at imposed $T$ and $P$ is
+To choose between the two candidates, we need to compare their **molar Gibbs free energies** at the same $T$ and $P$ ([Poling, Prausnitz, and O'Connell, 2001](../references.qmd#ref-poling2001properties)).
+
+To simplify, we now use **molar volume** $v=V/n$ (in L/mol). Without diving too deep into the math, the molar free-energy curve $\mathcal G(v;T,P)$ for a vdW gas–liquid system at fixed temperature and pressure is given below. The liquid-like and gas-like states will be distinguished by their volumes.
 
 $$
 \boxed{
@@ -38,7 +42,7 @@ $$
 }
 $$
 
-Here $v_{\mathrm{ref}}$ is a fixed reference volume that makes the logarithm dimensionless. $C(T)$ is common to the states being compared, so it cancels from their free-energy difference. This expression retains the dimensional vdW parameters and gives energy **per mole**.
+Here $v_{\mathrm{ref}}$ is a fixed reference volume that makes the logarithm dimensionless. $C(T)$ sets the reference energy: at the same temperature, it cancels when we compare the free energies of two states. This expression retains the dimensional vdW parameters and gives energy **per mole**.
 
 The curve is the molar Helmholtz free energy plus the work term $Pv$ at the imposed pressure. At a stationary volume satisfying the EOS, its value is the molar Gibbs free energy of that homogeneous state.
 
@@ -82,15 +86,19 @@ $$
 A descending EOS branch gives a free-energy minimum; the ascending middle branch gives a maximum. The vdW EOS and its thermodynamic use are discussed in [Poling, Prausnitz, and O'Connell (2001)](../references.qmd#ref-poling2001properties).
 :::
 
-![At 280 K and about 55.129 bar, the same stationary volumes appear as pressure intersections and free-energy extrema. The two minima have equal free energy.](../../../assets/L07-vdw-energy.png){#fig-vdw-energy fig-alt="Side-by-side dimensional CO2 van der Waals pressure and free-energy curves, with the two minima and intervening maximum marked at corresponding volumes." width="100%"}
+We can identify three features on the free-energy curve: two minima and one maximum. They coincide with the three EOS roots!
 
-The numerical task now has three parts:
+At 280 K, the vdW model gives $P_{\mathrm{sat}}\approx55.129$ bar, where the two minima have the **same free energy**. At higher pressure, the liquid-like well is lower; at lower pressure, the gas-like well is lower. For each pressure in the figure, we subtract the free energy of its gas-like minimum, so that minimum sits at zero. This reference shift preserves the energy difference between the two wells at that pressure.
+
+![Matching colours connect the imposed pressures on the EOS plot to their free-energy curves: 50 bar (blue), 55.129 bar (orange), and 56 bar (red). The two minima are equal at saturation; the gas-like minimum is lower at 50 bar and the liquid-like minimum is lower at 56 bar. Each energy curve is referenced to its own gas-like minimum.](../../../assets/L07-vdw-energy.png){#fig-vdw-energy fig-alt="Left: CO2 van der Waals EOS with three imposed pressures and their intersections. Right: corresponding Gibbs free-energy curves in blue, orange, and red, each referenced to its gas-like minimum." width="100%"}
+
+How do we know which phase is more stable at a given $P$ and $T$? The numerical task now has three parts:
 
 1. Find the volumes where the free energy has extrema.
 2. Classify the extrema and evaluate the free energy at each minimum.
 3. Compare the minima at the same $T$ and $P$ to decide which phase is favoured.
 
-Repeating that comparison at several temperatures and pressures leads to a phase diagram. First, how do we find a minimum?
+Repeating that comparison at several temperatures and pressures leads to a **phase diagram**. First, how do we find a minimum?
 
 ## The optimization problem
 
@@ -102,11 +110,11 @@ We will study one-dimensional minimization so that we can draw the geometry. Man
 Training an AI model also involves minimization, often over millions of parameters. The questions remain familiar: what direction should we move, how large a step should we take, and how do we know we have made progress?
 :::
 
-Our focus is on smooth **interior** extrema. A finite search interval is a numerical aid. If the answer lies on its endpoint, or the physical problem imposes constraints, we must check those boundaries separately.
+Our focus is on smooth **interior** extrema, i.e. extrema away from the endpoints of the function's interval. Apart from the physical domain and search interval, we don't impose additional constraints here. Problems with such restrictions are called **constrained optimization** problems, which you will study in more advanced courses.
 
 ### Where are the stationary points?
 
-At a smooth interior minimum or maximum, the tangent is horizontal:
+At a smooth interior minimum or maximum $x_s$, the first derivative is zero, or equivalently, the tangent line at this point is horizontal:
 
 $$
 f'(x_s)=0.
@@ -132,29 +140,38 @@ $$
 f'(x)\approx\frac{f(x+h)-f(x-h)}{2h}.
 $$
 
-For the curvature used by Newton's method, the same three function evaluations give
+For the curvature used by Newton–Raphson, the same three function evaluations give
 
 $$
 f''(x)\approx\frac{f(x+h)-2f(x)+f(x-h)}{h^2}.
 $$
 
-We do not need the derivation here. The important point is that values of the original function can provide both the slope and curvature needed for a derivative-based update. At a stationary point, a positive estimated curvature supports a local-minimum interpretation; a negative estimate supports a local-maximum interpretation. Because the curvature estimate divides by $h^2$, it is especially sensitive to round-off and noise. We will return to the error analysis of numerical differentiation later.
+We do not need the derivation here. The important point is that values of the original function can provide both the slope and curvature needed for a derivative-based update. At a stationary point, a **positive estimated curvature** supports a **local-minimum** interpretation; a negative estimate supports a local-maximum interpretation. Because the curvature estimate divides by $h^2$, it is especially sensitive to round-off and noise. We will return to the error analysis of numerical differentiation later.
 
 ## Bounded minimization: golden-section search
 
-Suppose $f$ has one minimum in $[a,b]$, decreasing toward it and increasing after it. Such an interval is **unimodal**. We can compare function values inside the interval to discard a part that cannot contain the minimum.
+Suppose the function we are interested in, $f(x)$, has **exactly one minimum** in $[a,b]$, decreasing toward it and increasing after it. The function is **unimodal** on this interval. We can compare function values inside the interval to discard a part that cannot contain the minimum. This is the basic idea behind bounded minimization, analogous to the bracketing methods in root-finding. A widely used method is **golden-section search** ([Kiefer, 1953](../references.qmd#ref-kiefer1953sequential)).
 
-A single midpoint value does not tell us which side has the lower values. Golden-section search evaluates **two interior points**, $x_1<x_2$:
+A single midpoint value does not tell us which side has the lower values (**why?**). Golden-section search evaluates **two interior points**, $x_1<x_2$:
 
 - If $f(x_1)>f(x_2)$, keep $[x_1,b]$.
 - If $f(x_1)<f(x_2)$, keep $[a,x_2]$.
 - If the values are equal and the function is strictly unimodal, the minimum lies between the two points.
 
-![Golden-section search compares two interior values, discards one end, and reuses one evaluated point.](../../../assets/L07-golden-section.png){#fig-golden-section fig-alt="Two stages of a golden-section search showing a discarded left interval and reuse of the old right interior point as the new left point." width="100%"}
+![Three steps of golden-section search: compare two interior values, discard one end, and reuse one evaluated point. Blue points mark reused values in steps 2 and 3.](../../../assets/L07-golden-section.png){#fig-golden-section fig-alt="Three successive golden-section intervals: step 1 discards the left end; step 2 reuses the old right point and discards the right end; step 3 reuses the old left point." width="100%"}
 
 **Before looking at the second panel:** which end would you discard, and which function evaluation could you reuse?
 
 The special placement of the points lets us reuse one value after each update. After the first two evaluations, an ordinary update needs only **one new function evaluation**.
+
+Golden-section search places the two points $x_1$ and $x_2$ at fixed fractions of the interval. If its width is $h=b-a$, then
+
+$$
+x_1-a=b-x_2=(1-R)h\approx0.382h,
+\qquad R=\frac{\sqrt5-1}{2}\approx0.618.
+$$
+
+Here $R$ is the reciprocal of the golden ratio, using Kiusalaas's notation. The retained interval has width $Rh$.
 
 ::: {.callout-note collapse="true"}
 ## Why the golden ratio?
@@ -162,40 +179,53 @@ The special placement of the points lets us reuse one value after each update. A
 Let $h=b-a$ and choose
 
 $$
-x_1=b-rh,\qquad x_2=a+rh,
-\qquad r=\frac{\sqrt5-1}{2}\approx0.618.
+x_1=b-Rh,\qquad x_2=a+Rh,
+\qquad R=\frac{\sqrt5-1}{2}\approx0.618.
 $$
 
-Suppose $f(x_1)>f(x_2)$. The new interval is $[x_1,b]$, of width $h'=rh$. For the old $x_2$ to become the new left interior point,
+Suppose $f(x_1)>f(x_2)$. The new interval is $[x_1,b]$, of width $h'=Rh$. For the old $x_2$ to become the new left interior point,
 
 $$
-a+rh=b-rh'=a+h-r^2h.
+a+Rh=b-Rh'=a+h-R^2h.
 $$
 
-Hence $r^2+r=1$, giving $r=(\sqrt5-1)/2$. This is the reciprocal of the golden ratio $\phi=(1+\sqrt5)/2$.
+Hence $R^2+R=1$, giving $R=(\sqrt5-1)/2$. This is the reciprocal of the golden ratio $\phi=(1+\sqrt5)/2$.
 
 After $k$ ordinary updates,
 
 $$
-h_k=r^k h_0.
+h_k=R^k h_0.
 $$
 
 To reach width $\varepsilon_x<h_0$ requires
 
 $$
 k\ge\left\lceil
-\frac{\ln(\varepsilon_x/h_0)}{\ln r}
+\frac{\ln(\varepsilon_x/h_0)}{\ln R}
 \right\rceil.
 $$
 
 The interval shrinks by about 0.618 each time, compared with 0.5 for a bisection root bracket. The two algorithms use different information: golden section compares function values, while bisection preserves a sign change ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013)).
 :::
 
-### How do we know the interval contains one minimum?
+Like bisection in root-finding, golden-section search reduces the interval by a fixed factor at each step. To reduce an initial width $h_0$ to at most $\varepsilon_x<h_0$, it takes
+
+$$
+k=\left\lceil\frac{\ln(\varepsilon_x/h_0)}{\ln R}\right\rceil
+\approx\left\lceil\frac{\ln(\varepsilon_x/h_0)}{\ln(0.618)}\right\rceil
+$$
+
+ordinary updates. This controls the uncertainty in the location of the minimum.
+
+::: {.callout-note}
+## How do we know the interval contains one minimum?
 
 A graph, physical reasoning, and an initial scan can identify a candidate well. Three points $a<m<b$ with $f(m)<f(a)$ and $f(m)<f(b)$ bracket an interior minimum of a continuous function, but **do not prove there is only one well**.
 
 For the two-well vdW landscape, split the search at the intervening maximum. Search each well separately, then compare their minima. Passing one large interval to a local minimizer does not guarantee that it will find the lower of two wells.
+:::
+
+### Bounded minimization methods in SciPy
 
 In SciPy, use [`minimize_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html):
 
@@ -219,7 +249,7 @@ Here `free_energy(v)` holds $T$ and $P$ fixed. A two-point `bracket` for `golden
 
 ## Open-domain methods
 
-### Newton: find a zero of the slope
+### Newton–Raphson: find a zero of the slope
 
 Apply Newton–Raphson to $f'(x)=0$:
 
@@ -227,9 +257,9 @@ $$
 \boxed{x_{k+1}=x_k-\frac{f'(x_k)}{f''(x_k)}.}
 $$
 
-This needs the slope **and** curvature. Both can be supplied analytically or estimated from function values as above. Near a well-behaved minimum it can converge quickly, but it can also approach a maximum. Its root-finding target is a horizontal tangent.
+This needs the slope $f'$ **and** curvature $f''$! Both can be supplied analytically or estimated from function values as above. Near a well-behaved minimum it can converge quickly, but it can also approach a maximum. Newton–Raphson targets a zero first derivative, so we need to check that the second derivative is positive to confirm a strict local minimum.
 
-For example, SciPy can solve the stationary-point equation directly:
+For example, SciPy can solve the stationary-point equation directly. Note that we still use `newton` in root-finding, but the residual function becomes the derivative `d_free_energy`!
 
 ```{.python code-fold="false"}
 from scipy.optimize import root_scalar
@@ -242,17 +272,17 @@ print(stationary.root, stationary.converged)
 print(d2_free_energy(stationary.root))  # Positive at a strict minimum.
 ```
 
-A zero or small curvature makes the Newton step undefined or large. For many-variable energies, the first derivatives form a **gradient** and the second derivatives form a **Hessian matrix**. Computing and solving with that matrix can be expensive ([Nocedal and Wright, 2006](../references.qmd#ref-nocedal2006optimization)).
+A zero or small curvature makes the Newton–Raphson step undefined or large. For many-variable energies, the first derivatives form a **gradient** and the second derivatives form a **Hessian matrix**. Computing and solving with that matrix can be expensive ([Nocedal and Wright, 2006](../references.qmd#ref-nocedal2006optimization)).
 
 ### Gradient descent: take a step downhill
 
-If curvature is unavailable, we can use the slope alone:
+If curvature (second derivative) is unavailable or hard to calculate, we can use the slope alone, with just a small tweak:
 
 $$
 \boxed{x_{k+1}=x_k-\alpha f'(x_k),\qquad \alpha>0.}
 $$
 
-This is **gradient descent** in one dimension. The step-size parameter $\alpha$ controls how far we move downhill according to the current slope. When the objective is a black-box calculation, the numerical slope estimate above can supply $f'(x_k)$; the extra evaluations and any noise in them affect the direction of the update.
+This is **gradient descent** in one dimension ([Nocedal and Wright, 2006](../references.qmd#ref-nocedal2006optimization)). What we did was to introduce one adjustable parameter, the step-size parameter $\alpha$, which controls how far we move downhill according to the current slope. When the objective is a black-box calculation, the numerical slope estimate above can supply $f'(x_k)$; the extra evaluations and any noise in them affect the direction of the update.
 
 - Too small: the calculation makes slow progress.
 - Too large: the step can overshoot the well and increase the energy or diverge.
@@ -263,13 +293,13 @@ If $f$ and $x$ carry units, $\alpha$ must have units that make $\alpha f'(x)$ an
 ::: {.callout-note collapse="true"}
 ## Connect the step size to L06's fixed-point condition
 
-For $g(x)=x-\alpha f'(x)$,
+We can examine gradient descent itself as a fixed-point iteration. For $g(x)=x-\alpha f'(x)$,
 
 $$
 g'(x_s)=1-\alpha f''(x_s).
 $$
 
-Near a minimum with positive curvature, local attraction requires
+Near a minimum with positive curvature, the **Lipschitz condition** with a constant below one gives the local slope test
 
 $$
 |1-\alpha f''(x_s)|<1,
@@ -277,10 +307,12 @@ $$
 0<\alpha<\frac{2}{f''(x_s)}.
 $$
 
-For a quadratic well this gives the exact constant-step convergence range. For a general function it is a local test; the curvature changes as we move. Practical optimizers often adjust the step using a line search.
+For a quadratic well, this gives the exact constant-step convergence range. The vdW free-energy curve is approximately quadratic near each minimum, so the condition provides a local step-size guide. If the step size exceeds $2/f''(x_s)$, small errors grow under the local linear approximation. Practical optimizers often adjust the step using a line search.
 :::
 
+::: {.callout-tip}
 Choosing a step length matters in both atomic structure relaxation and machine-learning training.
+:::
 
 ## Hands-on: compare the vdW minima
 
@@ -290,24 +322,24 @@ Use the CO₂ parameters from L05:
 - $b=0.04267$ L mol⁻¹ $=4.267\times10^{-5}$ m³ mol⁻¹;
 - $R=8.314462618$ J mol⁻¹ K⁻¹ in the free-energy calculation.
 
-The demo converts to SI units when calculating free energy. Its axes show molar volume in **L/mol**, pressure in **bar**, and free energy in **J/mol**. It uses $v_{\mathrm{ref}}=1$ L/mol and sets the common $C(T)$ to zero.
+The demo uses the same referenced free energy as @fig-vdw-energy.
 
-**Predict:** as pressure rises at fixed temperature, which minimum should become lower? Look at the $Pv$ term before moving the pressure slider.
+**Predict:** pick a temperature. Can you move the pressure so that the two free-energy minima are balanced?
 
-::: {.quarto-wasm-local notebook="l07_co2_free_energy.edit.py" view="app" title="Compare dimensional CO2 free-energy minima and the van der Waals phase boundary" height="900" loading="lazy" fullscreen="true"}
-![CO2 pressure, molar free energy, and the model liquid–gas boundary at 280 K and 50 bar.](../../../assets/L07-co2-demo.png){fig-alt="Pressure intersections and two free-energy wells alongside the calculated van der Waals liquid–gas coexistence line."}
+::: {.quarto-wasm-local notebook="l07_co2_free_energy.edit.py" view="app" title="Compare dimensional CO2 free-energy minima and the van der Waals phase boundary" height="1100" loading="lazy" fullscreen="true"}
+![CO2 at 280 K and 50 bar: EOS at top left, referenced Gibbs free energy at top right, and a full-width phase diagram below.](../../../assets/L07-co2-demo.png){fig-alt="A blue EOS curve and orange referenced Gibbs free-energy curve above a phase diagram with a red coexistence line, shaded gas, liquid, and supercritical regions, and the selected temperature and pressure."}
 
-**Static example.** At 280 K and 50 bar, the liquid-like and gas-like minima occur near 0.0876734 and 0.3065501 L/mol. Their free energies differ by $G_{\mathrm{liq}}-G_{\mathrm{gas}}\approx+98.10$ J/mol, so the gas-like state is favoured. Newton started at 0.11 L/mol reaches the intervening **maximum** near 0.1140563 L/mol. For this parameter set, the equal-minimum pressure at 280 K is about 55.129 bar.
+**Static example.** At 280 K and 50 bar, the liquid-like and gas-like minima occur near 0.0876734 and 0.3065501 L/mol. Their free energies differ by $G_{\mathrm{liq}}-G_{\mathrm{gas}}\approx+98.10$ J/mol, so the gas-like state is favoured. Newton–Raphson started at 0.11 L/mol reaches the intervening **maximum** near 0.1140563 L/mol. For this parameter set, the equal-minimum pressure at 280 K is about 55.129 bar.
 :::
 
 1. At **280 K and 50 bar**, locate the two minima. Which is lower?
 2. Raise pressure to **56 bar**. Has the preferred phase changed?
-3. Switch to Newton and start at **0.11 L/mol** at 280 K and 50 bar. The solver converges: did it find a minimum?
+3. Switch to Newton–Raphson and start at **0.11 L/mol** at 280 K and 50 bar. The solver converges: did it find a minimum?
 4. Compare the iteration counts. What does each method evaluate during an iteration?
 5. Check the pressure residual at each computed minimum. Does the optimizer's success flag alone establish your chosen pressure tolerance?
 6. At one reported stationary volume, use the three-value estimates above to check whether the slope is near zero and inspect the sign of the curvature. Do they agree with the solver's classification?
 
-The bounded demonstration searches one well at a time, using the middle stationary volume to separate the wells when there are three roots. An independent cubic solve provides the stationary-volume reference. Newton uses an explicit update and reports steps that leave $v>b$.
+The bounded demonstration searches one well at a time, using the middle stationary volume to separate the wells when there are three roots. An independent cubic solve provides the stationary-volume reference. Newton–Raphson uses an explicit update and reports steps that leave $v>b$.
 
 ### Stable, metastable, or unstable?
 
@@ -364,7 +396,7 @@ $$
 
 Each evaluation of $\Delta G$ requires finding the two minima at that pressure. The pressure where their values are equal is the **saturation pressure**: liquid and gas coexist there.
 
-Repeat at several temperatures to trace the liquid–gas phase boundary. The demo's right-hand plot shows this boundary for the dimensional vdW CO₂ model. The two controls move the chosen $(T,P)$ point across it.
+Repeat at several temperatures to trace the liquid–gas phase boundary. The demo's bottom plot shows this boundary for the dimensional vdW CO₂ model. The two controls move the chosen $(T,P)$ point across it.
 
 This combines the methods from three lectures:
 

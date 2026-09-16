@@ -23,13 +23,7 @@ def course_imports():
 def energy_question(mo):
     mo.md(r"""
     ## L07 · Which CO₂ state has the lower free energy?
-    **Predict:** at 280 K, will raising the pressure favour the smaller-volume or larger-volume minimum?
-
-    Use molar volume $v$ and the dimensional vdW free-energy landscape
-    $\mathcal G(v;T,P)=-RT\ln[(v-b)/v_{
-    m ref}]-a/v+Pv$.
-    Here $a=0.3592$ Pa m⁶ mol⁻², $b=4.267	imes10^{-5}$ m³ mol⁻¹, and $v_{
-    m ref}=10^{-3}$ m³ mol⁻¹. The temperature-only constant is set to zero; it cancels when comparing phases at the same T and P. Plots use L/mol, bar, and J/mol.
+    **Predict:** pick a temperature. Can you move the pressure so that the two free-energy minima are balanced?
     """)
     return
 
@@ -55,6 +49,13 @@ def energy_model(brentq, np):
         # Independent reference: solve the cubic implied by the EOS.
         candidates = np.roots([pressure, -(pressure*0.04267+0.08314462618*temperature), 3.592, -3.592*0.04267])
         return np.sort([z.real for z in candidates if abs(z.imag) < 1e-8 and z.real > 0.04267])
+
+
+    def co2_relative_energy(volume, temperature, pressure):
+        # Use the gas-like minimum as zero in the two-well region.
+        # With one minimum, use that sole minimum as the reference.
+        reference_volume = co2_volumes(temperature, pressure)[-1]
+        return co2_energy(volume, temperature, pressure) - co2_energy(reference_volume, temperature, pressure)
 
 
     def co2_saturation(temperature):
@@ -83,6 +84,8 @@ def energy_model(brentq, np):
         co2_phase_P,
         co2_phase_T,
         co2_pressure,
+        co2_relative_energy,
+        co2_saturation,
         co2_slope,
         co2_volumes,
     )
@@ -91,9 +94,9 @@ def energy_model(brentq, np):
 @app.cell(hide_code=True)
 def energy_controls(mo):
     energy_T = mo.ui.slider(250, 330, step=1, value=280, label="Temperature (K)", show_value=True, debounce=True)
-    energy_P = mo.ui.slider(10, 100, step=0.5, value=50, label="Pressure (bar)", show_value=True, debounce=True)
-    energy_method = mo.ui.dropdown(["Bounded: each well", "Newton: stationary point"], value="Bounded: each well", label="Solver")
-    energy_guess = mo.ui.number(0.05, 3.0, step=0.01, value=0.30, label="Newton starting volume (L/mol)")
+    energy_P = mo.ui.slider(10, 100, step=0.01, value=50, label="Pressure (bar)", show_value=True, debounce=True)
+    energy_method = mo.ui.dropdown(["Bounded: each well", "Newton–Raphson: stationary point"], value="Bounded: each well", label="Solver")
+    energy_guess = mo.ui.number(0.05, 3.0, step=0.01, value=0.30, label="Newton–Raphson starting volume (L/mol)")
     mo.vstack([mo.hstack([energy_T, energy_P], widths="equal"), mo.hstack([energy_method, energy_guess], wrap=True)])
     return energy_P, energy_T, energy_guess, energy_method
 
@@ -125,7 +128,7 @@ def energy_solver(
                 rows.append(dict(volume=result.x, energy=float(result.fun), iterations=int(result.nit), calls=int(result.nfev), success=bool(result.success)))
             message = "Each interval contains one well; the middle stationary volume splits the two-well case."
         else:
-            # Transparent Newton update on dG/dV = 100(P_external − P_EOS).
+            # Transparent Newton–Raphson update on dG/dv = 100(P_external − P_EOS).
             volume = float(guess)
             success = False
             message = "Iteration limit"
@@ -136,7 +139,7 @@ def energy_solver(
                     break
                 trial = volume + (pressure-co2_pressure(volume, temperature))/slope
                 if not np.isfinite(trial) or trial <= 0.04267:
-                    message = "Stopped: Newton step left the physical domain"
+                    message = "Stopped: Newton–Raphson step left the physical domain"
                     break
                 small_step = abs(trial-volume) <= 1e-8
                 volume = trial
@@ -153,17 +156,17 @@ def energy_solver(
 
 
     energy_stationary, energy_rows, energy_message = solve_co2_minima(energy_T.value, energy_P.value, energy_method.value, energy_guess.value)
-    return energy_message, energy_rows, energy_stationary
+    return energy_message, energy_rows, energy_stationary, solve_co2_minima
 
 
 @app.cell(hide_code=True)
 def energy_plot(
     co2_Pc,
     co2_Tc,
-    co2_energy,
     co2_phase_P,
     co2_phase_T,
     co2_pressure,
+    co2_relative_energy,
     energy_P,
     energy_T,
     energy_message,
@@ -174,48 +177,84 @@ def energy_plot(
     plt,
 ):
     def draw_co2_landscape(temperature, pressure, stationary, rows):
-        upper = max(0.65, 1.35*stationary[-1])
+        upper = max(0.35, 1.35*stationary[-1])
         volumes = np.linspace(0.050, upper, 1800)
-        fig, axes = plt.subplots(1, 3, figsize=(12, 3.8), layout="constrained", gridspec_kw={"width_ratios":[1,1.2,1]})
-        axes[0].plot(volumes, co2_pressure(volumes,temperature), color="#007c41")
-        axes[0].axhline(pressure, color="#d87700", ls="--")
-        axes[0].scatter(stationary, np.full(len(stationary), pressure), color="black", s=24)
-        axes[0].set(xlabel="Molar volume (L/mol)", ylabel="Pressure (bar)", ylim=(0,110), title="EOS: possible volumes")
-        axes[1].plot(volumes, co2_energy(volumes,temperature,pressure), color="#007c41")
-        axes[1].scatter(stationary, co2_energy(stationary,temperature,pressure), color="black", s=25, label="Stationary reference")
-        for row in rows:
-            axes[1].scatter([row["volume"]], [row["energy"]], marker="x", color="#d87700", s=65)
-        energy_values = co2_energy(stationary,temperature,pressure)
-        axes[1].set(xlabel="Molar volume (L/mol)", ylabel="Molar free energy (J/mol)", title="Lower minimum is favoured", ylim=(min(energy_values)-30, max(energy_values)+250))
-        axes[1].legend(fontsize=7)
-        axes[2].plot(co2_phase_T, co2_phase_P, color="#007c41", label="Equal-minimum pressure")
-        axes[2].scatter([co2_Tc], [co2_Pc], color="black", label="vdW critical point", s=25)
-        axes[2].scatter([temperature], [pressure], color="#d87700", s=65, label="Your T, P")
-        axes[2].set(xlabel="Temperature (K)", ylabel="Pressure (bar)", xlim=(250,330), ylim=(10,100), title="vdW CO₂ liquid–gas boundary")
-        axes[2].legend(fontsize=7)
-        for ax in axes:
+        fig = plt.figure(figsize=(10, 7.8), layout="constrained")
+        grid = fig.add_gridspec(2, 2, height_ratios=[1, 1.1])
+        eos = fig.add_subplot(grid[0, 0])
+        gibbs = fig.add_subplot(grid[0, 1])
+        phase = fig.add_subplot(grid[1, :])
+
+        eos.plot(volumes, co2_pressure(volumes, temperature), color="#1f77b4")
+        eos.axhline(pressure, color="0.3", ls="--", label=f"P = {pressure:.2f} bar")
+        eos.scatter(stationary, np.full(len(stationary), pressure), color="black", s=24)
+        eos.set(xlabel="Molar volume (L/mol)", ylabel="Pressure (bar)",
+                xlim=(0.050, upper), ylim=(0, 110), title="van der Waals EOS")
+        eos.legend(fontsize=8)
+
+        energy_values = co2_relative_energy(stationary, temperature, pressure)
+        gibbs.plot(volumes, co2_relative_energy(volumes, temperature, pressure), color="#ff7f0e")
+        gibbs.axhline(0, color="0.6", lw=0.8)
+        gibbs.scatter(stationary, energy_values, color="black", s=25, label="Stationary reference")
+        for index, row in enumerate(rows):
+            gibbs.scatter(row["volume"], co2_relative_energy(row["volume"], temperature, pressure),
+                          marker="x", color="#d62728", s=65, zorder=4,
+                          label="Solver result" if index == 0 else None)
+        reference = r"G_{\mathrm{gas}}" if len(stationary) == 3 else r"G_{\mathrm{min}}"
+        gibbs.set(xlabel="Molar volume (L/mol)",
+                  ylabel=rf"$\mathcal{{G}}(v;T,P)-{reference}(T,P)$ (J/mol)",
+                  xlim=(0.050, upper), ylim=(min(energy_values)-30, max(energy_values)+80),
+                  title="Gibbs free energy and minimum")
+        gibbs.legend(fontsize=8)
+
+        boundary_T = np.append(co2_phase_T, co2_Tc)
+        boundary_P = np.append(co2_phase_P, co2_Pc)
+        phase.fill_between(boundary_T, 10, boundary_P, color="#1f77b4", alpha=0.14)
+        phase.fill_between(boundary_T, boundary_P, 100, color="#ff7f0e", alpha=0.14)
+        phase.fill_between([co2_Tc, 330], 10, co2_Pc, color="#1f77b4", alpha=0.14)
+        phase.fill_between([co2_Tc, 330], co2_Pc, 100, color="#d62728", alpha=0.12)
+        phase.plot(boundary_T, boundary_P, color="#d62728", lw=2, label="Liquid–gas coexistence")
+        # Dotted guides mark the supercritical quadrant, not phase boundaries.
+        phase.plot([co2_Tc, co2_Tc, 330], [100, co2_Pc, co2_Pc], color="0.5", ls=":", lw=1)
+        phase.scatter(co2_Tc, co2_Pc, color="black", label="vdW critical point", s=30, zorder=4)
+        phase.scatter(temperature, pressure, color="white", edgecolor="black", marker="*",
+                      s=170, linewidth=1.2, label="Your T, P", zorder=5)
+        phase.text(261, 65, "Liquid", color="#a84b00", fontsize=12, ha="center")
+        phase.text(291, 23, "Gas", color="#165783", fontsize=12, ha="center")
+        phase.text(315, 87, "Supercritical\n$T>T_c$, $P>P_c$", color="#a31d1e", fontsize=11, ha="center")
+        phase.set(xlabel="Temperature (K)", ylabel="Pressure (bar)",
+                  xlim=(250, 330), ylim=(10, 100), title="Phase diagram")
+        phase.legend(fontsize=8, loc="upper left")
+        for ax in (eos, gibbs, phase):
             ax.grid(alpha=0.2)
+        fig.suptitle(f"vdW CO₂ at {temperature:g} K")
         return fig
 
 
     energy_figure = draw_co2_landscape(energy_T.value, energy_P.value, energy_stationary, energy_rows)
     energy_report = "\n".join(
-        f"- V = **{r['volume']:.7f} L/mol**, G = **{r['energy']:.3f} J/mol**; {r['kind']}; "
-        f"solver success: **{r['success']}**; pressure residual **{r['pressure_residual']:+.2g} bar**; **{r['iterations']} iterations**."
-        for r in energy_rows)
+        f"- v = **{row['volume']:.7f} L/mol**, relative G = **{co2_relative_energy(row['volume'], energy_T.value, energy_P.value):.3f} J/mol**; {row['kind']}; "
+        f"solver success: **{row['success']}**; pressure residual **{row['pressure_residual']:+.2g} bar**; **{row['iterations']} iterations**."
+        for row in energy_rows)
     if len(energy_stationary) == 3:
-        energy_difference = float(co2_energy(energy_stationary[0],energy_T.value,energy_P.value)-co2_energy(energy_stationary[-1],energy_T.value,energy_P.value))
-        energy_interpretation = f"G(small-volume) − G(large-volume) = **{energy_difference:+.3f} J/mol**. " + ("The small-volume minimum is lower." if energy_difference < 0 else "The large-volume minimum is lower.")
+        energy_difference = float(co2_relative_energy(energy_stationary[0], energy_T.value, energy_P.value))
+        if abs(energy_difference) <= 0.1:
+            energy_preference = "The minima are balanced to within 0.1 J/mol."
+        elif energy_difference < 0:
+            energy_preference = "The small-volume minimum is lower."
+        else:
+            energy_preference = "The large-volume minimum is lower."
+        energy_interpretation = f"G(liquid) − G(gas) = **{energy_difference:+.3f} J/mol**. " + energy_preference
     else:
-        energy_interpretation = "There is one stationary volume at these conditions. A single minimum can occur below Tc too, outside the three-root pressure range."
+        energy_interpretation = "There is one minimum, used as the energy zero. A single minimum can occur below Tc too, outside the three-root pressure range."
     mo.vstack([
         energy_figure,
         mo.md(energy_report + "\n\n" + energy_interpretation + "\n\n" + energy_message),
         mo.accordion({"What should I check?": mo.md(
-            "At **280 K**, compare **50** and **56 bar**. Try Newton at **0.11 L/mol**: can a successful root solve find a maximum? Raise T to **310 K** and vary P. Compare the two minima only at the same T and P. The plotted boundary is calculated from this vdW CO₂ model; quantitative comparison with measured CO₂ needs validation.\n\n"
-            "A minimum with higher free energy is metastable in the homogeneous model. The intervening maximum signals an unstable volume; predicting a nucleation rate also requires interfacial physics. Newton evaluates pressure and its derivative each iteration; the bounded solver evaluates free energy, so iteration counts measure different work." )}),
+            "The gas-like minimum sets the energy zero when two wells exist, just as in the lecture figure. At **280 K**, compare **50** and **56 bar**. Try Newton–Raphson at **0.11 L/mol**: can a successful root solve find a maximum? Raise T to **310 K** and vary P. Compare the two minima only at the same T and P.\n\n"
+            "A minimum with higher free energy is metastable in the homogeneous model. The intervening maximum signals an unstable volume; predicting a nucleation rate also requires interfacial physics. Newton–Raphson evaluates pressure and its derivative each iteration; the bounded solver evaluates free energy, so iteration counts measure different work." )}),
     ])
-    return
+    return draw_co2_landscape, energy_figure
 
 
 if __name__ == "__main__":

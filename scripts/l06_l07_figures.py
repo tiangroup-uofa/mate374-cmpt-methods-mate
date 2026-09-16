@@ -235,6 +235,80 @@ def save_fixed_point_figure():
     save(fig, "L06-fixed-point.png")
 
 
+def save_vdw_energy_figure(energy):
+    """Keep the EOS connection and show pressure selecting the deeper well."""
+    temperature = 280.0
+    saturation = energy["co2_saturation"](temperature)
+    vv = np.linspace(0.06, 0.37, 1200)
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.3), layout="constrained")
+    axes[0].plot(vv, energy["co2_pressure"](vv, temperature), color="0.25")
+    axes[0].set(ylabel="Pressure (bar)", ylim=(35, 80), title="van der Waals EOS")
+
+    axes[1].axhline(0, color="0.6", lw=0.8)
+    for pressure, colour, style, label in [
+        (50.0, "#1f77b4", "--", "50 bar: gas favoured"),
+        (saturation, "#ff7f0e", "-", f"{saturation:.3f} bar: equal minima"),
+        (56.0, "#d62728", "-.", "56 bar: liquid favoured"),
+    ]:
+        volumes = energy["co2_volumes"](temperature, pressure)
+        pressure_label = f"$P_{{sat}}$ = {pressure:.3f} bar" if pressure == saturation else f"P = {pressure:g} bar"
+        axes[0].axhline(pressure, color=colour, ls=style, label=pressure_label)
+        axes[0].scatter(volumes, np.full(len(volumes), pressure), color=colour, s=25, zorder=3)
+        relative_energy = energy["co2_relative_energy"](vv, temperature, pressure)
+        values = energy["co2_relative_energy"](volumes, temperature, pressure)
+        axes[1].plot(vv, relative_energy, color=colour, ls=style, label=label)
+        axes[1].scatter(volumes, values, color=colour, s=25, zorder=3)
+        if pressure == saturation:
+            for volume, value, name, offset in zip(
+                volumes, values,
+                ["Liquid-like\nminimum", "Maximum", "Gas-like\nminimum"],
+                [(4, -36), (12, 5), (0, -36)],
+            ):
+                axes[1].annotate(name, (volume, value), xytext=offset,
+                                 textcoords="offset points", fontsize=8, ha="center")
+    axes[1].set(ylabel=r"$\mathcal{G}(v;T,P)-G_{\mathrm{gas}}(T,P)$ (J/mol)",
+                ylim=(-65, 190), title="Gibbs free energy and minimum")
+    axes[0].legend(fontsize=8, loc="upper right")
+    axes[1].legend(fontsize=8, loc="upper right")
+    for ax in axes:
+        ax.set(xlabel="Molar volume (L/mol)", xlim=(0.06, 0.37))
+        ax.grid(alpha=0.2)
+    fig.suptitle("vdW CO₂ at 280 K")
+    save(fig, "L07-vdw-energy.png")
+
+
+def save_golden_section_figure():
+    R = (np.sqrt(5) - 1) / 2
+    f = lambda x: (x - 0.68)**2 + 0.3
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.6), layout="constrained")
+    a, b = 0.0, 1.0
+    reused = None
+    titles = ["Step 1: compare two values", "Step 2: reuse old x₂", "Step 3: reuse old x₁"]
+    for ax, title in zip(axes, titles):
+        x1, x2 = b - R * (b - a), a + R * (b - a)
+        xx = np.linspace(0, 1, 500)
+        ax.plot(xx, f(xx), color="#007c41")
+        ax.axvspan(a, b, alpha=0.12, color="#007c41")
+        for x in (x1, x2):
+            is_reused = reused is not None and np.isclose(x, reused)
+            ax.scatter(x, f(x), color="#1f77b4" if is_reused else "#ff7f0e",
+                       s=40, zorder=3, label="Reused value" if is_reused else None)
+        for x, label in [(a, "a"), (x1, "x₁"), (x2, "x₂"), (b, "b")]:
+            ax.axvline(x, color="0.5", lw=0.7, ls=":")
+            ax.text(x, 0.27, label, ha="center")
+        comparison = "$f(x_1)>f(x_2)$" if f(x1) > f(x2) else "$f(x_1)<f(x_2)$"
+        ax.text(0.04, 0.94, comparison, transform=ax.transAxes, va="top")
+        ax.set(xlabel="$x$", ylabel="$f(x)$", title=title, ylim=(0.24, 0.82))
+        if reused is not None:
+            ax.legend(fontsize=8, loc="upper right")
+        if f(x1) > f(x2):
+            a, reused = x1, x2
+        else:
+            b, reused = x2, x1
+    fig.suptitle("Golden section search")
+    save(fig, "L07-golden-section.png")
+
+
 def main():
     roots = notebook_definitions("l06_open_methods.edit.py")
     save_regula_falsi_secant_animation()
@@ -244,44 +318,10 @@ def main():
     save_fixed_point_figure()
 
     energy = notebook_definitions("l07_co2_free_energy.edit.py")
-    temperature = 280.0
-    pressure = energy["co2_saturation"](temperature)
-    stationary = energy["co2_volumes"](temperature, pressure)
-    vv = np.linspace(0.06, 0.37, 1200)
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4), layout="constrained")
-    axes[0].plot(vv, energy["co2_pressure"](vv,temperature), color="#007c41")
-    axes[0].axhline(pressure, ls="--", color="#d87700", label=f"P = {pressure:.3f} bar")
-    axes[0].scatter(stationary, np.full(3, pressure), color="black", s=30)
-    axes[0].set(ylabel="Pressure (bar)", ylim=(35,80), title="Three EOS intersections")
-    axes[0].legend(fontsize=9)
-    gg = energy["co2_energy"](stationary,temperature,pressure)
-    axes[1].plot(vv, energy["co2_energy"](vv,temperature,pressure), color="#007c41")
-    axes[1].scatter(stationary, gg, color="black", s=30)
-    for v, value, name, offset in zip(stationary, gg, ["Liquid-like minimum", "Maximum", "Gas-like minimum"], [(20,15),(20,15),(0,15)]):
-        axes[1].annotate(name, (v,value), xytext=offset, textcoords="offset points", fontsize=8)
-    axes[1].set(ylabel="Molar free energy (J/mol)", ylim=(min(gg)-15, max(gg)+70), title="Two equal minima at coexistence")
-    for ax in axes:
-        ax.set(xlabel="Molar volume (L/mol)", xlim=(0.06,0.37))
-        ax.grid(alpha=0.2)
-    fig.suptitle("vdW CO₂ · 280 K · dimensional molar free energy")
-    save(fig, "L07-vdw-energy.png")
+    save_vdw_energy_figure(energy)
     save(energy["energy_figure"], "L07-co2-demo.png")
 
-    r = (np.sqrt(5)-1)/2
-    f = lambda x: (x-0.68)**2+0.3
-    fig, axes = plt.subplots(1, 2, figsize=(10, 3.3), layout="constrained")
-    intervals = [(0.0,1.0),(1-r,1.0)]
-    for ax, (a,b), title in zip(axes, intervals, ["Compare: f(x₁) > f(x₂)", "Keep the right interval; reuse x₂"]):
-        x1, x2 = b-r*(b-a), a+r*(b-a)
-        xx = np.linspace(0,1,500)
-        ax.plot(xx, f(xx), color="#007c41")
-        ax.axvspan(a,b, alpha=0.12, color="#007c41")
-        ax.scatter([x1,x2], [f(x1),f(x2)], color="#d87700", zorder=3)
-        for x, label in [(a,"a"),(x1,"x₁"),(x2,"x₂"),(b,"b")]:
-            ax.axvline(x,color="0.5",lw=0.7,ls=":")
-            ax.text(x,0.27,label,ha="center")
-        ax.set(xlabel="x", ylabel="f(x)", title=title, ylim=(0.24,0.82))
-    save(fig, "L07-golden-section.png")
+    save_golden_section_figure()
     plt.close("all")
 
 
