@@ -248,7 +248,7 @@ def save_vdw_energy_figure(energy):
     for pressure, colour, style, label in [
         (50.0, "#1f77b4", "--", "50 bar: gas favoured"),
         (saturation, "#ff7f0e", "-", f"{saturation:.3f} bar: equal minima"),
-        (56.0, "#d62728", "-.", "56 bar: liquid favoured"),
+        (57.5, "#d62728", "-.", "57.5 bar: liquid favoured"),
     ]:
         volumes = energy["co2_volumes"](temperature, pressure)
         pressure_label = f"$P_{{sat}}$ = {pressure:.3f} bar" if pressure == saturation else f"P = {pressure:g} bar"
@@ -304,7 +304,7 @@ def save_golden_section_figure():
         if f(x1) > f(x2):
             a, reused = x1, x2
         else:
-            b, reused = x2, x1
+            b, reused = x2, x1i
     fig.suptitle("Golden section search")
     save(fig, "L07-golden-section.png")
 
