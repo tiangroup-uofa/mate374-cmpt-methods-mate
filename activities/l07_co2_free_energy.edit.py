@@ -23,7 +23,8 @@ def course_imports():
 def energy_question(mo):
     mo.md(r"""
     ## L07 · Which CO₂ state has the lower free energy?
-    **Predict:** pick a temperature. Can you move the pressure so that the two free-energy minima are balanced?
+    **Predict:** click on the phase diagram to place your $(T, P)$ state — a short click drops a point,
+    a small drag lets you fine-tune. Can you land on the coexistence line so the two free-energy minima balance?
     """)
     return
 
@@ -92,13 +93,48 @@ def energy_model(brentq, np):
 
 
 @app.cell(hide_code=True)
-def energy_controls(mo):
-    energy_T = mo.ui.slider(250, 330, step=1, value=280, label="Temperature (K)", show_value=True, debounce=True)
-    energy_P = mo.ui.slider(10, 100, step=0.01, value=50, label="Pressure (bar)", show_value=True, debounce=True)
+def energy_controls(co2_Pc, co2_Tc, co2_phase_P, co2_phase_T, mo, np, plt):
+    def draw_phase_picker():
+        # Static phase diagram: the selection box you draw is your (T, P) marker.
+        boundary_T = np.append(co2_phase_T, co2_Tc)
+        boundary_P = np.append(co2_phase_P, co2_Pc)
+        fig, phase = plt.subplots(figsize=(7.6, 4.4), layout="constrained")
+        phase.fill_between(boundary_T, 10, boundary_P, color="#1f77b4", alpha=0.14)
+        phase.fill_between(boundary_T, boundary_P, 100, color="#ff7f0e", alpha=0.14)
+        phase.fill_between([co2_Tc, 330], 10, co2_Pc, color="#1f77b4", alpha=0.14)
+        phase.fill_between([co2_Tc, 330], co2_Pc, 100, color="#d62728", alpha=0.12)
+        phase.plot(boundary_T, boundary_P, color="#d62728", lw=2, label="Liquid–gas coexistence")
+        # Dotted guides mark the supercritical quadrant, not phase boundaries.
+        phase.plot([co2_Tc, co2_Tc, 330], [100, co2_Pc, co2_Pc], color="0.5", ls=":", lw=1)
+        phase.scatter(co2_Tc, co2_Pc, color="black", label="vdW critical point", s=30, zorder=4)
+        phase.text(261, 65, "Liquid", color="#a84b00", fontsize=12, ha="center")
+        phase.text(291, 23, "Gas", color="#165783", fontsize=12, ha="center")
+        phase.text(315, 87, "Supercritical\n$T>T_c$, $P>P_c$", color="#a31d1e", fontsize=11, ha="center")
+        phase.set(xlabel="Temperature (K)", ylabel="Pressure (bar)",
+                  xlim=(250, 330), ylim=(10, 100), title="Phase diagram — click to set your (T, P)")
+        phase.legend(fontsize=8, loc="upper left")
+        phase.grid(alpha=0.2)
+        return phase
+
+    # Seed a small box centred on the previous default (280 K, 50 bar).
+    energy_pick = mo.ui.matplotlib(draw_phase_picker(), value={"x": (279.0, 281.0), "y": (49.0, 51.0)}, debounce=True)
     energy_method = mo.ui.dropdown(["Bounded: each well", "Newton–Raphson: stationary point"], value="Bounded: each well", label="Solver")
     energy_guess = mo.ui.number(0.05, 3.0, step=0.01, value=0.30, label="Newton–Raphson starting volume (L/mol)")
-    mo.vstack([mo.hstack([energy_T, energy_P], widths="equal"), mo.hstack([energy_method, energy_guess], wrap=True)])
-    return energy_P, energy_T, energy_guess, energy_method
+    mo.vstack([energy_pick, mo.hstack([energy_method, energy_guess], wrap=True)])
+    return energy_guess, energy_method, energy_pick
+
+
+@app.cell(hide_code=True)
+def energy_point(energy_pick):
+    # Reduce the box selection to its centre: a quick click is a near-degenerate
+    # box, so the centre is effectively the clicked point.
+    _sel = energy_pick.value
+    if _sel is None:
+        energy_T, energy_P = 280.0, 50.0
+    else:
+        energy_T = min(max((_sel.x_min + _sel.x_max) / 2, 250.0), 330.0)
+        energy_P = min(max((_sel.y_min + _sel.y_max) / 2, 10.0), 100.0)
+    return energy_P, energy_T
 
 
 @app.cell(hide_code=True)
@@ -155,16 +191,12 @@ def energy_solver(
         return stationary, rows, message
 
 
-    energy_stationary, energy_rows, energy_message = solve_co2_minima(energy_T.value, energy_P.value, energy_method.value, energy_guess.value)
+    energy_stationary, energy_rows, energy_message = solve_co2_minima(energy_T, energy_P, energy_method.value, energy_guess.value)
     return energy_message, energy_rows, energy_stationary, solve_co2_minima
 
 
 @app.cell(hide_code=True)
 def energy_plot(
-    co2_Pc,
-    co2_Tc,
-    co2_phase_P,
-    co2_phase_T,
     co2_pressure,
     co2_relative_energy,
     energy_P,
@@ -179,11 +211,10 @@ def energy_plot(
     def draw_co2_landscape(temperature, pressure, stationary, rows):
         upper = max(0.35, 1.35*stationary[-1])
         volumes = np.linspace(0.050, upper, 1800)
-        fig = plt.figure(figsize=(10, 7.8), layout="constrained")
-        grid = fig.add_gridspec(2, 2, height_ratios=[1, 1.1])
+        fig = plt.figure(figsize=(10, 4.2), layout="constrained")
+        grid = fig.add_gridspec(1, 2)
         eos = fig.add_subplot(grid[0, 0])
         gibbs = fig.add_subplot(grid[0, 1])
-        phase = fig.add_subplot(grid[1, :])
 
         eos.plot(volumes, co2_pressure(volumes, temperature), color="#1f77b4")
         eos.axhline(pressure, color="0.3", ls="--", label=f"P = {pressure:.2f} bar")
@@ -206,38 +237,19 @@ def energy_plot(
                   xlim=(0.050, upper), ylim=(min(energy_values)-30, max(energy_values)+80),
                   title="Gibbs free energy and minimum")
         gibbs.legend(fontsize=8)
-
-        boundary_T = np.append(co2_phase_T, co2_Tc)
-        boundary_P = np.append(co2_phase_P, co2_Pc)
-        phase.fill_between(boundary_T, 10, boundary_P, color="#1f77b4", alpha=0.14)
-        phase.fill_between(boundary_T, boundary_P, 100, color="#ff7f0e", alpha=0.14)
-        phase.fill_between([co2_Tc, 330], 10, co2_Pc, color="#1f77b4", alpha=0.14)
-        phase.fill_between([co2_Tc, 330], co2_Pc, 100, color="#d62728", alpha=0.12)
-        phase.plot(boundary_T, boundary_P, color="#d62728", lw=2, label="Liquid–gas coexistence")
-        # Dotted guides mark the supercritical quadrant, not phase boundaries.
-        phase.plot([co2_Tc, co2_Tc, 330], [100, co2_Pc, co2_Pc], color="0.5", ls=":", lw=1)
-        phase.scatter(co2_Tc, co2_Pc, color="black", label="vdW critical point", s=30, zorder=4)
-        phase.scatter(temperature, pressure, color="white", edgecolor="black", marker="*",
-                      s=170, linewidth=1.2, label="Your T, P", zorder=5)
-        phase.text(261, 65, "Liquid", color="#a84b00", fontsize=12, ha="center")
-        phase.text(291, 23, "Gas", color="#165783", fontsize=12, ha="center")
-        phase.text(315, 87, "Supercritical\n$T>T_c$, $P>P_c$", color="#a31d1e", fontsize=11, ha="center")
-        phase.set(xlabel="Temperature (K)", ylabel="Pressure (bar)",
-                  xlim=(250, 330), ylim=(10, 100), title="Phase diagram")
-        phase.legend(fontsize=8, loc="upper left")
-        for ax in (eos, gibbs, phase):
+        for ax in (eos, gibbs):
             ax.grid(alpha=0.2)
-        fig.suptitle(f"vdW CO₂ at {temperature:g} K")
+        fig.suptitle(f"vdW CO₂ at your selected state:  T = {temperature:g} K,  P = {pressure:.2f} bar")
         return fig
 
 
-    energy_figure = draw_co2_landscape(energy_T.value, energy_P.value, energy_stationary, energy_rows)
+    energy_figure = draw_co2_landscape(energy_T, energy_P, energy_stationary, energy_rows)
     energy_report = "\n".join(
-        f"- v = **{row['volume']:.7f} L/mol**, relative G = **{co2_relative_energy(row['volume'], energy_T.value, energy_P.value):.3f} J/mol**; {row['kind']}; "
+        f"- v = **{row['volume']:.7f} L/mol**, relative G = **{co2_relative_energy(row['volume'], energy_T, energy_P):.3f} J/mol**; {row['kind']}; "
         f"solver success: **{row['success']}**; pressure residual **{row['pressure_residual']:+.2g} bar**; **{row['iterations']} iterations**."
         for row in energy_rows)
     if len(energy_stationary) == 3:
-        energy_difference = float(co2_relative_energy(energy_stationary[0], energy_T.value, energy_P.value))
+        energy_difference = float(co2_relative_energy(energy_stationary[0], energy_T, energy_P))
         if abs(energy_difference) <= 0.1:
             energy_preference = "The minima are balanced to within 0.1 J/mol."
         elif energy_difference < 0:
@@ -251,7 +263,7 @@ def energy_plot(
         energy_figure,
         mo.md(energy_report + "\n\n" + energy_interpretation + "\n\n" + energy_message),
         mo.accordion({"What should I check?": mo.md(
-            "The gas-like minimum sets the energy zero when two wells exist, just as in the lecture figure. At **280 K**, compare **50** and **56 bar**. Try Newton–Raphson at **0.11 L/mol**: can a successful root solve find a maximum? Raise T to **310 K** and vary P. Compare the two minima only at the same T and P.\n\n"
+            "The gas-like minimum sets the energy zero when two wells exist, just as in the lecture figure. Near **280 K**, click just below then just above the red coexistence line and watch which well drops lower. Landing exactly on it balances the two minima — a small drag lets you nudge the point. Try Newton–Raphson at **0.11 L/mol**: can a successful root solve find a maximum? Click into the supercritical corner (**T > 304 K, P > 74 bar**) and watch the two wells merge into one. Compare the two minima only at the same T and P.\n\n"
             "A minimum with higher free energy is metastable in the homogeneous model. The intervening maximum signals an unstable volume; predicting a nucleation rate also requires interfacial physics. Newton–Raphson evaluates pressure and its derivative each iteration; the bounded solver evaluates free energy, so iteration counts measure different work." )}),
     ])
     return draw_co2_landscape, energy_figure
