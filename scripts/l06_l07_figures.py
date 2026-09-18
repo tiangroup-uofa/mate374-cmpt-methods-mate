@@ -251,6 +251,10 @@ def save_vdw_energy_figure(energy):
         (57.5, "#d62728", "-.", "57.5 bar: liquid favoured"),
     ]:
         volumes = energy["co2_volumes"](temperature, pressure)
+        if len(volumes) != 3:
+            raise ValueError(f"Expected three EOS roots at {temperature:g} K, {pressure:g} bar")
+        np.testing.assert_allclose(energy["co2_pressure"](volumes, temperature), pressure, atol=1e-8, rtol=0)
+        np.testing.assert_array_equal(np.sign(-energy["co2_slope"](volumes, temperature)), [1, -1, 1])
         pressure_label = f"$P_{{sat}}$ = {pressure:.3f} bar" if pressure == saturation else f"P = {pressure:g} bar"
         axes[0].axhline(pressure, color=colour, ls=style, label=pressure_label)
         axes[0].scatter(volumes, np.full(len(volumes), pressure), color=colour, s=25, zorder=3)
@@ -304,7 +308,7 @@ def save_golden_section_figure():
         if f(x1) > f(x2):
             a, reused = x1, x2
         else:
-            b, reused = x2, x1i
+            b, reused = x2, x1
     fig.suptitle("Golden section search")
     save(fig, "L07-golden-section.png")
 

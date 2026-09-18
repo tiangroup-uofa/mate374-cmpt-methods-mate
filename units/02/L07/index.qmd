@@ -90,7 +90,7 @@ We can identify three features on the free-energy curve: two minima and one maxi
 
 At 280 K, the vdW model gives $P_{\mathrm{sat}}\approx55.129$ bar, where the two minima have the **same free energy**. At higher pressure, the liquid-like well is lower; at lower pressure, the gas-like well is lower. For each pressure in the figure, we subtract the free energy of its gas-like minimum, so that minimum sits at zero. This reference shift preserves the energy difference between the two wells at that pressure.
 
-![Matching colours connect the imposed pressures on the EOS plot to their free-energy curves: 50 bar (blue), 55.129 bar (orange), and 56 bar (red). The two minima are equal at saturation; the gas-like minimum is lower at 50 bar and the liquid-like minimum is lower at 56 bar. Each energy curve is referenced to its own gas-like minimum.](../../../assets/L07-vdw-energy.png){#fig-vdw-energy fig-alt="Left: CO2 van der Waals EOS with three imposed pressures and their intersections. Right: corresponding Gibbs free-energy curves in blue, orange, and red, each referenced to its gas-like minimum." width="100%"}
+![Matching colours connect the imposed pressures on the EOS plot to their free-energy curves: 50 bar (blue), 55.129 bar (orange), and 57.5 bar (red). The two minima are equal at saturation; the gas-like minimum is lower at 50 bar and the liquid-like minimum is lower at 57.5 bar. Each energy curve is referenced to its own gas-like minimum.](../../../assets/L07-vdw-energy.png){#fig-vdw-energy fig-alt="Left: CO2 van der Waals EOS with three imposed pressures and their intersections. Right: corresponding Gibbs free-energy curves in blue, orange, and red, each referenced to its gas-like minimum." width="100%"}
 
 How do we know which phase is more stable at a given $P$ and $T$? The numerical task now has three parts:
 
@@ -171,7 +171,7 @@ x_1-a=b-x_2=(1-R)h\approx0.382h,
 \qquad R=\frac{\sqrt5-1}{2}\approx0.618.
 $$
 
-Here $R$ is the reciprocal of the golden ratio, using Kiusalaas's notation. The retained interval has width $Rh$.
+Here $R$ is the reciprocal of the golden ratio ($R=1/(1.618\ldots)\approx0.618$). The retained interval has width $Rh$.
 
 ::: {.callout-note collapse="true"}
 ## Why the golden ratio?
@@ -352,9 +352,9 @@ At the same $T$ and $P$:
 
 The maximum separates the homogeneous wells. A prediction of a nucleation barrier or lifetime also needs interfacial energy and a model of how a new phase forms.
 
-For a visual connection to the material, watch [CO₂ liquefaction](https://www.youtube.com/watch?v=M2duzKxb1QM):
+For a visual connection to the material, watch this video about phase changes in CO$_2$: start at [3:47 for the phase boundary](https://www.youtube.com/watch?v=zu-S1GxmkCo&t=227s) and [7:25 for the supercritical state](https://www.youtube.com/watch?v=zu-S1GxmkCo&t=445s).
 
-{{< video https://www.youtube.com/watch?v=M2duzKxb1QM >}}
+{{< video https://www.youtube.com/watch?v=zu-S1GxmkCo >}}
 
 ### Do we always have two minima?
 
