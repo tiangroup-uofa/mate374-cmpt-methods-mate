@@ -35,6 +35,8 @@ Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/re
 
 Figure generation is managed by [`scripts/render_figures.py`](scripts/render_figures.py), which runs the plotting scripts from source and saved data without rerunning benchmarks. Add new figure generators to its explicit list. To refresh figures without a full site build, run `uv run --locked python scripts/render_figures.py`. Daily HTML builds reuse the existing images.
 
+The workflow caches TinyTeX between runs and installs common KOMA-Script and XeLaTeX packages in one batch. This reduces repeated package downloads during full PDF builds.
+
 The workflow follows the CHE 318 and MATE 664 Pages pattern, with `uv sync --locked` added so local and CI Python environments use the same dependency resolution. The full build also needs `librsvg2-bin` for SVG-to-PDF image conversion. CI still produces the complete site on every push; the HTML-only path speeds up local iteration.
 
 ## Course identity
