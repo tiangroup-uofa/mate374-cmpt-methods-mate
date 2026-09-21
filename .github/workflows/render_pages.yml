@@ -37,11 +37,36 @@ jobs:
       - name: Install locked Python environment
         run: uv sync --locked
 
+      - name: Cache TinyTeX (LaTeX package tree)
+        uses: actions/cache@v4
+        with:
+          path: ~/.TinyTeX
+          # Refresh when page content or build config changes, since that is when
+          # new LaTeX packages may be needed. restore-keys reuses the most recent
+          # tree so only the delta downloads instead of the whole package set.
+          key: tinytex-${{ runner.os }}-${{ hashFiles('**/*.qmd', '_quarto.yml', '_quarto-full.yml', '.github/workflows/render_pages.yml') }}
+          restore-keys: |
+            tinytex-${{ runner.os }}-
+
       - name: Set up Quarto and TinyTeX
         uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: "1.9.30"
+          # Idempotent when the cache above already restored ~/.TinyTeX.
           tinytex: true
+
+      - name: Pre-install common LaTeX packages
+        run: |
+          # Batch-install the packages Quarto's KOMA-Script + XeLaTeX PDF path
+          # needs so a cold cache warms in one step instead of many slow on-demand
+          # tlmgr calls during render. On a warm cache these are already present.
+          tlmgr update --self || true
+          tlmgr install \
+            koma-script caption fancyvrb fvextra framed booktabs etoolbox \
+            xcolor colortbl geometry hyperref bookmark footnotehyper upquote \
+            environ trimspaces ulem unicode-math fontspec euenc xetex \
+            tex-gyre tex-gyre-math amsmath pdftexcmds infwarerr kvoptions \
+            ltxcmds epstopdf-pkg || true
 
       - name: Install SVG support
         run: |

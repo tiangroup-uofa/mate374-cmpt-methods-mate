@@ -19,6 +19,8 @@ FIGURE_SCRIPTS = (
     "l05_root_figures.py",
     "l06_l07_figures.py",
     "l08_l09_figures.py",
+    "l10_figures.py",
+    "s04_figures.py",
 )
 
 

@@ -33,7 +33,9 @@ Keep both output-format definitions in `_quarto.yml` so page-specific PDF settin
 
 Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/render_pages.yml). The workflow installs the locked `uv` environment, Quarto, and TinyTeX, then runs `quarto render --profile full` to export notebooks, regenerate scripted figures, stage answer PDFs, render all HTML and PDF pages, and deploy `_site/` with GitHub Pages. The post-render hook generates the agent-facing `llms.txt` index.
 
-Figure generation is managed by [`scripts/render_figures.py`](scripts/render_figures.py), which runs the plotting scripts from source and saved data without rerunning benchmarks. Add new figure generators to its explicit list. To refresh figures without a full site build, run `uv run --locked python scripts/render_figures.py`. Daily HTML builds reuse the existing images.
+Figure generation is managed by [`scripts/render_figures.py`](scripts/render_figures.py), which runs the plotting scripts from source and saved data without rerunning benchmarks. Add new figure generators to its explicit list. To refresh figures without a full site build, run `uv run --locked python scripts/render_figures.py`. Daily HTML builds reuse the existing images. [`GLOSSARY.md`](GLOSSARY.md) indexes every figure and interactive demo against the script or notebook that produces it.
+
+The workflow caches the TinyTeX package tree (`~/.TinyTeX`) between runs and pre-installs the common LaTeX packages, so PDF rendering no longer re-downloads packages on every push. Archived prototype pages under `units/archive/**` are kept in the repo but excluded from the render so CI does not build orphaned pages.
 
 The workflow follows the CHE 318 and MATE 664 Pages pattern, with `uv sync --locked` added so local and CI Python environments use the same dependency resolution. The full build also needs `librsvg2-bin` for SVG-to-PDF image conversion. CI still produces the complete site on every push; the HTML-only path speeds up local iteration.
 

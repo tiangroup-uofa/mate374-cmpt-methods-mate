@@ -20,6 +20,9 @@ project:
     - "introduction/**/*.qmd"
     - "units/**/*.qmd"
     - "!units/03/**"
+    # Archived prototype lectures are kept in the repo for reference but are not
+    # in the site navigation; skip them so CI does not render 30 orphaned pages.
+    - "!units/archive/**"
     - "assignments/**/*.qmd"
     - "project/**/*.qmd"
     - "seminars/**/*.qmd"
