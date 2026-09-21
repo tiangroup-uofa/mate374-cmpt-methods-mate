@@ -62,7 +62,7 @@ def main():
     ax.legend(fontsize=9)
     fig.tight_layout()
     output = Path(__file__).resolve().parents[1] / "assets/L03-polygon-precision.png"
-    fig.savefig(output, dpi=180)
+    fig.savefig(output, dpi=300)
     print(f"Saved {output}")
 
 

@@ -11,7 +11,7 @@ def main():
     N = np.array([1e3, 1e4, 1e5, 1e6, 1e7, 1e8])
     t = np.array([0.0020, 0.0170, 0.0910, 0.6530, 7.1560, 78.6260])
 
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=200)
+    fig, ax = plt.subplots(figsize=(6, 4), dpi=300)
 
     ax.loglog(N, t, "o-", color="#e36209", markersize=7, linewidth=1.8,
               label="Measured (WASM)")
@@ -36,7 +36,7 @@ def main():
     ax.set_ylim(5e-4, 3e3)
 
     fig.tight_layout()
-    fig.savefig(OUTPUT, bbox_inches="tight", facecolor="white")
+    fig.savefig(OUTPUT, dpi=300, bbox_inches="tight", facecolor="white")
     print(f"Saved {OUTPUT}")
 
 if __name__ == "__main__":

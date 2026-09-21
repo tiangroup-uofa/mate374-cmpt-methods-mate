@@ -47,7 +47,7 @@ def main():
 
     fig.tight_layout()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUTPUT, dpi=200)
+    fig.savefig(OUTPUT, dpi=300)
     print(f"Saved {OUTPUT}")
 
 if __name__ == "__main__":

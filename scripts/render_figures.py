@@ -18,6 +18,7 @@ FIGURE_SCRIPTS = (
     "l04_final_scaling.py",
     "l05_root_figures.py",
     "l06_l07_figures.py",
+    "l08_l09_figures.py",
 )
 
 

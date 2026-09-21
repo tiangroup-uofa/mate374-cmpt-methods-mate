@@ -59,7 +59,7 @@ def error_balance():
         ax.annotate("", xy=(1.015, 0), xytext=(.97, 0),
                     xycoords="axes fraction", annotation_clip=False,
                     arrowprops={"arrowstyle": "->", "color": "black"})
-        fig.savefig(ASSETS / "L03-error-balance.png", dpi=180)
+        fig.savefig(ASSETS / "L03-error-balance.png", dpi=300)
         plt.close(fig)
 
 
@@ -100,7 +100,7 @@ def patriot():
     ax.text(5.05, .08, "Target travel: 1700 m/s × 0.34 s ≈ 580 m", ha="center", fontsize=13)
     fig.text(.5, .045, "Fixed-point conversion, not Python binary64 • Schematic, not to scale • Sources: GAO/IMTEC-92-26; Arnold (2000)",
              ha="center", fontsize=10, color="#555555")
-    fig.savefig(ASSETS / "L03-patriot-timing.png", dpi=180)
+    fig.savefig(ASSETS / "L03-patriot-timing.png", dpi=300)
     plt.close(fig)
     print(f"Patriot reconstruction: bias={float(bias):.12g} s/tick; "
           f"100 h error={time_error:.9f} s; target travel={distance:.3f} m")

@@ -52,7 +52,7 @@ fig, ax = plt.subplots(figsize=(6, 2.5), layout='constrained')
 ax.loglog([r[0] for r in results['pi']], [r[2] for r in results['pi']], 'o-')
 ax.set(xlabel='Retained terms N', ylabel='Absolute error', title='Leibniz convergence')
 ax.grid(alpha=.2)
-fig.savefig(OUT / 'pi-convergence.png', dpi=170)
+fig.savefig(OUT / 'pi-convergence.png', dpi=300)
 plt.close(fig)
 
 for points in [400, 2000]:
@@ -76,7 +76,7 @@ for name in four_atom_shapes(1):
     axes[1].plot(lengths, energies, label=name)
 axes[1].set(xlabel='Spacing / edge length (Å)', ylabel='Cluster energy (eV)')
 axes[1].legend(fontsize=8)
-fig.savefig(OUT / 'lj-comparison.png', dpi=170)
+fig.savefig(OUT / 'lj-comparison.png', dpi=300)
 plt.close(fig)
 assert abs(calculate_LJ_cluster([[0,0,0],[4,0,0],[0,4.5,0]]) + .01720978466531022) < 1e-14
 for seed in [1, 2, 3]:

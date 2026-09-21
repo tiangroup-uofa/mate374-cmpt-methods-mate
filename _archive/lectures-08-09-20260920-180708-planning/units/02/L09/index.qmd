@@ -1,0 +1,193 @@
+## Lecture 9: approximating data with function
+
+=Introduction to lease square fitting (LSR)
+
+In last lecture we learned about interpolation, which is having a function passing through the discrete points. 
+
+<following are from older 374 definitions>
+
+1. Curve fitting is a procedure in which a mathematical formula
+(equation) is used to best fit a given set of data points.
+• The objective is to find a function that fits the data
+points overall — This means that the function does not
+have to give the exact value at any single point, but fits
+the data well overall.
+• Basically, any fitting curve must fit the general trend of
+the data but does not match any of the data points
+exactly!.
+• Curve fitting can be carried out with many types of
+functions and with polynomials of various orders.
+2. Interpolation is a procedure for estimating a value between
+known values of data points.
+• It is done by first determining a function that gives the
+exact value at the data points, and then using this
+function to calculate values between the points.
+
+<below will have a figure about curve fitting vs interpolation>
+
+<callout note: we would also use the idea of interpolation, when x belongs between 2 known data x s, but on a curve fitting task>
+
+## first example: linear regression
+
+in many situations the linear trend between variable x and function value y is enough.
+Curve fitting using a linear equation (first degree
+polynomial) is the process by which an equation of the
+form:
+y = a1x + a0 (1)
+can be used to best fit the given data points.
+• This is done by determining the constants a1 and a0 that
+give the smallest error when the data points are substituted
+in Eq. (1).
+• If the data comprise only two points, the values a1 and a0
+can be defined easily.
+• When the data consists of more than two points, a straight
+line can not pass through all of the points. In this case, the
+constants a1 and a0 are calculated using condition that the
+line has the best fit overall
+
+
+### How can we tell if the fitting is good?
+
+Curve Fitting – Quality of a Fit
+1.To choose the right fitting line, we need a criterion that
+measures how good a fit is between given data points and
+an approximating linear function
+a. First, such a criterion can be used to compare two
+different functions that are used for fitting the same
+data points.
+b. Second, and even more important, the criterion itself is
+used for determining the coefficients of the function that
+gives the best fit.
+2. The fit between given data points and an approximating
+linear function is determined by first calculating the error
+(the residual) at each point, (xi , yi ):
+ri = yi − f (xi ) (2)
+where yi is the value of the data point, f (xi ) is the value of
+the function used to approximate the data points.
+
+A criterion that measures how well the approximating function fits the given data can be
+obtained by calculating a total error E in terms of the residuals.
+• The overall error can be calculated in different ways:
+
+absolute error
+
+E = sum |abs r|
+
+square error
+
+E = sum abs r^2
+
+In both cases we dont want to have the error to cancel out between positive and negative residuals.
+
+So, when we have the error, how can we try to reduce it?? of course, this is to minimize the error E!  That's the idea behind the least square regression
+
+## Basics of LSR
+
+Linear least-squares regression is a procedure in which the coefficients a1 and a0 of a linear
+function y = a1 x + a0 are determined such that the function has the best fit to a given set of
+data points.
+• The best fit is defined as the smallest possible total error that is calculated by adding the
+squares of the residuals according to Eq. (4).
+• Since all the values xi and yi are known, E in Eq. (4) is a nonlinear function of the two variables
+a1 and a0.
+• The function E has a minimum at the values of a1 and a0 where the partial derivatives of E with
+respect to each variable are equal to zero. Taking the partial derivatives and setting them equal
+to zero gives: (suppose linear LSR uses coeffs a0, a1)
+
+\partial E / a0 = -2 \sum(y - a1xi - a0) = 0
+....
+
+<callout important: LSR solver uses heavily the fact that square of error can have easy analytical derivative, while absolute will have opposite gradients, so not easy to analyze>
+
+In the case of Linear LSR, there are only 2 unknowns a0 and a1 (all the rest xi and yi are known!), so you can use any methods to derive
+
+(detailed math will be derived again in lecture, )
+
+Given that LSR formula, a0 = ... and a1 = ... nSxy - SxSy ....
+
+<use the same formula type in older 374 lecture notes under ~/>
+
+How good are the fitting? you can go back to the square error (or MSE or MAE, once the coeffs are already known)
+
+Another way to estimate the quality of fitting is the R^2 you may often seen (definition!), but we should be careful R^2 really do not translate to non-linear systems
+
+## Use LSR on nonlinear systems
+
+For this lecture purpose you could transform many nonlinear equations to linear form. For example:
+
+<older 374 table Transforming nonlinear equations to linear form, lecture 11 age 14>
+
+Example may like 
+1) estimating the log-log scaling in our earlier computational convergence 
+2) arrennius plot
+
+1. Finally, the linear least-squares regression (linear LSR) can be used for curve fitting an
+equation of the form y = b xm to a set of data points xi , yi .
+2.This can be done by calculating a1 and a0 using Eqs. (11) and (12) while substituting ln(yi )
+for yi and ln(xi ) for xi .
+3. Once a1 and a0 are known, the constants b and m in the exponential equation are calculated by:
+m = a1 and b = ea0
+Many other nonlinear equations can be transformed into linear form in a similar way. E.g., this
+method is widely used in the experimental definition of heterogeneous kinetics using Arrhenius
+law:
+where A is the pre-exponential factor and Ea is the activation energy, Rg is the Universal gas
+constant, T is the temperature.
+Here Y = ln(k), X = 1/T , a0 = ln(A), a1 = − Ea / Rg.
+
+
+## General formula of LSR
+
+Using the same logic from linear Least-Square Regression, we can write a linear combination of functions:
+<older 374 context>
+• The functions f1(x),..., fk (x) are called basis functions and must be completely specified in terms of x. For
+example:
+• The overall error to be minimized is now:
+• The coefficients a1, ...., ak can be defined from taking partial derivatives of E with respect to ai :
+
+This system of linear algebraic equations can be written in the matrix notation [F ][a] = [b], which can be
+solved with respect to [ai ] using any method considered  <this is older 374, we shall say LSR should be done properly with formulations and systems of equations to be introduced later>
+
+<why do we want to write this way? just to show LSR is easier to understand>
+
+Some cases we may need polynomials (higher than order of 1 for regression)
+<still older 374 context>
+
+Polynomial regression is a procedure for determining the coefficients of a polynomial of
+a second degree, or higher, such that the polynomial best fits a given set of data points.
+• Similar to the linear regression, the derivation of the equations that are used for
+determining the coefficients is based on minimizing the total error.
+• If the polynomial, of order n, that is used for the curve fitting is:
+Pn (x) = a0 + a1x + a2x2 + a3x3 + ... + anxn (11)
+• then, for a given set of m data points (xi , yi ) (n ≤ (m − 1)), the total error is given by:
+• Since all the values xi and yi of the discrete data points are known, E in Eq. (12) is a
+nonlinear function of the n + 1 variables (the coefficients a0 through an ).
+• The function E has a minimum at the values of a0 through an where the partial derivatives
+of E with respect to each of the variables are equal to zero.
+
+What are we doing? still just a system of equations in a minimization problem! If we write the error in a factor os LSR <remember to distinguish between known and unknowns!> 
+
+<show how the systems of equations will be, when we have N number points, and power of m>
+
+How do we do fitting in python?
+
+<numpy.polyfit of course good, but maybe more general form in scipy? what about minimize? >
+
+<are we guaranteed to find the solution? what does lsr tell? is it error to 0?>
+
+<can we omit the error form and do optimization directly?
+
+
+<from older 374 notinces A problem arises for high-degree polynomials. The coefficients in Eq. (14), m to σ𝑖=1
+𝑚 𝑥𝑖
+2𝑛 can
+vary over a range of several orders of magnitude, which gives rise to ill-conditioned systems.
+• Normalizing each equation helps to get precise solution.
+• Double precision calculations are frequently required!
+• Values of n up to 5 or 6 generally yield good results.
+• Values of n between 6 and 10 may or may not yield good results.
+• Values of n greater than approximately 10 generally yield poor results.>
+
+
+
+
+<VERY VERY IMPORATNT: this lecture, is to make sure students know that fitting  itself, is some sort of optimization problem!>

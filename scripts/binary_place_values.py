@@ -27,4 +27,4 @@ for (row, col), cell in table.get_celld().items():
 ax.set_title("The binary point separates positive and negative powers of two", fontsize=14)
 fig.text(.5, .06, "1101.101₂ = 8 + 4 + 1 + 1/2 + 1/8 = 13.625₁₀", ha="center", fontsize=15)
 fig.tight_layout(rect=[0, .12, 1, 1])
-fig.savefig(Path(__file__).resolve().parents[1] / "assets/L03-binary-place-values.png", dpi=180)
+fig.savefig(Path(__file__).resolve().parents[1] / "assets/L03-binary-place-values.png", dpi=300)

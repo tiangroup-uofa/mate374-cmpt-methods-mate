@@ -69,6 +69,6 @@ if __name__ == "__main__":
     fig = plot_class_scaling(data)
     for extension in ("png", "svg", "pdf"):
         path = root / f"assets/L04-final-scaling.{extension}"
-        fig.savefig(path, dpi=220, facecolor="white")
+        fig.savefig(path, dpi=300, facecolor="white")
         print(path)
     plt.close(fig)

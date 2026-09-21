@@ -30,7 +30,7 @@ def main():
     ax.set(xlabel="Volume (L)", ylabel="Pressure (bar)", ylim=(0, 170))
     ax.legend()
     ax.grid(alpha=0.2)
-    fig.savefig(ASSETS / "L05-ideal-gas.png", dpi=180)
+    fig.savefig(ASSETS / "L05-ideal-gas.png", dpi=300)
     plt.close(fig)
 
     left, right = 0.2, 0.6
@@ -52,7 +52,7 @@ def main():
         ax.grid(alpha=0.2)
     axes[0].set_ylabel("Residual (bar)")
     axes[1].legend(fontsize=9)
-    fig.savefig(ASSETS / "L05-false-position.png", dpi=180)
+    fig.savefig(ASSETS / "L05-false-position.png", dpi=300)
     plt.close(fig)
 
 
