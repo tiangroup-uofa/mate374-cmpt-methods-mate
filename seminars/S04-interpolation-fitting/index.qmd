@@ -1,0 +1,559 @@
+---
+title: "S04 · Interpolation and fitting in Python"
+subtitle: "Quadratic spline equations and a power-law viscosity fit"
+body-classes: lecture-page seminar-page
+---
+
+## Learning outcomes
+
+By the end of this seminar, you should be able to:
+
+1. **Formulate** a quadratic spline as a system of endpoint, slope-matching, and boundary equations.
+2. **Calculate** spline coefficients and interpolated values in Python, checking the conditions that define the spline.
+3. **Fit** a power-law viscosity model using linearized and direct nonlinear least squares.
+4. **Compare** the two fits using residuals in viscosity and logarithmic units.
+
+## Today's calculations
+
+In [L08](../../units/02/L08/index.qmd), we required a curve to pass through each supplied point. In [L09](../../units/02/L09/index.qmd), we chose coefficients that minimized an overall mismatch. Today we will turn both kinds of conditions into calculations you can type and run. These two exercises revisit problems from earlier MATE 374 offerings.
+
+Work out the equations on paper, then enter the numerical calculation in the embedded notebooks. Record your spline value, fitted parameters, and residuals. The code below is copyable, and each notebook contains a working reference. To practise entering a calculation, replace the contents of the corresponding code cell with your own version. Edit the existing cell rather than defining the same names in a second cell.
+
+The notebooks already import NumPy as `np`, Matplotlib as `plt`, and the SciPy functions used below. Plotting code is supplied and collapsed. Run an edited cell with **Shift+Enter**. If you want to save your work, use **Open notebook directly** before making your edits, then download the `.py` file with **Save** or **Ctrl+S / ⌘S**. Edits in the embedded copy do not transfer to the separate tab.
+
+## 1. A quadratic spline through five points
+
+Estimate $y$ at $x=12.7$ from the following table:
+
+| $x$ | 8 | 11 | 15 | 18 | 22 |
+|---|---:|---:|---:|---:|---:|
+| $y$ | 5 | 9 | 10 | 8 | 7 |
+
+Use quadratic pieces with matching first derivatives at the interior data points. **Set the second derivative at the first point to zero:** $f_1''(8)=0$.
+
+### Count the unknowns
+
+The five points define four intervals. On interval $i$, choose
+
+$$
+f_i(x)=a_i x^2+b_i x+c_i.
+$$
+
+| Piece | Interval | Unknown coefficients |
+|---|---|---|
+| $f_1$ | $8\le x\le11$ | $a_1,b_1,c_1$ |
+| $f_2$ | $11\le x\le15$ | $a_2,b_2,c_2$ |
+| $f_3$ | $15\le x\le18$ | $a_3,b_3,c_3$ |
+| $f_4$ | $18\le x\le22$ | $a_4,b_4,c_4$ |
+
+The **known quantities** are the five $(x,y)$ pairs and our boundary condition. The **chosen function form** is a quadratic on each interval. The **unknowns** are the twelve coefficients in the table. The powers of $x$ become known numbers when we substitute an endpoint, so the resulting equations are linear in these coefficients.
+
+**Before calculating:** which piece will you use at $x=12.7$? How many equations do twelve unknown coefficients need?
+
+### Eight endpoint equations
+
+Each piece must pass through both ends of its own interval. For the first piece,
+
+$$
+f_1(8)=5,\quad f_1(11)=9
+\quad\Longrightarrow\quad
+\begin{cases}
+64a_1+8b_1+c_1=5,\\
+121a_1+11b_1+c_1=9.
+\end{cases}
+$$
+
+**Your turn:** write the two equations for $f_2$, then complete the equations for $f_3$ and $f_4$. The second piece uses $x=11$ and $x=15$.
+
+::: {.callout-note collapse="true"}
+## All eight endpoint equations
+
+$$
+\begin{aligned}
+64a_1+8b_1+c_1&=5, &121a_1+11b_1+c_1&=9,\\
+121a_2+11b_2+c_2&=9, &225a_2+15b_2+c_2&=10,\\
+225a_3+15b_3+c_3&=10, &324a_3+18b_3+c_3&=8,\\
+324a_4+18b_4+c_4&=8, &484a_4+22b_4+c_4&=7.
+\end{aligned}
+$$
+
+At an interior point, two different polynomials must reach the same supplied value. For example, $f_1(11)=9$ and $f_2(11)=9$ constrain different coefficients, so both equations are needed.
+:::
+
+### Three slope equations and one boundary equation
+
+The derivative of piece $i$ is
+
+$$
+f_i'(x)=2a_i x+b_i.
+$$
+
+Matching the slopes at the three interior points gives
+
+$$
+\begin{aligned}
+f_1'(11)=f_2'(11)&\quad\Rightarrow\quad22a_1+b_1-22a_2-b_2=0,\\
+f_2'(15)=f_3'(15)&\quad\Rightarrow\quad30a_2+b_2-30a_3-b_3=0,\\
+f_3'(18)=f_4'(18)&\quad\Rightarrow\quad36a_3+b_3-36a_4-b_4=0.
+\end{aligned}
+$$
+
+We now have eleven equations. Our chosen boundary condition supplies the twelfth:
+
+$$
+f_1''(8)=2a_1=0\quad\Longrightarrow\quad\boxed{a_1=0.}
+$$
+
+Because a quadratic has a constant second derivative, this makes the **entire first piece a straight line**. We impose this one end condition to determine the remaining freedom in the quadratic spline. Adding a zero second derivative at the right end would give thirteen conditions for twelve coefficients and generally overconstrain the problem.
+
+### The complete matrix
+
+Put the unknowns in a fixed order:
+
+$$
+\mathbf c=[a_1,b_1,c_1,\ a_2,b_2,c_2,\ a_3,b_3,c_3,\ a_4,b_4,c_4]^{\mathsf T}.
+$$
+
+The superscript $\mathsf T$ turns this row into a column. Collecting the coefficients of each equation gives $A\mathbf c=\mathbf d$:
+
+$$
+{\small
+\left[\begin{array}{rrr|rrr|rrr|rrr}
+64&8&1&0&0&0&0&0&0&0&0&0\\
+121&11&1&0&0&0&0&0&0&0&0&0\\
+0&0&0&121&11&1&0&0&0&0&0&0\\
+0&0&0&225&15&1&0&0&0&0&0&0\\
+0&0&0&0&0&0&225&15&1&0&0&0\\
+0&0&0&0&0&0&324&18&1&0&0&0\\
+0&0&0&0&0&0&0&0&0&324&18&1\\
+0&0&0&0&0&0&0&0&0&484&22&1\\ \hline
+22&1&0&-22&-1&0&0&0&0&0&0&0\\
+0&0&0&30&1&0&-30&-1&0&0&0&0\\
+0&0&0&0&0&0&36&1&0&-36&-1&0\\ \hline
+2&0&0&0&0&0&0&0&0&0&0&0
+\end{array}\right]
+\mathbf c=
+\begin{bmatrix}5\\9\\9\\10\\10\\8\\8\\7\\0\\0\\0\\0\end{bmatrix}.
+}
+$$
+
+Each group of three columns belongs to one polynomial. The first eight rows impose endpoint values, the next three match slopes, and the last imposes the boundary condition. **Read row nine aloud as an equation.** Why are the entries for $c_1$ and $c_2$ zero?
+
+### Type the system into Python
+
+We could use Gaussian elimination to solve these twelve equations by hand. We will study linear-system solvers in the next unit. For today, [`np.linalg.solve`](https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html) performs that calculation once we have supplied the matrix and right-hand side.
+
+In the notebook, enter the following matrix in the `A` cell. Commas separate entries in a row, and square brackets enclose each row. Keep the column order consistent with $\mathbf c$.
+
+```{.python code-fold="false"}
+# Columns: a1, b1, c1, a2, b2, c2, a3, b3, c3, a4, b4, c4
+A = np.array([
+    [64, 8, 1,   0, 0, 0,     0, 0, 0,     0, 0, 0],
+    [121, 11, 1, 0, 0, 0,     0, 0, 0,     0, 0, 0],
+    [0, 0, 0,    121, 11, 1,  0, 0, 0,     0, 0, 0],
+    [0, 0, 0,    225, 15, 1,  0, 0, 0,     0, 0, 0],
+    [0, 0, 0,    0, 0, 0,     225, 15, 1,  0, 0, 0],
+    [0, 0, 0,    0, 0, 0,     324, 18, 1,  0, 0, 0],
+    [0, 0, 0,    0, 0, 0,     0, 0, 0,     324, 18, 1],
+    [0, 0, 0,    0, 0, 0,     0, 0, 0,     484, 22, 1],
+    [22, 1, 0,   -22, -1, 0,  0, 0, 0,     0, 0, 0],
+    [0, 0, 0,    30, 1, 0,    -30, -1, 0,  0, 0, 0],
+    [0, 0, 0,    0, 0, 0,     36, 1, 0,    -36, -1, 0],
+    [2, 0, 0,    0, 0, 0,     0, 0, 0,     0, 0, 0],
+], dtype=float)
+```
+
+The supplied data cell defines `x` and `y`. Enter the right-hand side in its own cell:
+
+```{.python code-fold="false"}
+rhs = np.array([y[0], y[1], y[1], y[2], y[2], y[3], y[3], y[4], 0, 0, 0, 0])
+```
+
+Now type the solve and print the result:
+
+```{.python code-fold="false"}
+coefficients = np.linalg.solve(A, rhs)
+pieces = coefficients.reshape(4, 3)
+print(pieces)
+print("Largest equation residual:", np.max(np.abs(A @ coefficients - rhs)))
+```
+
+`reshape(4, 3)` arranges the twelve coefficients into four rows, one $[a_i,b_i,c_i]$ row per piece. The `@` operator performs matrix multiplication, so `A @ coefficients - rhs` checks the twelve equations we entered. This check should be close to zero, with small differences from floating-point arithmetic.
+
+::: {.quarto-wasm-local notebook="s04_quadratic_spline.edit.py" view="edit" title="Enter and solve the twelve quadratic-spline equations" height="1000" loading="lazy" fullscreen="true"}
+![Four quadratic pieces through the data, compared with a natural cubic spline.](../../assets/S04-quadratic-spline.png){fig-alt="Four coloured quadratic pieces through five points, with a straight first piece and a dashed natural cubic curve. A star marks the quadratic estimate at x equals 12.7."}
+
+**Offline calculation.** Use the code blocks on this page with the imports and data in the standalone setup below. The worked coefficients and interpolation value follow.
+:::
+
+::: {.callout-note collapse="true"}
+## Imports and data for a separate Python script
+
+If you are using a separate Python script or blank notebook, put this before the spline code above. The embedded notebook already supplies these definitions.
+
+```{.python code-fold="false"}
+import numpy as np
+from scipy.interpolate import CubicSpline, make_interp_spline
+
+x = np.array([8., 11., 15., 18., 22.])
+y = np.array([5., 9., 10., 8., 7.])
+```
+:::
+
+### Evaluate the correct piece
+
+Since $11<12.7<15$, use $f_2$. Python counts rows from zero, so its coefficients are in `pieces[1]`. [`np.polyval`](https://numpy.org/doc/stable/reference/generated/numpy.polyval.html) evaluates coefficients ordered from the highest power to the constant:
+
+```{.python code-fold="false"}
+x_new = 12.7
+piece_index = 1
+estimate = np.polyval(pieces[piece_index], x_new)
+print(f"f{piece_index + 1}({x_new:g}) = {estimate:.8f}")
+```
+
+**Your turn:** change the evaluation cell to calculate $y$ at $x=20$. Change both `x_new` and `piece_index`. Then evaluate at $x=15$ using each of its two neighbouring pieces. Do the values agree?
+
+::: {.callout-note collapse="true"}
+## Worked coefficients and interpolation values
+
+The pieces are
+
+$$
+\begin{aligned}
+f_1(x)&=\tfrac43x-\tfrac{17}{3}, &&8\le x\le11,\\
+f_2(x)&=-\tfrac{13}{48}x^2+\tfrac{175}{24}x-\tfrac{615}{16}, &&11\le x\le15,\\
+f_3(x)&=\tfrac1{18}x^2-\tfrac52x+35, &&15\le x\le18,\\
+f_4(x)&=\tfrac1{16}x^2-\tfrac{11}{4}x+\tfrac{149}{4}, &&18\le x\le22.
+\end{aligned}
+$$
+
+The corresponding coefficient rows, rounded for display, are
+
+```text
+[[ 0.          1.33333333 -5.66666667]
+ [-0.27083333  7.29166667 -38.43750000]
+ [ 0.05555556 -2.50000000 35.00000000]
+ [ 0.06250000 -2.75000000 37.25000000]]
+```
+
+A computed $a_1$ of order $10^{-16}$ is numerical roundoff around zero. Using the unrounded coefficients gives
+
+$$
+\boxed{f_2(12.7)=10.48395833\ldots,\qquad f_4(20)=7.25.}
+$$
+
+Both $f_2(15)$ and $f_3(15)$ equal 10. Keep full precision in the code: substituting the rounded coefficients $-0.2708$, $7.2917$, and $-38.4375$ instead gives about 10.4898 at 12.7.
+:::
+
+### Check the conditions, not just the matrix multiplication
+
+A mistyped matrix can still have a solution with a tiny matrix residual. The notebook therefore also evaluates the endpoints and derivatives directly from the polynomials. Inspect those checks: every piece should reach its two data values, both slopes should agree at each join, and $2a_1$ should be close to zero.
+
+For example, type these lines at the end of the evaluation cell to check the first join:
+
+```{.python code-fold="false"}
+print(np.polyval(pieces[0], 11), np.polyval(pieces[1], 11))
+print(2 * pieces[0, 0] * 11 + pieces[0, 1],
+      2 * pieces[1, 0] * 11 + pieces[1, 1])
+```
+
+Both values should be 9, and both slopes should be $4/3$. These checks confirm the conditions we imposed. The data provide no independent value at 12.7 with which to measure the interpolation error there.
+
+**Another code change:** move the `2` in the last row of `A` from the $a_1$ column to the $a_4$ column. This imposes $f_4''(22)=0$ instead. Which piece becomes straight? Does the curve still pass through all five points? Restore the original row afterward.
+
+### Compare with a SciPy spline
+
+SciPy can construct a spline directly from the data. Enter this in the library-comparison cell:
+
+```{.python code-fold="false"}
+cubic = CubicSpline(x, y, bc_type="natural", extrapolate=False)
+print(float(cubic(x_new)))
+```
+
+At `x_new = 12.7`, the natural cubic gives about **10.11890**. It uses cubic pieces, matches first and second derivatives at interior points, and sets the second derivative to zero at **both** ends. Our quadratic construction uses different conditions, so the two estimates need not agree. Both interpolate the supplied data.
+
+If we want an independent library check of our coefficient calculation, we must specify the same quadratic problem. The optional code below does that.
+
+::: {.callout-note collapse="true"}
+## Reproduce the same quadratic spline with SciPy
+
+[`make_interp_spline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.make_interp_spline.html) uses a B-spline representation, a basis for piecewise polynomials. Here `k=2` chooses quadratic pieces, and `t` specifies their knots. Repeating each outer knot three times gives the endpoint multiplicity used for this degree-two representation. The interior knots are our three interval joins.
+
+```{.python code-fold="false"}
+knots = np.r_[np.repeat(x[0], 3), x[1:-1], np.repeat(x[-1], 3)]
+quadratic_reference = make_interp_spline(
+    x, y, k=2, t=knots, bc_type=([(2, 0.0)], None)
+)
+print(float(quadratic_reference(12.7)))
+```
+
+In `bc_type`, `(2, 0.0)` specifies a zero second derivative at the left end, while `None` imposes no extra right-end condition. The result is **10.48395833…**, matching our twelve-equation calculation. This cell is already supplied and collapsed in the notebook. The library's B-spline coefficients use a different basis from our $a_i,b_i,c_i$ coefficients, so compare function values rather than coefficient arrays.
+:::
+
+## 2. Fit a power law to bitumen viscosity
+
+A bitumen sample has the following viscosity data:
+
+| Temperature, $T$ (°C) | 18 | 33 | 57 | 70 |
+|---|---:|---:|---:|---:|
+| Viscosity, $\mu$ (Pa·s) | 1000 | 100 | 10 | 2 |
+
+Fit the empirical relation
+
+$$
+\mu=bT^m.
+$$
+
+Enter $T$ as the **numerical Celsius temperature**, as specified in this exercise, and $\mu$ as the numerical viscosity in Pa·s. The fitted $b$ is tied to this unit convention, while $m$ is dimensionless. When taking logarithms below, we mean logarithms of these numerical values in the stated units.
+
+Use this empirical power law over the supplied positive-temperature range. Replacing `T` with kelvin would change the model, because Celsius and kelvin differ by an additive offset. Keep the stated Celsius convention for both fits.
+
+### Turn the power law into a straight line
+
+Taking natural logarithms gives
+
+$$
+\ln\mu=\ln b+m\ln T.
+$$
+
+Define $X=\ln T$, $Y=\ln\mu$, and $\alpha=\ln b$. The transformed model is
+
+$$
+\boxed{\hat Y=\alpha+mX,\qquad b=e^\alpha.}
+$$
+
+The **known data** are four $X_i,Y_i$ pairs. The **unknown coefficients** are $\alpha$ and $m$. We choose them to minimize
+
+$$
+E_{\log}=(Y_1-\alpha-mX_1)^2+(Y_2-\alpha-mX_2)^2
++(Y_3-\alpha-mX_3)^2+(Y_4-\alpha-mX_4)^2.
+$$
+
+Four data points do not generally lie on one straight line. Collecting the four predictions gives the **design matrix**:
+
+$$
+\underbrace{\begin{bmatrix}
+1&\ln18\\1&\ln33\\1&\ln57\\1&\ln70
+\end{bmatrix}}_{D\text{: }4\times2}
+\underbrace{\begin{bmatrix}\alpha\\m\end{bmatrix}}_{\text{two unknowns}}
+\approx
+\underbrace{\begin{bmatrix}\ln1000\\\ln100\\\ln10\\\ln2\end{bmatrix}}_{\mathbf Y\text{: four observations}}.
+$$
+
+**Before coding:** why is this a $4\times2$ matrix rather than a $4\times4$ matrix? What would its shape become if we collected ten measurements of the same power law?
+
+### Type the linear least-squares fit
+
+The notebook supplies `T` and `mu`. Enter this in its linear-fit cell:
+
+```{.python code-fold="false"}
+X = np.log(T)
+Y = np.log(mu)
+design = np.column_stack([np.ones_like(X), X])
+log_parameters, _, rank, _ = np.linalg.lstsq(design, Y, rcond=None)
+alpha_log, m_log = log_parameters
+b_log = np.exp(alpha_log)
+print("Design matrix shape:", design.shape, "rank:", rank)
+print("alpha, m, b:", alpha_log, m_log, b_log)
+```
+
+`np.column_stack` puts the column of ones beside the column of $X$ values. [`np.linalg.lstsq`](https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html) finds the coefficients that minimize the squared residuals. The underscore discards outputs we do not need here, while `rank` should be 2 for the two independent columns. A rectangular data-fitting problem calls for `lstsq`, rather than the square-system `solve` used for the spline.
+
+::: {.quarto-wasm-local notebook="s04_viscosity_fitting.edit.py" view="edit" title="Type linearized and direct least-squares fits for bitumen viscosity" height="1100" loading="lazy" fullscreen="true"}
+![Power-law fits to the bitumen data and their relative residuals.](../../assets/S04-viscosity-fitting.png){fig-alt="Viscosity on a logarithmic vertical axis versus Celsius temperature for both fits. A second panel shows that the direct fit has a large negative relative residual at 70 degrees Celsius."}
+
+**Offline calculation.** The code blocks and standalone setup on this page reproduce both fits. The parameter and residual tables below provide reference values.
+:::
+
+::: {.callout-note collapse="true"}
+## Imports and data for a separate viscosity-fitting script
+
+Put this before the fitting code if you are working outside the embedded notebook:
+
+```{.python code-fold="false"}
+import numpy as np
+from scipy.optimize import curve_fit
+
+T = np.array([18., 33., 57., 70.])
+mu = np.array([1000., 100., 10., 2.])
+```
+:::
+
+### Where is the square system of equations?
+
+The four data equations cannot generally be satisfied exactly by two coefficients. As in L09, setting the two derivatives of $E_{\log}$ to zero gives **two normal equations**:
+
+$$
+\begin{bmatrix}
+4&X_1+X_2+X_3+X_4\\
+X_1+X_2+X_3+X_4&X_1^2+X_2^2+X_3^2+X_4^2
+\end{bmatrix}
+\begin{bmatrix}\alpha\\m\end{bmatrix}
+=
+\begin{bmatrix}
+Y_1+Y_2+Y_3+Y_4\\
+X_1Y_1+X_2Y_2+X_3Y_3+X_4Y_4
+\end{bmatrix}.
+$$
+
+In matrix notation this is $D^{\mathsf T}D[\alpha,m]^{\mathsf T}=D^{\mathsf T}\mathbf Y$. Enter the following in the normal-equations cell to compare with `lstsq`:
+
+```{.python code-fold="false"}
+normal_matrix = design.T @ design
+normal_rhs = design.T @ Y
+normal_parameters = np.linalg.solve(normal_matrix, normal_rhs)
+print(normal_matrix)
+print(normal_rhs)
+print(normal_parameters)
+```
+
+The **design matrix is $4\times2$**, while the **normal matrix is $2\times2$**. They describe different stages of the same fit. `lstsq` is preferable for general computation because forming the normal matrix can amplify numerical sensitivity. Here the explicit normal equations let us connect the minimization to a system we can inspect.
+
+::: {.callout-note collapse="true"}
+## Numerical normal equations and fitted parameters
+
+Rounded for display, the system is
+
+$$
+\begin{bmatrix}
+4&14.67842583\\14.67842583&54.97578940
+\end{bmatrix}
+\begin{bmatrix}\alpha\\m\end{bmatrix}
+=
+\begin{bmatrix}14.50865774\\48.32229522\end{bmatrix}.
+$$
+
+Using full-precision values gives
+
+$$
+\alpha\approx19.86287982,\qquad
+\boxed{m\approx-4.42437509,\quad b\approx4.22998768\times10^8.}
+$$
+
+The negative exponent means that the fitted viscosity decreases as the positive Celsius input increases. Ten measurements would give a $10\times2$ design matrix and still a $2\times2$ normal matrix.
+:::
+
+### Fit the original viscosity values directly
+
+The linearized calculation minimizes squared differences in **log viscosity**. We can instead ask for the smallest squared differences in **viscosity**:
+
+$$
+E_\mu=(\mu_1-\hat\mu_1)^2+(\mu_2-\hat\mu_2)^2
++(\mu_3-\hat\mu_3)^2+(\mu_4-\hat\mu_4)^2,
+\qquad \hat\mu_i=bT_i^m.
+$$
+
+Enter the model in the function cell:
+
+```{.python code-fold="false"}
+def viscosity(T, alpha, m):
+    return np.exp(alpha + m * np.log(T))
+```
+
+This is $bT^m$ written with $b=e^\alpha$, keeping $b$ positive and avoiding a very large coefficient in the numerical search. The function returns viscosity in Pa·s. Using $\alpha$ as a parameter does **not** take logarithms of the residuals.
+
+Now enter the nonlinear fit:
+
+```{.python code-fold="false"}
+direct_parameters, covariance = curve_fit(
+    viscosity, T, mu, p0=log_parameters, maxfev=10000
+)
+alpha_direct, m_direct = direct_parameters
+b_direct = np.exp(alpha_direct)
+print("alpha, m, b:", alpha_direct, m_direct, b_direct)
+```
+
+[`curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html) iteratively adjusts the two parameters. `p0` supplies starting values from the log-space fit, and `maxfev` sets the allowed number of function evaluations. The returned `covariance` estimates local parameter uncertainty under the fitting assumptions. We will focus on the parameters and residuals here.
+
+We still have four residuals and two unknown parameters, but their dependence on the parameters is nonlinear. There is no single fixed $4\times2$ design matrix that solves this original-space fit in one linear least-squares call.
+
+### Calculate and compare the residuals
+
+Use the sign convention from L09:
+
+$$
+r_i=\mu_i-\hat\mu_i.
+$$
+
+A positive residual means that the measured viscosity is above the fitted value. Enter the predictions and residuals in their cell:
+
+```{.python code-fold="false"}
+predicted_log = viscosity(T, *log_parameters)
+predicted_direct = viscosity(T, *direct_parameters)
+residual_log = mu - predicted_log
+residual_direct = mu - predicted_direct
+print(np.column_stack([T, mu, predicted_log, predicted_direct]))
+print("Log-fit residuals (Pa s):", residual_log)
+print("Direct-fit residuals (Pa s):", residual_direct)
+print("Direct-fit relative residuals (%):", 100 * residual_direct / mu)
+```
+
+The `*` passes the two entries of a parameter array as the two arguments `alpha` and `m`. To compare the objectives, type the following in the error-measures cell:
+
+```{.python code-fold="false"}
+sse_log_fit = np.sum(residual_log**2)
+sse_direct_fit = np.sum(residual_direct**2)
+log_sse_log_fit = np.sum((np.log(mu) - np.log(predicted_log))**2)
+log_sse_direct_fit = np.sum((np.log(mu) - np.log(predicted_direct))**2)
+print("Viscosity SSE:", sse_log_fit, sse_direct_fit)
+print("Viscosity RMSE:",
+      np.sqrt(sse_log_fit / len(mu)), np.sqrt(sse_direct_fit / len(mu)))
+print("Log-space SSE:", log_sse_log_fit, log_sse_direct_fit)
+```
+
+SSE is the sum of squared residuals. RMSE divides that sum by the four observations and takes a square root, returning a mismatch in Pa·s. Compare both fits using the **same** measure in each row. A viscosity SSE and a log-space SSE have different meanings and units.
+
+**Discuss:** which fit has the smaller viscosity SSE? Which has the smaller log-space SSE? At 70 °C, is the direct fit's residual small compared with the measured viscosity of 2 Pa·s?
+
+::: {.callout-note collapse="true"}
+## Worked comparison of parameters and residuals
+
+| Quantity | Log-space fit | Direct viscosity fit |
+|---|---:|---:|
+| $m$ | −4.424375 | −3.815522 |
+| $b$ in the stated Celsius/Pa·s convention | $4.229988\times10^8$ | $6.159452\times10^7$ |
+| Viscosity SSE, (Pa·s)$^2$ | 33424.01 | 19.39275 |
+| Viscosity RMSE, Pa·s | 91.41117 | 2.201860 |
+| Log-space SSE | 0.319261 | 1.109499 |
+
+The predictions and signed residuals are:
+
+| $T$ (°C) | Measured $\mu$ | Log-fit $\hat\mu$ | Log-fit $r$ | Direct-fit $\hat\mu$ | Direct-fit $r$ |
+|---:|---:|---:|---:|---:|---:|
+| 18 | 1000 | 1181.797 | −181.797 | 1000.051 | −0.051 |
+| 33 | 100 | 80.884 | +19.116 | 98.996 | +1.004 |
+| 57 | 10 | 7.206 | +2.794 | 12.302 | −2.302 |
+| 70 | 2 | 2.904 | −0.904 | 5.617 | −3.617 |
+
+All viscosity entries and residuals are in Pa·s. The unweighted direct fit strongly favours matching the large viscosity at 18 °C. At 70 °C, its residual is about **−181%** of the measured value. Its small overall RMSE therefore does not imply a small percentage mismatch at every temperature.
+
+Each fit minimizes its own objective. Log residuals measure ratios, $\ln\mu_i-\ln\hat\mu_i=\ln(\mu_i/\hat\mu_i)$, so the log fit responds to proportional discrepancies. Deciding which fit better represents an experiment requires information about measurement uncertainty and the prediction we need. These four fitted measurements alone do not establish accuracy at new temperatures.
+:::
+
+### Your own prediction and a different weighting
+
+1. In the prediction cell, type `T_new = 45.0` and evaluate both fits. Report the two viscosities in Pa·s. Is this interpolation or extrapolation?
+2. Add `sigma=mu` to the `curve_fit` call, then run it again. This minimizes squared relative residuals, $[(\mu_i-\hat\mu_i)/\mu_i]^2$. Compare the new parameters and the 70 °C residual. The weighting is an experiment here, rather than a supplied measurement-uncertainty model.
+3. Remove `sigma=mu` to restore the unweighted fit. Explain why fitting log viscosity and fitting relative residuals can give similar but unequal coefficients.
+
+::: {.callout-note collapse="true"}
+## Code for a prediction at a new temperature
+
+```{.python code-fold="false"}
+T_new = 45.0
+print("Log fit (Pa s):", viscosity(T_new, *log_parameters))
+print("Direct fit (Pa s):", viscosity(T_new, *direct_parameters))
+```
+
+The log-space fit gives about **20.5072 Pa·s**, and the direct fit gives about **30.3161 Pa·s**. The temperature lies within the measured range of 18–70 °C, so this is interpolation in the sense of estimating inside the data range. Neither regression curve is required to pass through every measurement.
+:::
+
+## Before you leave
+
+Keep your code and write down:
+
+- the spline value at $x=20$, the piece you used, and one endpoint or slope check;
+- the two fitted pairs $(b,m)$ and the viscosity predicted at 45 °C by each;
+- one sentence explaining why the fit with the smaller viscosity RMSE can have the larger percentage mismatch at 70 °C.
+
+Finally, explain the dimensions of today's three matrices: the **$12\times12$ spline system**, the **$4\times2$ design matrix**, and the **$2\times2$ normal matrix**. In each case, what does a row represent, and what are the unknowns?
