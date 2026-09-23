@@ -1,0 +1,91 @@
+Assignment 2: due Oct 7 12:00 pm noon
+
+Working with functions 
+
+Q1: short answer question (20 pt)
+
+These questions only require very concise answer. Don't overthink!
+
+Q1: short answer question (20 pt)
+
+<To agent, you don't need to write my "tricky" "open-ended" comments into sample answer, but rather just say: multiple possibilities.>
+
+These questions only require very concise answers. Don't overthink! 
+
+1\) On a function \(f(x)\), given two neighboring sampled points \((x_i,f(x_i))\) and \((x_{i+1},f(x_{i+1}))\), how can you tell whether they bracket a root? Can the same two function values tell you whether they bracket a maximum or minimum?
+
+<intended answer: first part is easy: \(f(x_i)f(x_{i+1})<0\), assuming continuity. This only tells us that at least one root lies between them, not how many. For an extremum, two function values alone are generally not enough. If derivative information is available, one could instead look for a sign change in \(f'(x)\). This part is intentionally a bit open-ended; students may also argue that three points could give a reasonable indication of a local maximum/minimum for a continuous function, although it would still only be a guess without more information.>
+
+2\) For a fixed-point iteration method written as \(x_{n+1}=g(x_n)\), what condition near the fixed point \(x_s\) determines whether the iteration converges? Since the fixed point is not known beforehand, how could you check this condition in practice?
+
+<intended answer: the local convergence condition is \(|g'(x_s)|<1\). Although \(x_s\) is commonly not known beforehand, one practical way is to graph \(y=x\) and \(y=g(x)\), estimate the location of the fixed point from their intersection, and then inspect the slope of \(g(x)\) near that point. This deliberately exposes the causality issue: the convergence criterion depends on a solution that we are trying to find.>
+
+3\) With \(N\) data points, Lagrange interpolation gives a single polynomial directly, without solving for its coefficients through a large system of equations. In contrast, a piecewise cubic interpolation introduces \(4(N-1)\) coefficients, together with additional continuity conditions. Why is the piecewise approach still usually preferred when \(N\) is large?
+
+<intended answer: even though piecewise interpolation seemingly introduces more unknowns, it avoids the strong oscillatory behavior that may occur when fitting many points with one high-degree polynomial. In addition, the equations arising from piecewise interpolation are highly structured and sparse, so the resulting system may be easier to solve than a general dense system.>
+
+4\) After running a curve-fitting program against your experimental data, the total squared residual
+\[
+E=\sum_i \left[y_i-\hat f(x_i)\right]^2
+\]
+is a very small number, for example \(10^{-5}\). However, plotting the data together with \(\hat f(x)\) looks very bad. What might be one possible reason?
+
+<intended answer: this is intentionally a tricky question and multiple answers may be acceptable. First, the magnitude of the residual by itself has little meaning without considering the units and scale of \(y\). For example, an error of \(10^{-3}\) becomes only \(10^{-6}\) after squaring, but that error may still be very large relative to the magnitude of the data. The residual should therefore be interpreted together with quantities such as absolute or relative error, or other goodness-of-fit measures such as \(R^2\). Another possible argument is overfitting: a model can achieve a very small residual at the sampled data points while still behaving poorly between them or showing an unreasonable overall shape.>
+
+Q2. Iterative fixed point for solving the binary alloy (30 pt)
+
+In symmetric alloys (e.g which and which??) what its free energy canbe described by a regular solution free energy, an interesting phenomenon will arise as miscibility gap, such that: at certain temperature, and some composition x, it will separate into 2 phases (commonly alpha and beta). A simpliefied model is  
+
+to find root in equation
+
+\(\ln\frac{x}{1-x}+A(1-2x)=0\)
+
+where A represents a parameter that is material and temp dependent (here actually the mixing enthalpy). A is unitless.  continue x must be between 0 and 1. We will use this question to show how a typical binary solution behaves
+
+1) show that regardless of the value of A, the x=0.5 is always a root for F(x)=0 (trivial root)
+2. rewrite the eqn F(x)=0 into x=gx form iterative (keep A as a constant) show gx. Type the function into the editable demo. If correct, your function should lools like blahblah
+3. interact with the plot if A less than 2, do we have root between 0.5 to 1? Try A larger than 2, does root appear? Physically speaking, A the ratio between the mixing enthalpy and thermal energy. a Higher A will cause additional root to appear, corresponding to the phase separation.
+4. determine the root fora=2.5 using fixed pt iteration. The root between 0 to 0.5 is typically referred to as x_alpha, and the other x_beta. You can solve x_beta. x_alpha is just 1 - x_beta
+You can use demo to record value. Show solution up to 4 significant 
+5. Choose to implement the root finding prob by root scalar report which method you used how mn iter and final root. Do you get the same answer?
+
+
+Q3. Fitting atomistic energy curve (20pt)
+
+In assignment 1, we have worked out a solution for LJ interaction energy. How can we use an existing LJ curve data to determine the parameters epsilon and sigma?
+
+<use the Argon example, we will give 8 data points from the LJ curve. The exact value should have some noise, and do not show the minimum!>.
+
+Method 1: interpolation
+Since the lennard jone potential's analytical points are already shown, you could use the interpolation function from the points to get the root and minimum. <analytical results>, show the sigma estimated from these methods, which one will be better (compare with exact value), and why?
+
+The minimum of the curve will give approx (analyical value). from your interpolation curve, is the value close to exact? why or why not
+
+
+Method 2: fitting the LJ curve
+
+You could use a curve fitting to make the LJ curve. We have create a scaffold for you. use scipy's minimize method to report the best eps, sigma value. are they now close? you could use yout values from the interpolation in method 1 as a initial start
+
+
+
+
+Q4 Estimating LJ from real quantum data (30 pt)
+
+We can do better than Q3's fitting. Since in assignment 1 we have already worked out the solution for single LJ, and a cluster. This method is to use the least square minimization to show fitting a complex data
+
+<one equation for LJ(r; eps, sigma)> <another for the total energy E = sum(coordinate, eps,sigma) = ...>
+
+The idea is to have many atom clusters, each varying the distance between them (the exact coordinates are given), the energy for each cluster k (containing n_k atoms)can be calculated using very accuracy quantum chemistry softwares (such as the density functional theory (DFT) method which we will cover later in the course). 
+
+Suppose we have N such atom clusters, each having n_k atom, with a coordinate (n_k * 3) <the n_k atoms may be different>. the accurate quantum chem energy is E^QM_k. 
+
+1) the LSR residual is written as E = sum_k [E_^QM/n_k - E^LJ/nk(sigma, eps)]^2
+use your own words to describe what does the residual mean? What will be the unknowns we need to solve?
+
+2) We have already given you the calculate_cluster_energy function (given coordinate, eps, sigma), finish the object / lsr function. using the first 2 data of the dataset, you should get a error of ... if eps = and sigma =
+
+3) now use minimize to perform a fitting. choose first 10 data from the set, and show the fitted, plus residual. 
+
+4) now increase the dataset to include more <we can generate up to 50 data>, do your method work to get a converged eps, sigma? 
+
+5) we can use a chart called parity plot to compare E_QM vs E_fitted (on average atom), a perfit fit should align along diagonal. Comment how good was the LJ? 

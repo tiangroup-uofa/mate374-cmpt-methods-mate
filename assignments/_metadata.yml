@@ -1,0 +1,19 @@
+# Shared defaults for assignment handouts and their answer PDFs.
+#
+# Keep both formats in this directory-level metadata file. The empty HTML
+# entry preserves the site-wide HTML settings while the PDF entry provides the
+# single set of handout typography and LaTeX settings used by every assignment.
+format:
+  html: {}
+  pdf:
+    toc: false
+    mainfont: "TeX Gyre Heros"
+    sansfont: "TeX Gyre Heros"
+    fontsize: 10pt
+    geometry:
+      - margin=0.75in
+    include-in-header:
+      text: |
+        \RedeclareSectionCommand[beforeskip=.8\baselineskip,afterskip=.3\baselineskip]{subsection}
+        \RedeclareSectionCommand[beforeskip=.6\baselineskip,afterskip=.2\baselineskip]{subsubsection}
+        \setlength{\parskip}{3pt}

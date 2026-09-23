@@ -1,0 +1,206 @@
+---
+title: "MAT E 374 Assignment 2"
+subtitle: "Working with functions: root-finding, optimization, and curve fitting"
+header-includes:
+  - \usepackage{wrapfig}
+---
+
+**Due:** Wednesday, October 7, 2026, at 12:00 pm (noon) via Canvas
+
+::: {.content-visible when-format="html"}
+[Download the PDF handout](index.pdf)
+:::
+
+Submit **one PDF answering all four problems** (100 marks), including calculations, requested code snippets, plots, and concise explanations. Keep your full Python scripts; do not submit them.
+
+
+## Problem 1 · Short answers — 20 marks
+
+These questions only require very concise answers. Don't overthink! If use of AI is involved in answering these questions, please clearly state which model you used.
+
+
+1. **Closed-domain methods**: On a function $f(x)$, given two neighboring sampled points $(x_i,f(x_i))$ and $(x_{i+1},f(x_{i+1}))$, how can you tell whether they bracket a root? Can the same two function values tell you whether they bracket a maximum or minimum?
+
+```{=latex}
+\vspace{1em}
+```
+
+2. **Fixed-point iteration**: For a fixed-point iteration written as $x_{n+1}=g(x_n)$, what condition near the fixed point $x_s$ determines whether the iteration converges? Since the fixed point is not known beforehand, how could you check this condition in practice?
+
+```{=latex}
+\vspace{1em}
+```
+
+3. **Interpolation**: With $N$ data points at distinct $x$ values, Lagrange interpolation gives a single polynomial directly, without solving for its coefficients through a large system of equations. In contrast, piecewise cubic interpolation introduces $4(N-1)$ coefficients. Why is the piecewise approach still usually preferred when $N$ is large?
+
+```{=latex}
+\vspace{1em}
+```
+
+4. **Curve-fitting**: After running a curve-fitting program against your experimental data, the total squared residual $E=\sum_i\left[y_i-\hat f(x_i)\right]^2$ is a very small number, for example $10^{-5}$ in magnitude. However, plotting the data together against the fitted function $\hat f(x)$ looks very bad. What might be one possible reason? (Hint: what is the magnitude of the data points?)
+
+```{=latex}
+\newpage
+```
+
+## Problem 2 · Fixed-point iteration for a binary alloy — 30 marks
+
+::: {.content-visible when-format="pdf"}
+```{=latex}
+\begin{wrapfigure}{r}{0.45\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{../../assets/A02-miscibility-gap.png}
+\end{wrapfigure}
+```
+:::
+
+::: {.content-visible when-format="html"}
+![Schematic of a symmetric miscibility gap: the free-energy curve has two minima at $x_\alpha$ and $x_\beta$, separated by a central maximum.](../../assets/A02-miscibility-gap.png){width="45%" fig-align="right"}
+:::
+
+A binary alloy can separate into two phases with different compositions when mixing is energetically unfavorable. We describe this behavior using a symmetric regular-solution model. Here, $x$ is the fraction of A in the A-B alloy ($0<x<1$). When a miscibility gap exists, the two equilibrium phase compositions are $x_{\alpha}$ and $x_{\beta}$, with $x_{\alpha}=1-x_{\beta}$. They are the outer roots of the following equation:
+
+$$
+F(x)=\ln\frac{x}{1-x}+H(1-2x)=0.
+$$
+
+Here, $H$ is a dimensionless parameter measuring the energetic penalty for mixing A and B relative to the thermal contribution. We will use numerical methods to solve this nonlinear model. The programming part of the question can be assisted by the [A2 Q2 interactive demo below](#q2-interactive-demo).
+
+### 2.1 Central root
+
+Show that $x=0.5$ is always a root of $F(x)=0$, regardless of $H$.
+
+### 2.2 Fixed-point form
+
+Rearrange $F(x)=0$ into $x=g(x)$ and write down your expression for $g(x)$ ($H$ is a constant). You can use the demo's Q2.2 section to check your expression. The curves $y=g(x)$ and $y=x$ should intersect at $x=0.5$.
+
+
+### 2.3 Additional roots
+
+Use the demo's Q2.3 section to compare the following behavior:
+
+1. Choose $H=1.5$. Do the curves $y=g(x)$ and $y=x$ intersect for $x\in(0.5,1.0)$?
+2. Choose $H=2.5$. Do the curves $y=g(x)$ and $y=x$ intersect for $x\in(0.5,1.0)$?
+
+Physically, $H>2.0$ is the condition for two additional roots to appear, corresponding to the miscibility-gap region.
+
+
+### 2.4 Fixed-point solution
+
+For $H=2.5$, find the upper root $x_{\beta}$ ($x_{\beta}\in(0.5,1.0)$) using fixed-point iteration, starting from $x_0=0.9$. Stop when $|x_{n+1}-x_n|<10^{-4}$. Report the number of updates, the final value of $x_{\beta}$ to five significant figures, and the residual $F(x_{\beta})$. Use the demo's Q2.4 section to record the fixed-point iterates. If you implement your own code, include it below.
+
+### Q2 interactive demo {#q2-interactive-demo}
+
+::: {.content-visible when-format="html"}
+::: {.quarto-wasm-local notebook="assignments/A2/a2_q2_miscibility.edit.py" view="edit" title="A2 Q2 · Fixed-point map and miscibility-gap compositions" height="1180" loading="lazy" fullscreen="true"}
+**Static fallback.** Rearrangement gives $g(x;H)=1/[1+\exp(H(1-2x))]$. At $H=1.5$, the only intersection is $x=0.5$. At $H=2.5$, the intersections are approximately $x=0.1448$, $0.5$, and $0.8552$. Starting from $x_0=0.9$ at $H=2.5$, the step tolerance $10^{-4}$ is met after 12 updates, at $x_{12}\approx0.85532$ with $F(x_{12})\approx3.6\times10^{-4}$.
+:::
+:::
+
+
+```{=latex}
+\newpage
+```
+
+## Problem 3 · Fitting an atomistic energy curve — 20 marks
+
+In Assignment 1, we used the Lennard-Jones pair potential
+
+$$
+V(r;\varepsilon,\sigma)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right].
+$$
+
+How can we use sampled energies to determine $\varepsilon$ and $\sigma$? The following eight points were generated from the same argon model, with small added noise. Distances are in Å and energies are in eV. The data are also in `lj-data.csv`.
+
+| $r$ (Å) | $V$ (eV) |
+|---:|---:|
+| 3.20 | 0.026084565 |
+| 3.35 | 0.004126033 |
+| 3.50 | −0.005477196 |
+| 3.65 | −0.009421694 |
+| 4.00 | −0.009608200 |
+| 4.40 | −0.006943821 |
+| 5.00 | −0.003610619 |
+| 6.00 | −0.001348986 |
+
+Use $\varepsilon_{\mathrm{ref}}=0.0103$ eV and $\sigma_{\mathrm{ref}}=3.40$ Å to assess your estimates. These are the parameters used **before adding noise**. Neither the exact zero crossing nor the exact minimum is among the sampled distances.
+
+### 3.1 Method 1: interpolation
+
+Use `CubicSpline(r, V, bc_type="natural", extrapolate=False)` to interpolate the data.
+
+1. Recall the A1 results $r_0=\sigma$, $r_m=2^{1/6}\sigma$, and $V(r_m)=-\varepsilon$. Find the spline's zero crossing in $[3.35,3.50]$ Å and its minimum in $[3.50,4.40]$ Å using `root_scalar` and `minimize_scalar`.
+2. Estimate $\sigma$ in two ways: from the zero crossing and from the minimum location. Compare both with $\sigma_{\mathrm{ref}}$. Which estimate is closer for these data, and why might the two estimates differ?
+3. Estimate $\varepsilon$ from the minimum energy. Is it close to $\varepsilon_{\mathrm{ref}}$? Explain how the spacing and noise of the sampled data can affect the result.
+
+### 3.2 Method 2: fitting the LJ curve
+
+Complete the squared-residual function in the scaffold,
+
+$$
+E(\varepsilon,\sigma)=\sum_{i=1}^{8}\left[V_i-V(r_i;\varepsilon,\sigma)\right]^2,
+$$
+
+and use `scipy.optimize.minimize` to determine the two parameters. Start from your interpolation estimates. The scaffold supplies positive parameter bounds and solver settings.
+
+Submit your residual function, fitted parameters, total squared residual, and convergence status. Compare the parameters with the reference values. Include one plot showing the data, interpolation, and fitted LJ curve. Why can fitting the LJ form improve these estimates?
+
+```{=latex}
+\newpage
+```
+
+## Problem 4 · Fitting LJ parameters to quantum cluster energies — 30 marks
+
+We can also fit LJ parameters to energies calculated using quantum chemistry, such as density functional theory (DFT), which we will cover later in the course. Each cluster has given atomic coordinates and a reference energy. The clusters contain the same element, but their numbers of atoms and pair distances may differ. Use the [A2 Q4 interactive demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a2_q4_lj_fit.html) to complete the residual and fitting steps.
+
+For cluster $k$, let $n_k$ be its number of atoms. Its coordinates are an $n_k\times3$ array, with one row $[x,y,z]$ per atom in Å. The LJ total energy is the sum over all unique pairs,
+
+$$
+E_k^{\mathrm{LJ}}(\varepsilon,\sigma)
+=\sum_{i<j}^{n_k}4\varepsilon\left[\left(\frac{\sigma}{r_{ij}}\right)^{12}-\left(\frac{\sigma}{r_{ij}}\right)^6\right],
+\qquad r_{ij}=\lVert\mathbf r_i-\mathbf r_j\rVert.
+$$
+
+As in A1, exclude self-pairs and use no cutoff or periodic boundaries. The supplied quantum energy $E_k^{\mathrm{QM}}$ will be an **interaction energy relative to separated atoms**, in eV. This gives it the same energy reference as the LJ sum. Keep the coordinates fixed while fitting one shared pair of parameters to all clusters.
+
+### 4.1 Squared residual
+
+For $N$ clusters, use the total squared residual
+
+$$
+E(\varepsilon,\sigma)=\sum_{k=1}^{N}\left[\frac{E_k^{\mathrm{QM}}}{n_k}-\frac{E_k^{\mathrm{LJ}}(\varepsilon,\sigma)}{n_k}\right]^2.
+$$
+
+In your own words, describe what this residual measures and why each cluster energy is divided by $n_k$. What are the unknowns we need to determine?
+
+### 4.2 Implement the residual
+
+The scaffold supplies `calculate_cluster_energy(coords, epsilon, sigma)`. Complete `cluster_residual(parameters, clusters)` and submit your function. Use the first two clusters to check your implementation.
+
+The supplied demo uses 100 shuffled Ar₃–Ar₇ structures with fixed coordinates and PBE-D3(BJ) interaction energies. The notebook embeds the EXTXYZ data so the browser activity does not depend on a separate file request.
+
+### 4.3 Fit ten clusters
+
+Use `minimize` to fit the first ten clusters in the supplied order. Report your starting parameters, method, fitted parameters, total squared residual, and convergence status.
+
+### 4.4 Increase the dataset
+
+Repeat the fit using the first 20, 30, 40, and 50 clusters, if available. Tabulate $N$, the fitted parameters, and the root-mean-square error per atom,
+
+$$
+\mathrm{RMSE}=\sqrt{\frac{E}{N}}.
+$$
+
+Do the parameters become approximately stable as more clusters are included? Distinguish this from the optimizer reaching its stopping criterion. Try another positive starting pair to check whether it reaches the same fit.
+
+### 4.5 Parity plot
+
+For the largest dataset, plot the quantum energy per atom on the horizontal axis and the fitted LJ energy per atom on the vertical axis. Use the same limits and scale on both axes, and draw the diagonal $y=x$. A perfect fit would place every point on this diagonal. Comment on the agreement and any systematic deviations. Does one pair of LJ parameters describe all the given clusters well?
+
+### Q4 interactive demo {#q4-interactive-demo}
+
+::: {.content-visible when-format="html"}
+::: {.quarto-wasm-local notebook="assignments/A2/a2_q4_lj_fit.edit.py" view="edit" title="A2 Q4 · Fit LJ parameters to quantum cluster energies" height="1250" loading="lazy" fullscreen="true"}
+**Static fallback.** The activity checks the residual against a two-cluster reference, lets you vary the number of fitting clusters and trial parameters, and unlocks the `minimize` learning curve after the fitting call returns an optimizer result. A green check reports MAE below 5 meV/atom for the selected training set. The final panel compares the 100-cluster fit with a held-out Ar₂₀ DFT structure; this is an extrapolation check rather than another training point.
+:::
+:::
