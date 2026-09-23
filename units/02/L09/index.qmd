@@ -249,7 +249,7 @@ The $N$ pairs $(x_i,y_i)$ are known, so every entry in the matrix and on the rig
 This gives another connection to **systems of equations**. In L08, the equations required the curve to match each point. Here they express the condition that the overall squared error is minimized.
 :::
 
-![An illustrative quadratic SSE landscape in two parameters. The tilted elliptical contours surround the minimum, marked by a star.](../../../assets/L09-error-landscape.png){#fig-lsr-objective fig-alt="Tilted elliptical contours of a generic quadratic SSE objective on a0 and a1 axes, with a star marking its minimum." width="80%"}
+![An illustrative quadratic SSE landscape in two parameters. The tilted elliptical contours surround the minimum, marked by a star.](../../../assets/L09-error-landscape.png){#fig-lsr-objective fig-alt="Tilted elliptical contours of a generic quadratic SSE objective on a0 and a1 axes, with a star marking its minimum." width="45%"}
 
 The sum-of-squares objective is nonlinear in the coefficients, but its first-derivative equations are linear. This is why a straight-line fit can be calculated directly, without choosing an iterative starting guess.
 
@@ -311,7 +311,7 @@ residual = y - f_hat(x)
 
 `np.polyfit` returns coefficients from **highest power to constant**, meaning $a_1,a_0$ for a straight line. `np.poly1d` turns those coefficients into a function we can evaluate.
 
-NumPy's newer `Polynomial.fit` interface rescales the inputs internally to reduce numerical difficulties from large input values or offsets and returns an object that we can evaluate like a function. This is the interface we will use:
+NumPy's `np.polynomial.Polynomial` class provides a `.fit` method that rescales the inputs internally to reduce numerical difficulties from large input values or offsets. It returns an object that we can evaluate like a function. This is the interface we will use:
 
 ```{.python code-fold="false"}
 from numpy.polynomial import Polynomial
@@ -447,6 +447,13 @@ residual = y - f_hat(x)
 
 **Quick check:** why does the smaller SSE at degree 10 alone give us insufficient evidence to prefer it over degree 3?
 
+::: {.callout-important}
+## Two clues when checking a fit
+
+- **A visible pattern in the residual plot** suggests that the model has missed structure in the data. The model may be underfitting; for example, a straight line cannot capture the cubic trend in the demo.
+- **Many near-zero high-order polynomial coefficients** suggest that the chosen degree may include terms that contribute little to the fitted curve. A needlessly flexible polynomial can overfit the noise. Check prediction on data not used for fitting, and remember that coefficient magnitudes depend on the scale of $x$.
+:::
+
 ## Fitting nonlinear equations
 
 ### Method 1: Linearization
@@ -455,7 +462,7 @@ A curved relation can sometimes be transformed into a straight line. You have al
 
 - **The power-law error trend in L02:** $E(N)=CN^{-p}$ becomes $\ln E=\ln C-p\ln N$. Plotting $\ln E$ against $\ln N$ gives a straight line with intercept $\ln C$ and slope $-p$.
 - **The bitumen viscosity model:** $\mu(T)=\alpha T^{-p}$ becomes $\ln\mu=\ln\alpha-p\ln T$. Here the straight line has intercept $\ln\alpha$ and slope $-p$.
-- **The van der Waals equation, with $a$ known:** $(P+a/v^2)(v-b)=RT$ can be rearranged as $v(P+a/v^2)-RT=b(P+a/v^2)$. If we define $X=v(P+a/v^2)-RT$ and $Y=P+a/v^2$, then $Y=X/b$. A line through the origin has slope $1/b$. This construction requires a known $a$ to calculate $X$ and $Y$, and measurement errors can enter both transformed quantities.
+- **The Arrhenius relation:** $k(T)=A\exp[-E_a/(RT)]$ becomes $\ln k=\ln A-(E_a/R)(1/T)$. Plotting $\ln k$ against $1/T$ gives a straight line with intercept $\ln A$ and slope $-E_a/R$.
 
 For many nonlinear formulas, we can first rewrite the relation in linear terms and perform linear least-squares regression. The resulting coefficients can be calculated directly, avoiding the starting guess and iterative search required for a nonlinear fit. The transformation also changes how measurement errors enter the fitting problem, so we need to examine the residuals in both the transformed and original variables.
 
@@ -541,7 +548,13 @@ $$
 E(p_0,p_1,\ldots)=\sum_{i=1}^{N}\left[y_i-\hat f(x_i;p_0,p_1,\ldots)\right]^2.
 $$
 
-The $x_i,y_i$ values remain fixed while the optimizer adjusts the parameters. SciPy provides several interfaces for this calculation:
+The $x_i,y_i$ values remain fixed while the optimizer adjusts the parameters. The three functions below are in SciPy's `scipy.optimize` module, which we import as follows:
+
+```{.python code-fold="false"}
+from scipy.optimize import curve_fit, minimize, least_squares
+```
+
+They are library functions supplied by SciPy, not built into Python or NumPy:
 
 - [`curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html) is a convenient choice for a parameterized curve. Supply the model, data, and starting parameters. It constructs the least-squares problem for you.
 - [`minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) accepts a scalar objective function. We can supply the entire squared-error sum ourselves, using a vector of parameters as the optimization variable.
@@ -706,11 +719,11 @@ For computation, use `lstsq` rather than explicitly forming an inverse of $\Phi^
 
 ## Which Python function should I call?
 
-Curve fitting covers more than we can study in a 50-minute class. For the problems introduced here, the following functions provide useful starting points:
+Curve fitting covers more than we can study in a 50-minute class. For polynomial fitting, we recommend the `np.polynomial.Polynomial` class and its `fit` method. `np.polyfit` is an older convenience function, included earlier because it appears in many existing tutorials. For the problems introduced here, the following functions provide useful starting points:
 
 | Model or task | Function | What you supply |
 |---|---|---|
-| Straight line or low-degree polynomial | `Polynomial.fit` or `np.polyfit` | Data and degree |
+| Straight line or low-degree polynomial | `np.polynomial.Polynomial.fit` | Data and degree |
 | Parameterized nonlinear curve | `scipy.optimize.curve_fit` | Model, data, starting parameters; optional uncertainties and bounds |
 | General scalar objective | `scipy.optimize.minimize` | Objective function and starting parameters |
 
@@ -720,6 +733,9 @@ For more flexibility in how the model or residuals are constructed:
 |---|---|---|
 | Specified linear combination of basis functions | `np.linalg.lstsq` | Design matrix and observations |
 | Custom residual vector | `scipy.optimize.least_squares` | Residual function and starting parameters |
+| Square linear system, including a Newton step using a Jacobian | `np.linalg.solve` | Square matrix and right-hand side |
+
+For an objective $E(\mathbf p)$, the partial derivatives $\partial E/\partial p_j$ form its **gradient vector**. For a system of equations $F_i(\mathbf p)=0$, the **Jacobian matrix** has entries $J_{ij}=\partial F_i/\partial p_j$. In a Newton step, we solve $J\,\Delta\mathbf p=-\mathbf F$. If $\mathbf F=\nabla E$, this Jacobian is the Hessian matrix of second derivatives of $E$. `np.linalg.solve` solves the resulting linear system; it does not calculate the Jacobian or minimize the objective by itself.
 
 Always remember, **a minimum does not require the residuals to be zero**. At a smooth, unconstrained interior minimum, the derivatives of the **overall objective** with respect to the parameters are zero. Individual residuals can remain nonzero.
 

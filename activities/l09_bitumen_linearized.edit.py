@@ -29,7 +29,7 @@ def introduction(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def data(np):
     # Rounded values from scripts/l09_intro_figures.py; no measured paper data.
     T = np.array([

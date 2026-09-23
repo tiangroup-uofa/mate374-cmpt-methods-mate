@@ -64,7 +64,7 @@ $$
 F(x)=\ln\frac{x}{1-x}+H(1-2x)=0.
 $$
 
-Here, $H$ is a dimensionless parameter measuring the energetic penalty for mixing A and B relative to the thermal contribution. We will use numerical methods to solve this nonlinear model. The programming part of the question can be assisted by the [A2 Q2 interactive demo below](#q2-interactive-demo).
+Here, $H$ is a dimensionless parameter measuring the energetic penalty for mixing A and B relative to the thermal contribution. We will use numerical methods to solve this nonlinear model. The programming part of the question can be assisted by the [A2 Q2 interactive demo below](#q2-interactive-demo). <No, this is not correct, the link should be exactly https://.../wasmlocal/...html>
 
 ### 2.1 Central root
 
@@ -87,11 +87,14 @@ Physically, $H>2.0$ is the condition for two additional roots to appear, corresp
 
 ### 2.4 Fixed-point solution
 
-For $H=2.5$, find the upper root $x_{\beta}$ ($x_{\beta}\in(0.5,1.0)$) using fixed-point iteration, starting from $x_0=0.9$. Stop when $|x_{n+1}-x_n|<10^{-4}$. Report the number of updates, the final value of $x_{\beta}$ to five significant figures, and the residual $F(x_{\beta})$. Use the demo's Q2.4 section to record the fixed-point iterates. If you implement your own code, include it below.
+For $H=2.5$, find the upper root $x_{\beta}$ ($x_{\beta}\in(0.5,1.0)$) using fixed-point iteration, starting from $x_0=0.9$. Stop when $|x_{n+1}-x_n|<10^{-4}$. Report the number of updates, the final value of $x_{\beta}$ to **five significant digits**, and the residual $F(x_{\beta})$. Use the demo's Q2.4 section to record the fixed-point iterates. If you implement your own code, include it below.
+
+
+<apparently the demo should only be inside the html output>
+::: {.content-visible when-format="html"}
 
 ### Q2 interactive demo {#q2-interactive-demo}
 
-::: {.content-visible when-format="html"}
 ::: {.quarto-wasm-local notebook="assignments/A2/a2_q2_miscibility.edit.py" view="edit" title="A2 Q2 · Fixed-point map and miscibility-gap compositions" height="1180" loading="lazy" fullscreen="true"}
 **Static fallback.** Rearrangement gives $g(x;H)=1/[1+\exp(H(1-2x))]$. At $H=1.5$, the only intersection is $x=0.5$. At $H=2.5$, the intersections are approximately $x=0.1448$, $0.5$, and $0.8552$. Starting from $x_0=0.9$ at $H=2.5$, the step tolerance $10^{-4}$ is met after 12 updates, at $x_{12}\approx0.85532$ with $F(x_{12})\approx3.6\times10^{-4}$.
 :::
