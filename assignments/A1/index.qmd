@@ -55,7 +55,7 @@ Use the [L03 bit explorer](https://tiangroup-uofa.github.io/mate374-cmpt-methods
 \newpage
 ```
 
-## Problem 3 · Find and test a method for computing π — 25 marks
+## Problem 3 · Find and test a method for computing pi — 25 marks
 
 ### 3.1 Find a method
 
