@@ -1,0 +1,70 @@
+---
+title: "Lxx · Lecture title"
+subtitle: "The engineering question or numerical method in focus"
+body-classes: lecture-page
+---
+
+<!--
+AGENT-ONLY SCAFFOLD. Adapt this outline to a student-facing lecture note in
+units/NN/Lxx/index.qmd. Replace every placeholder and remove authoring notes.
+Keep this scaffold in `templates/`. Do not render it or export it as PDF.
+-->
+
+::: {.callout-note}
+## Central question
+
+State the engineering or materials question that organizes the lecture.
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Explain** ...
+2. **Calculate** ...
+3. **Compare** ...
+4. **Check** ...
+
+## Opening problem
+
+Begin with a physical observation, materials example, or engineering decision. Show why a model or numerical method is needed before naming the algorithm.
+
+## First main idea
+
+Introduce the quantities students know, the model or function form they choose, and the unknowns they must determine. Expand unfamiliar notation in a concrete example before using compact notation.
+
+$$
+\boxed{\text{Write the relation students need to interpret or calculate}}
+$$
+
+Use a small number of broad sections to develop the argument. Add a subsection when it helps compare distinct cases or methods.
+
+### A worked case
+
+Show enough intermediate reasoning for students to follow how the data and assumptions become a calculation. Keep the physical meaning close to the equations.
+
+### A second case or method
+
+Explain why the second case follows from the first. Compare assumptions, results, cost, or limitations where that comparison helps answer the central question.
+
+## Python calculation
+
+Show the numerical call students should learn to read or adapt. Explain its inputs and connect the returned result to the physical quantities. Collapse supporting or plotting code where appropriate.
+
+## Materials interpretation and credibility check
+
+Interpret the result using the checks relevant to this problem: units, limiting behavior, residuals, refinement, conservation, uncertainty, or comparison with evidence.
+
+## What to keep
+
+End with three to five specific findings that preserve the lecture's argument.
+
+## Check your understanding
+
+1. Ask for an interpretation of a result.
+2. Ask students to compare methods or diagnose an assumption.
+3. Connect the final question to the next lecture.
+
+## Next
+
+Explain in a short paragraph why the next topic is needed.

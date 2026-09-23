@@ -1,0 +1,53 @@
+---
+title: "Sxx · Seminar title"
+subtitle: "The calculation or computational practice students will work through"
+body-classes: lecture-page seminar-page
+---
+
+<!--
+AGENT-ONLY SCAFFOLD. Adapt this outline to a student-facing seminar in
+seminars/Sxx-topic/index.qmd. Center the session on student practice and
+feedback. Extend the lecture with calculations, implementation, and
+interpretation. Remove authoring notes. Keep this scaffold in `templates/`.
+Do not render it or export it as PDF.
+-->
+
+## Learning outcomes
+
+By the end of this seminar, you should be able to:
+
+1. **Formulate** a calculation from the supplied data and assumptions.
+2. **Calculate** the requested result by hand or with Python.
+3. **Check** the result using a residual, unit, limiting case, or reference.
+
+## Connection to the lecture
+
+Briefly identify the idea from lecture that students will use. State the materials or engineering question for today's work and list the known data, assumptions, and required result.
+
+## Before calculating
+
+Give students a short prediction, sketch, estimate, or choice to make before showing a method or code. Explain what evidence they should use to support the prediction.
+
+## Exercise 1 · [specific task]
+
+State the task, supplied data, units, and expected work product. Break the calculation into clear steps when students need to develop equations before entering them in Python.
+
+### Set up the model
+
+Show how the known quantities and chosen function or algorithm lead to the unknowns. Define notation and include the equations needed for the work.
+
+### Calculate in Python
+
+Provide the essential editable call or short code block. Explain the inputs and what the returned values mean. Keep plotting and other support code out of the way when it does not help students learn the calculation.
+
+### Check the result
+
+Ask students to test a residual, limiting case, unit, or comparison with a reference result. State what a successful check should show.
+
+## Exercise 2 · [comparison or extension]
+
+Use a second task to change one assumption, method, or data set. Ask students to compare the effect and explain the physical or numerical reason.
+
+## Record and discuss
+
+Specify the values, plots, equations, or short explanations students should keep. End with one question that reveals a common misconception or prepares the next class.

@@ -1,0 +1,67 @@
+---
+title: "MAT E 374 Assignment N"
+subtitle: "The topics and skills assessed"
+---
+
+<!--
+AGENT-ONLY SCAFFOLD. Use this single source to prepare two separate files:
+1. the student handout at assignments/AN/index.qmd;
+2. the worked answer key at answer-keys/AN/answers.qmd.
+Keep the answer-key material out of the student handout. Replace all
+placeholders and remove authoring notes. Keep this scaffold in `templates/`.
+Do not render it or export it as HTML or PDF.
+-->
+
+<!-- BEGIN STUDENT HANDOUT SOURCE -->
+
+**Due:** [day, date, and time] via [submission method]
+
+Submit [file format and required contents]. Include units, calculations, code, plots, and explanations requested below. State any rounding or formatting expectations.
+
+## Learning outcomes assessed
+
+This assignment assesses your ability to:
+
+- **Calculate** ...
+- **Implement** ...
+- **Interpret** ...
+
+## Problem 1 · [materials or engineering question] — [marks]
+
+Provide the context, known data, assumptions, and requested result. Include units with every quantity.
+
+### 1.1 [specific task] — [marks]
+
+State exactly what students should calculate, derive, implement, or explain. Identify the work they should submit.
+
+### 1.2 [diagnostic or comparison task] — [marks]
+
+Ask students to interpret or check the result. Specify any comparison, tolerance, or evidence required.
+
+## Problem 2 · [second question] — [marks]
+
+Continue with a related task or assess a distinct outcome. Make the mark allocation and expected deliverables clear.
+
+<!-- END STUDENT HANDOUT SOURCE -->
+
+<!-- BEGIN ANSWER KEY SOURCE: move to answer-keys/AN/answers.qmd -->
+
+# Instructor answer key
+
+Use the same problem numbering as the student handout. Show a correct method, intermediate reasoning, units, and final answers. Include acceptable alternatives and grading guidance where the question allows more than one defensible response.
+
+## Problem 1
+
+### 1.1
+
+Give the worked calculation or response. State the expected result and any assumptions that affect it.
+
+### 1.2
+
+Explain the diagnostic or comparison, including what a correct check should show.
+
+## Problem 2
+
+Provide the worked solution and the evidence needed to award full credit.
+
+<!-- END ANSWER KEY SOURCE -->

@@ -23,6 +23,7 @@ project:
     - "assignments/**/*.qmd"
     - "project/**/*.qmd"
     - "seminars/**/*.qmd"
+    # Agent scaffolds stay out of site HTML and PDF render targets.
     - "!templates/**"
 
 website:
