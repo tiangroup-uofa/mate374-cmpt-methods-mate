@@ -17,3 +17,6 @@ __pycache__/
 
 **/*.quarto_ipynb
 **/index_files/
+
+# Obsolete exploratory DFT work; final A2 records live under assignments/A2/calculations/.
+/calculations/
