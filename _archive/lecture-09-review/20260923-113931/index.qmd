@@ -15,8 +15,8 @@ body-classes: lecture-page
 By the end of this lecture, you should be able to:
 
 1. **Formulate** a fitting problem by identifying the known data, unknown parameters, residuals, and objective to minimize.
-2. **Fit** a straight line, a low-degree polynomial, and a viscosity power law using NumPy or SciPy.
-3. **Compare** a linearized power-law fit with direct nonlinear least squares by the residuals each method minimizes.
+2. **Fit** a straight line, a low-degree polynomial, and an Arrhenius relation using NumPy or SciPy.
+3. **Compare** a linearized Arrhenius fit with direct nonlinear least squares by the residuals each method minimizes.
 4. **Assess** a fitted model using residual patterns, parameter units, data range, and independent checks.
 
 ## From interpolation to an overall fit
@@ -416,7 +416,7 @@ For ordinary least squares with an intercept, evaluated on the fitted data, $R^2
 
 The same formula can be calculated for nonlinear models, but its usual linear-regression interpretation does not automatically carry over. It can be negative for a poor prediction or on new data, and is undefined when every observed $y_i$ is identical.
 
-An $R^2$ calculated for $\ln y$ measures a different quantity from one calculated for $y$. Neither establishes that the chosen function describes the underlying physics.
+An $R^2$ calculated for $\ln y$ measures a different quantity from one calculated for $y$. Neither establishes that a fitted activation energy is physically meaningful.
 :::
 
 **Rule of thumb: always plot the residuals as well**
@@ -427,19 +427,24 @@ An $R^2$ calculated for $\ln y$ measures a different quantity from one calculate
 
 A residual is small only relative to the accuracy the application needs. Data not used for fitting provide a stronger prediction check than the same data used to choose the coefficients.
 
-## Fitting nonlinear equations
+## Fitting non-linear equation
 
 ### Method 1: Linearization
 
-A curved relation can sometimes be transformed into a straight line. You have already met a few examples:
+A curved relation can sometimes be transformed into a straight line. You have already met a few examples <below should be a bullet points>
 
-- **The power-law error trend in L02:** $E(N)=CN^{-p}$ becomes $\ln E=\ln C-p\ln N$. Plotting $\ln E$ against $\ln N$ gives a straight line with intercept $\ln C$ and slope $-p$.
-- **The bitumen viscosity model:** $\mu(T)=\alpha T^{-p}$ becomes $\ln\mu=\ln\alpha-p\ln T$. Here the straight line has intercept $\ln\alpha$ and slope $-p$.
-- **The van der Waals equation, with $a$ known:** $(P+a/v^2)(v-b)=RT$ can be rearranged as $v(P+a/v^2)-RT=b(P+a/v^2)$. If we define $X=v(P+a/v^2)-RT$ and $Y=P+a/v^2$, then $Y=X/b$. A line through the origin has slope $1/b$. This construction requires a known $a$ to calculate $X$ and $Y$, and measurement errors can enter both transformed quantities.
+- in L02: a power-law error trend $E(N)=CN^{-p}$ appears as a straight line on log–log axes.
+  this writen as logE = C -p logN
+- the bitumen viscosity example we showed, also similar form mu = alphaT^-p, to log form
+log .. <expand>
+- the vdW equation of state: nonlinear form (P + av^2)(v-b) = RT, write is as linear form
+  .... <here we wil need to use 1/b>
 
-For many nonlinear formulas, we can first rewrite the relation in linear terms and perform linear least-squares regression. The resulting coefficients can be calculated directly, avoiding the starting guess and iterative search required for a nonlinear fit. The transformation also changes how measurement errors enter the fitting problem, so we need to examine the residuals in both the transformed and original variables.
+For many non-linear formula, it is possible to first rewrite the formula into linear terms, perform a linear LSR. Which typically will be more stable than directly use the non-linear eq to do a LSR
 
-@tbl-linearizing-models lists several common transformations. In each row, fit a straight line to the transformed data $(X_i,Y_i)$, then recover the original parameters from its intercept $a_0$ and slope $a_1$.
+In each row below, fit $Y=a_0+a_1X$ and then recover the original parameters.
+
+<this table better be able to link!>
 
 | Original relation | $X$ | $Y$ | Recover the parameters |
 |---|---|---|---|
@@ -449,176 +454,80 @@ For many nonlinear formulas, we can first rewrite the relation in linear terms a
 | $y=mx/(b+x)$ | $1/x$ | $1/y$ | $m=1/a_0$, $b=a_1/a_0$ |
 | $k=Ae^{-E_a/(RT)}$ | $1/T$ | $\ln k$ | $A=e^{a_0}$, $E_a=-Ra_1$ |
 
-: Transformations for fitting a straight line to a nonlinear relation. {#tbl-linearizing-models}
+<Instead of the arrhenius problem, let's just use th bitumen example!>
 
-Logarithms require positive values, and reciprocals require nonzero values. For quantities with units, we take logarithms of their numerical values in stated reference units, such as $\ln[T/(1\ \mathrm{K})]$ and $\ln[\mu/(1\ \mathrm{Pa\cdot s})]$. The notation $\ln T$ and $\ln\mu$ below uses this convention.
+Let's use the bitumen example to demonstrate this. 
 
-### Linearization of the bitumen problem
 
-Let's use the bitumen example to follow the calculation step by step.
+### Linearization of bitumen problem
 
-1. **What nonlinear equation do we want to fit?** The known data are the temperatures $T_i$ and viscosities $\mu_i$. Our chosen function is
+1) What nonlinear equation we want to fit?
 
-   $$
-   \hat f(T)=\alpha T^{-p},
-   $$
+<mu = alpha T^-p>
 
-   with unknown parameters $\alpha$ and $p$.
+2) How do we linearize it?
 
-2. **How do we linearize it?** This is the power-law row of @tbl-linearizing-models, with $b=\alpha$ and $m=-p$. Define
+This falls into the category of $y=bx^m$, so we do the trasformation
 
-   $$
-   X_i=\ln T_i,\qquad Y_i=\ln\mu_i.
-   $$
+X = ln T
+Y = ln mu
 
-   The transformed fitted function is
+Y = ln b + m X
 
-   $$
-   \hat f_{\log}(X)=\ln\alpha-pX=a_0+a_1X.
-   $$
+This is a linear equation with a0 = lnb and a1 = m
 
-   Thus $a_0=\ln\alpha$ and $a_1=-p$.
+3) Use the numpy's polynomial solver
 
-3. **Use NumPy's polynomial solver.** Convert the data before fitting the line:
+remember first convert T and mu to X, Y, and then use
 
-   ```{.python code-fold="false"}
-   X = np.log(T)
-   Y = np.log(mu)
-   log_fit = Polynomial.fit(X, Y, deg=1)
-   a0, a1 = log_fit.convert().coef
-   ```
+4) Recover
 
-4. **Recover the original coefficients.** The table gives $\alpha=e^{a_0}$ and $p=-a_1$:
+use the same table to recover the original coefficients
 
-   ```{.python code-fold="false"}
-   alpha = np.exp(a0)
-   p = -a1
+b = e^lnb; m = m
 
-   def f_hat(T):
-       return alpha * T**(-p)
-   ```
+5) perform residual analysis, 
 
-5. **Perform residual analysis.** The fit minimizes the squared log residuals. We can also calculate residuals in the original viscosity units:
+<The demo here is basically a full multiple editable notebook to show, nothing fancy drag, just show how to do step by step, the data should just be normal array after you extract from previous script, no pandas; the plotting cell can hide. the part where we do the fitting should be shown>
 
-   ```{.python code-fold="false"}
-   log_residual = Y - log_fit(X)
-   residual = mu - f_hat(T)
-   ```
+### Direct nonlinear least squares in Python
 
-The notebook uses the same four synthetic series as the introductory figure, stored as ordinary NumPy arrays. The data, transformation, fit, and recovered parameters are in separate editable cells, with the plotting code collapsed.
+We can, of course directly the nonlinear form to perform the fitting. This is simply to write the fitting as a multivariable optimization for the residual problem
 
-::: {.quarto-wasm-local notebook="l09_bitumen_linearized.edit.py" view="edit" title="Fit the bitumen power law by linearizing the data" height="1000" loading="lazy" fullscreen="true"}
-The transformed fit gives $p\approx7.7885$ and $\hat f(298\ \mathrm{K})\approx97.45\ \mathrm{Pa\cdot s}$.
+E = sum (y_i - f_non_linear(x))^2
 
-![The linearized power-law fit and its residuals in viscosity units.](../../../assets/L09-bitumen-linearized.png){fig-alt="A decreasing power-law curve through scattered viscosity data, beside the signed viscosity residuals."}
-:::
+where f_nonlinear can have multiple parameters (p0, p1, ....). Since it is just a minimization problem with multivariable inputs, we can have several awys
 
-### Method 2: Direct nonlinear least squares in Python
+<is curve_fit still recommended way??
+>
+<we can first construct the residual function / often called the objective function, plugin in the `scipt.optimize.minimize` (a multivariable version of `minimize`)>
 
-We can also fit the nonlinear function directly. This is a multivariable optimization problem in the model parameters $p_0,p_1,\ldots$:
+In the case of the viscosity test, we can write the fitting directly in non-linear fitting way 
 
-$$
-E(p_0,p_1,\ldots)=\sum_{i=1}^{N}\left[y_i-\hat f(x_i;p_0,p_1,\ldots)\right]^2.
-$$
+<still a editable notebook, similar to above>
 
-The $x_i,y_i$ values remain fixed while the optimizer adjusts the parameters. SciPy provides several interfaces for this calculation:
 
-- [`curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html) is a convenient choice for a parameterized curve. Supply the model, data, and starting parameters. It constructs the least-squares problem for you.
-- [`minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) accepts a scalar objective function. We can supply the entire squared-error sum ourselves, using a vector of parameters as the optimization variable.
-- [`least_squares`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html) accepts the vector of residuals and provides more control over a least-squares calculation.
-
-For the bitumen model, $\alpha$ is numerically very large when $T$ is in kelvin. We can keep the fitted parameters on more manageable scales by writing the same power law as
-
-$$
-\hat f(T)=A\left(\frac{T}{T_{\mathrm{ref}}}\right)^{-p},
-\qquad T_{\mathrm{ref}}=298\ \mathrm{K},
-\qquad \alpha=A T_{\mathrm{ref}}^p.
-$$
-
-Now $A$ is the fitted viscosity at $298\ \mathrm{K}$, in $\mathrm{Pa\cdot s}$, and $p$ is dimensionless. This reparameterization preserves the original viscosity-space objective:
-
-$$
-E(A,p)=\sum_{i=1}^{N}\left[\mu_i-A\left(\frac{T_i}{T_{\mathrm{ref}}}\right)^{-p}\right]^2.
-$$
-
-The fitting call is
-
-```{.python code-fold="false"}
-from scipy.optimize import curve_fit
-
-T_ref = 298.0
-
-def power_law(T, A, p):
-    return A * (T / T_ref)**(-p)
-
-parameters, covariance = curve_fit(
-    power_law, T, mu, p0=[100.0, 8.0], bounds=(0, [np.inf, 50.0])
-)
-A, p = parameters
-```
-
-Here `p0` supplies the starting values of $A$ and $p$. The bounds require nonnegative parameters and limit the exponent to $50$, a broad range for this example. `covariance` is an approximate parameter-covariance matrix based on the local fit and its error assumptions.
-
-The notebook below also constructs the scalar objective explicitly and passes it to `minimize`. Both calls use the same model, data, starting values, and bounds, so their results should agree when they reach the same minimum.
-
-::: {.quarto-wasm-local notebook="l09_bitumen_direct.edit.py" view="edit" title="Fit the bitumen power law directly with curve_fit and minimize" height="1100" loading="lazy" fullscreen="true"}
-```{.python code-fold="false"}
-from scipy.optimize import minimize
-
-def objective(parameters):
-    return np.sum((mu - power_law(T, *parameters))**2)
-
-result = minimize(
-    objective, x0=[100.0, 8.0], method="L-BFGS-B",
-    bounds=[(0, None), (0, 50)],
-)
-print(result.success, result.message)
-print(result.x)
-```
-
-The direct fit gives $p\approx7.5893$ and $A\approx97.25\ \mathrm{Pa\cdot s}$.
-
-![The direct nonlinear power-law fit and its residuals in viscosity units.](../../../assets/L09-bitumen-direct.png){fig-alt="A directly fitted decreasing power law through the viscosity data, beside the signed viscosity residuals."}
-:::
 
 ### Compare the two methods
 
-The fitted curves are similar for these data, but their exponents differ. The reason is that the two methods minimize different quantities:
+<compare the above 2 methods, I believe not much difference in the case of nonlinearity for this, but the p value may change>
 
-$$
-\begin{aligned}
-E_{\log}&=\sum_{i=1}^{N}\left[\ln\mu_i-\ln\hat f(T_i)\right]^2,
-&&\text{linearized fit},\\
-E_{\mu}&=\sum_{i=1}^{N}\left[\mu_i-\hat f(T_i)\right]^2,
-&&\text{direct fit}.
-\end{aligned}
-$$
+but can comment that in a high dimensional parameter space it can be difficult for a nonlinear to converge, while linearizable form is always known to converge!
 
-| Fit | $p$ | $\hat f(298\ \mathrm{K})$ ($\mathrm{Pa\cdot s}$) | Viscosity-space SSE ($\mathrm{(Pa\cdot s)^2}$) | Log-space SSE |
-|---|---:|---:|---:|---:|
-| Linearized | 7.7885 | 97.45 | 4305.03 | **1.60183** |
-| Direct nonlinear | 7.5893 | 97.25 | **4272.26** | 1.63623 |
-
-Each fit gives the smaller value of the objective it minimizes. Since $\ln\mu_i-\ln\hat f(T_i)=\ln[\mu_i/\hat f(T_i)]$, the logarithmic fit compares ratios. For small discrepancies, this is approximately a relative error. The direct fit compares absolute viscosity differences, so the larger viscosities can contribute more strongly to its objective when relative scatter is similar.
-
-A linearized fit can be solved directly when the transformed inputs determine independent coefficients. A nonlinear fit may be more sensitive to starting values, parameter scales, and multiple minima, especially as the number of parameters grows. Linearization avoids that iterative search, but repeated transformed inputs or poorly separated coefficient effects can still prevent a reliable solution. The appropriate fit depends on which error model describes the measurements.
-
-**Quick check:** if the measurements have roughly constant percentage uncertainty, which of these two objectives better reflects that uncertainty?
+<I'll keep the following as a bonus topic, only to be connected to our later system of eqns>
 
 ## (Bonus topic) General linear least squares
-
-The two-coefficient line fit extends to a larger system of equations when we add more coefficients. This connection will return in the next unit.
 
 A model can curve with $x$ and still be **linear in its unknown coefficients**. For example,
 
 $$
-\hat f(x)=a_0+a_1x+a_2x^2
+\hat y(x)=a_0+a_1x+a_2x^2
 $$
 
 is linear in $a_0,a_1,a_2$. More generally,
 
 $$
-\boxed{\hat f(x)=a_0\phi_0(x)+a_1\phi_1(x)+\cdots+a_{p-1}\phi_{p-1}(x)
+\boxed{\hat y(x)=a_0\phi_0(x)+a_1\phi_1(x)+\cdots+a_{p-1}\phi_{p-1}(x)
 =\sum_{j=0}^{p-1}a_j\phi_j(x).}
 $$
 
@@ -628,7 +537,7 @@ The **basis functions** $\phi_j$ are completely specified before fitting. We adj
 
 ### How large is the system?
 
-Here $p$ denotes the number of unknown coefficients. With $N$ data points and $p$ unknown coefficients, form a **design matrix** with one row per point and one column per basis function:
+With $N$ data points and $p$ unknown coefficients, form a **design matrix** with one row per point and one column per basis function:
 
 $$
 \Phi_{ij}=\phi_j(x_i),\qquad
@@ -642,8 +551,8 @@ NumPy's [`lstsq`](https://numpy.org/doc/stable/reference/generated/numpy.linalg.
 ```{.python code-fold="false"}
 Phi = np.column_stack([np.ones_like(x), x, x**2])
 coefficients, _, rank, singular_values = np.linalg.lstsq(Phi, y, rcond=None)
-f_hat_values = Phi @ coefficients
-residual = y - f_hat_values
+y_hat = Phi @ coefficients
+residual = y - y_hat
 ```
 
 This quadratic has three coefficients, regardless of how many data points we collect. `rank == 3` indicates three independent columns at the solver's numerical threshold. If the columns are dependent, the data cannot determine all coefficients independently.
@@ -686,22 +595,24 @@ For computation, use `lstsq` rather than explicitly forming an inverse of $\Phi^
 
 ## Which Python function should I call?
 
-Curve fitting covers more than we can study in a 50-minute class. For the problems introduced here, the following functions provide useful starting points:
+Curve or data fitting is a big topic that cannot be compacted into a 50 min class, but as a rule of thumb, if you face the choices, here are our suggestions
+
 
 | Model or task | Function | What you supply |
 |---|---|---|
 | Straight line or low-degree polynomial | `Polynomial.fit` or `np.polyfit` | Data and degree |
+
 | Parameterized nonlinear curve | `scipy.optimize.curve_fit` | Model, data, starting parameters; optional uncertainties and bounds |
+
 | General scalar objective | `scipy.optimize.minimize` | Objective function and starting parameters |
 
-For more flexibility in how the model or residuals are constructed:
+Additionaly, if you want more flexibility
 
-| Model or task | Function | What you supply |
-|---|---|---|
 | Specified linear combination of basis functions | `np.linalg.lstsq` | Design matrix and observations |
+
 | Custom residual vector | `scipy.optimize.least_squares` | Residual function and starting parameters |
 
-Always remember, **a minimum does not require the residuals to be zero**. At a smooth, unconstrained interior minimum, the derivatives of the **overall objective** with respect to the parameters are zero. Individual residuals can remain nonzero.
+Alawys remember, **a minimum does not require the residuals to be zero**, as we're only trying to make the derivative of residual with respect to the parameters to 0!
 
 ## Summary of topics in Unit 2
 
@@ -719,6 +630,6 @@ The next step is to handle **several unknowns together**. The spline coefficient
 ## Before the next lecture
 
 1. Write a least-squares objective for fitting $y=a_0+a_1x+a_2x^2$. Identify every known quantity and unknown coefficient.
-2. Explain why fitting $\ln\mu$ and fitting $\mu$ directly can give different exponents $p$, even with the same power law and viscosity data.
+2. Explain why fitting $\ln k$ and fitting $k$ directly can give different activation energies, even with the same Arrhenius law and data.
 3. A degree-six polynomial gives nearly zero residual on seven noisy measurements. What evidence would you need before using it for prediction?
 4. You have 100 measurements and a quadratic model. What are the shapes of the design matrix and the normal-equation matrix? Which Python function would you call?
