@@ -20,8 +20,8 @@ from _marimo_export import (  # noqa: E402
 
 def export_focused():
     notebooks = sorted((ROOT / "activities").glob("l0[89]_*.edit.py"))
-    if len(notebooks) != 8:
-        raise SystemExit("Expected the eight L08/L09 notebooks; review the focused export list.")
+    if len(notebooks) != 9:
+        raise SystemExit("Expected the nine L08/L09 notebooks; review the focused export list.")
     cache = ROOT / ".quarto" / "l08-l09-wasm"
     fingerprint = export_fingerprint(ROOT, notebooks)
     if not cache_is_current(cache, notebooks, fingerprint):

@@ -257,15 +257,23 @@ def extra_figures(phase, line):
     fig.suptitle("Subtract the same 70x trend to see the scatter")
     save(fig, "L09-interpolation-vs-fitting.png")
 
-    intercept, slope = line["fitted"].convert().coef
-    A0, A1 = np.meshgrid(np.linspace(intercept-12, intercept+12, 151), np.linspace(slope-8, slope+8, 151))
-    error = np.sum((y[:, None, None]-A0-A1*x[:, None, None])**2, axis=0)
-    fig, ax = plt.subplots(figsize=(8, 4.5), layout="constrained")
-    contours = ax.contour(A0, A1, error, levels=[60, 100, 200, 400, 800, 1600], cmap="viridis")
-    ax.clabel(contours, fontsize=8, fmt="%g")
-    ax.scatter(intercept, slope, marker="*", s=150, color="tab:red", label=f"Minimum SSE = {line['SSE']:.2f} MPa²")
-    ax.set(xlabel="Intercept a₀ (MPa)", ylabel="Slope a₁ (MPa per mm/m)", title="Choose coefficients to minimize squared residuals")
-    ax.legend(fontsize=9)
+    lsr_landscape_figure()
+
+
+def lsr_landscape_figure():
+    # Illustrative positive-definite quadratic, independent of lecture data.
+    # The cross term tilts the elliptical contours in the two parameters.
+    A0, A1 = np.meshgrid(np.linspace(-3, 4, 301), np.linspace(-4, 3, 301))
+    u, v = A0 - 0.5, A1 + 0.5
+    error = 2 + 3*u**2 + 3.6*u*v + 2*v**2
+    fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
+    contours = ax.contour(A0, A1, error, levels=[3, 5, 9, 17, 29, 45], cmap="viridis")
+    ax.clabel(contours, fontsize=9, fmt="%g")
+    ax.scatter(0.5, -0.5, marker="*", s=180, color="tab:red", zorder=3, label="Minimum")
+    ax.set(xlabel=r"$a_0$", ylabel=r"$a_1$", aspect="equal",
+           title="Typical landscape of residual\n(summed square error, SSE) in LSR")
+    ax.legend(fontsize=10, loc="upper right")
+    ax.spines[["top", "right"]].set_visible(False)
     save(fig, "L09-error-landscape.png")
 
 

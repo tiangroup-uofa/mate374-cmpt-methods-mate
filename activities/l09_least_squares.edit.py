@@ -11,10 +11,26 @@ app = marimo.App(width="medium")
 
 @app.cell(hide_code=True)
 def imports():
+    import marimo as mo
     import numpy as np
     import matplotlib.pyplot as plt
     from numpy.polynomial import Polynomial
-    return Polynomial, np, plt
+    return Polynomial, mo, np, plt
+
+
+@app.cell(hide_code=True)
+def introduction(mo):
+    mo.md(r"""
+    These synthetic data show the strain $\varepsilon$ (mm/m) and stress $\sigma$
+    (MPa) of a material. We want to fit stress as a linear function of strain:
+
+    $$\hat f(\varepsilon)=a_0+a_1\varepsilon.$$
+
+    Here $a_0$ is the stress intercept and $a_1$ is the slope.
+    **How well does the line fit the data?** Compare the fitted curve with the
+    measurements and inspect the residuals.
+    """)
+    return
 
 
 @app.cell

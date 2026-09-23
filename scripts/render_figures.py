@@ -21,6 +21,7 @@ FIGURE_SCRIPTS = (
     "l08_l09_figures.py",
     "l09_intro_figures.py",
     "l09_bitumen_figures.py",
+    "l09_residual_figures.py",
     "l10_figures.py",
     "s04_figures.py",
 )
