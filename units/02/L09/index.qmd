@@ -733,9 +733,8 @@ For more flexibility in how the model or residuals are constructed:
 |---|---|---|
 | Specified linear combination of basis functions | `np.linalg.lstsq` | Design matrix and observations |
 | Custom residual vector | `scipy.optimize.least_squares` | Residual function and starting parameters |
-| Square linear system, including a Newton step using a Jacobian | `np.linalg.solve` | Square matrix and right-hand side |
+| Linear system from setting $\partial E/\partial\mathbf p=\mathbf 0$ | `np.linalg.solve` | Assemble the coefficient matrix and right-hand side yourself |
 
-For an objective $E(\mathbf p)$, the partial derivatives $\partial E/\partial p_j$ form its **gradient vector**. For a system of equations $F_i(\mathbf p)=0$, the **Jacobian matrix** has entries $J_{ij}=\partial F_i/\partial p_j$. In a Newton step, we solve $J\,\Delta\mathbf p=-\mathbf F$. If $\mathbf F=\nabla E$, this Jacobian is the Hessian matrix of second derivatives of $E$. `np.linalg.solve` solves the resulting linear system; it does not calculate the Jacobian or minimize the objective by itself.
 
 Always remember, **a minimum does not require the residuals to be zero**. At a smooth, unconstrained interior minimum, the derivatives of the **overall objective** with respect to the parameters are zero. Individual residuals can remain nonzero.
 
