@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     subprocess.run(["quarto", "render", "answer-keys", "--to", "pdf"], cwd=ROOT, check=True)
-    source = ROOT / "answer-keys/render/A1/A1-answers.pdf"
+    source = ROOT / "answer-keys/render/A1/answers.pdf"
     target = ROOT / "assignments/A1/A1-answers.pdf"
     if not source.is_file():
         raise FileNotFoundError(f"Answer PDF was not produced: {source}")

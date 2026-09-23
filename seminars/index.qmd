@@ -8,5 +8,6 @@ Seminars are practical support sessions. Dates, rooms, and section-specific inst
 - [S01 · Python, marimo, and your first plot](S01-python-numerics/index.qmd)
 - [S02 · How computers write numbers in binary](S02-number-conversion/index.qmd)
 - [S03 · When does repeated updating settle?](S03-fixed-point/index.qmd)
+- [S04 · Interpolation and fitting in Python](S04-interpolation-fitting/index.qmd)
 
 Additional seminar pages will be added when their activities are ready for students.

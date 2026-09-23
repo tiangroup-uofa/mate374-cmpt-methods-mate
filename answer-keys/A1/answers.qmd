@@ -1,17 +1,5 @@
 ---
 title: "MAT E 374 · Assignment 1 answers"
-format:
-  pdf:
-    output-file: A1-answers.pdf
-    toc: false
-    fontsize: 10pt
-    geometry:
-      - margin=0.6in
-    include-in-header:
-      text: |
-        \RedeclareSectionCommand[beforeskip=.6\baselineskip,afterskip=.2\baselineskip]{subsection}
-        \RedeclareSectionCommand[beforeskip=.4\baselineskip,afterskip=.15\baselineskip]{subsubsection}
-        \setlength{\parskip}{2.5pt}
 ---
 
 ## Q1 · Error and computational effort

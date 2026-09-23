@@ -42,6 +42,7 @@ Which volumes satisfy a gas equation, and which state has the lowest free energy
 - [L07 · Finding extrema in one dimension](units/02/L07/index.qmd): minima, maxima, and the preferred material state.
 - [L08 · Fitting data with a function — the exact approach](units/02/L08/index.qmd): interpolation and a sparse phase boundary.
 - [L09 · Approximating data with a function](units/02/L09/index.qmd): least squares and Arrhenius fitting.
+- [L10 · Building a phase diagram program](units/02/L10/index.qmd): a reusable coexistence solver, real-gas comparisons, and the Unit 02 wrap-up.
 
 ## Start here
 

@@ -1,26 +1,12 @@
 ---
 title: "MAT E 374 Assignment 1"
 subtitle: "Error, floating-point precision, convergence, and pair interactions"
-format:
-  html:
-    toc: true
-  pdf:
-    output-file: A1.pdf
-    toc: false
-    fontsize: 10pt
-    geometry:
-      - margin=0.75in
-    include-in-header:
-      text: |
-        \RedeclareSectionCommand[beforeskip=.8\baselineskip,afterskip=.3\baselineskip]{subsection}
-        \RedeclareSectionCommand[beforeskip=.6\baselineskip,afterskip=.2\baselineskip]{subsubsection}
-        \setlength{\parskip}{3pt}
 ---
 
 **Due:** Wednesday, September 23, 2026, at 12:00 pm (noon) via Canvas
 
 ::: {.content-visible when-format="html"}
-[Download the PDF handout](A1.pdf)
+[Download the PDF handout](index.pdf)
 :::
 
 Submit **one PDF answering all four problems** (100 marks), including calculations, requested code snippets, plots, and concise explanations. Keep your full Python scripts; do not submit them.

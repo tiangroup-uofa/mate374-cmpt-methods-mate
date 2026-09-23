@@ -3,6 +3,12 @@ project:
   output-dir: render
   render:
     - A1/answers.qmd
+    - A2/answers.qmd
+# Reuse the canonical assignment PDF options for every answer key.
+metadata-files:
+  - ../assignments/_metadata.yml
+
+# This project renders answer keys as PDF only; the shared metadata supplies
+# the PDF options.
 format:
-  pdf:
-    toc: false
+  pdf: {}

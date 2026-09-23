@@ -1,11 +1,6 @@
 ---
 title: "Assignments"
 subtitle: "Provisional assessment architecture"
-format:
-  html:
-    toc: true
-  pdf:
-    toc: false
 ---
 
 ::: {.callout-note}
