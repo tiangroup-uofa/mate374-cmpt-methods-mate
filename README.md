@@ -10,14 +10,14 @@ Quarto source for the redesigned University of Alberta MATE 374 course. Quarto o
 
 ## Preview or render
 
-For everyday writing, preview HTML or build the HTML site without compiling PDFs:
+The default preview and HTML-only build cover the full site:
 
 ```bash
 quarto preview
 quarto render --to html
 ```
 
-For a complete local check, use the same command as CI:
+Use the full profile to build the complete site:
 
 ```bash
 quarto render --profile full
@@ -34,8 +34,6 @@ Keep both output-format definitions in `_quarto.yml` so page-specific PDF settin
 Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/render_pages.yml). The workflow installs the locked `uv` environment, Quarto, and TinyTeX, then runs `quarto render --profile full` to export notebooks, regenerate scripted figures, stage answer PDFs, render all HTML and PDF pages, and deploy `_site/` with GitHub Pages. The post-render hook generates the agent-facing `llms.txt` index.
 
 Figure generation is managed by [`scripts/render_figures.py`](scripts/render_figures.py), which runs the plotting scripts from source and saved data without rerunning benchmarks. Add new figure generators to its explicit list. To refresh figures without a full site build, run `uv run --locked python scripts/render_figures.py`. Daily HTML builds reuse the existing images.
-
-The workflow caches TinyTeX between runs and installs common KOMA-Script and XeLaTeX packages in one batch. This reduces repeated package downloads during full PDF builds.
 
 The workflow follows the CHE 318 and MATE 664 Pages pattern, with `uv sync --locked` added so local and CI Python environments use the same dependency resolution. The full build also needs `librsvg2-bin` for SVG-to-PDF image conversion. CI still produces the complete site on every push; the HTML-only path speeds up local iteration.
 
@@ -86,7 +84,7 @@ Static fallback for non-HTML output.
 
 `loading="eager"` starts an iframe immediately; the default is `loading="lazy"`. Run-mode `*.py` dashboards expose only requested controls. Editable `*.edit.py` notebooks also receive the **App view / Edit code** control. Every local embed includes a collapsed **Notebook not loading?** panel with direct-open and reload/reset actions.
 
-[`_marimo_export.py`](_marimo_export.py), adapted from MATE 664, exports all notebooks into the generated `wasm-local/` resource directory; Quarto copies it to `_site/wasm-local/`. This pre-render staging makes Quarto preview register every nested CSS, font, worker, and JavaScript asset. The notebooks share one generated marimo `assets/` directory. [`filters/quarto-wasm-local.lua`](filters/quarto-wasm-local.lua) maps the notebook filename to its local HTML output and supplies the iframe attributes.
+[`_marimo_export.py`](_marimo_export.py), adapted from MATE 664, exports notebooks referenced by current course pages into the generated `wasm-local/` resource directory; Quarto copies it to `_site/wasm-local/`. This pre-render staging makes Quarto preview register every nested CSS, font, worker, and JavaScript asset. The notebooks share one generated marimo `assets/` directory. [`filters/quarto-wasm-local.lua`](filters/quarto-wasm-local.lua) maps the notebook filename to its local HTML output and supplies the iframe attributes.
 
 Filename convention:
 

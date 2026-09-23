@@ -16,6 +16,19 @@ OUTPUT_DIR = "wasm-local"
 MANIFEST_NAME = ".marimo-export-manifest.json"
 AUTO_RUN_OPT_OUT = "mate374: auto-run = false"
 BUILD_EXECUTION_OPT_OUT = "mate374: build-execute = false"
+FULL_SITE_QMD_DIRS = (
+    "syllabus",
+    "introduction",
+    "units",
+    "assignments",
+    "project",
+    "seminars",
+)
+LOCAL_WASM_DIV_RE = re.compile(
+    r"(?m)^\s*:{3,}\s*\{[^}]*\.quarto-wasm-local\b[^}]*\}"
+)
+NOTEBOOK_ATTRIBUTE_RE = re.compile(r"\b(?:notebook|source)\s*=\s*([\"'])(.*?)\1")
+LOCAL_WASM_HTML_RE = re.compile(r"wasm-local/([^/\s)\"'?#]+)\.html")
 
 
 def contains_import_marimo(py_path: Path) -> bool:
@@ -32,6 +45,65 @@ def export_mode_and_outstem(py_file: Path) -> tuple[str, str]:
     if stem.endswith(".edit"):
         return "edit", stem.removesuffix(".edit")
     return "run", stem
+
+
+def rendered_qmd_sources(project_root: Path) -> list[Path]:
+    """Mirror the full-profile page roots, excluding the intentionally omitted unit."""
+    pages = set(project_root.glob("*.qmd"))
+    for directory in FULL_SITE_QMD_DIRS:
+        source_dir = project_root / directory
+        if source_dir.is_dir():
+            pages.update(source_dir.rglob("*.qmd"))
+
+    return sorted(
+        path
+        for path in pages
+        if path.is_file()
+        and not path.name.startswith(".#")
+        and path.relative_to(project_root).as_posix() != "units/03"
+        and not path.relative_to(project_root).as_posix().startswith("units/03/")
+    )
+
+
+def page_export_requirements(
+    project_root: Path, source_dir: Path
+) -> tuple[set[Path], set[str]]:
+    """Collect embedded notebooks and direct links to generated WASM HTML."""
+    notebook_sources: set[Path] = set()
+    linked_html_stems: set[str] = set()
+
+    for qmd_path in rendered_qmd_sources(project_root):
+        text = qmd_path.read_text(encoding="utf-8", errors="ignore")
+        for div_match in LOCAL_WASM_DIV_RE.finditer(text):
+            attributes = div_match.group(0)
+            notebook_match = NOTEBOOK_ATTRIBUTE_RE.search(attributes)
+            if notebook_match is None:
+                raise ValueError(
+                    f"A .quarto-wasm-local Div in {qmd_path} needs a notebook or source attribute"
+                )
+
+            notebook = notebook_match.group(2)
+            notebook_path = Path(notebook)
+            if (
+                notebook_path.is_absolute()
+                or ".." in notebook_path.parts
+                or "\\" in notebook
+                or not notebook.endswith(".py")
+            ):
+                raise ValueError(
+                    f"Invalid local WASM notebook path in {qmd_path}: {notebook}"
+                )
+
+            source_path = (
+                project_root / notebook_path
+                if "/" in notebook
+                else source_dir / notebook_path
+            )
+            notebook_sources.add(source_path.resolve())
+
+        linked_html_stems.update(LOCAL_WASM_HTML_RE.findall(text))
+
+    return notebook_sources, linked_html_stems
 
 
 def export_fingerprint(project_root: Path, notebooks: list[Path]) -> str:
@@ -187,13 +259,41 @@ def main() -> None:
     if not source_dir.is_dir():
         raise SystemExit(f"Expected {SOURCE_DIR!r} folder at project root: {source_dir}")
 
-    notebooks = sorted(
+    # Scan only direct activities/ children: activities/graveyard is retained
+    # for recovery but is deliberately outside the export source set.
+    candidates = sorted(
         path
         for path in [*source_dir.iterdir(), *(project_root / "assignments").rglob("*.py")]
         if path.is_file()
         and path.suffix == ".py"
         and not path.name.endswith(".molab.py")
         and contains_import_marimo(path)
+    )
+    referenced_paths, linked_html_stems = page_export_requirements(
+        project_root, source_dir
+    )
+    candidates_by_path = {path.resolve(): path for path in candidates}
+    missing_sources = referenced_paths - candidates_by_path.keys()
+    if missing_sources:
+        missing = ", ".join(sorted(str(path) for path in missing_sources))
+        raise SystemExit(f"Current Quarto pages reference unavailable Marimo notebooks: {missing}")
+
+    candidates_by_stem: dict[str, list[Path]] = {}
+    for path in candidates:
+        stem = export_mode_and_outstem(path)[1]
+        candidates_by_stem.setdefault(stem, []).append(path)
+    missing_html = linked_html_stems - candidates_by_stem.keys()
+    if missing_html:
+        raise SystemExit(
+            "Current Quarto pages link to WASM HTML without a source notebook: "
+            + ", ".join(sorted(missing_html))
+        )
+
+    notebooks = sorted(
+        {
+            *(candidates_by_path[path] for path in referenced_paths),
+            *(path for stem in linked_html_stems for path in candidates_by_stem[stem]),
+        }
     )
     output_stems = [export_mode_and_outstem(path)[1] for path in notebooks]
     if len(output_stems) != len(set(output_stems)):

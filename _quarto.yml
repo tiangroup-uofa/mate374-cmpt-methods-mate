@@ -1,7 +1,7 @@
 project:
   type: website
   output-dir: _site
-  # Daily preview/HTML builds skip answer PDFs; use --profile full to build them.
+  # Daily preview/HTML builds cover the site; use --profile full for figures and answer PDFs.
   pre-render:
     - _marimo_export.py
   post-render:
