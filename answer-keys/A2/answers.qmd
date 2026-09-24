@@ -38,7 +38,12 @@ $$
 
 Here `H` is a global parameter and NumPy is imported as `np`.
 
-{{< include generated/g.qmd >}}
+```python
+H = 2.5
+
+def g(x):
+    return 1 / (1 + np.exp(H * (1 - 2 * x)))
+```
 
 The map satisfies $g(0.5)=0.5$, so its graph intersects $y=x$ at the central root.
 
@@ -55,13 +60,37 @@ For this map, $g'(x)=2H g(x)[1-g(x)]$. At the central root, $g'(0.5)=H/2$, which
 
 The optional loop returns the complete sequence, including $x_0$:
 
-{{< include generated/fixed_point.qmd >}}
+```python
+def fixed_point(g, x0, tol=0.0001, maxiter=100):
+    sequence = [x0]
+    for _ in range(maxiter):
+        next_x = g(sequence[-1])
+        step = abs(next_x - sequence[-1])
+        sequence.append(next_x)
+        if step < tol:
+            return sequence
+    raise RuntimeError('Step tolerance not reached')
+```
 
 With `H = 2.5`, call `sequence = fixed_point(g, 0.9)`.
 
-{{< include generated/q2-iterations.qmd >}}
+| Update $n$ | $x_n$ | $|x_n-x_{n-1}|$ |
+| --- | --- | --- |
+| 0 | 0.900000000000 | — |
+| 1 | 0.880797077978 | 0.0192029 |
+| 2 | 0.870341928535 | 0.0104551 |
+| 3 | 0.864327709689 | 0.00601422 |
+| 4 | 0.860762623720 | 0.00356509 |
+| 5 | 0.858612469916 | 0.00215015 |
+| 6 | 0.857302319290 | 0.00131015 |
+| 7 | 0.856499055314 | 0.000803264 |
+| 8 | 0.856004708622 | 0.000494347 |
+| 9 | 0.855699772982 | 0.000304936 |
+| 10 | 0.855511407149 | 0.000188366 |
+| 11 | 0.855394947116 | 0.00011646 |
+| 12 | 0.855322904921 | 7.20422e-05 |
 
-{{< include generated/q2-summary.qmd >}}
+The step tolerance is first met after **12 updates**, giving $x_{12}=0.855322904921$, or **$x_\beta=0.85532$** to five significant digits. The final step is $7.20422e-05$ and the residual at the unrounded iterate is $F(x_{12})=+0.00036021$.
 
 The stopping rule concerns the change in composition, so the residual need not be smaller than $10^{-4}$.
 
@@ -75,15 +104,41 @@ The stopping rule concerns the change in composition, so the residual need not b
 
 The completed function uses the supplied method switch. `root_scalar` and `minimize_scalar` are imported from `scipy.optimize`; the interpolation classes and data are supplied by the notebook.
 
-{{< include generated/estimate_by_interpolation.qmd >}}
+```python
+def estimate_by_interpolation(method):
+    if method == 'Natural cubic spline':
+        f_interp = CubicSpline(r_data, V_data, bc_type='natural', extrapolate=False)
+    elif method == 'Shape-preserving cubic (PCHIP)':
+        f_interp = PchipInterpolator(r_data, V_data, extrapolate=False)
+    elif method == 'Piecewise linear':
+        f_interp = interp1d(r_data, V_data, kind='linear', bounds_error=True)
+    else:
+        raise ValueError('Unknown interpolation method')
+    zero = root_scalar(f_interp, bracket=[3.35, 3.5], method='brentq')
+    minimum = minimize_scalar(f_interp, bounds=[3.5, 4.4], method='bounded', options={'xatol': 1e-12})
+    if not zero.converged or not minimum.success:
+        raise RuntimeError('Root finding or minimization failed')
+    r_zero = float(zero.root)
+    r_min = float(minimum.x)
+    V_min = float(f_interp(r_min))
+    return (r_zero, r_min, V_min)
+```
 
 The resulting zero crossings and minima are:
 
-{{< include generated/q3-locations.qmd >}}
+| Method | $r_0$ (Å) | $r_m$ (Å) | $V_m$ (eV) |
+| --- | --- | --- | --- |
+| Natural cubic spline | 3.3955397 | 3.8043243 | -0.010534572 |
+| Shape-preserving cubic (PCHIP) | 3.4009742 | 4.0000000 | -0.009608200 |
+| Piecewise linear | 3.4144476 | 3.9999999 | -0.009608200 |
 
 Applying $\sigma_{\mathrm{root}}=r_0$, $\sigma_{\mathrm{min}}=r_m/2^{1/6}$, and $\varepsilon_{\mathrm{min}}=-V_m$ gives:
 
-{{< include generated/q3-interpolation.qmd >}}
+| Method | $\sigma$ from root (Å) | $\sigma$ from minimum (Å) | $\varepsilon$ from minimum (eV) |
+| --- | --- | --- | --- |
+| Natural cubic spline | 3.3955397 | 3.3892676 | 0.010534572 |
+| Shape-preserving cubic (PCHIP) | 3.4009742 | 3.5635949 | 0.009608200 |
+| Piecewise linear | 3.4144476 | 3.5635948 | 0.009608200 |
 
 Compared with $\sigma_{\mathrm{ref}}=3.40$ Å, **PCHIP gives the closest zero-crossing estimate**. The **natural cubic spline gives the closest minimum-based estimates** of both $\sigma$ and $\varepsilon$, compared with $\varepsilon_{\mathrm{ref}}=0.0103$ eV. PCHIP and piecewise linear interpolation place the minimum at the lowest sampled point, $r=4.00$ Å. The natural cubic spline has a deeper minimum between sampled points.
 
@@ -91,11 +146,18 @@ Compared with $\sigma_{\mathrm{ref}}=3.40$ Å, **PCHIP gives the closest zero-cr
 
 The data arrays are global. This implementation uses the same loop scaffold as the student notebook:
 
-{{< include generated/squared_residual.qmd >}}
+```python
+def squared_residual(sigma, epsilon):
+    total = 0.0
+    for r_i, V_i in zip(r_data, V_data):
+        V_model = lj(r_i, epsilon, sigma)
+        total += (V_i - V_model) ** 2
+    return total
+```
 
 The supplied `minimize` call starts from $[\sigma,\varepsilon]=[3.3,0.01]$ and uses Nelder–Mead with positive bounds.
 
-{{< include generated/q3-fit.qmd >}}
+The fit gives **$\sigma=3.40002614$ Å** and **$\varepsilon=0.010317795$ eV**, with total squared residual $2.819856e-08$ eV$^2$. The optimizer reports success.
 
 ![All three interpolation methods and the fitted LJ curve, with an enlarged view near the minimum.](lj-fit.png){width="100%"}
 
@@ -113,7 +175,18 @@ Each term measures the squared mismatch between the QM and LJ **energy per atom*
 
 ### 4.2 Implement the residual
 
-{{< include generated/cluster_residual.qmd >}}
+```python
+def cluster_residual(sigma, epsilon, clusters):
+    total = 0.0
+    for cluster in clusters:
+        coords = cluster['coords']
+        E_QM = cluster['energy_eV']
+        k = cluster['n_atoms']
+        E_LJ = calculate_cluster_energy(coords, epsilon, sigma)
+        difference = (E_QM - E_LJ) / k
+        total += difference ** 2
+    return total
+```
 
 The energy difference is divided by $k$ **before squaring**. Thus the squared total-energy difference is effectively divided by $k^2$, not by $k$. This implementation passes the checks on the three separate synthetic clusters.
 
@@ -121,7 +194,11 @@ The energy difference is divided by $k$ **before squaring**. Thus the squared to
 
 The supplied function varies $\sigma$ and $\varepsilon$ to minimize the sum of squared per-atom energy differences over the selected clusters. Nelder–Mead evaluates trial parameter pairs and adjusts them until its stopping criteria are met. It returns an optimizer result containing the fitted values and convergence status.
 
-{{< include generated/fit_LJ.qmd >}}
+```python
+def fit_LJ(clusters):
+    result = minimize(lambda values: cluster_residual(values[0], values[1], clusters), x0=[3.4, 0.01], method='Nelder-Mead', bounds=[(2.5, 4.5), (1e-06, 0.1)], options={'xatol': 1e-09, 'fatol': 1e-14, 'maxiter': 3000})
+    return result
+```
 
 For ten clusters, the first row of the table in Q4.4 gives the parameters and MAE. The objective is a **sum of squared errors**, while the reported MAE is the **mean absolute error**; these are different measures.
 
@@ -129,7 +206,14 @@ For ten clusters, the first row of the table in Q4.4 gives the parameters and MA
 
 The results below use the notebook's fixed random order and the supplied solver settings. Every fit reports success.
 
-{{< include generated/q4-fits.qmd >}}
+| Clusters $N$ | $\sigma$ (Å) | $\varepsilon$ (eV) | MAE (meV/atom) |
+| --- | --- | --- | --- |
+| 10 | 3.38415121 | 0.013907454 | 0.682968 |
+| 20 | 3.38898783 | 0.013682988 | 1.088557 |
+| 40 | 3.39090858 | 0.013538130 | 1.105877 |
+| 60 | 3.38906459 | 0.013417985 | 1.203182 |
+| 80 | 3.38724419 | 0.013648534 | 1.069892 |
+| 100 | 3.38564792 | 0.013707774 | 1.019545 |
 
 The parameters are approximately stable: $\sigma$ stays near 3.39 Å and $\varepsilon$ near 0.0137 eV. Their changes are not monotonic. The MAE also need not decrease as more clusters are added, because each fit is evaluated on a different set of structures. The low ten-cluster MAE does not by itself make that fit preferable for predicting new clusters.
 
@@ -137,9 +221,15 @@ The parameters are approximately stable: $\sigma$ stays near 3.39 Å and $\varep
 
 Use the 100-cluster fit as the reference choice because it uses all available fitting data. Other choices from Q4.4 are acceptable if the dataset size is stated and the corresponding errors are calculated consistently.
 
-{{< include generated/q4-summary.qmd >}}
+Using the **100-cluster fit**, the five Ar₂₀ clusters have a mean absolute total-energy difference of **0.15683187 eV/cluster** and a mean absolute per-atom difference of **7.841594 meV/atom**. The corresponding fitting-set MAE is **1.019545 meV/atom**.
 
-{{< include generated/q4-extrapolation.qmd >}}
+| Ar₂₀ cluster | $E^{\mathrm{QM}}$ (eV) | $E^{\mathrm{LJ}}$ (eV) | Absolute error (meV/atom) |
+| --- | --- | --- | --- |
+| 1 | -0.84079017 | -0.99776044 | 7.84851 |
+| 2 | -0.79537023 | -0.94071967 | 7.26747 |
+| 3 | -0.66961730 | -0.83342848 | 8.19056 |
+| 4 | -0.55100223 | -0.74056039 | 9.47791 |
+| 5 | -0.61639127 | -0.74486159 | 6.42352 |
 
 For these 20-atom clusters, the per-atom MAE is the total-energy MAE divided by 20 and multiplied by 1000 to convert eV to meV. The extrapolation error is about **7.7 times** the fitting-set MAE. The LJ energies are too negative for all five larger clusters: the model overestimates their binding relative to the QM calculation.
 
@@ -147,7 +237,18 @@ For these 20-atom clusters, the per-atom MAE is the total-energy MAE divided by 
 
 The plot uses **total energies**, so there is no division by the number of atoms in this function:
 
-{{< include generated/parity_energies.qmd >}}
+```python
+def parity_energies(sigma, epsilon, clusters):
+    qm_energies = []
+    lj_energies = []
+    for cluster in clusters:
+        coords = cluster['coords']
+        E_QM = cluster['energy_eV']
+        E_LJ = calculate_cluster_energy(coords, epsilon, sigma)
+        qm_energies.append(E_QM)
+        lj_energies.append(E_LJ)
+    return (qm_energies, lj_energies)
+```
 
 ![Parity plot for all 100 fitting clusters and five larger clusters using the 100-cluster fit. The right panel enlarges the region near the smaller-cluster energies.](cluster-parity.png){width="100%"}
 

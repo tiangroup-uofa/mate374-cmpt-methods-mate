@@ -1,8 +1,0 @@
-```python
-def squared_residual(sigma, epsilon):
-    total = 0.0
-    for r_i, V_i in zip(r_data, V_data):
-        V_model = lj(r_i, epsilon, sigma)
-        total += (V_i - V_model) ** 2
-    return total
-```

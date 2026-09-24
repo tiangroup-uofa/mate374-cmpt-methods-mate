@@ -1,6 +1,0 @@
-```python
-H = 2.5
-
-def g(x):
-    return 1 / (1 + np.exp(H * (1 - 2 * x)))
-```

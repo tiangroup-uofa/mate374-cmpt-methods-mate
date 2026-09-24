@@ -1,1 +1,0 @@
-The fit gives **$\sigma=3.40002614$ Å** and **$\varepsilon=0.010317795$ eV**, with total squared residual $2.819856e-08$ eV$^2$. The optimizer reports success.

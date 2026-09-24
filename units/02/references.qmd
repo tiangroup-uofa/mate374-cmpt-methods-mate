@@ -8,12 +8,6 @@ nocite: |
   @*
 ---
 
-::: {.callout-warning}
-## Prototype bibliography
-
-This page collects references for the current L05–L09 drafts. Kiusalaas, Chapter 3, supports the interpolation and least-squares material; the lectures link directly to the NumPy and SciPy functions used in the examples.
-:::
-
 ## Bibliography
 
 ::: {#refs}

@@ -1,4 +1,4 @@
-"""Export unlisted completed notebooks, linked only from answer PDFs.
+"""Export unlisted completed activity notebooks, linked only from answer PDFs.
 
 These are PUBLIC resources, not access-controlled answers. They are omitted
 from student navigation, Quarto search, and llms.txt. The opaque path and
@@ -16,7 +16,7 @@ OUTPUT = ROOT / "completed-notebooks" / "8f7c2e91"
 
 
 def main():
-    notebooks = sorted((ROOT / "answer-keys").glob("A*/notebooks/*.edit.py"))
+    notebooks = sorted((ROOT / "activities").glob("*_completed.edit.py"))
     if not notebooks:
         raise RuntimeError("No completed notebooks found")
     fingerprint = hashlib.sha256(

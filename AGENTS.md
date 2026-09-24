@@ -1,31 +1,45 @@
 # Project instructions
 
-## Figure-generation policy
+## Templates
 
-- All script-generated figures must use `dpi=300` when saved. Do not introduce lower-resolution figure output unless the instructor explicitly requests it.
+Use the matching scaffold in `templates/` when creating course pages:
 
-## Current work: Lectures 8 and 9
+| Page type | Template | Destination |
+|---|---|---|
+| Unit landing page | `unit-landing.qmd.template` | `units/NN/index.qmd` |
+| Lecture note | `lecture-note.qmd.template` | `units/NN/Lxx/index.qmd` |
+| Assignment and answer key | `assignment.qmd.template` | `assignments/AN/index.qmd` and `answer-keys/AN/answers.qmd` |
+| Seminar | `seminar.qmd.template` | `seminars/Sxx-topic/index.qmd` |
 
-- Follow the user's L08/L09 planning comments and preserve the tone and lecture structure established in L01–L07. Cover interpolation and regression in these two lectures; prioritize concepts and practical Python calls over exhaustive derivations.
-- The original commented plans are saved, with checksums, in `_archive/lectures-08-09-20260920-180708-planning/`. The book extract is `units/02/l08-09-kiusalaas-book-extract.txt`. Next-round questions and the teaching route are in `units/02/l08-l09-review.md`.
-- Full-site rendering is restored after the A2 revisions. `_quarto.yml` contains the site-wide render targets. Use `quarto preview` or `quarto render --to html` for daily work, and `quarto render --profile full` to also regenerate figures and answer PDFs for complete local/CI builds.
-- Preserve the L09 and S03 navigation. The full pre-focus configuration is checkpointed at `_archive/quarto-checkpoints/20260920-182224-before-l08-l09-focus/`. The focused exporter remains available in `scripts/export_l08_l09.py` for targeted checks, but is no longer a default build hook.
-- Keep notebook prose light, with editable numerical calls visible and plotting/support code collapsed. Check examples with `uv run --locked python scripts/l08_l09_figures.py --check-only` and `marimo check`.
-- In L08/L09, show how the conditions become systems of equations. Label known data, chosen function forms, and unknown coefficients explicitly. Introduce unfamiliar notation through expanded expressions and concrete examples. Keep the Newton divided-difference definitions and procedure table visible. Concision must not remove the mathematics students need to read the method.
-- Preserve the Unit 02 title **Working with Functions**. Leave four major refinement questions for the instructor rather than blocking the first draft on decisions.
+Read the template, copy the relevant scaffold to its destination, replace placeholders, and remove authoring notes. Adapt the sections to the topic while preserving established course titles, tone, and navigation. For assignments, split the handout and answer-key sections into separate files. Update the relevant landing-page links and `_quarto.yml` navigation. Templates remain outside HTML/PDF render targets.
 
-## Earlier work: Lectures 6 and 7
+## Preview and render scope
 
-- Prioritize completing both lecture drafts over polishing demos. Update lecture names on landing pages to match, but preserve the Unit 02 title **Working with Functions**. Do not rename the unit.
-- Focus this round on `units/02/L06/index.qmd` and `units/02/L07/index.qmd`. Preserve the drafts' structure, voice, and mathematical visuals; the user is proud of them.
-- Put concepts and physical interpretation first. Keep heavy mathematics and derivations in collapsed, expandable sections. Check for additional passages that need folding.
-- For the current L06 refinements, the user has authorized direct edits to the local WASM notebook sources in `activities/`. Keep `student_map` in its own visible cell; collapse the other fixed-point demo code cells. If pairing on a live molab session later, use `marimo-pair` and edit through `marimo._code_mode`.
-- Keep iteration short. Check the L06 notebooks and their numerical examples locally; leave full-site rendering to CI. Avoid long local Quarto renders or WASM/browser debugging.
-- Use **Newton–Raphson** consistently in teaching prose and demo labels. Preserve required API names such as SciPy's `method="newton"`.
-- Use `quarto preview` or `quarto render --to html` for daily HTML work. The shared hook exports local notebooks; `_quarto-full.yml` adds figure regeneration, answer-PDF generation/staging, and PDF format links. Complete local checks and CI use `quarto render --profile full` to build all HTML and PDF pages. The post-render hook generates `llms.txt`. Preserve navigation in the focused preview and full build.
-- Original drafts, associated L06 figures, and the pre-focus `_quarto.yml` are saved in `_archive/lectures-06-07-20260915-160126/`, with SHA-256 checksums. The current full `_quarto.yml` was additionally checkpointed at `_archive/quarto-checkpoints/20260916-102601-before-l06-preview/`. Preserve these baselines.
-- The archived `_quarto.yml` records the baseline rendering configuration. Preserve the current navigation, including S03, when changing build hooks.
-- Molab session URL: `https://sb-93d3852d0dfbeff0.sb.molab.run/`. Use the token supplied in the conversation; do not save it in project files. Request a fresh connection if the session expires.
+- **Whole-site HTML:** `quarto preview` or `quarto render --to html`.
+- **Complete local/CI build:** `quarto render --profile full`. This also regenerates figures and answer PDFs and enables PDF format links.
+- **One-page test:** `quarto render units/NN/Lxx/index.qmd --to html`.
+- **Temporary multi-page scope:** stop preview, save a copy of the full `_quarto.yml` outside the project, then temporarily replace only `project.render` in the local `_quarto.yml` with the desired page paths or globs. Keep navigation, resources, format definitions, and hooks intact. Run `quarto preview` or `quarto render --to html`.
+- **Return to full scope:** restore the saved `project.render` list, restart preview, and use the whole-site or full-profile command above. Do not commit temporary scope changes or overwrite unrelated configuration edits.
+
+`_quarto-full.yml` adds build hooks, not render targets: selecting `--profile full` alone does not undo a narrowed `_quarto.yml`. Profile render lists append to the base list, so a short `_quarto-local.yml` render list does not narrow the scope. Shared notebook-export hooks may still process notebooks outside the selected pages.
+
+## Figure generation
+
+All script-generated figures must use `dpi=300` when saved. Do not introduce lower-resolution output unless the instructor explicitly requests it.
+
+## Assignment answer-key architecture
+
+- Keep one answer-key source file per assignment: `answer-keys/AN/answers.qmd`. Store only the static PNG figures referenced by that file beside it. Keep answer prose, code, tables, and reported values directly in `answers.qmd`; avoid generated QMD fragments, results JSON, duplicate PDFs, and one-off extraction/check scripts in the answer-key folders.
+- Use the existing rendered figures as the answer-key assets. Save all script-generated figures at 300 dpi; do not retain temporary figure-generation code solely to recreate an already-checked image unless the instructor asks for reproducibility.
+- Keep editable completed marimo notebook sources in `activities/*_completed.edit.py`, never duplicated under `answer-keys/`. `scripts/export_completed_notebooks.py` builds the linked HTML notebooks into the ignored `completed-notebooks/` output directory. Treat that HTML and its assets as generated build output.
+- Render and stage answer PDFs through `scripts/render_answer_pdfs.py` and the full Quarto profile. Do not commit rendered PDF copies inside `answer-keys/AN/`.
+
+## Work in progress and planning
+
+Keep work-in-progress notes, plans, and questions for the instructor in separate `.txt` files, never `.md` files, so they stay outside rendered course materials.
+
+- **NEVER** insert planning questions, draft-status notices, or requests for instructor decisions as callouts or other text in course materials.
+- **NEVER** use course text as a “schooling ground” to lecture, scold, or patronize the reader or instructor. Keep authoring commentary and editorial advice in the separate `.txt` notes. Student-facing text must teach the course subject respectfully.
 
 ## Writing style
 

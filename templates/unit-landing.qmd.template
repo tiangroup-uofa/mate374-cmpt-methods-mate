@@ -1,0 +1,26 @@
+---
+title: "Unit NN · Unit title"
+toc: false
+---
+
+<!--
+AGENT-ONLY SCAFFOLD. Adapt to units/NN/index.qmd. Replace every placeholder
+and remove authoring notes. Keep this scaffold in templates/ and out of
+HTML/PDF render targets. Preserve established unit titles when revising.
+-->
+
+Open with a materials or engineering question that connects the unit's topics. Explain how the methods help answer it and how this unit builds on earlier work.
+
+We will ask the following questions:
+
+1. **[First scientific or numerical question]?** Introduce the method in accessible language and give a concrete materials example.
+2. **[Second question]?** Explain the related calculation or interpretation students will learn.
+3. **[Third question]?** Identify the next method and the physical situation that motivates it.
+
+Describe the teaching sequence in one short paragraph, explaining why each topic leads to the next. Keep detailed derivations and worked examples in the lecture pages.
+
+- [Lxx · Lecture title](Lxx/index.qmd)
+- [Lyy · Lecture title](Lyy/index.qmd)
+- [Lzz · Lecture title](Lzz/index.qmd)
+
+[Unit NN references](references.qmd)

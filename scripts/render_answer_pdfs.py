@@ -1,4 +1,4 @@
-"""Render answer PDFs separately and stage only PDFs for the course website.
+"""Render the answer-key QMD files and stage PDFs for the course website.
 
 The answer source project has no website navigation or HTML output. Staged PDFs
 are public resources, not access-controlled files, even when no page links them.
@@ -11,11 +11,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    for assignment in ("A1", "A2"):
-        subprocess.run(
-            ["uv", "run", "--locked", "python", f"answer-keys/{assignment}/check_answers.py"],
-            cwd=ROOT, check=True,
-        )
     subprocess.run(
         ["uv", "run", "--locked", "python", "scripts/export_completed_notebooks.py"],
         cwd=ROOT, check=True,

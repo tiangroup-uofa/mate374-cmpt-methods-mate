@@ -1,5 +1,0 @@
-```python
-def fit_LJ(clusters):
-    result = minimize(lambda values: cluster_residual(values[0], values[1], clusters), x0=[3.4, 0.01], method='Nelder-Mead', bounds=[(2.5, 4.5), (1e-06, 0.1)], options={'xatol': 1e-09, 'fatol': 1e-14, 'maxiter': 3000})
-    return result
-```
