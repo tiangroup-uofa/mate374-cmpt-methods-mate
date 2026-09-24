@@ -3,8 +3,6 @@ title: "Unit 02 · References"
 format:
   html:
     toc: true
-  pdf:
-    toc: false
 bibliography: references.bib
 nocite: |
   @*

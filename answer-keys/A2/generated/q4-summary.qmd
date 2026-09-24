@@ -1,0 +1,1 @@
+Using the **100-cluster fit**, the five Ar₂₀ clusters have a mean absolute total-energy difference of **0.15683187 eV/cluster** and a mean absolute per-atom difference of **7.841594 meV/atom**. The corresponding fitting-set MAE is **1.019545 meV/atom**.

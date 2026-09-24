@@ -12,6 +12,8 @@ from urllib.parse import urljoin
 SITE_URL = "https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/"
 EXCLUDED_PREFIXES = (
     "units/archive/",
+    "answer-keys/",
+    "completed-notebooks/",
 )
 EXCLUDED_PATHS = {
     "units/01/media-backlog.html",

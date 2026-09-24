@@ -2,6 +2,13 @@
 title: "MAT E 374 · Assignment 1 answers"
 ---
 
+## Completed reference notebooks
+
+- [Q3 · Leibniz series and convergence](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a1_q3_completed.html)
+- [Q4 · Lennard-Jones clusters](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a1_q4_completed.html)
+
+These notebooks contain working implementations of the functions used in these answers.
+
 ## Q1 · Error and computational effort
 
 **1.1** Any three distinct, correctly explained sources with examples are acceptable:

@@ -1,0 +1,19 @@
+```python
+def estimate_by_interpolation(method):
+    if method == 'Natural cubic spline':
+        f_interp = CubicSpline(r_data, V_data, bc_type='natural', extrapolate=False)
+    elif method == 'Shape-preserving cubic (PCHIP)':
+        f_interp = PchipInterpolator(r_data, V_data, extrapolate=False)
+    elif method == 'Piecewise linear':
+        f_interp = interp1d(r_data, V_data, kind='linear', bounds_error=True)
+    else:
+        raise ValueError('Unknown interpolation method')
+    zero = root_scalar(f_interp, bracket=[3.35, 3.5], method='brentq')
+    minimum = minimize_scalar(f_interp, bounds=[3.5, 4.4], method='bounded', options={'xatol': 1e-12})
+    if not zero.converged or not minimum.success:
+        raise RuntimeError('Root finding or minimization failed')
+    r_zero = float(zero.root)
+    r_min = float(minimum.x)
+    V_min = float(f_interp(r_min))
+    return (r_zero, r_min, V_min)
+```

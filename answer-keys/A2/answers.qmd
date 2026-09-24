@@ -1,80 +1,69 @@
 ---
 title: "MAT E 374 · Assignment 2 answers"
-subtitle: "Draft · quantum cluster data pending"
 ---
+
+## Completed reference notebooks
+
+- [Q2 · Fixed-point iteration](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a2_q2_completed.html)
+- [Q3 · Interpolation and least-squares fitting](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a2_q3_completed.html)
+- [Q4 · Fitting quantum cluster energies](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a2_q4_completed.html)
+
+These notebooks contain the completed functions and reproduce the calculations shown here. Small differences in the last digits are acceptable when solver tolerances differ.
 
 ## Q1 · Short answers
 
-**1.** Assuming $f$ is continuous on the interval, $f(x_i)f(x_{i+1})<0$ guarantees at least one root between the points. It does not determine how many roots are present. A zero endpoint is itself a root. Two function values alone generally cannot establish an interior maximum or minimum. Multiple possibilities: inspect derivative signs, or use additional sampled points to locate a candidate extremum. Opposite signs of a continuous derivative guarantee an interior extremum, though they need not identify a unique one. For a continuous function, a middle sampled value above both neighboring values guarantees an interior maximum somewhere between the neighbors, but does not locate it exactly.
+**1.1** For a continuous function, opposite signs, $f(x_i)f(x_{i+1})<0$, guarantee at least one root between the points. A zero endpoint is itself a root. Two function values alone do not establish an interior maximum or minimum. Additional information, such as derivative signs or a third sampled point, is needed.
 
-**2.** A differentiable map is locally convergent if $|g'(x_s)|<1$, with a sufficiently close initial guess. It is locally repelling if $|g'(x_s)|>1$; equality requires further analysis. One practical check is to plot $y=x$ and $y=g(x)$, estimate their intersection, and inspect the slope nearby. More systematically, find an interval mapped into itself with $|g'(x)|\le q<1$ throughout.
+**1.2** A differentiable fixed-point map is locally convergent when $|g'(x_s)|<1$ and the starting value is sufficiently close. If $|g'(x_s)|>1$, the fixed point is repelling; equality is inconclusive. In practice, plot $g(x)$ and $x$ to estimate the intersection and check the slope nearby, analytically or by finite differences. A stronger check is to find an interval mapped into itself with $|g'(x)|\le q<1$ throughout.
 
-**3.** Low-degree pieces avoid the strong oscillations that can occur in a single high-degree polynomial, especially near the ends of the data range. The spline equations are sparse and structured, so more coefficients do not necessarily mean a more expensive calculation.
+**1.3** Low-degree pieces reduce the large oscillations that can occur with a single high-degree polynomial, especially near the endpoints. The spline equations are sparse and structured, so having more coefficients does not require solving a general dense system.
 
-**4.** Multiple possibilities. The residual depends on the units and scale of $y$: an error of $10^{-3}$ contributes only $10^{-6}$ after squaring, but may be large relative to the data. Alternatively, an overfitted curve can match the sampled values closely and still behave poorly between them.
+**1.4** The data may be small in the chosen units. An error that is large relative to a measured value can still have a small square. The absolute squared residual must therefore be interpreted relative to the data scale.
 
 ## Q2 · Fixed-point iteration for a binary alloy
 
-**2.1** Substituting $x=0.5$ gives $F(0.5)=\ln 1+H(0)=0$ for every $H$.
+### 2.1 Central root
 
-**2.2** Rearranging gives
+Substitution gives $F(0.5)=\ln 1+H(0)=0$ for every $H$.
+
+### 2.2 Fixed-point form
+
+Rearrange the equation:
 
 $$
 \ln\frac{x}{1-x}=H(2x-1),\qquad
 \frac{x}{1-x}=e^{H(2x-1)},\qquad
-x=g(x)=\frac{1}{1+e^{H(1-2x)}}.
+\boxed{g(x)=\frac{1}{1+e^{H(1-2x)}}.}
 $$
 
-```python
-def g(x, H):
-    return 1 / (1 + np.exp(H * (1 - 2*x)))
-```
+Here `H` is a global parameter and NumPy is imported as `np`.
 
-For $H>0$, this is an increasing S-shaped curve between 0 and 1, with $g(0.5)=0.5$. Its derivative is
+{{< include generated/g.qmd >}}
 
-$$
-g'(x)=2H\,g(x)[1-g(x)].
-$$
+The map satisfies $g(0.5)=0.5$, so its graph intersects $y=x$ at the central root.
 
-**2.3** For $H=1.5$, the only intersection is at $0.5$. For $H=2.5$, two additional intersections appear, symmetrically placed about $0.5$. More generally,
+### 2.3 Additional roots
 
-$$
-F'(x)=\frac{1}{x(1-x)}-2H.
-$$
+- **$H=1.5$:** no intersection in $0.5<x<1$.
+- **$H=2.5$:** one additional intersection in $0.5<x<1$, with a symmetric partner below $0.5$.
 
-Since $x(1-x)\le1/4$, $F$ is strictly increasing for $H<2$ and has only the central root. At $H=2$, the central root remains the only root, with zero derivative there. For $H>2$, $F'(0.5)<0$, while $F$ tends to $-\infty$ as $x\to0^+$ and $+\infty$ as $x\to1^-$. The symmetry $F(1-x)=-F(x)$ gives two outer roots.
+![Fixed-point maps for the two specified values of H.](fixed-point.png){width="90%"}
 
-For the symmetric regular-solution model, the outer roots are the coexisting compositions when $H>2$; the central stationary point is then unstable. At $H<2$, the central composition is stable. The central root alone therefore does not identify a miscibility gap.
+For this map, $g'(x)=2H g(x)[1-g(x)]$. At the central root, $g'(0.5)=H/2$, which changes from less than one to greater than one as $H$ passes through 2. For $H=2.5$, the upper fixed point is attracting and can be reached from $x_0=0.9$.
 
-```{=latex}
-\newpage
-```
+### 2.4 Fixed-point solution
 
-**2.4** Starting at $x_0=0.9$:
+The optional loop returns the complete sequence, including $x_0$:
 
-```python
-x = 0.9
-for step in range(1, 101):
-    new = g(x, 2.5)
-    if step <= 5:
-        print(step, new)
-    if abs(new - x) < 1e-4:
-        break
-    x = new
-else:
-    raise RuntimeError("No convergence")
-x_beta = new
-```
+{{< include generated/fixed_point.qmd >}}
 
-| Update $n$ | $x_n$ |
-|---:|---:|
-| 1 | 0.8807970780 |
-| 2 | 0.8703419285 |
-| 3 | 0.8643277097 |
-| 4 | 0.8607626237 |
-| 5 | 0.8586124699 |
+With `H = 2.5`, call `sequence = fixed_point(g, 0.9)`.
 
-The step tolerance is met after **12 updates**, giving $x_{12}=0.855322904921$. To five significant figures, $x_\beta=0.85532$. The original-equation residual at the unrounded iterate is $F(x_{12})\approx+3.6021\times10^{-4}$.
+{{< include generated/q2-iterations.qmd >}}
+
+{{< include generated/q2-summary.qmd >}}
+
+The stopping rule concerns the change in composition, so the residual need not be smaller than $10^{-4}$.
 
 ```{=latex}
 \newpage
@@ -82,47 +71,35 @@ The step tolerance is met after **12 updates**, giving $x_{12}=0.855322904921$. 
 
 ## Q3 · Fitting an atomistic energy curve
 
-**3.1** With the specified natural cubic spline:
+### 3.1 Estimates from interpolation
 
-| Quantity | Interpolation result | Reference |
-|---|---:|---:|
-| Zero crossing $r_0$ (Å) | 3.395540 | 3.400000 |
-| Minimum location $r_m$ (Å) | 3.804324 | 3.816371 |
-| $\sigma$ from $r_0$ (Å) | 3.395540 | 3.400000 |
-| $\sigma$ from $r_m/2^{1/6}$ (Å) | 3.389268 | 3.400000 |
-| $\varepsilon=-V_{\mathrm{spline}}(r_m)$ (eV) | 0.01053457 | 0.01030000 |
+The completed function uses the supplied method switch. `root_scalar` and `minimize_scalar` are imported from `scipy.optimize`; the interpolation classes and data are supplied by the notebook.
 
-The zero-crossing estimate of $\sigma$ is closer for these data: its absolute error is about $0.00446$ Å, compared with $0.01073$ Å from the minimum. The zero crossing is closely bracketed by the sampled distances 3.35 and 3.50 Å. The minimum lies in the wider gap between 3.65 and 4.00 Å, where its location depends on the interpolated shape. Noise also changes the spline's slopes and minimum. A different set of points or noise could reverse this comparison.
+{{< include generated/estimate_by_interpolation.qmd >}}
 
-The interpolated well depth is about 2.28% too large. A spline passes through the noisy data and does not enforce the LJ form. Even tight solver tolerances only locate the spline's root and minimum more accurately, without removing interpolation error.
+The resulting zero crossings and minima are:
 
-**3.2** Residual function and fit:
+{{< include generated/q3-locations.qmd >}}
 
-```python
-def pair_residual(parameters, r, V):
-    epsilon, sigma = parameters
-    predicted = calculate_LJ(r, epsilon, sigma)
-    return np.sum((V - predicted)**2)
+Applying $\sigma_{\mathrm{root}}=r_0$, $\sigma_{\mathrm{min}}=r_m/2^{1/6}$, and $\varepsilon_{\mathrm{min}}=-V_m$ gives:
 
-fit = minimize(pair_residual, [epsilon0, sigma0], args=(r, V),
-               method="Nelder-Mead",
-               bounds=[(1e-6, 0.1), (2.5, 4.5)],
-               options={"xatol": 1e-11, "fatol": 1e-18,
-                        "maxiter": 10000})
-```
+{{< include generated/q3-interpolation.qmd >}}
 
-Starting from $\varepsilon_0=0.01053457$ eV and $\sigma_0=3.389268$ Å gives
+Compared with $\sigma_{\mathrm{ref}}=3.40$ Å, **PCHIP gives the closest zero-crossing estimate**. The **natural cubic spline gives the closest minimum-based estimates** of both $\sigma$ and $\varepsilon$, compared with $\varepsilon_{\mathrm{ref}}=0.0103$ eV. PCHIP and piecewise linear interpolation place the minimum at the lowest sampled point, $r=4.00$ Å. The natural cubic spline has a deeper minimum between sampled points.
 
-$$
-\boxed{\varepsilon_{\mathrm{fit}}=0.01031780\ \mathrm{eV},\qquad
-\sigma_{\mathrm{fit}}=3.400026\ \text{Å}.}
-$$
+### 3.2 Least-squares fitting
 
-The solver reports success, with a total squared residual of $2.81986\times10^{-8}$ eV$^2$. The relative parameter errors are about 0.173% and 0.000769%, respectively. Small differences in the last digits are acceptable.
+The data arrays are global. This implementation uses the same loop scaffold as the student notebook:
 
-![](lj-fit.png){width="65%" fig-alt="Noisy pair-energy data compared with a natural cubic spline, fitted Lennard-Jones curve, and reference curve."}
+{{< include generated/squared_residual.qmd >}}
 
-Both fitted parameters are closer to their reference values than the interpolation estimates. Fitting uses all eight points to determine two parameters and imposes the same functional form that generated the data. This reduces the influence of individual noisy points. Exact recovery is not expected after noise has been added.
+The supplied `minimize` call starts from $[\sigma,\varepsilon]=[3.3,0.01]$ and uses Nelder–Mead with positive bounds.
+
+{{< include generated/q3-fit.qmd >}}
+
+![All three interpolation methods and the fitted LJ curve, with an enlarged view near the minimum.](lj-fit.png){width="100%"}
+
+Both fitted parameters are closer to the reference values than any of the interpolation estimates. The fit uses all eight energies to determine the two parameters of the LJ form. The interpolation estimates instead depend on where each interpolated curve crosses zero or reaches its minimum.
 
 ```{=latex}
 \newpage
@@ -130,27 +107,48 @@ Both fitted parameters are closer to their reference values than the interpolati
 
 ## Q4 · Fitting LJ parameters to quantum cluster energies
 
-**4.1** Each term is the squared difference between the quantum and LJ energies per atom for one cluster. Dividing by $n_k$ puts clusters of different sizes on a per-atom scale, so a larger total energy alone does not give a larger cluster more weight. Every cluster contributes one squared per-atom error. The unknowns are the two shared parameters $\varepsilon$ and $\sigma$, with coordinates and quantum reference energies held fixed.
+### 4.1 Squared residual
 
-**4.2** One implementation is:
+Each term measures the squared mismatch between the QM and LJ **energy per atom** for one cluster. The unknowns are the two shared parameters $\sigma$ and $\varepsilon$. The coordinates, cluster sizes, and QM energies are known. Each cluster contributes one squared per-atom error.
 
-```python
-def cluster_residual(parameters, clusters):
-    epsilon, sigma = parameters
-    total = 0.0
-    for cluster in clusters:
-        coords = cluster["coords"]
-        n = len(coords)
-        predicted = calculate_cluster_energy(coords, epsilon, sigma)
-        difference = (cluster["energy_eV"] - predicted) / n
-        total += difference**2
-    return total
-```
+### 4.2 Implement the residual
 
-The division by $n$ occurs **before squaring**. The numerical check for the first two quantum clusters remains pending the dataset.
+{{< include generated/cluster_residual.qmd >}}
 
-**4.3** Fit the first ten entries, passing `args=(clusters[:10],)` to `minimize`. Report the solver status and recompute the unscaled residual at its returned parameters. The fitted values and parameter bounds will depend on the chosen element and dataset.
+The energy difference is divided by $k$ **before squaring**. Thus the squared total-energy difference is effectively divided by $k^2$, not by $k$. This implementation passes the checks on the three separate synthetic clusters.
 
-**4.4** Repeat with nested subsets in the supplied order. Compare parameters and $\sqrt{E/N}$, because total squared residual alone is not a fair measure of fit quality across different numbers of data. There is no requirement for the parameters or RMSE to change monotonically. Optimizer convergence concerns one fixed objective and its stopping criterion. Parameter stability across growing datasets concerns how sensitive the fit is to the included configurations. Different positive starting pairs help check sensitivity to initialization.
+### 4.3 Fit ten clusters
 
-**4.5** Plot $E_k^{\mathrm{QM}}/n_k$ horizontally and $E_k^{\mathrm{LJ}}/n_k$ vertically, with equal axis scales and a diagonal. Points above the diagonal have LJ energies that are too high, and points below have LJ energies that are too low. Curvature or clusters of deviations can reveal configurations that a single LJ pair potential describes poorly. Quantum interactions can include effects beyond an isotropic pair sum. A conclusion about this particular fit awaits the data. This plot assesses agreement on the fitted clusters; prediction for new geometries would require additional clusters excluded from fitting.
+The supplied function varies $\sigma$ and $\varepsilon$ to minimize the sum of squared per-atom energy differences over the selected clusters. Nelder–Mead evaluates trial parameter pairs and adjusts them until its stopping criteria are met. It returns an optimizer result containing the fitted values and convergence status.
+
+{{< include generated/fit_LJ.qmd >}}
+
+For ten clusters, the first row of the table in Q4.4 gives the parameters and MAE. The objective is a **sum of squared errors**, while the reported MAE is the **mean absolute error**; these are different measures.
+
+### 4.4 Increase the dataset
+
+The results below use the notebook's fixed random order and the supplied solver settings. Every fit reports success.
+
+{{< include generated/q4-fits.qmd >}}
+
+The parameters are approximately stable: $\sigma$ stays near 3.39 Å and $\varepsilon$ near 0.0137 eV. Their changes are not monotonic. The MAE also need not decrease as more clusters are added, because each fit is evaluated on a different set of structures. The low ten-cluster MAE does not by itself make that fit preferable for predicting new clusters.
+
+### 4.5 Extrapolation to larger clusters
+
+Use the 100-cluster fit as the reference choice because it uses all available fitting data. Other choices from Q4.4 are acceptable if the dataset size is stated and the corresponding errors are calculated consistently.
+
+{{< include generated/q4-summary.qmd >}}
+
+{{< include generated/q4-extrapolation.qmd >}}
+
+For these 20-atom clusters, the per-atom MAE is the total-energy MAE divided by 20 and multiplied by 1000 to convert eV to meV. The extrapolation error is about **7.7 times** the fitting-set MAE. The LJ energies are too negative for all five larger clusters: the model overestimates their binding relative to the QM calculation.
+
+### 4.6 Parity plot
+
+The plot uses **total energies**, so there is no division by the number of atoms in this function:
+
+{{< include generated/parity_energies.qmd >}}
+
+![Parity plot for all 100 fitting clusters and five larger clusters using the 100-cluster fit. The right panel enlarges the region near the smaller-cluster energies.](cluster-parity.png){width="100%"}
+
+The Ar₃–Ar₇ points lie close to the diagonal, with visible scatter on the enlarged scale. All five Ar₂₀ points lie below it, showing systematically more negative LJ predictions. A good fit to small clusters therefore does not establish accuracy for larger clusters. The larger-cluster errors remain substantially larger even after normalization per atom.

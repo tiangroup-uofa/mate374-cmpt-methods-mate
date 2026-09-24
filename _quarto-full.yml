@@ -6,6 +6,8 @@ project:
     - python scripts/render_answer_pdfs.py
   resources:
     - "assignments/A1/A1-answers.pdf"
+    - "assignments/A2/A2-answers.pdf"
+    - "completed-notebooks/**"
 
 format:
   html:

@@ -1,0 +1,5 @@
+| Method | $\sigma$ from root (Å) | $\sigma$ from minimum (Å) | $\varepsilon$ from minimum (eV) |
+| --- | --- | --- | --- |
+| Natural cubic spline | 3.3955397 | 3.3892676 | 0.010534572 |
+| Shape-preserving cubic (PCHIP) | 3.4009742 | 3.5635949 | 0.009608200 |
+| Piecewise linear | 3.4144476 | 3.5635948 | 0.009608200 |
