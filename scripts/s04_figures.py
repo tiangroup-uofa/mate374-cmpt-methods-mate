@@ -37,14 +37,18 @@ def check_spline(d):
     np.testing.assert_allclose(pieces, expected, atol=1e-11)
     np.testing.assert_allclose(d["estimate"], 10.483958333333333, atol=1e-11)
     np.testing.assert_allclose(np.polyval(pieces[3], 20), 7.25, atol=1e-11)
+    knots = np.r_[np.repeat(x[0], 3), x[1:-1], np.repeat(x[-1], 3)]
+    quadratic_reference = make_interp_spline(
+        x, y, k=2, t=knots, bc_type=([(2, 0.0)], None)
+    )
     for i in range(4):
         grid = np.linspace(x[i], x[i + 1], 101)
         np.testing.assert_allclose(np.polyval(pieces[i], grid),
-                                   d["quadratic_reference"](grid), atol=1e-11)
+                                   quadratic_reference(grid), atol=1e-11)
     np.testing.assert_allclose(d["cubic"](12.7), 10.118896381578947)
     assert np.isnan(d["cubic"](23))
 
-    # Student extension: put the zero curvature at the right end instead.
+    # Independent check with zero curvature at the right end instead.
     right_A = d["A"].copy()
     right_A[-1] = 0
     right_A[-1, 9] = 2
@@ -52,7 +56,7 @@ def check_spline(d):
     np.testing.assert_allclose(right_pieces[3, 0], 0, atol=1e-12)
     assert abs(right_pieces[0, 0]) > 0.01
     right_reference = make_interp_spline(
-        x, y, k=2, t=d["knots"], bc_type=(None, [(2, 0.0)])
+        x, y, k=2, t=knots, bc_type=(None, [(2, 0.0)])
     )
     for i in range(4):
         grid = np.linspace(x[i], x[i + 1], 101)
@@ -61,9 +65,11 @@ def check_spline(d):
 
 
 def check_fit(d):
-    assert d["design"].shape == (4, 2)
-    assert d["normal_matrix"].shape == (2, 2)
-    np.testing.assert_allclose(d["normal_parameters"], d["log_parameters"], atol=1e-10)
+    normal_matrix = np.array([[d["N"], d["Sx"]], [d["Sx"], d["Sxx"]]])
+    normal_rhs = np.array([d["Sy"], d["Sxy"]])
+    np.testing.assert_allclose(normal_matrix @ d["log_parameters"], normal_rhs, atol=1e-10)
+    np.testing.assert_allclose(np.linalg.solve(normal_matrix, normal_rhs),
+                               d["log_parameters"], atol=1e-10)
     np.testing.assert_allclose(d["log_parameters"],
                                np.polyfit(d["X"], d["Y"], 1)[::-1], atol=1e-10)
     np.testing.assert_allclose(d["log_parameters"], [19.86287982351404, -4.42437508701609])
@@ -79,7 +85,7 @@ def check_fit(d):
     np.testing.assert_allclose(model(45, *d["log_parameters"]), 20.50722246)
     np.testing.assert_allclose(model(45, *d["direct_parameters"]), 30.31608554)
 
-    # Try a second initial guess and the requested relative-residual weighting.
+    # Independently check a second initial guess and relative-residual weighting.
     alternate, _ = curve_fit(model, d["T"], d["mu"], p0=[18., -4.], maxfev=10000)
     np.testing.assert_allclose(alternate, d["direct_parameters"], rtol=1e-5)
     weighted, _ = curve_fit(model, d["T"], d["mu"], p0=d["log_parameters"],

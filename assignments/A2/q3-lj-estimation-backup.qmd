@@ -1,0 +1,66 @@
+---
+title: "A2 Q3 backup · Fitting an atomistic energy curve"
+---
+
+<!-- Instructor backup of the former Q3. Excluded from site and PDF renders. -->
+
+## Problem 3 · Fitting an atomistic energy curve — 20 marks
+
+In Assignment 1, we used the Lennard-Jones pair potential
+
+$$
+V(r;\varepsilon,\sigma)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right].
+$$
+
+How can we use sampled energies to determine $\varepsilon$ and $\sigma$? The following eight points were generated from the argon model, with small added noise. Use the [A2 Q3 interactive demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a2_q3_lj_estimation.html) to compare estimates from interpolation with a least-squares fit.
+
+::: {.small}
+| $r$ (Å) | 3.20 | 3.35 | 3.50 | 3.65 | 4.00 | 4.40 | 5.00 | 6.00 |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|
+| $V(r)$ ($10^{-3}$ eV) | 26.084565 | 4.126033 | −5.477196 | −9.421694 | −9.608200 | −6.943821 | −3.610619 | −1.348986 |
+:::
+
+The reference values $\varepsilon_{\mathrm{ref}}=0.0103$ eV and $\sigma_{\mathrm{ref}}=3.40$ Å will be used to check your answers.
+
+The demo includes the data in eV and the LJ function from Assignment 1, so your focus is on interpolation and fitting.
+
+### 3.1 Estimates from interpolation
+
+An interpolated curve lets us estimate the zero crossing and minimum between sampled distances. The demo offers three methods: natural cubic spline, shape-preserving cubic (PCHIP), and piecewise linear interpolation. The plot updates when you change the method.
+
+The function `estimate_by_interpolation(method)` is a scaffold. We provide the code that selects the method and creates `f_interp(r)`. Change only the code below the marked line to complete these tasks:
+
+1. Find the zero-crossing distance $r_0$ in $[3.35,3.50]$ Å using `root_scalar`.
+2. Find the minimum-energy distance $r_m$ in $[3.50,4.40]$ Å using `minimize_scalar`, and evaluate $V_m=\texttt{f\_interp}(r_m)$.
+3. Return the three scalar values `(r_zero, r_min, V_min)` in that order.
+
+The function initially returns zeros. Once your values pass the checks, the demo converts them into parameter estimates using the A1 relations:
+
+$$
+\sigma_{\text{root}}=r_0,\qquad
+\sigma_{\text{min}}=\frac{r_m}{2^{1/6}},\qquad
+\varepsilon_{\text{min}}=-V_m.
+$$
+
+Copy your working code for `estimate_by_interpolation` into your answer report, including the results from all three interpolation methods. Which estimates are closest to the reference values?
+
+### 3.2 Least-squares fitting
+
+We can also determine $\varepsilon$ and $\sigma$ by fitting the LJ function to all eight energies. Complete the scaffold `squared_residual(sigma, epsilon)`. The arrays `r_data` and `V_data` are already defined outside the function. Use `lj(r, epsilon, sigma)` to calculate the model energies at these distances and return the total squared residual as **one scalar**:
+
+$$
+E(\varepsilon,\sigma)=\sum_{i=1}^{8}\left[V_i-V(r_i;\varepsilon,\sigma)\right]^2.
+$$
+
+Once your objective passes the checks, the demo runs the supplied `minimize` call and displays the fitted parameters and a comparison plot.
+
+Copy your working code for `squared_residual` into your answer report, including the fitted $\varepsilon$ and $\sigma$. Compare them with the reference values and your interpolation estimates.
+
+::: {.content-visible when-format="html"}
+
+### Q3 interactive demo {#q3-interactive-demo}
+
+::: {.quarto-wasm-local notebook="a2_q3_lj_estimation.edit.py" view="edit" title="A2 Q3 · Interpolation estimates and least-squares fitting" height="1180" loading="lazy" fullscreen="true"}
+Complete the interpolation-estimation and scalar-objective functions to compare the two methods.
+:::
+:::

@@ -21,14 +21,14 @@ def imports():
 @app.cell(hide_code=True)
 def introduction(mo):
     mo.md(r"""
-    # A2 Q4 · Fitting LJ parameters to quantum cluster energies
+    # A2 Q3 · Fitting LJ parameters to quantum cluster energies
 
     Fit one pair of LJ parameters to the DFT interaction energies of 100
     Ar₃–Ar₇ clusters, then test your chosen parameters on five larger Ar₂₀
     clusters. Coordinates are in Å and energies are in eV, relative to
     separated atoms. All coordinates remain fixed during fitting.
 
-    Complete the marked code in Q4.2 and Q4.6. The cluster-energy calculation
+    Complete the marked code in Q3.2 and Q3.6. The cluster-energy calculation
     from A1 and the fitting call are provided.
     """)
     return
@@ -69,7 +69,7 @@ def supplied_cluster_energy(np):
 @app.cell(hide_code=True)
 def residual_definition(mo):
     mo.md(r"""
-    ## Q4.1 · Squared residual
+    ## Q3.1 · Squared residual
 
     Let $c$ label clusters and $k_c$ be the number of atoms in cluster $c$.
     We compare energies per atom:
@@ -89,7 +89,7 @@ def residual_definition(mo):
 @app.cell(hide_code=True)
 def residual_instructions(mo):
     mo.md(r"""
-    ## Q4.2 · Complete the residual loop
+    ## Q3.2 · Complete the residual loop
 
     `calculate_cluster_energy` is already implemented using the Assignment 1
     answer. Complete the scaffold `cluster_residual(sigma, epsilon, clusters)`.
@@ -153,7 +153,7 @@ def residual_check(calculate_cluster_energy, cluster_residual, mo, np):
 @app.cell(hide_code=True)
 def fitting_instructions(mo):
     mo.md(r"""
-    ## Q4.3 · Fit ten clusters
+    ## Q3.3 · Fit ten clusters
 
     Read the supplied `fit_LJ` function. In your answer report, briefly describe
     what the `minimize` call does. The optimizer receives `[sigma, epsilon]`; the short function
@@ -205,7 +205,7 @@ def error_support(calculate_cluster_energy, np):
 
 @app.cell(hide_code=True)
 def selected_fit(cluster_count, clusters, energy_errors, fit_LJ, mo, np, residual_ok):
-    mo.stop(not residual_ok, mo.md("Complete Q4.2 to calculate the selected fit."))
+    mo.stop(not residual_ok, mo.md("Complete Q3.2 to calculate the selected fit."))
     selected_clusters = clusters[:int(cluster_count.value)]
     fit_result = fit_LJ(selected_clusters)
     mo.stop(not fit_result.success or not np.all(np.isfinite(fit_result.x)),
@@ -213,7 +213,7 @@ def selected_fit(cluster_count, clusters, energy_errors, fit_LJ, mo, np, residua
     _sigma, _epsilon = fit_result.x
     _, _mae = energy_errors(selected_clusters, _sigma, _epsilon)
     mo.md(
-        f"### Q4.3–Q4.4 · Results for {len(selected_clusters)} clusters\n\n"
+        f"### Q3.3–Q3.4 · Results for {len(selected_clusters)} clusters\n\n"
         "| Quantity | Value |\n|---|---:|\n"
         f"| σ (Å) | {_sigma:.9g} |\n"
         f"| ε (eV) | {_epsilon:.9g} |\n"
@@ -226,9 +226,9 @@ def selected_fit(cluster_count, clusters, energy_errors, fit_LJ, mo, np, residua
 @app.cell(hide_code=True)
 def dataset_instructions(mo):
     mo.md(r"""
-    ## Q4.4 · Increase the dataset
+    ## Q3.4 · Increase the dataset
 
-    Use the slider in Q4.3 for **20, 40, 60, 80, and 100 clusters**. Write down
+    Use the slider in Q3.3 for **20, 40, 60, 80, and 100 clusters**. Write down
     $\varepsilon$, $\sigma$, and MAE for all six dataset sizes.
     Do the parameters become approximately stable?
 
@@ -241,9 +241,9 @@ def dataset_instructions(mo):
 @app.cell(hide_code=True)
 def extrapolation_instructions(mo):
     mo.md(r"""
-    ## Q4.5 · Extrapolation to five Ar₂₀ clusters
+    ## Q3.5 · Extrapolation to five Ar₂₀ clusters
 
-    Enter your chosen best-fit parameters from Q4.4 and state in your report
+    Enter your chosen best-fit parameters from Q3.4 and state in your report
     which dataset size you used. These five 20-atom clusters were excluded
     from fitting. The starting zeros leave the calculation locked until you
     enter positive values. For each cluster, the supplied calculation uses
@@ -251,7 +251,7 @@ def extrapolation_instructions(mo):
 
     Record the mean absolute total-energy difference (eV/cluster) and the mean
     absolute per-atom difference (meV/atom). Compare the per-atom error with
-    your corresponding Q4.4 value. What do you observe?
+    your corresponding Q3.4 value. What do you observe?
     """)
     return
 
@@ -266,12 +266,12 @@ def extrapolation_inputs(mo):
 
 @app.cell(hide_code=True)
 def chosen_values(chosen_epsilon, chosen_sigma, mo, np, residual_ok):
-    mo.stop(not residual_ok, mo.md("Complete Q4.2 before testing the larger clusters."))
+    mo.stop(not residual_ok, mo.md("Complete Q3.2 before testing the larger clusters."))
     test_sigma = float(chosen_sigma.value)
     test_epsilon = float(chosen_epsilon.value)
     mo.stop(not (np.isfinite(test_sigma) and np.isfinite(test_epsilon)
                  and test_sigma > 0 and test_epsilon > 0),
-            mo.md("Enter positive, finite fitted parameters from Q4.4."))
+            mo.md("Enter positive, finite fitted parameters from Q3.4."))
     return test_epsilon, test_sigma
 
 
@@ -279,7 +279,7 @@ def chosen_values(chosen_epsilon, chosen_sigma, mo, np, residual_ok):
 def extrapolation_results(ar20_clusters, energy_errors, mo, test_epsilon, test_sigma):
     _total_mae, _per_atom_mae = energy_errors(ar20_clusters, test_sigma, test_epsilon)
     mo.md(
-        "### Q4.5 · Errors across all five Ar₂₀ clusters\n\n"
+        "### Q3.5 · Errors across all five Ar₂₀ clusters\n\n"
         "| Mean absolute difference | Value |\n|---|---:|\n"
         f"| Total energy (eV/cluster) | {_total_mae:.6g} |\n"
         f"| Energy per atom (meV/atom) | {_per_atom_mae:.6g} |"
@@ -290,11 +290,11 @@ def extrapolation_results(ar20_clusters, energy_errors, mo, test_epsilon, test_s
 @app.cell(hide_code=True)
 def parity_instructions(mo):
     mo.md(r"""
-    ## Q4.6 · Complete the parity-plot loop
+    ## Q3.6 · Complete the parity-plot loop
 
     Each point compares a cluster's QM total energy on the horizontal axis
     with its LJ total energy on the vertical axis. Perfect agreement lies
-    on $y=x$. Use the same parameters you entered in Q4.5 for both groups.
+    on $y=x$. Use the same parameters you entered in Q3.5 for both groups.
 
     Complete only the marked part inside the `for` loop: append the QM energy
     to `qm_energies` and the calculated LJ energy to `lj_energies`. Return the
@@ -360,7 +360,7 @@ def parity_plot(mo, np, parity_values, plt):
     _limits = (float(_all.min()) - _pad, float(_all.max()) + _pad)
     _ax.plot(_limits, _limits, "--", color="0.4", label="y = x")
     _ax.set(xlim=_limits, ylim=_limits, xlabel="QM total interaction energy (eV)",
-            ylabel="LJ total interaction energy (eV)", title="Q4.6 · Parity plot")
+            ylabel="LJ total interaction energy (eV)", title="Q3.6 · Parity plot")
     _ax.set_aspect("equal", adjustable="box")
     _ax.legend()
     _ax.grid(alpha=0.2)

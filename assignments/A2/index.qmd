@@ -11,7 +11,7 @@ header-includes:
 [Download the PDF handout](index.pdf)
 :::
 
-Submit **one PDF answering all four problems** (100 marks), including calculations, requested code snippets, plots, and concise explanations. Keep your full Python scripts; do not submit them.
+Submit **one PDF answering all three problems** (100 marks), including calculations, requested code snippets, plots, and concise explanations. Keep your full Python scripts; do not submit them.
 
 
 ## Problem 1 · Short answers — 20 marks
@@ -19,7 +19,7 @@ Submit **one PDF answering all four problems** (100 marks), including calculatio
 Keep your answers concise. Don't overthink! If you use AI to answer these questions, clearly state which model you used.
 
 
-1. **Closed-domain methods**: For a continuous function $f(x)$, consider two neighboring sampled points $(x_i,f(x_i))$ and $(x_{i+1},f(x_{i+1}))$. How can you tell whether they bracket a root? Can the same two function values tell you whether they bracket a maximum or minimum?
+1. **Closed-domain methods**: For a continuous function $f(x)$, consider two neighboring sampled points $(x_i,f(x_i))$ and $(x_{i+1},f(x_{i+1}))$. How can you tell whether they bracket a root of $f(x)=0$? Can the same two function values tell you whether they bracket a maximum or minimum?
 
 ```{=latex}
 \vspace{1em}
@@ -64,7 +64,7 @@ $$
 F(x)=\ln\frac{x}{1-x}+H(1-2x)=0.
 $$
 
-Here, $H$ is a dimensionless parameter measuring the energetic penalty for mixing A and B relative to the thermal contribution. Use the [A2 Q2 interactive demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a2_q2_miscibility.html) to check your rearrangement and carry out the numerical updates.
+Here, $H$ is a dimensionless parameter measuring the energetic penalty for mixing A and B relative to the thermal contribution. Treat $H$ as constant while solving $F(x)=0$; its value changes between the cases below. Use the [A2 Q2 interactive demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a2_q2_miscibility.html) to check your rearrangement and carry out the numerical updates.
 
 ### 2.1 Central root
 
@@ -72,15 +72,15 @@ Show that $x=0.5$ is always a root of $F(x)=0$, regardless of $H$.
 
 ### 2.2 Fixed-point form
 
-Rearrange $F(x)=0$ into $x=g(x;H)$, treating $H$ as a constant. Write down your expression and enter it as `g(x)` (using the global parameter `H`) in the demo's Q2.2 cell, replacing `...`. Use the plot immediately below the cell to check whether $y=g(x;H)$ and $y=x$ intersect at $x=0.5$.
+Rearrange $F(x)=0$ into $x=g(x)$, treating $H$ as a constant. Write down your expression and enter it as `g(x)` (using the global parameter `H`) in the demo's Q2.2 cell, replacing `...`. Use the plot immediately below the cell to check whether $y=g(x)$ and $y=x$ intersect at $x=0.5$.
 
 
 ### 2.3 Additional roots
 
 Move the slider in the demo's Q2.3 section to compare the following cases:
 
-1. Set $H=1.5$. Do the curves $y=g(x;H)$ and $y=x$ intersect for $x\in(0.5,1.0)$?
-2. Set $H=2.5$. Do the curves $y=g(x;H)$ and $y=x$ intersect for $x\in(0.5,1.0)$?
+1. Set $H=1.5$. Do the curves $y=g(x)$ and $y=x$ intersect for $x\in(0.5,1.0)$?
+2. Set $H=2.5$. Do the curves $y=g(x)$ and $y=x$ intersect for $x\in(0.5,1.0)$?
 
 Physically, $H>2.0$ is the condition for two additional roots to appear, corresponding to the miscibility-gap region.
 
@@ -104,76 +104,21 @@ Enter your own fixed-point map in Q2.2, compare the plots in Q2.3, and use the o
 \newpage
 ```
 
-## Problem 3 · Fitting an atomistic energy curve — 20 marks
 
-In Assignment 1, we used the Lennard-Jones pair potential
-
-$$
-V(r;\varepsilon,\sigma)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right].
-$$
-
-How can we use sampled energies to determine $\varepsilon$ and $\sigma$? The following eight points were generated from the argon model, with small added noise. Use the [A2 Q3 interactive demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a2_q3_lj_estimation.html) to compare estimates from interpolation with a least-squares fit.
-
-::: {.small}
-| $r$ (Å) | 3.20 | 3.35 | 3.50 | 3.65 | 4.00 | 4.40 | 5.00 | 6.00 |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| $V(r)$ ($10^{-3}$ eV) | 26.084565 | 4.126033 | −5.477196 | −9.421694 | −9.608200 | −6.943821 | −3.610619 | −1.348986 |
-:::
-
-The reference values $\varepsilon_{\mathrm{ref}}=0.0103$ eV and $\sigma_{\mathrm{ref}}=3.40$ Å will be used to check your answers.
-
-The demo includes the data in eV and the LJ function from Assignment 1, so your focus is on interpolation and fitting.
-
-### 3.1 Estimates from interpolation
-
-An interpolated curve lets us estimate the zero crossing and minimum between sampled distances. The demo offers three methods: natural cubic spline, shape-preserving cubic (PCHIP), and piecewise linear interpolation. The plot updates when you change the method.
-
-The function `estimate_by_interpolation(method)` is a scaffold. We provide the code that selects the method and creates `f_interp(r)`. Change only the code below the marked line to complete these tasks:
-
-1. Find the zero-crossing distance $r_0$ in $[3.35,3.50]$ Å using `root_scalar`.
-2. Find the minimum-energy distance $r_m$ in $[3.50,4.40]$ Å using `minimize_scalar`, and evaluate $V_m=\texttt{f\_interp}(r_m)$.
-3. Return the three scalar values `(r_zero, r_min, V_min)` in that order.
-
-The function initially returns zeros. Once your values pass the checks, the demo converts them into parameter estimates using the A1 relations:
-
-$$
-\sigma_{\text{root}}=r_0,\qquad
-\sigma_{\text{min}}=\frac{r_m}{2^{1/6}},\qquad
-\varepsilon_{\text{min}}=-V_m.
-$$
-
-Copy your working code for `estimate_by_interpolation` into your answer report, including the results from all three interpolation methods. Which estimates are closest to the reference values?
-
-### 3.2 Least-squares fitting
-
-We can also determine $\varepsilon$ and $\sigma$ by fitting the LJ function to all eight energies. Complete the scaffold `squared_residual(sigma, epsilon)`. The arrays `r_data` and `V_data` are already defined outside the function. Use `lj(r, epsilon, sigma)` to calculate the model energies at these distances and return the total squared residual as **one scalar**:
-
-$$
-E(\varepsilon,\sigma)=\sum_{i=1}^{8}\left[V_i-V(r_i;\varepsilon,\sigma)\right]^2.
-$$
-
-Once your objective passes the checks, the demo runs the supplied `minimize` call and displays the fitted parameters and a comparison plot.
-
-Copy your working code for `squared_residual` into your answer report, including the fitted $\varepsilon$ and $\sigma$. Compare them with the reference values and your interpolation estimates.
-
-::: {.content-visible when-format="html"}
-
-### Q3 interactive demo {#q3-interactive-demo}
-
-::: {.quarto-wasm-local notebook="a2_q3_lj_estimation.edit.py" view="edit" title="A2 Q3 · Interpolation estimates and least-squares fitting" height="1180" loading="lazy" fullscreen="true"}
-Complete the interpolation-estimation and scalar-objective functions to compare the two methods.
-:::
-:::
 
 ```{=latex}
 \newpage
 ```
 
-## Problem 4 · Fitting LJ parameters to quantum cluster energies — 30 marks
+## Problem 3 · Fitting LJ parameters to quantum cluster energies — 50 marks
 
 In the last question of Assignment 1, we calculated the total LJ energy of an atomic cluster by adding the energies of all unique pairs. We can use the same calculation to estimate the LJ parameters for an element when we know the energies of many clusters. Here, those energies come from quantum chemistry calculations using density functional theory (DFT), which we will cover later in the course.
 
 An argon cluster $\mathrm{Ar}_k$ contains $k$ atoms at positions $(x_1,y_1,z_1),\ldots,(x_k,y_k,z_k)$. Each DFT calculation gives one total interaction energy relative to separated atoms. A calculation can take up to two hours on a single CPU, so obtaining these energy data is expensive!
+
+The five structures below are examples from the fixed random order used in the demo. Their QM and LJ interaction energies are listed beneath each structure; the LJ values use the fit to all 100 training clusters. In 3.6, you will compare the full dataset in a parity plot.
+
+![Five randomly selected Ar₃–Ar₇ training clusters, with their QM and 100-cluster-fit LJ interaction energies compared below.](figures/q3-training-examples.png){width="100%" fig-align="center"}
 
 Label the different clusters by $c=1,\ldots,N$, and let $k_c$ be the number of atoms in cluster $c$. Within that cluster, $i$ and $j$ label atoms. Its LJ energy is
 
@@ -186,9 +131,9 @@ $$
 
 Here, $\mathbf r_{c,i}$ is the position of atom $i$ in cluster $c$. We assume that $\varepsilon$ and $\sigma$ do not change with cluster size.
 
-We have pre-calculated the DFT energies of 100 randomly generated Ar₃–Ar₇ clusters. Use the [A2 Q4 interactive demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a2_q4_lj_fit.html) to fit the LJ model to these data by nonlinear least squares.
+We have pre-calculated the DFT energies of 100 randomly generated Ar₃–Ar₇ clusters. Use the [A2 Q3 interactive demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a2_q3_lj_fit.html) to fit the LJ model to these data by nonlinear least squares.
 
-### 4.1 Squared residual
+### 3.1 Squared residual
 
 For $N$ clusters, define
 
@@ -198,19 +143,15 @@ $$
 
 In your own words, describe what the residual measures: what is the mismatch between the data and the predictions?^[Dividing each energy by the number of atoms puts clusters of different sizes on a per-atom basis, reducing the tendency of larger clusters to dominate the fit simply because their total energies are larger.] What are the unknowns we need to determine?
 
-### 4.2 Implement the residual
+### 3.2 Implement the residual
 
-The function `calculate_cluster_energy` is already implemented using the Assignment 1 answer. Your task is to complete the scaffold `cluster_residual(sigma, epsilon, clusters)`. The scaffold includes the loop over clusters and extracts each cluster's coordinates, QM energy, and number of atoms. Complete the marked part to add up the squared per-atom energy differences and return one scalar.
+`calculate_cluster_energy` and the loop over clusters are supplied. Complete `cluster_residual(sigma, epsilon, clusters)` to add each squared per-atom energy difference and return the scalar sum.
 
-Your function is checked on three synthetic clusters with arbitrary coordinates and dummy reference energies, separate from the DFT dataset. Passing these checks unlocks the fitting calculation.
+The function is checked on three synthetic clusters before fitting unlocks. Copy your working code into your answer report.
 
-Copy your working code for `cluster_residual` into your answer report.
+### 3.3 Fit ten clusters
 
-### 4.3 Fit ten clusters
-
-Read the supplied `fit_LJ` function and briefly describe what its `minimize` call does. Set the dataset-size slider to **10 clusters**.
-
-Record the fitted $\varepsilon$ and $\sigma$ and the **mean absolute energy error per atom** (MAE):
+Read `fit_LJ` and briefly describe its `minimize` call. Set the dataset-size slider to **10 clusters**. Record $\varepsilon$, $\sigma$, and the **mean absolute energy error per atom** (MAE):
 
 $$
 \mathrm{MAE}=\frac{1}{N}\sum_{c=1}^{N}\left|\frac{E_c^{\mathrm{LJ}}-E_c^{\mathrm{QM}}}{k_c}\right|.
@@ -218,29 +159,31 @@ $$
 
 The demo reports this error in meV/atom, where $1\ \mathrm{meV}=10^{-3}\ \mathrm{eV}$.
 
-### 4.4 Increase the dataset
+### 3.4 Increase the dataset
 
-Repeat Q4.3 using **20, 40, 60, 80, and 100 clusters**. Write down the fitted parameters and MAE per atom for all six dataset sizes. Do the parameters become approximately stable as more clusters are included?
+Repeat Q3.3 using **20, 40, 60, 80, and 100 clusters**. Write down the fitted parameters and MAE per atom for all six dataset sizes. Do the parameters become approximately stable as more clusters are included?
 
-### 4.5 Extrapolation to larger clusters
+### 3.5 Extrapolation to larger clusters
 
-Can the parameters fitted to Ar₃–Ar₇ describe larger clusters? In the demo's Q4.5 section, enter your chosen best-fit $\varepsilon$ and $\sigma$ from Q4.4 and state which dataset size you used. The demo evaluates five Ar₂₀ clusters that were excluded from fitting, testing extrapolation beyond the fitted cluster sizes.
+Can parameters fitted to Ar₃–Ar₇ describe larger clusters? These five Ar₂₀ structures were held out from fitting:
 
-Record the mean absolute **total-energy difference** in eV/cluster and the mean absolute **per-atom energy difference** in meV/atom across these five clusters. Compare the per-atom error with the corresponding value from Q4.4. What do you observe?
+![Five held-out Ar₂₀ cluster structures. Can parameters fitted to Ar₃–Ar₇ predict their energies?](figures/q3-ar20-test-clusters.png){width="100%" fig-align="center"}
 
-### 4.6 Parity plot
+In Q3.5, enter your fitted $\varepsilon$ and $\sigma$ from Q3.4 and state the dataset size. Record mean absolute **total-energy** (eV/cluster) and **per-atom** (meV/atom) errors for these five clusters. Compare the per-atom error with your Q3.4 MAE. What do you observe?
 
-A **parity plot** compares reference and predicted values: each point represents a cluster, with $E^{\mathrm{QM}}$ on the horizontal axis and $E^{\mathrm{LJ}}$ on the vertical axis. Perfect agreement lies on the diagonal $y=x$.
+### 3.6 Parity plot
 
-Complete the marked part inside the scaffold's `for` loop to collect the QM and LJ total energies. The demo then plots all 100 Ar₃–Ar₇ clusters and the five Ar₂₀ clusters with different markers, using the parameters you entered in Q4.5.
+A **parity plot** places each cluster's QM total energy on the horizontal axis and LJ total energy on the vertical axis. Perfect agreement lies on $y=x$.
 
-Copy your working code for `parity_energies` and the plot into your answer report. Compare how the two groups lie relative to the diagonal. Do you see a systematic difference between predictions for the smaller clusters and the extrapolated Ar₂₀ clusters?
+Complete the marked loop to collect and return one QM and LJ total energy per cluster. Use the parameters from Q3.5 for the 100 training clusters and five Ar₂₀ test clusters. Copy your working code and plot into your report. Compare both groups with the diagonal. With the 100-cluster fit, training predictions should lie close to $y=x$, while the Ar₂₀ points fall below it, as in the example.
+
+![Example parity plot using the 100-cluster fit.](../../answer-keys/A2/cluster-parity.png){width="80%" fig-align="center"}
 
 ::: {.content-visible when-format="html"}
 
-### Q4 interactive demo {#q4-interactive-demo}
+### Q3 interactive demo {#q3-interactive-demo}
 
-::: {.quarto-wasm-local notebook="a2_q4_lj_fit.edit.py" view="edit" title="A2 Q4 · Fit LJ parameters to quantum cluster energies" height="1250" loading="lazy" fullscreen="true"}
+::: {.quarto-wasm-local notebook="a2_q3_lj_fit.edit.py" view="edit" title="A2 Q3 · Fit LJ parameters to quantum cluster energies" height="1250" loading="lazy" fullscreen="true"}
 Complete the residual and parity-plot loops, compare fits at different dataset sizes, and test your chosen parameters on five larger clusters.
 :::
 :::

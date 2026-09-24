@@ -52,7 +52,7 @@ def plotting_support(mo, np, plt):
         except Exception as error:
             return mo.callout(mo.md(f"Check `g(x)`: {error}"), kind="warn")
         fig, ax = plt.subplots(figsize=(6.4, 4.2), layout="constrained")
-        ax.plot(xs, ys, color="#007c41", label=r"$y=g(x;H)$")
+        ax.plot(xs, ys, color="#007c41", label=r"$y=g(x)$")
         ax.plot(xs, xs, "--", color="0.35", label=r"$y=x$")
         ax.set(xlim=(0, 1), ylim=(0, 1), xlabel="Composition x", ylabel="y",
                title=f"Your fixed-point map at H = {H:g}")
@@ -92,10 +92,11 @@ def map_instructions(mo):
     mo.md(r"""
     ## Q2.2 · Enter your fixed-point form
 
-    Rearrange $F(x;H)=0$ into $x=g(x;H)$. Enter your expression for
-    **`g(x)` in the cell below**, replacing `...`. The global parameter `H`
-    is set by the Q2.3 slider and starts at 1.5. NumPy is available as `np`.
-    Run the cell to draw $y=g(x;H)$ and $y=x$ immediately below it.
+    Rearrange $F(x;H)=0$ into $x=g(x)$, treating $H$ as a constant.
+    Enter your expression for **`g(x)` in the cell below**, replacing `...`.
+    The global parameter `H` is set by the Q2.3 slider and starts at 1.5.
+    NumPy is available as `np`. Run the cell to draw $y=g(x)$ and $y=x$
+    immediately below it.
     **Do the curves intersect at $x=0.5$?** This checks the central root from Q2.1.
     """)
     return

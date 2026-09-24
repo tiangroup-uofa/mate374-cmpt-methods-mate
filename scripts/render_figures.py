@@ -24,6 +24,7 @@ FIGURE_SCRIPTS = (
     "l09_residual_figures.py",
     "l10_figures.py",
     "s04_figures.py",
+    "../activities/a2_q3_figures.py",
 )
 
 

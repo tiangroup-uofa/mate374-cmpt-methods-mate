@@ -14,9 +14,9 @@ def imports():
     import marimo as mo
     import numpy as np
     import matplotlib.pyplot as plt
-    from scipy.interpolate import CubicSpline, make_interp_spline
+    from scipy.interpolate import CubicSpline
 
-    return CubicSpline, make_interp_spline, mo, np, plt
+    return CubicSpline, mo, np, plt
 
 
 @app.cell(hide_code=True)
@@ -24,8 +24,9 @@ def introduction(mo):
     mo.md(r"""
     ## Four quadratic pieces through five points
 
-    Write the endpoint and slope conditions on paper, then type the matrix
-    into the cell below. The supplied version is a working reference.
+    Each piece has the form $\hat f_i(x)=a_i x^2+b_i x+c_i$.
+    Write the endpoint and slope conditions on paper and compare them with
+    the supplied matrix. The boundary condition is $\hat f_1''(8)=0$.
     Edit existing cells rather than defining the same names in new cells.
 
     **Your calculation:** evaluate at `x_new = 20.0` after checking 12.7.
@@ -81,9 +82,9 @@ def solve(A, np, rhs):
 @app.cell(hide_code=False)
 def evaluate(np, pieces):
     x_new = 12.7
-    piece_index = 1  # f2 uses row 1 in Python; valid for 11 <= x_new <= 15.
+    piece_index = 1  # The second piece uses row 1; valid for 11 <= x_new <= 15.
     estimate = np.polyval(pieces[piece_index], x_new)
-    print(f"f{piece_index + 1}({x_new:g}) = {estimate:.8f}")
+    print(f"f_hat_{piece_index + 1}({x_new:g}) = {estimate:.8f}")
     return estimate, piece_index, x_new
 
 
@@ -109,16 +110,6 @@ def library_comparison(CubicSpline, x, x_new, y):
     cubic = CubicSpline(x, y, bc_type="natural", extrapolate=False)
     print(f"Natural cubic at {x_new:g}: {float(cubic(x_new)):.8f}")
     return (cubic,)
-
-
-@app.cell(hide_code=True)
-def same_quadratic(make_interp_spline, np, x, y):
-    # Optional: same degree, interval boundaries, and left-end condition.
-    knots = np.r_[np.repeat(x[0], 3), x[1:-1], np.repeat(x[-1], 3)]
-    quadratic_reference = make_interp_spline(
-        x, y, k=2, t=knots, bc_type=([(2, 0.0)], None)
-    )
-    return (quadratic_reference,)
 
 
 @app.cell(hide_code=True)
@@ -151,12 +142,13 @@ def plot(cubic, estimate, mo, np, piece_index, pieces, plt, x, x_new, y):
 @app.cell(hide_code=True)
 def follow_up(mo):
     mo.md(r"""
-    **Try another boundary condition.** In the last row of `A`, move the `2`
-    from the `a1` column to the `a4` column. Keep the last entry of `rhs` at zero.
-    Which piece is now straight? Check the endpoints and slopes again.
-    The natural cubic is unchanged because it uses its own boundary conditions.
+    **Your calculation:** set `x_new = 20.0` and `piece_index = 3`.
+    Then evaluate at 15 using piece indices 1 and 2. Do the values agree?
 
-    Restore the last row before comparing with the worked answers.
+    The natural cubic matches both first and second derivatives at interior
+    points and sets the second derivative to zero at both ends. These conditions
+    differ from our quadratic construction, so the estimates between data
+    points can differ.
     """)
     return
 

@@ -154,6 +154,10 @@ def calculate_LJ_cluster(coords):
     return total
 ```
 
+```{=latex}
+\newpage
+```
+
 **NumPy arrays, with the same pair-counting loops:**
 
 ```python

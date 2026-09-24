@@ -16,6 +16,7 @@ OUTPUT_DIR = "wasm-local"
 MANIFEST_NAME = ".marimo-export-manifest.json"
 AUTO_RUN_OPT_OUT = "mate374: auto-run = false"
 BUILD_EXECUTION_OPT_OUT = "mate374: build-execute = false"
+NON_RENDERED_QMD_SOURCES = {"assignments/A2/q3-lj-estimation-backup.qmd"}
 FULL_SITE_QMD_DIRS = (
     "syllabus",
     "introduction",
@@ -60,6 +61,7 @@ def rendered_qmd_sources(project_root: Path) -> list[Path]:
         for path in pages
         if path.is_file()
         and not path.name.startswith(".#")
+        and path.relative_to(project_root).as_posix() not in NON_RENDERED_QMD_SOURCES
         and path.relative_to(project_root).as_posix() != "units/03"
         and not path.relative_to(project_root).as_posix().startswith("units/03/")
     )

@@ -5,8 +5,7 @@ title: "MAT E 374 · Assignment 2 answers"
 ## Completed reference notebooks
 
 - [Q2 · Fixed-point iteration](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a2_q2_completed.html)
-- [Q3 · Interpolation and least-squares fitting](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a2_q3_completed.html)
-- [Q4 · Fitting quantum cluster energies](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a2_q4_completed.html)
+- [Q3 · Fitting LJ parameters to quantum cluster energies](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a2_q3_completed.html)
 
 These notebooks contain the completed functions and reproduce the calculations shown here. Small differences in the last digits are acceptable when solver tolerances differ.
 
@@ -98,82 +97,13 @@ The stopping rule concerns the change in composition, so the residual need not b
 \newpage
 ```
 
-## Q3 · Fitting an atomistic energy curve
+## Q3 · Fitting LJ parameters to quantum cluster energies
 
-### 3.1 Estimates from interpolation
-
-The completed function uses the supplied method switch. `root_scalar` and `minimize_scalar` are imported from `scipy.optimize`; the interpolation classes and data are supplied by the notebook.
-
-```python
-def estimate_by_interpolation(method):
-    if method == 'Natural cubic spline':
-        f_interp = CubicSpline(r_data, V_data, bc_type='natural', extrapolate=False)
-    elif method == 'Shape-preserving cubic (PCHIP)':
-        f_interp = PchipInterpolator(r_data, V_data, extrapolate=False)
-    elif method == 'Piecewise linear':
-        f_interp = interp1d(r_data, V_data, kind='linear', bounds_error=True)
-    else:
-        raise ValueError('Unknown interpolation method')
-    zero = root_scalar(f_interp, bracket=[3.35, 3.5], method='brentq')
-    minimum = minimize_scalar(f_interp, bounds=[3.5, 4.4], method='bounded', options={'xatol': 1e-12})
-    if not zero.converged or not minimum.success:
-        raise RuntimeError('Root finding or minimization failed')
-    r_zero = float(zero.root)
-    r_min = float(minimum.x)
-    V_min = float(f_interp(r_min))
-    return (r_zero, r_min, V_min)
-```
-
-The resulting zero crossings and minima are:
-
-| Method | $r_0$ (Å) | $r_m$ (Å) | $V_m$ (eV) |
-| --- | --- | --- | --- |
-| Natural cubic spline | 3.3955397 | 3.8043243 | -0.010534572 |
-| Shape-preserving cubic (PCHIP) | 3.4009742 | 4.0000000 | -0.009608200 |
-| Piecewise linear | 3.4144476 | 3.9999999 | -0.009608200 |
-
-Applying $\sigma_{\mathrm{root}}=r_0$, $\sigma_{\mathrm{min}}=r_m/2^{1/6}$, and $\varepsilon_{\mathrm{min}}=-V_m$ gives:
-
-| Method | $\sigma$ from root (Å) | $\sigma$ from minimum (Å) | $\varepsilon$ from minimum (eV) |
-| --- | --- | --- | --- |
-| Natural cubic spline | 3.3955397 | 3.3892676 | 0.010534572 |
-| Shape-preserving cubic (PCHIP) | 3.4009742 | 3.5635949 | 0.009608200 |
-| Piecewise linear | 3.4144476 | 3.5635948 | 0.009608200 |
-
-Compared with $\sigma_{\mathrm{ref}}=3.40$ Å, **PCHIP gives the closest zero-crossing estimate**. The **natural cubic spline gives the closest minimum-based estimates** of both $\sigma$ and $\varepsilon$, compared with $\varepsilon_{\mathrm{ref}}=0.0103$ eV. PCHIP and piecewise linear interpolation place the minimum at the lowest sampled point, $r=4.00$ Å. The natural cubic spline has a deeper minimum between sampled points.
-
-### 3.2 Least-squares fitting
-
-The data arrays are global. This implementation uses the same loop scaffold as the student notebook:
-
-```python
-def squared_residual(sigma, epsilon):
-    total = 0.0
-    for r_i, V_i in zip(r_data, V_data):
-        V_model = lj(r_i, epsilon, sigma)
-        total += (V_i - V_model) ** 2
-    return total
-```
-
-The supplied `minimize` call starts from $[\sigma,\varepsilon]=[3.3,0.01]$ and uses Nelder–Mead with positive bounds.
-
-The fit gives **$\sigma=3.40002614$ Å** and **$\varepsilon=0.010317795$ eV**, with total squared residual $2.819856e-08$ eV$^2$. The optimizer reports success.
-
-![All three interpolation methods and the fitted LJ curve, with an enlarged view near the minimum.](lj-fit.png){width="100%"}
-
-Both fitted parameters are closer to the reference values than any of the interpolation estimates. The fit uses all eight energies to determine the two parameters of the LJ form. The interpolation estimates instead depend on where each interpolated curve crosses zero or reaches its minimum.
-
-```{=latex}
-\newpage
-```
-
-## Q4 · Fitting LJ parameters to quantum cluster energies
-
-### 4.1 Squared residual
+### 3.1 Squared residual
 
 Each term measures the squared mismatch between the QM and LJ **energy per atom** for one cluster. The unknowns are the two shared parameters $\sigma$ and $\varepsilon$. The coordinates, cluster sizes, and QM energies are known. Each cluster contributes one squared per-atom error.
 
-### 4.2 Implement the residual
+### 3.2 Implement the residual
 
 ```python
 def cluster_residual(sigma, epsilon, clusters):
@@ -190,19 +120,23 @@ def cluster_residual(sigma, epsilon, clusters):
 
 The energy difference is divided by $k$ **before squaring**. Thus the squared total-energy difference is effectively divided by $k^2$, not by $k$. This implementation passes the checks on the three separate synthetic clusters.
 
-### 4.3 Fit ten clusters
+### 3.3 Fit ten clusters
 
 The supplied function varies $\sigma$ and $\varepsilon$ to minimize the sum of squared per-atom energy differences over the selected clusters. Nelder–Mead evaluates trial parameter pairs and adjusts them until its stopping criteria are met. It returns an optimizer result containing the fitted values and convergence status.
 
 ```python
 def fit_LJ(clusters):
-    result = minimize(lambda values: cluster_residual(values[0], values[1], clusters), x0=[3.4, 0.01], method='Nelder-Mead', bounds=[(2.5, 4.5), (1e-06, 0.1)], options={'xatol': 1e-09, 'fatol': 1e-14, 'maxiter': 3000})
+    result = minimize(
+        lambda values: cluster_residual(values[0], values[1], clusters),
+        x0=[3.4, 0.01], method='Nelder-Mead',
+        bounds=[(2.5, 4.5), (1e-06, 0.1)],
+        options={'xatol': 1e-09, 'fatol': 1e-14, 'maxiter': 3000})
     return result
 ```
 
-For ten clusters, the first row of the table in Q4.4 gives the parameters and MAE. The objective is a **sum of squared errors**, while the reported MAE is the **mean absolute error**; these are different measures.
+For ten clusters, the first row of the table in Q3.4 gives the parameters and MAE. The objective is a **sum of squared errors**, while the reported MAE is the **mean absolute error**; these are different measures.
 
-### 4.4 Increase the dataset
+### 3.4 Increase the dataset
 
 The results below use the notebook's fixed random order and the supplied solver settings. Every fit reports success.
 
@@ -217,9 +151,9 @@ The results below use the notebook's fixed random order and the supplied solver 
 
 The parameters are approximately stable: $\sigma$ stays near 3.39 Å and $\varepsilon$ near 0.0137 eV. Their changes are not monotonic. The MAE also need not decrease as more clusters are added, because each fit is evaluated on a different set of structures. The low ten-cluster MAE does not by itself make that fit preferable for predicting new clusters.
 
-### 4.5 Extrapolation to larger clusters
+### 3.5 Extrapolation to larger clusters
 
-Use the 100-cluster fit as the reference choice because it uses all available fitting data. Other choices from Q4.4 are acceptable if the dataset size is stated and the corresponding errors are calculated consistently.
+Use the 100-cluster fit as the reference choice because it uses all available fitting data. Other choices from Q3.4 are acceptable if the dataset size is stated and the corresponding errors are calculated consistently.
 
 Using the **100-cluster fit**, the five Ar₂₀ clusters have a mean absolute total-energy difference of **0.15683187 eV/cluster** and a mean absolute per-atom difference of **7.841594 meV/atom**. The corresponding fitting-set MAE is **1.019545 meV/atom**.
 
@@ -233,7 +167,7 @@ Using the **100-cluster fit**, the five Ar₂₀ clusters have a mean absolute t
 
 For these 20-atom clusters, the per-atom MAE is the total-energy MAE divided by 20 and multiplied by 1000 to convert eV to meV. The extrapolation error is about **7.7 times** the fitting-set MAE. The LJ energies are too negative for all five larger clusters: the model overestimates their binding relative to the QM calculation.
 
-### 4.6 Parity plot
+### 3.6 Parity plot
 
 The plot uses **total energies**, so there is no division by the number of atoms in this function:
 
@@ -250,6 +184,6 @@ def parity_energies(sigma, epsilon, clusters):
     return (qm_energies, lj_energies)
 ```
 
-![Parity plot for all 100 fitting clusters and five larger clusters using the 100-cluster fit. The right panel enlarges the region near the smaller-cluster energies.](cluster-parity.png){width="100%"}
+![Parity plot for all 100 fitting clusters and five larger clusters using the 100-cluster fit. The right panel enlarges the region near the smaller-cluster energies.](cluster-parity.png){width="80%"}
 
 The Ar₃–Ar₇ points lie close to the diagonal, with visible scatter on the enlarged scale. All five Ar₂₀ points lie below it, showing systematically more negative LJ predictions. A good fit to small clusters therefore does not establish accuracy for larger clusters. The larger-cluster errors remain substantially larger even after normalization per atom.

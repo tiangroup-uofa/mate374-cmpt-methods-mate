@@ -21,6 +21,7 @@ project:
     - "units/**/*.qmd"
     - "!units/03/**"
     - "assignments/**/*.qmd"
+    - "!assignments/A2/q3-lj-estimation-backup.qmd"
     - "project/**/*.qmd"
     - "seminars/**/*.qmd"
     # Agent scaffolds stay out of site HTML and PDF render targets.
@@ -51,13 +52,10 @@ website:
         text: Assignments
       - href: project/index.qmd
         text: Project
-    right:
-      - text: "Faculty of Engineering"
-        href: https://www.ualberta.ca/en/engineering/
-        aria-label: "University of Alberta Faculty of Engineering"
   sidebar:
     style: docked
     search: true
+    collapse-level: 3
     contents:
       - href: index.qmd
         text: Course home
@@ -72,30 +70,30 @@ website:
             href: units/01/index.qmd
             contents:
               - href: units/01/L01/index.qmd
-                text: "L01"
+                text: "Lecture 01"
               - href: units/01/L02/index.qmd
-                text: "L02"
+                text: "Lecture 02"
               - href: units/01/L03/index.qmd
-                text: "L03"
+                text: "Lecture 03"
               - href: units/01/L04/index.qmd
-                text: "L04"
+                text: "Lecture 04"
               - href: units/01/references.qmd
                 text: "References"
           - section: "02 · Working with functions"
             href: units/02/index.qmd
             contents:
               - href: units/02/L05/index.qmd
-                text: "L05"
+                text: "Lecture 05"
               - href: units/02/L06/index.qmd
-                text: "L06"
+                text: "Lecture 06"
               - href: units/02/L07/index.qmd
-                text: "L07"
+                text: "Lecture 07"
               - href: units/02/L08/index.qmd
-                text: "L08"
+                text: "Lecture 08"
               - href: units/02/L09/index.qmd
-                text: "L09"
+                text: "Lecture 09"
               - href: units/02/L10/index.qmd
-                text: "L10"
+                text: "Lecture 10"
               - href: units/02/references.qmd
                 text: "References"
       - href: seminars/index.qmd

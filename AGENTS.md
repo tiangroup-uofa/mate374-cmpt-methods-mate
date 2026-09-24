@@ -11,7 +11,15 @@ Use the matching scaffold in `templates/` when creating course pages:
 | Assignment and answer key | `assignment.qmd.template` | `assignments/AN/index.qmd` and `answer-keys/AN/answers.qmd` |
 | Seminar | `seminar.qmd.template` | `seminars/Sxx-topic/index.qmd` |
 
-Read the template, copy the relevant scaffold to its destination, replace placeholders, and remove authoring notes. Adapt the sections to the topic while preserving established course titles, tone, and navigation. For assignments, split the handout and answer-key sections into separate files. Update the relevant landing-page links and `_quarto.yml` navigation. Templates remain outside HTML/PDF render targets.
+Read the template, copy the relevant scaffold to its destination, replace placeholders, and remove authoring notes. Adapt the sections to the topic while preserving established course titles, tone, and navigation. For assignments, split the handout and answer-key sections into separate files. Templates remain outside HTML/PDF render targets.
+
+## Adding course content
+
+Before adding content, read its matching template and the relevant existing landing page; follow their structure and style. For every new page, update the appropriate landing-page links and site navigation in the root `_quarto.yml` (`website.sidebar` for unit and lecture entries, `website.navbar` for top-level categories), and confirm `project.render` includes it.
+
+- **New lecture:** add it in sequence to its unit landing page.
+- **New unit and its lectures:** create the unit landing page and lecture pages from their templates; add the unit and lecture links to `units/index.qmd` and a matching section in the sidebar. Follow the existing unit landing-page style.
+- **New assignment:** add the corresponding student-facing marimo activity notebook source(s) under `activities/`, link or describe them in the assignment, and add the assignment to its landing page. Never ask students to use or run a plain Python script.
 
 ## Preview and render scope
 

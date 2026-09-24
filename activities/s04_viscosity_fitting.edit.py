@@ -25,8 +25,9 @@ def introduction(mo):
     ## Fit bitumen viscosity
 
     The empirical model is $\mu=bT^m$, with `T` entered as the numerical
-    temperature in °C and viscosity in Pa·s. Type the log-space fit and the
-    direct-fit calls into their existing cells. A working reference is supplied.
+    temperature in °C and viscosity in Pa·s. The log-space fit uses the four
+    sums from L09, followed by a direct fit with `curve_fit`.
+    Working calculations are supplied in editable cells.
 
     **Predict:** which fit will have the smaller sum of squared viscosity
     residuals? Which will have the smaller sum of squared log residuals?
@@ -45,24 +46,26 @@ def data(np):
 def linear_fit(T, mu, np):
     X = np.log(T)
     Y = np.log(mu)
-    design = np.column_stack([np.ones_like(X), X])
-    log_parameters, _, rank, _ = np.linalg.lstsq(design, Y, rcond=None)
-    alpha_log, m_log = log_parameters
+    N = len(X)
+    Sx = np.sum(X)
+    Sy = np.sum(Y)
+    Sxx = np.sum(X**2)
+    Sxy = np.sum(X * Y)
+    m_log = (N * Sxy - Sx * Sy) / (N * Sxx - Sx**2)
+    alpha_log = (Sy - m_log * Sx) / N
     b_log = np.exp(alpha_log)
-    print("Design matrix shape:", design.shape, "rank:", rank)
+    log_parameters = np.array([alpha_log, m_log])
+    print("Sx, Sy, Sxx, Sxy:", Sx, Sy, Sxx, Sxy)
     print(f"alpha = {alpha_log:.8f}, m = {m_log:.8f}, b = {b_log:.8g}")
-    return X, Y, alpha_log, b_log, design, log_parameters, m_log
+    return N, Sx, Sxx, Sxy, Sy, X, Y, alpha_log, b_log, log_parameters, m_log
 
 
 @app.cell(hide_code=False)
-def normal_equations(Y, design, np):
-    normal_matrix = design.T @ design
-    normal_rhs = design.T @ Y
-    normal_parameters = np.linalg.solve(normal_matrix, normal_rhs)
-    print("Normal matrix:\n", normal_matrix)
-    print("Right-hand side:", normal_rhs)
-    print("[alpha, m] from the normal equations:", normal_parameters)
-    return normal_matrix, normal_parameters, normal_rhs
+def normal_equations(N, Sx, Sxx, Sxy, Sy, alpha_log, m_log):
+    # Check the two equations used to derive the formulas.
+    print("First normal-equation residual:", N * alpha_log + Sx * m_log - Sy)
+    print("Second normal-equation residual:", Sx * alpha_log + Sxx * m_log - Sxy)
+    return
 
 
 @app.cell(hide_code=False)
@@ -151,9 +154,8 @@ def follow_up(mo):
     At 70 °C, is the direct-fit residual small relative to the measured viscosity?
     Explain why a small overall RMSE can coexist with a large percentage mismatch.
 
-    **Your code change:** add `sigma=mu` to `curve_fit` to minimize squared
-    relative residuals. Compare the parameters and both error measures again,
-    then remove that argument to restore the original unweighted calculation.
+    **Your calculation:** use the prediction cell to compare both fits at
+    45 °C. Which objective gives more influence to the 1000 Pa·s measurement?
     """)
     return
 
