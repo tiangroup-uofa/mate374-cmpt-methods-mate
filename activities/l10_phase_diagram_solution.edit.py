@@ -16,9 +16,9 @@ def imports():
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy.optimize import curve_fit, minimize_scalar, root_scalar
-    from scipy.interpolate import PchipInterpolator
+    from scipy.interpolate import CubicSpline, PchipInterpolator
 
-    return PchipInterpolator, curve_fit, io, minimize_scalar, mo, np, plt, root_scalar
+    return CubicSpline, PchipInterpolator, curve_fit, io, minimize_scalar, mo, np, plt, root_scalar
 
 
 @app.cell(hide_code=True)
@@ -26,13 +26,17 @@ def introduction(mo):
     mo.md(r"""
     ## L10 · From CO₂ gas measurements to a liquid–gas boundary
 
-    **Reference notebook.** Every cell is complete. The four cells marked
-    **Live step** were typed in class. The collapsed cells supply the data,
-    the well limits, the plots, and the checks.
+    **Completed tutor reference.** All four live-code cells are filled in.
+    Run them in sequence to fit the model, find both free-energy minima,
+    solve for coexistence pressure, and interpolate the boundary. The collapsed
+    cells supply measurements, search intervals, figures, and checks.
 
-    **Engineering question.** CO₂ is held at a temperature between 250 and 295 K.
-    Above which pressure does it condense to liquid? We answer with the
-    van der Waals (vdW) model, fitted only to gas-phase measurements at 300–330 K.
+    **Engineering question.** At what pressure can liquid and gas CO₂ coexist
+    between 250 and 295 K? We fit the van der Waals (vdW) model to all 24
+    measurements below 10 mol/L, collected at 300–330 K.
+
+    In $f(x_1,x_2;p_1,p_2)$, the semicolon separates variables from parameters
+    held fixed for that calculation. Python separates all arguments with commas.
     """)
     return
 
@@ -40,51 +44,51 @@ def introduction(mo):
 @app.cell(hide_code=True)
 def supplied_data(io, np):
     # Offline copy of data/L10-co2-pvt.csv: CO₂ isochoric (P, ρ, T) measurements
-    # of Ely, Haynes and Bain (1989). Columns: T (K), P (MPa), ρ (mol/L), subset.
-    csv_text = """T_K,P_MPa,rho_mol_L,subset
-    300.0,2.1936,0.99431,fit_batch
-    300.0,5.07784,2.99455,fit_batch
-    305.0,7.33917,6.86619,fit_batch
-    310.0,2.28675,0.99322,fit_batch
-    310.0,5.43213,2.99001,fit_batch
-    310.0,7.12164,4.98887,additional_conditions
-    310.0,7.86433,6.85824,fit_batch
-    310.0,8.06822,7.83874,additional_conditions
-    310.0,8.20823,8.82938,additional_conditions
-    310.0,8.31622,9.87864,fit_batch
-    310.0,8.44698,11.24963,additional_conditions
-    310.0,8.62861,12.59945,additional_conditions
-    310.0,9.02537,14.05004,additional_conditions
-    310.0,10.37431,15.95375,additional_conditions
-    320.0,2.37898,0.99211,fit_batch
-    320.0,5.77614,2.98536,fit_batch
-    320.0,7.79098,4.97857,additional_conditions
-    320.0,8.87599,6.84063,fit_batch
-    320.0,9.26616,7.8168,additional_conditions
-    320.0,9.59111,8.80289,additional_conditions
-    320.0,9.89966,9.84698,fit_batch
-    320.0,10.3143,11.21009,additional_conditions
-    320.0,10.82856,12.54955,additional_conditions
-    320.0,11.67866,13.98434,additional_conditions
-    320.0,13.81104,15.87138,additional_conditions
-    330.0,2.47023,0.991,fit_batch
-    330.0,6.11169,2.97716,fit_batch
-    330.0,8.43934,4.96743,additional_conditions
-    330.0,9.85303,6.81963,fit_batch
-    330.0,10.42414,7.78929,additional_conditions
-    330.0,10.94096,8.76818,additional_conditions
-    330.0,11.46213,9.80457,fit_batch
-    330.0,12.1827,11.15849,additional_conditions
-    330.0,13.0513,12.49189,additional_conditions
-    330.0,14.37347,13.92777,additional_conditions
-    330.0,17.32428,15.82941,additional_conditions"""
+    # of Ely, Haynes and Bain (1989). Columns: T (K), P (MPa), ρ (mol/L).
+    csv_text = """T_K,P_MPa,rho_mol_L
+    300.0,2.1936,0.99431
+    300.0,5.07784,2.99455
+    305.0,7.33917,6.86619
+    310.0,2.28675,0.99322
+    310.0,5.43213,2.99001
+    310.0,7.12164,4.98887
+    310.0,7.86433,6.85824
+    310.0,8.06822,7.83874
+    310.0,8.20823,8.82938
+    310.0,8.31622,9.87864
+    310.0,8.44698,11.24963
+    310.0,8.62861,12.59945
+    310.0,9.02537,14.05004
+    310.0,10.37431,15.95375
+    320.0,2.37898,0.99211
+    320.0,5.77614,2.98536
+    320.0,7.79098,4.97857
+    320.0,8.87599,6.84063
+    320.0,9.26616,7.8168
+    320.0,9.59111,8.80289
+    320.0,9.89966,9.84698
+    320.0,10.3143,11.21009
+    320.0,10.82856,12.54955
+    320.0,11.67866,13.98434
+    320.0,13.81104,15.87138
+    330.0,2.47023,0.991
+    330.0,6.11169,2.97716
+    330.0,8.43934,4.96743
+    330.0,9.85303,6.81963
+    330.0,10.42414,7.78929
+    330.0,10.94096,8.76818
+    330.0,11.46213,9.80457
+    330.0,12.1827,11.15849
+    330.0,13.0513,12.49189
+    330.0,14.37347,13.92777
+    330.0,17.32428,15.82941"""
     table = np.genfromtxt(io.StringIO(csv_text.replace("    ", "")), delimiter=",",
                           names=True, dtype=None, encoding="utf-8")
     T_data = table["T_K"].astype(float)            # K
     P_data = 10*table["P_MPa"].astype(float)       # bar
     rho_data = table["rho_mol_L"].astype(float)    # mol/L
     v_data = 1/rho_data                            # L/mol
-    fit_set = table["subset"] == "fit_batch"       # 15 states, all below 10 mol/L
+    fit_set = rho_data < 10                       # All 24 states below 10 mol/L
     T_fit, v_fit, P_fit = T_data[fit_set], v_data[fit_set], P_data[fit_set]
     print(f"{fit_set.sum()} fitting states; largest density {rho_data[fit_set].max():.2f} mol/L")
     return P_data, P_fit, T_data, T_fit, fit_set, rho_data, v_data, v_fit
@@ -103,27 +107,27 @@ def supplied_constants():
 
 
 @app.cell(hide_code=True)
-def supplied_data_plot(P_data, T_data, fit_set, mo, np, plt, rho_data):
+def supplied_data_plot(P_data, T_data, mo, np, plt, rho_data):
     def plot_data():
-        fig, ax = plt.subplots(figsize=(7.5, 4))
+        fig, ax = plt.subplots(figsize=(8, 5))
         for T in np.unique(T_data):
             on = T_data == T
-            line, = ax.plot(rho_data[on], P_data[on], "-", lw=0.8, alpha=0.5)
-            ax.plot(rho_data[on & fit_set], P_data[on & fit_set], "o",
-                    color=line.get_color(), label=f"{T:g} K")
-            ax.plot(rho_data[on & ~fit_set], P_data[on & ~fit_set], "o",
-                    mfc="none", color=line.get_color())
-        ax.axvline(10, color="gray", ls=":")
-        ax.text(10.2, 25, "10 mol/L", color="gray")
-        ax.set(xlabel="Density ρ (mol/L)", ylabel="Pressure P (bar)",
-               title="CO₂ measurements: filled = fitting states, open = held back")
-        ax.legend(fontsize=8, title="Isotherm")
+            ax.scatter(rho_data[on], P_data[on], s=40, label=f"{T:g} K")
+        ax.set(xlabel="Molar density (mol/L)", ylabel="Pressure (bar)")
+        ax.legend()
         ax.grid(alpha=0.2)
         fig.tight_layout()
         return fig
 
     data_figure = plot_data()
-    mo.vstack([mo.md("### The measurements"), data_figure])
+    mo.vstack([mo.md(r"""
+    ### The measurements
+
+    CO₂ measurements from Ely, Haynes and Bain (1989), *The Journal of Chemical
+    Thermodynamics* **21**, 879–894. We use all 24 states with $\rho<10$ mol/L
+    for fitting. The plot includes all 36 measurements, so we can also see
+    the behaviour at higher density. Molar volume is $v=1/\rho$.
+    """), data_figure])
     return (data_figure,)
 
 
@@ -132,7 +136,11 @@ def step_one(mo):
     mo.md(r"""
     ### Live step 1 · Fit $a$ and $b$ with `curve_fit`
 
-    Model: $P_{\mathrm{vdW}}(T,v;a,b)=\dfrac{RT}{v-b}-\dfrac{a}{v^2}$. Data: `T_fit`, `v_fit`, `P_fit` (K, L/mol, bar).
+    Model: $P_{\mathrm{vdW}}(T,v;a,b)=\dfrac{RT}{v-b}-\dfrac{a}{v^2}$.
+    The arrays `T_fit`, `v_fit`, `P_fit` contain all 24 fitting states (K, L/mol, bar).
+    Pass `(T_fit, v_fit)` as the known inputs and minimize squared pressure residuals.
+
+    **Before coding:** Which quantities are measured, and which two does the fit change?
 
     ```python
     parameters, covariance = curve_fit(model, x_known, y_measured, p0=(guess_a, guess_b))
@@ -156,39 +164,26 @@ def live_fit(P_fit, R, T_fit, curve_fit, v_fit):
 
 
 @app.cell(hide_code=True)
-def check_fit(P_data, R, T_data, a_book, a_fit, b_book, b_fit, curve_fit, fit_set, mo, np, pressure_eos, rho_data, v_data):
-    mo.stop(a_fit is None, mo.md("*Waiting for live step 1: `a_fit, b_fit` are still `None`.*"))
+def check_fit(P_data, T_data, a_fit, b_fit, fit_set, mo, np, pressure_eos, v_data):
+    mo.stop(a_fit is None or b_fit is None,
+            mo.md("*Complete live step 1 to display the fitted pressure residuals.*"))
+    pressure_residual = pressure_eos(v_data, T_data, a_fit, b_fit) - P_data
+    fit_rmse = np.sqrt(np.mean(pressure_residual[fit_set]**2))
+    dense_rmse = np.sqrt(np.mean(pressure_residual[~fit_set]**2))
+    mo.md(f"""
+    ### Pressure residuals
 
-    # Fitting every state, including the dense ones, shows why the fit set stops at 10 mol/L.
-    a_all, b_all = curve_fit(lambda s, a, b: pressure_eos(s[1], s[0], a, b),
-                             (T_data, v_data), P_data, p0=(3.6, 0.043))[0]
-    held_dilute = ~fit_set & (rho_data < 10)
-    held_dense = rho_data > 10
+    | Density range | Number of states | RMS pressure residual (bar) |
+    |---|---:|---:|
+    | Below 10 mol/L (used for fitting) | {fit_set.sum()} | {fit_rmse:.2f} |
+    | Above 10 mol/L | {(~fit_set).sum()} | {dense_rmse:.2f} |
 
-    def rms(mask, a, b):
-        return np.sqrt(np.mean((pressure_eos(v_data[mask], T_data[mask], a, b) - P_data[mask])**2))
-
-    def fit_row(label, a, b):
-        Tc, Pc = 8*a/(27*R*b), a/(27*b*b)
-        return (f"| {label} | {a:.5f} | {b:.6f} | {rms(fit_set, a, b):.2f} | "
-                f"{rms(held_dilute, a, b):.2f} | {rms(held_dense, a, b):.2f} | {Tc:.1f} | {Pc:.1f} |")
-
-    fit_ok = rms(fit_set, a_fit, b_fit) < 2.0
-    mo.vstack([mo.md("\n".join([
-        "Root-mean-square pressure error in bar, and the model critical point. "
-        "Measured CO₂: T<sub>c</sub> = 304.1 K, P<sub>c</sub> = 73.8 bar.",
-        "",
-        f"| Parameters | a (L² bar/mol²) | b (L/mol) | Fitting states ({fit_set.sum()}) | "
-        f"Held back, ρ < 10 ({held_dilute.sum()}) | Held back, ρ > 10 ({held_dense.sum()}) | "
-        "T<sub>c</sub> (K) | P<sub>c</sub> (bar) |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
-        fit_row("Fitted, ρ < 10 mol/L", a_fit, b_fit),
-        fit_row("Course values (L05–L09)", a_book, b_book),
-        fit_row("Fitted to all 36 states", a_all, b_all),
-    ])), mo.callout("Step 1 check passed." if fit_ok else
-                    "The fit error exceeds 2 bar: check the model and the order of (T, v).",
-                    kind="success" if fit_ok else "warn")])
-    return a_all, b_all, fit_ok
+    The fit should give approximately **a = 3.58867 L² bar/mol²** and
+    **b = 0.042212 L/mol**, with an RMS pressure residual of **1.80 bar**
+    in the fitted range. The much larger high-density discrepancy shows
+    where this vdW approximation describes CO₂ poorly.
+    """)
+    return dense_rmse, fit_rmse
 
 
 @app.cell(hide_code=True)
@@ -229,8 +224,15 @@ def step_two(mo):
     mo.md(r"""
     ### Live step 2 · Minimize each free-energy well with `minimize_scalar`
 
-    $\mathcal G(v)=-RT\ln(v-b)-\dfrac{a}{v}+Pv$ in L bar/mol; multiply by 100 for J/mol.
-    `turning_volumes(T, a, b)` returns $v_1<v_2$: the liquid well lies in $(b, v_1)$, the gas well beyond $v_2$.
+    At fixed $T,P$, minimize
+    $\mathcal G(v)=-RT\ln[(v-b)/v_{\mathrm{ref}}]-a/v+Pv$ over $v$, with
+    $v_{\mathrm{ref}}=1$ L/mol. Multiply L bar/mol by 100 to obtain J/mol.
+    `turning_volumes(T, a, b)` locates the two zero-slope points of the isotherm:
+    the liquid well lies in $(b,v_1)$ and the gas well beyond $v_2$.
+
+    Write `find_state_volume` for one bounded search, then call it twice in
+    `phase_volumes`. Bounded minimization keeps each search in its own well.
+    **Predict:** As pressure increases at fixed temperature, which well becomes lower?
 
     ```python
     result = minimize_scalar(fun, bounds=(low, high), args=(T, P, a, b),
@@ -248,15 +250,20 @@ def live_minimize(R, minimize_scalar, np, turning_volumes):
     def free_energy(v, T, P, a, b):
         return 100*(-R*T*np.log(v - b) - a/v + P*v)  # J/mol
 
+    def find_state_volume(T, P, a, b, bounds):
+        result = minimize_scalar(free_energy, bounds=bounds, args=(T, P, a, b),
+                                 method="bounded", options={"xatol": 1e-10})
+        if not result.success:
+            raise RuntimeError(result.message)
+        return result.x
+
     def phase_volumes(T, P, a, b):
         v1, v2 = turning_volumes(T, a, b)
-        liquid = minimize_scalar(free_energy, bounds=(1.0001*b, v1), args=(T, P, a, b),
-                                 method="bounded", options={"xatol": 1e-10})
-        gas = minimize_scalar(free_energy, bounds=(v2, 5*R*T/P), args=(T, P, a, b),
-                              method="bounded", options={"xatol": 1e-10})
-        return liquid.x, gas.x
+        v_liq = find_state_volume(T, P, a, b, bounds=(1.0001*b, v1))
+        v_gas = find_state_volume(T, P, a, b, bounds=(v2, 5*R*T/P))
+        return v_liq, v_gas
 
-    return free_energy, phase_volumes
+    return find_state_volume, free_energy, phase_volumes
 
 
 @app.cell(hide_code=True)
@@ -317,10 +324,14 @@ def step_three(mo):
     `find_pressure_bracket(T, a, b)` returns a pressure interval where $\Delta G$ changes sign.
 
     ```python
-    result = root_scalar(f, args=(T, a, b), bracket=(low, high), method="brentq")
+    result = root_scalar(f, args=(T, a, b), bracket=(low, high), method="bisect")
     result.root, result.converged
     # f(P, T, a, b): the unknown comes first, the fixed inputs follow in args
     ```
+
+    Start with bisection, then try `method="brentq"` and compare the result.
+    At 275 K, the fitted model gives approximately **50.0448 bar**.
+    **Sanity check:** Where are the two volumes calculated when the root finder changes pressure?
 
     Docs: [`scipy.optimize.root_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root_scalar.html)
     """)
@@ -335,7 +346,9 @@ def live_root(find_pressure_bracket, free_energy, phase_volumes, root_scalar):
 
     def solve_pressure(T, a, b):
         result = root_scalar(delta_G, args=(T, a, b),
-                             bracket=find_pressure_bracket(T, a, b), method="brentq")
+                             bracket=find_pressure_bracket(T, a, b), method="bisect")
+        if not result.converged:
+            raise RuntimeError("The coexistence-pressure solve did not converge.")
         return result.root
 
     return delta_G, solve_pressure
@@ -371,24 +384,49 @@ def check_trials(a_fit, b_fit, delta_G, mo, np, phase_volumes, pressure_eos, sol
 @app.cell(hide_code=True)
 def step_four(mo):
     mo.md(r"""
-    ### Live step 4 · Five solves and a boundary with `PchipInterpolator`
+    ### Live step 4 · Interpolate five coexistence pressures
+
+    Use `np.linspace(250, 295, 5)` to choose five temperatures, including both
+    endpoints. Calculate their saturation pressures and pass the resulting
+    arrays to the helper below.
 
     ```python
-    boundary = PchipInterpolator(x_nodes, y_nodes, extrapolate=False)
-    boundary(275.0)   # evaluate like a function
+    boundary = interpolate_boundary(T_grid, P_grid, method="linear")
+    boundary(275.0)   # evaluate pressure in bar; nan outside the sampled interval
     ```
 
+    Start with `"linear"`, then try `"cubic"` and `"pchip"`. A cubic spline is smooth,
+    while PCHIP preserves the increasing shape of these data. Compare each
+    prediction at 275 K with a fresh coexistence calculation.
+    A plotting grid spaced by 0.01 K gives a dense curve; its accuracy still
+    depends on the five original calculations and the interpolation method.
+
     Docs: [`numpy.linspace`](https://numpy.org/doc/stable/reference/generated/numpy.linspace.html) ·
-    [`scipy.interpolate.PchipInterpolator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
+    [`CubicSpline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html) ·
+    [`PchipInterpolator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
     """)
     return
 
 
+@app.cell(hide_code=True)
+def supplied_interpolation(CubicSpline, PchipInterpolator, np):
+    def interpolate_boundary(T_nodes, P_nodes, method="linear"):
+        if method == "linear":
+            return lambda T: np.interp(T, T_nodes, P_nodes, left=np.nan, right=np.nan)
+        if method == "cubic":
+            return CubicSpline(T_nodes, P_nodes, extrapolate=False)
+        if method == "pchip":
+            return PchipInterpolator(T_nodes, P_nodes, extrapolate=False)
+        raise ValueError("Choose 'linear', 'cubic', or 'pchip'.")
+
+    return (interpolate_boundary,)
+
+
 @app.cell
-def live_boundary(PchipInterpolator, a_fit, b_fit, np, solve_pressure):
+def live_boundary(a_fit, b_fit, interpolate_boundary, np, solve_pressure):
     T_grid = np.linspace(250, 295, 5)  # K
     P_grid = [solve_pressure(T, a_fit, b_fit) for T in T_grid]
-    boundary = PchipInterpolator(T_grid, P_grid, extrapolate=False)
+    boundary = interpolate_boundary(T_grid, P_grid, method="linear")
     return P_grid, T_grid, boundary
 
 
@@ -429,9 +467,14 @@ def supplied_answer(a_book, a_fit, b_book, b_fit, boundary, checks_passed, delta
         "",
         "### Answer to the engineering question: condensation pressure",
         "",
-        "| T (K) | vdW, fitted (bar) | vdW, course values (bar) | Measured CO₂ (bar) | Fitted vs measured (%) |",
+        "| T (K) | vdW, fitted (bar) | vdW, course values (bar) | CO₂ reference (bar) | Fitted vs reference (%) |",
         "|---:|---:|---:|---:|---:|",
         *rows,
+        "",
+        "The CO₂ reference is the vapour-pressure correlation of Span and Wagner (1996), "
+        "https://doi.org/10.1063/1.555991. The fitted vdW model overpredicts saturation pressure, "
+        "especially at lower temperatures. Small EOS and free-energy residuals check our "
+        "numerical calculation; agreement with the reference data tests the physical model.",
     ]))
     return answer_T, answer_book, answer_fit, answer_measured, check_T, direct_P, interpolated_P
 
@@ -439,13 +482,13 @@ def supplied_answer(a_book, a_fit, b_book, b_fit, boundary, checks_passed, delta
 @app.cell(hide_code=True)
 def supplied_phase_plot(P_data, P_grid, Pc_CO2, R, T_data, T_grid, Tc_CO2, a_book, a_fit, b_book, b_fit, boundary, check_T, direct_P, fit_set, measured_saturation_pressure, np, plt, solve_pressure):
     def plot_phase_diagram():
-        grid = np.linspace(T_grid[0], T_grid[-1], 300)
+        grid = np.linspace(T_grid[0], T_grid[-1], 4501)  # 0.01 K spacing
         book_T = np.linspace(250.0, 295.0, 10)
         book_P = [solve_pressure(T, a_book, b_book) for T in book_T]
         measured_T = np.linspace(245.0, Tc_CO2, 300)
         fig, ax = plt.subplots(figsize=(8, 5))
         ax.plot(measured_T, measured_saturation_pressure(measured_T), color="black",
-                lw=2, label="Measured CO₂ (Span–Wagner)")
+                lw=2, label="CO₂ reference (Span–Wagner)")
         ax.plot(grid, boundary(grid), color="tab:red", lw=2, label="vdW, fitted a, b")
         ax.plot(book_T, book_P, color="tab:gray", ls="--", label="vdW, course a, b")
         ax.scatter(T_grid, P_grid, c="tab:red", s=30, zorder=4, label="Five coexistence solves")

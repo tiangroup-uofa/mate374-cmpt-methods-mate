@@ -14,10 +14,12 @@ body-classes: lecture-page
 
 By the end of this lecture, you should be able to:
 
-1. **Fit** the two van der Waals parameters to measured pressure–volume–temperature data and judge the fit on states it did not use.
+1. **Fit** the two van der Waals parameters to measured pressure–volume–temperature data and assess the pressure residuals.
 2. **Assemble** a coexistence-pressure calculation in which a root finder repeatedly calls two free-energy minimizations.
 3. **Construct** a liquid–gas boundary from a few calculated pressures by interpolation.
 4. **Distinguish** checks that verify the numerical calculation from a comparison that tests the model against measured CO₂.
+
+## Wrapping up Unit 2
 
 In [L05–L09](../index.qmd), we studied four numerical tasks, mostly through functions of one variable:
 
@@ -55,11 +57,17 @@ Ely and colleagues measured CO₂ along lines of nearly constant density by heat
 
 ![CO₂ measurement table from Ely, Haynes and Bain (1989).](../../../assets/L10-nist-data-screenshot.png){fig-alt="A table of experimental CO2 temperatures, pressures, and molar densities." width="90%"}
 
-We fit **15 states from four low-density series**, at nominal densities of about 1, 3, 6.9, and 9.9 mol/L, and reserve the other 21 states to test the model. This lets us compare its performance both within and beyond the density range used for fitting.
+We fit **all 24 measurements with $\rho<10$ mol/L**. The figure shows the full set of 36 measurements, including the denser states where the vdW approximation becomes less accurate.
 
-![Measured CO₂ pressure against density on five isotherms. Filled circles are the 15 fitting states. Open circles are held back: nine below 10 mol/L and twelve above it.](../../../assets/L10-co2-measurements.png){fig-alt="Pressure rises with density on each isotherm from 300 to 330 K. The fitting points lie at densities of about 1, 3, 6.9, and 9.9 mol/L. Held-back points extend to 16 mol/L." width="90%"}
+![Measured CO₂ pressure against molar density at five temperatures.](../../../assets/L10-co2-measurements.png){fig-alt="CO2 pressure–density measurements from 300 to 330 K, with one colour per temperature and the same marker style for every measurement." width="90%"}
 
 ### Components of the design problem
+
+::: {.callout-note}
+## Function notation: Variables and parameters
+
+We will write functions in the form $f(\mathrm{var}_1,\mathrm{var}_2;\mathrm{param}_1,\mathrm{param}_2)$. The semicolon separates the variables from the parameters held fixed when evaluating the function. For example, $P(T,v;a,b)$ takes temperature and molar volume as variables for a chosen pair of model parameters $a,b$. Which quantities vary depends on the numerical task. In Python, all arguments are separated by commas.
+:::
 
 #### Part 1: Curve fitting
 
@@ -77,7 +85,7 @@ The parameter $b$ accounts for the volume excluded by the molecules, while $a/v^
 ::: {.callout-tip collapse="true"}
 ## Answer: Known states and fitted parameters
 
-Each state supplies two inputs, $T_i$ and $v_i$, and a measured output, $P_i$. The model predicts pressure. We fit one pair of parameters, $a$ and $b$, shared by all 15 states.
+Each state supplies two inputs, $T_i$ and $v_i$, and a measured output, $P_i$. The model predicts pressure. We fit one pair of parameters, $a$ and $b$, shared by all 24 states.
 :::
 
 #### Part 2: Finding the two minima
@@ -90,7 +98,9 @@ $$
 \qquad v>b.
 $$
 
-Here $v_{\mathrm{ref}}=1\ \mathrm{L/mol}$ makes the logarithm dimensionless. The expression gives energy in L bar/mol, which we multiply by 100 to obtain J/mol. At a suitable subcritical temperature and pressure, this curve has two local minima: a liquid-like state at small molar volume and a gas-like state at large molar volume. We find each minimum in its own volume interval.
+Here $v_{\mathrm{ref}}=1\ \mathrm{L/mol}$ makes the logarithm dimensionless. The expression gives energy in L bar/mol, which we multiply by 100 to obtain J/mol. At a suitable subcritical temperature and pressure, this curve has two local minima: a liquid-like state at small molar volume and a gas-like state at large molar volume. We find each minimum in its own volume interval. The L07 figure below shows how the relative depths of these two wells change with pressure.
+
+![The vdW isotherm and corresponding free-energy curves from L07, using the course parameters at 280 K. The gas well is lower at 50 bar, the wells are equal at 55.129 bar, and the liquid well is lower at 57.5 bar.](../../../assets/L07-vdw-energy.png){fig-alt="A vdW pressure–volume curve beside three free-energy curves with liquid-like and gas-like minima. Changing pressure changes their relative depths." width="100%"}
 
 **Sanity check:** Which variable does the minimizer change, and which quantities stay fixed during each search?
 
@@ -121,6 +131,10 @@ For each trial $P$, the inner minimizations determine both volumes at the chosen
 #### Part 4: Interpolation
 
 Once we can calculate $P_{\mathrm{sat}}$ at any temperature in our range, interpolation is an optional way to reduce repeated computation. We calculate five pairs $(T_i,P_{\mathrm{sat},i})$ and construct a function $\widehat P_{\mathrm{sat}}(T)$ that passes through them.
+
+The L08 figure illustrates the same question: how should we connect a few calculated coexistence pressures to estimate the boundary between them?
+
+![The phase-boundary interpolation problem from L08, illustrated with six coexistence calculations using the course vdW parameters.](../../../assets/L08-phase-points.png){fig-alt="Six saturation-pressure points between 250 and 295 K, with an arrow asking where the liquid–gas boundary lies between points." width="80%"}
 
 **Sanity check:** Looking back at L08, which interpolation methods could represent a smoothly rising saturation-pressure curve?
 
@@ -156,8 +170,8 @@ $$
 \begin{aligned}
 S(a,b)&=\bigl[P_{\mathrm{vdW}}(T_1,v_1;a,b)-P_1\bigr]^2
 +\bigl[P_{\mathrm{vdW}}(T_2,v_2;a,b)-P_2\bigr]^2+\cdots
-+\bigl[P_{\mathrm{vdW}}(T_{15},v_{15};a,b)-P_{15}\bigr]^2\\
-&=\sum_{i=1}^{15}\bigl[P_{\mathrm{vdW}}(T_i,v_i;a,b)-P_i\bigr]^2.
++\bigl[P_{\mathrm{vdW}}(T_{24},v_{24};a,b)-P_{24}\bigr]^2\\
+&=\sum_{i=1}^{24}\bigl[P_{\mathrm{vdW}}(T_i,v_i;a,b)-P_i\bigr]^2.
 \end{aligned}
 $$
 
@@ -192,12 +206,12 @@ The second output is the parameter covariance matrix. We assign it to `_` becaus
 The fitted values should be approximately
 
 $$
-a=3.61938\ \mathrm{L^2\,bar/mol^2},\qquad b=0.042460\ \mathrm{L/mol}.
+a=3.58867\ \mathrm{L^2\,bar/mol^2},\qquad b=0.042212\ \mathrm{L/mol}.
 $$
 
 ### How well does the model fit?
 
-Compare the predicted pressure $P_{\mathrm{vdW}}(T_i,v_i)$ with $P_i$ at **all 36 states**, including those held back from the fit. The root-mean-square pressure residual is about **1.53 bar** for the 15 fitting states and **2.50 bar** for the nine held-back states below 10 mol/L. For the twelve denser states, it rises to about **133 bar**. The model captures the low-density trend but performs poorly at high density.
+Compare the predicted pressure $P_{\mathrm{vdW}}(T_i,v_i)$ with $P_i$ at the **24 fitting states**. The root-mean-square pressure residual is about **1.80 bar**. If we also evaluate the model at the twelve measurements above 10 mol/L, the residual for those denser states is about **129 bar**. The model captures the low-density trend but performs poorly at high density.
 
 ::: {.callout-important}
 ## Model error at high density
@@ -283,7 +297,7 @@ def solve_pressure(T, a, b):
 ```
 :::
 
-**Sanity check:** At $T=275$ K, using the fitted $a$ and $b$, you should obtain $P_{\mathrm{sat}}\approx49.32$ bar. Check that $\Delta G$ is close to zero at this pressure and that both phase volumes reproduce it through the EOS.
+**Sanity check:** At $T=275$ K, using the fitted $a$ and $b$, you should obtain $P_{\mathrm{sat}}\approx50.04$ bar. Check that $\Delta G$ is close to zero at this pressure and that both phase volumes reproduce it through the EOS.
 
 ## Step 4 · From five pressures to a phase boundary
 
@@ -342,15 +356,15 @@ P_plot = boundary(T_plot)
 ```
 :::
 
-At 275 K, which lies between the five sample temperatures, compare `boundary(275.0)` with a fresh `solve_pressure(275.0, a_fit, b_fit)`. The direct calculation gives about **49.3239 bar**. PCHIP, used in the completed reference notebook, gives **49.3220 bar**, a difference of about 0.002 bar. Repeat the comparison with linear and cubic interpolation to see how much the method matters.
+At 275 K, which lies between the five sample temperatures, compare `boundary(275.0)` with a fresh `solve_pressure(275.0, a_fit, b_fit)`. The direct calculation gives about **50.0448 bar**. Linear interpolation gives **50.1253 bar**, while PCHIP gives **50.0428 bar**, a difference from the direct calculation of about 0.002 bar. Repeat the comparison with linear and cubic interpolation to see how much the method matters.
 
 ## Answering the engineering question
 
-Our fit gives $a\approx3.61938$ and $b\approx0.042460$, close to the course values $a=3.592$ and $b=0.04267$. A common way to determine vdW parameters is to match the critical temperature and pressure. Here we fitted pressure–volume–temperature data instead, yet the resulting model critical point,
+Our fit gives $a\approx3.58867$ and $b\approx0.042212$, close to the course values $a=3.592$ and $b=0.04267$. A common way to determine vdW parameters is to match the critical temperature and pressure. Here we fitted pressure–volume–temperature data instead, yet the resulting model critical point,
 
 $$
-T_c=\frac{8a}{27Rb}\approx303.8\ \mathrm{K},
-\qquad P_c=\frac{a}{27b^2}\approx74.4\ \mathrm{bar},
+T_c=\frac{8a}{27Rb}\approx303.0\ \mathrm{K},
+\qquad P_c=\frac{a}{27b^2}\approx74.6\ \mathrm{bar},
 $$
 
 is close to the measured CO₂ values of 304.1 K and 73.8 bar. This agreement is encouraging, but the rest of the phase boundary still needs comparison with experiment.
@@ -359,13 +373,13 @@ The table below compares direct vdW coexistence calculations with the CO₂ vapo
 
 | $T$ (K) | vdW, fitted (bar) | vdW, course values (bar) | CO₂ reference (bar) | Fitted vs reference |
 |---:|---:|---:|---:|---:|
-| 250 | 32.45 | 33.75 | 17.85 | +82% |
-| 260 | 38.68 | 40.16 | 24.19 | +60% |
-| 270 | 45.60 | 47.28 | 32.03 | +42% |
-| 280 | 53.23 | 55.13 | 41.61 | +28% |
-| 290 | 61.60 | 63.72 | 53.18 | +16% |
+| 250 | 32.95 | 33.75 | 17.85 | +85% |
+| 260 | 39.26 | 40.16 | 24.19 | +62% |
+| 270 | 46.27 | 47.28 | 32.03 | +44% |
+| 280 | 54.00 | 55.13 | 41.61 | +30% |
+| 290 | 62.48 | 63.72 | 53.18 | +17% |
 
-![CO₂ liquid–gas boundary predicted from gas-phase data. The red curve uses PCHIP through five fitted-vdW coexistence calculations, and the dashed curve uses the course parameters. The black curve is the CO₂ reference. Open squares mark the model critical points, and blue crosses mark the 15 fitting states.](../../../assets/L10-phase-boundary.png){fig-alt="Pressure against temperature. Both vdW boundaries lie above the CO2 reference curve, with a larger relative discrepancy at lower temperatures. Their critical points lie close to the measured critical point." width="100%"}
+![CO₂ liquid–gas boundary predicted from gas-phase data. The red curve uses linear interpolation through five fitted-vdW coexistence calculations, and the dashed curve uses the course parameters. The black curve is the CO₂ reference. Open squares mark the model critical points, and blue crosses mark the 24 fitting states.](../../../assets/L10-phase-boundary.png){fig-alt="Pressure against temperature. Both vdW boundaries lie above the CO2 reference curve, with a larger relative discrepancy at lower temperatures. Their critical points lie close to the measured critical point." width="100%"}
 
 The fitted model overpredicts saturation pressure throughout this range. Its relative error grows as temperature decreases, farther from the temperatures used for fitting. Matching the critical point therefore does not establish accuracy along the whole liquid–gas boundary.
 
@@ -375,7 +389,7 @@ The EOS residuals, free-energy difference, and fresh interpolation checks test t
 
 The completed notebook contains the full calculation. Rerun it, change the fitted data set or sample temperatures, and compare the result with the tables above.
 
-[Open the reference notebook](../../../wasm-local/l10_phase_diagram_solution.html){target="_blank"} · [Download the reference notebook](../../../activities/l10_phase_diagram_solution.edit.py){download="l10_phase_diagram_solution.edit.py"} · [Download the CO₂ data (CSV)](../../../data/L10-co2-pvt.csv){download="L10-co2-pvt.csv"}
+[Open the reference notebook](../../../wasm-local/l10_phase_diagram_solution.html){target="_blank"} · [Download the reference notebook](../../../wasm-local/l10_phase_diagram_solution.edit.py){download="l10_phase_diagram_solution.edit.py"} · [Download the CO₂ data (CSV)](../../../data/L10-co2-pvt.csv){download="L10-co2-pvt.csv"}
 
 ## What carries over to the next problem?
 
@@ -404,4 +418,8 @@ a_{21}x_1+a_{22}x_2&=b_2,
 \begin{bmatrix}b_1\\b_2\end{bmatrix}.
 $$
 
-We write this compactly as $A\mathbf{x}=\mathbf{b}$: $A$ contains the known coefficients, $\mathbf{x}$ contains the unknowns, and $\mathbf{b}$ contains the known right-hand sides. In the next unit, we will study matrix operations and methods for solving these systems, then use linear algebra to work with higher-dimensional data, including an introduction to machine learning.
+$$
+\boxed{A\mathbf{x}=\mathbf{b}}
+$$
+
+The next unit is all about this equation.
