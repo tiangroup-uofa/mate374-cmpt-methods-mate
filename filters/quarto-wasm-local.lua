@@ -107,6 +107,24 @@ function Div(div)
     hint_html = '<p class="marimo-toggle-hint">Use the <strong>App view / Edit code</strong> button, or click inside the notebook and press <kbd>⌘.</kbd> on macOS or <kbd>Ctrl+.</kbd> elsewhere. To keep edits, open the notebook directly and use its <strong>Save</strong> button or press <kbd>⌘S</kbd>/<kbd>Ctrl+S</kbd>.</p>'
   end
 
+  -- Optional: marimo-app="true" adds a link that opens the same source in a
+  -- full marimo.app editor tab, which keeps working after the course page closes.
+  local marimo_app = div.attributes["marimo-app"] or "false"
+  if marimo_app ~= "true" and marimo_app ~= "false" then
+    error("A .quarto-wasm-local marimo-app attribute must be true or false")
+  end
+  if marimo_app == "true" then
+    local helper = pandoc.path.join({ project_dir, "scripts", "marimo_iframe_url.py" })
+    local share_url = pandoc.pipe(
+      "uv",
+      { "run", "--quiet", "--project", project_dir, helper, "--share", source_path },
+      ""
+    ):gsub("%s+$", "")
+    hint_html = hint_html
+      .. '<p class="marimo-toggle-hint"><a href="' .. escape_html(share_url)
+      .. '" target="_blank" rel="noopener">Open this notebook in marimo.app</a> for a separate editor tab. Save from there with <kbd>⌘S</kbd>/<kbd>Ctrl+S</kbd> to download your <code>.py</code> file.</p>'
+  end
+
   src = escape_html(src)
   direct_src = escape_html(direct_src)
   local iframe = string.format(

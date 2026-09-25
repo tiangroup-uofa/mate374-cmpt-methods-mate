@@ -19,7 +19,7 @@ By the end of this lecture, you should be able to:
 3. **Construct** a liquid–gas boundary from a few calculated pressures by interpolation.
 4. **Distinguish** checks that verify the numerical calculation from a comparison that tests the model against measured CO₂.
 
-We have already studied each numerical method separately in [L05–L09](../index.qmd). Today we chain them into one program. Work in pairs: one person types while the other checks the physical quantities and the function's output. We will spend **35 minutes on the program and 15 minutes on the Unit 02 Wooclap questions**.
+We have already studied each numerical method separately in [L05–L09](../index.qmd). Today we chain them into one program, which I will type live while you watch and predict what each step returns. Each step below gives the SciPy call with a link to its documentation, because the syntax is the easiest part to miss while the code scrolls past. We will spend **35 minutes on the live program and 15 minutes on the Unit 02 Wooclap questions**. The completed notebook is linked at the end of the lecture for you to rerun afterwards.
 
 ## The engineering question
 
@@ -35,42 +35,27 @@ Suppose our only measurements come from a laboratory study of CO₂ gas at 300�
 | **Deliverables** | (1) fitted $a,b$ with their pressure error; (2) $P_{\mathrm{sat}}$ at 250, 270, 290 K; (3) a boundary curve from 250 to 295 K; (4) a comparison with measured CO₂ vapour pressures |
 | **Acceptance checks** | free-energy difference $|\Delta G|<10^{-4}$ J/mol and EOS residual $<10^{-3}$ bar at each $P_{\mathrm{sat}}$; interpolated boundary within 0.01 bar of a fresh solve at 275 K |
 
-The calculation needs four of our Unit 02 methods, each answering a different question. The arrows show which result feeds the next step.
+The calculation needs four of our Unit 02 methods, each answering a different question. Read the diagram from left to right. Each box is one step of the program, and the steps in the shaded box repeat for every trial pressure until $\Delta G=0$.
 
 ```{mermaid}
-flowchart TD
-    A["15 measured gas states (T, v, P)"] --> B["Step 1 · Regression (L09): fit a, b"]
-    B --> C["Choose temperature T"]
-    C --> D["Try pressure P"]
-    D --> E["Step 2 · Minimization (L07): liquid and gas volumes"]
-    E --> F["Liquid-minus-gas free energy ΔG"]
-    F --> G{"Step 3 · Root finding (L05–L06): is ΔG = 0?"}
-    G -- No --> D
-    G -- Yes --> H["P_sat(T)"]
-    H --> I["Step 4 · Interpolation (L08): boundary curve"]
-    I --> J["Compare with measured CO₂"]
+flowchart LR
+    B["1 · Fit a, b to gas data<br/>curve_fit"] --> L
+    subgraph L["repeat at each T"]
+        direction LR
+        C["2 · Two wells<br/>minimize_scalar"] <--> D["3 · ΔG = 0<br/>root_scalar"]
+    end
+    L --> E["4 · Boundary<br/>PchipInterpolator"]
+    style L fill:#fff8e1,stroke:#b08900,color:#5c4700
 ```
 
 Steps 2 and 3 are nested. Every trial pressure chosen by the root finder triggers two new minimizations, so one saturation pressure costs a few dozen minimizations. Step 1 runs once, and its $a$ and $b$ enter every later calculation.
 
-## The notebook
+## The live notebook
 
-The notebook supplies the data, the free-energy functions, the plots, and the checks. You complete three short cells, marked **YOUR CODE**, in the order of the steps below. Each step's text on this page ends with a completed replacement block that you can paste if you get stuck.
+The notebook supplies the data, the limits of the two free-energy wells, the plots, and a check after each step. I type the four cells marked **Live step**, and each check turns green once its step works. Watch for three things in each cell: the physical quantity it returns, the units, and the arguments passed to the SciPy function.
 
-[Download the starter](../../../activities/l10_phase_diagram.edit.py){download="l10_phase_diagram.edit.py"} · [Download the completed example](../../../activities/l10_phase_diagram_solution.edit.py){download="l10_phase_diagram_solution.edit.py"} · [Download the CO₂ data (CSV)](../../../data/L10-co2-pvt.csv){download="L10-co2-pvt.csv"}
-
-For saving, use **Open notebook directly** beneath the embed **before editing**, then **Save** or **Ctrl+S / ⌘S** to download your `.py` file. You can also open that file at [marimo.app](https://marimo.app/). Edits in an embedded notebook do not transfer to a new tab. Run the edited cell with **Shift+Enter**, replacing the existing code rather than defining the same name in a second cell.
-
-::: {.quarto-wasm-local notebook="l10_phase_diagram.edit.py" view="edit" title="Fit vdW parameters to CO₂ data and build the liquid–gas boundary" height="1100" loading="lazy" fullscreen="true"}
-The starter notebook provides the data and all intermediate functions. Complete the fitting, pressure-solver, and boundary cells using the replacement blocks on this page. The tables and figures below give a printable reference for every result.
-:::
-
-::: {.callout-warning collapse="true"}
-## Recovery when an edit fails or the browser stops responding
-
-Save your attempted notebook and the error message so we can inspect them. If necessary, copy the changed cell into a text file. Continue with the completed replacement blocks or [open the completed notebook](../../../wasm-local/l10_phase_diagram_solution.html). The **Reload/reset notebook** button discards unsaved changes in the course embed.
-
-The supplied solvers have iteration limits. Avoid adding unbounded loops: interrupting Python in a browser/WASM session may not recover a stuck calculation. If the tab is unresponsive, reopen the original notebook in a fresh tab and restore your last saved version.
+::: {.quarto-wasm-local notebook="l10_phase_diagram.edit.py" view="edit" title="Live demo: fit vdW parameters to CO₂ data and build the liquid–gas boundary" height="1100" loading="lazy" fullscreen="true" marimo-app="true"}
+The live notebook provides the data and the supporting functions. The four live cells are typed in class. The code, tables, and figures below give a printable record of every step.
 :::
 
 ## Step 1 · Fitting $a$ and $b$ to gas measurements
@@ -102,22 +87,32 @@ S(a,b)&=\bigl[P_{\mathrm{vdW}}(T_1,v_1;a,b)-P_1\bigr]^2+\bigl[P_{\mathrm{vdW}}(T
 \end{aligned}
 $$
 
-The model is linear in $a$ but not in $b$, which appears in a denominator. We therefore use [`curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html), which minimizes $S$ iteratively from a starting guess. Its model function must take the known inputs first and the fitted parameters after them. Since each state has two known inputs, the supplied function receives them together as the pair `(T, v)`:
+The model is linear in $a$ but not in $b$, which appears in a denominator. We therefore use [`curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html), which minimizes $S$ iteratively from a starting guess. Its model function must take the known inputs first and the fitted parameters after them. Each state has two known inputs, so our model function receives them together as the pair `(T, v)` and unpacks them inside.
 
-| Supplied name | Meaning | Units |
-|---|---|---|
-| `T_fit`, `v_fit`, `P_fit` | Temperature, molar volume, and pressure of the 15 fitting states | K, L/mol, bar |
-| `vdw_pressure((T, v), a, b)` | vdW pressure at the known states for trial $a,b$ | bar |
+::: {.callout-note}
+## Syntax: `curve_fit`
 
-**Task 1.** In the **fit** cell, call `curve_fit` with `vdw_pressure`, the pair `(T_fit, v_fit)`, the measured `P_fit`, and the starting guess `p0=(3.6, 0.043)`. Unpack the two fitted values into `a_fit` and `b_fit`.
+```python
+parameters, covariance = curve_fit(model, x_known, y_measured, p0=(guess_a, guess_b))
+# model(x_known, a, b): known inputs first, then the fitted parameters
+```
+
+Documentation: [`scipy.optimize.curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html). The notebook supplies `T_fit`, `v_fit`, and `P_fit` for the 15 fitting states in K, L/mol, and bar.
+:::
 
 ::: {.callout-tip collapse="true"}
-## Completed replacement: the `curve_fit` call for $a$ and $b$
+## Code typed in class: the vdW model and the `curve_fit` call
 
 ```{.python code-fold="false"}
-parameters, covariance = curve_fit(vdw_pressure, (T_fit, v_fit), P_fit, p0=(3.6, 0.043))
-a_fit, b_fit = parameters
+def vdw_pressure(state, a, b):
+    T, v = state
+    return R*T/(v - b) - a/v**2
+
+(a_fit, b_fit), _ = curve_fit(vdw_pressure, (T_fit, v_fit), P_fit, p0=(3.6, 0.043))
+print(f"a = {a_fit:.5f} L² bar/mol²,  b = {b_fit:.6f} L/mol")
 ```
+
+The second output of `curve_fit` is the parameter covariance matrix, which we do not use here, so it is assigned to `_`.
 :::
 
 The fit should give
@@ -148,9 +143,43 @@ $$
 \qquad v>b.
 $$
 
-Here $v_{\mathrm{ref}}=1\ \mathrm{L/mol}$ makes the logarithm dimensionless. The expression has units of L bar/mol, so the supplied Python function multiplies it by 100 to return **J/mol**. A term depending only on $T$ cancels when we compare two volumes.
+Here $v_{\mathrm{ref}}=1\ \mathrm{L/mol}$ makes the logarithm dimensionless, so with $v$ in L/mol the code can write `np.log(v - b)`. The expression has units of L bar/mol, and multiplying by 100 returns **J/mol**. A term depending only on $T$ cancels when we compare two volumes.
 
-Below the model's critical temperature, a range of pressures gives $\mathcal G(v)$ two minima: a **liquid-like well** at small volume and a **gas-like well** at large volume. The notebook's slider sets the trial pressure at 280 K, and the supplied bounded minimizer finds the bottom of each well separately. Their free-energy difference is
+Below the model's critical temperature, a range of pressures gives $\mathcal G(v)$ two minima: a **liquid-like well** at small volume and a **gas-like well** at large volume. The two wells are separated by the volumes $v_1<v_2$ where the vdW isotherm turns, $\partial P/\partial v=0$. The supplied function `turning_volumes(T, a, b)` returns them, so we can search the liquid well between $b$ and $v_1$ and the gas well beyond $v_2$. A bounded minimizer needs exactly this kind of interval, since it searches only between the limits we give it.
+
+::: {.callout-note}
+## Syntax: `minimize_scalar` with bounds
+
+```python
+result = minimize_scalar(fun, bounds=(low, high), args=(T, P, a, b),
+                         method="bounded", options={"xatol": 1e-10})
+result.x    # the volume at the bottom of the well
+# fun(v, T, P, a, b): the variable being minimized comes first, args fill the rest
+```
+
+Documentation: [`scipy.optimize.minimize_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html). The default volume tolerance is too coarse for a steep liquid well, so we set `xatol`.
+:::
+
+::: {.callout-tip collapse="true"}
+## Code typed in class: the free energy and the two well minima
+
+```{.python code-fold="false"}
+def free_energy(v, T, P, a, b):
+    return 100*(-R*T*np.log(v - b) - a/v + P*v)  # J/mol
+
+def phase_volumes(T, P, a, b):
+    v1, v2 = turning_volumes(T, a, b)
+    liquid = minimize_scalar(free_energy, bounds=(1.0001*b, v1), args=(T, P, a, b),
+                             method="bounded", options={"xatol": 1e-10})
+    gas = minimize_scalar(free_energy, bounds=(v2, 5*R*T/P), args=(T, P, a, b),
+                          method="bounded", options={"xatol": 1e-10})
+    return liquid.x, gas.x
+```
+
+The gas limit $5RT/P$ is five times the ideal-gas volume, safely beyond the gas minimum.
+:::
+
+The notebook's slider then sets the trial pressure at 280 K and plots both wells. Their free-energy difference is
 
 $$
 \Delta G(P;T,a,b)=\mathcal G(v_{\mathrm{liq}};T,P,a,b)
@@ -159,58 +188,48 @@ $$
 
 where both volumes are recalculated at each trial pressure. At 50 bar, the gas well is lower by about 65 J/mol, so CO₂ stays a gas.
 
-**Prediction:** as you raise the slider, which well drops relative to the other? At what pressure do you estimate the two wells have equal depth?
+**Prediction:** as the pressure rises, which well drops relative to the other? At what pressure do you estimate the two wells have equal depth?
 
 ## Step 3 · Root finding: the pressure where $\Delta G=0$
 
-**Coexistence requires $\Delta G=0$:** neither phase is preferred, and liquid and gas can exist together. At fixed $T$, the pressure is the only unknown, so finding $P_{\mathrm{sat}}$ is a one-variable root-finding problem for $\Delta G(P)$. The complication is that each evaluation of $\Delta G$ requires the two minimizations from Step 2. The supplied functions divide this work so that each has one responsibility:
+**Coexistence requires $\Delta G=0$:** neither phase is preferred, and liquid and gas can exist together. At fixed $T$, the pressure is the only unknown, so finding $P_{\mathrm{sat}}$ is a one-variable root-finding problem for $\Delta G(P)$. Each evaluation of $\Delta G$ requires the two minimizations from Step 2, so we write it as a function of $P$ that calls `phase_volumes` inside.
 
-| Supplied function | Inputs | Output |
-|---|---|---|
-| `free_energy(v, T, P, a, b)` | Volume and the current model conditions | Free energy in J/mol |
-| `find_phase_volumes(g_func, T, P, a, b)` | A free-energy function and its conditions | The two minimum volumes in L/mol |
-| `free_energy_difference_P(P, T, a, b)` | Trial pressure and fixed model inputs | Liquid-minus-gas free energy in J/mol |
-| `find_pressure_bracket(T, a, b)` | Fixed model inputs | A pressure interval containing coexistence |
+A bracketing method needs an interval where $\Delta G$ changes sign (L05). The supplied function `find_pressure_bracket(T, a, b)` returns one: between the two turning-point pressures both wells exist, and $\Delta G$ has opposite signs at the ends.
 
-The pressure interval keeps both wells available throughout the search and gives opposite signs of $\Delta G$ at its endpoints, which is exactly the condition a bracketing method needs (L05).
+::: {.callout-note}
+## Syntax: `root_scalar` with a bracket
 
-::: {.callout-note collapse="true"}
-## Why the minimizer receives a free-energy function, and the supported temperature range
+```python
+result = root_scalar(f, args=(T, a, b), bracket=(low, high), method="brentq")
+result.root, result.converged
+# f(P, T, a, b): the unknown comes first, args fill the fixed inputs
+```
 
-`g_func(v)` fixes the current $T,P,a,b$ so the minimizer sees a function of volume alone. This separates evaluating the physical model from minimizing it. A different free-energy model can use the same numerical idea, although its physical domain and the intervals containing each phase must also be reconsidered.
-
-This classroom scaffold supports **$0.82\le T/T_c\le0.985$**, where the supplied intervals resolve two distinct wells reliably, and reports an error outside this range. For the fitted parameters that is 249–299 K. At or above $T_c$, distinct liquid and gas volumes disappear.
+Documentation: [`scipy.optimize.root_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root_scalar.html). `method="brentq"` selects Brent's bracketing method from L05.
 :::
 
-**Task 2.** Complete the **`solve_pressure`** cell:
-
-1. Keep the supplied pressure interval and the nested `residual(P)` function.
-2. Call `root_scalar` on `residual` using that interval and `method="brentq"`.
-3. Check convergence and return the numerical pressure, `result.root`.
-
 ::: {.callout-tip collapse="true"}
-## Completed replacement: `solve_pressure` with `root_scalar`
-
-Copy this entire block into the existing pressure-solver cell. The notebook already imports `root_scalar`.
+## Code typed in class: $\Delta G(P)$ and `solve_pressure`
 
 ```{.python code-fold="false"}
+def delta_G(P, T, a, b):
+    v_liq, v_gas = phase_volumes(T, P, a, b)
+    return free_energy(v_liq, T, P, a, b) - free_energy(v_gas, T, P, a, b)
+
 def solve_pressure(T, a, b):
-    pressure_bracket = find_pressure_bracket(T, a, b)
-
-    def residual(P):
-        return free_energy_difference_P(P, T, a, b)
-
-    result = root_scalar(
-        residual, bracket=pressure_bracket, method="brentq",
-        xtol=1e-8, maxiter=60,
-    )
-    if not result.converged:
-        raise RuntimeError("The coexistence-pressure solve did not converge.")
+    result = root_scalar(delta_G, args=(T, a, b),
+                         bracket=find_pressure_bracket(T, a, b), method="brentq")
     return result.root
 ```
 :::
 
-The trial cell then calls your function at three temperatures with the fitted $a$ and $b$ (deliverable 2):
+::: {.callout-note collapse="true"}
+## Supported temperature range of the supplied well limits
+
+The supplied `turning_volumes` supports **$0.82\le T/T_c\le0.985$**, where it resolves two distinct wells reliably, and reports an error outside this range. For the fitted parameters that is 249–299 K. At or above $T_c$, distinct liquid and gas volumes disappear.
+:::
+
+The check cell then calls `solve_pressure` at three temperatures with the fitted $a$ and $b$ (deliverable 2):
 
 | $T$ (K) | $P_{\mathrm{sat}}$, fitted vdW (bar) |
 |---:|---:|
@@ -224,15 +243,25 @@ The notebook also checks $|\Delta G|<10^{-4}$ J/mol and the EOS residual $|P_{\m
 
 Each saturation pressure costs dozens of minimizations, so we calculate only five and interpolate between them (L08). We use `PchipInterpolator`, which preserves the increasing trend of these pressures between the sample points, with extrapolation disabled so the curve stops at 250 and 295 K.
 
-**Task 3.** In the **boundary** cell, call `solve_pressure` with the fitted parameters at each temperature in `sample_T`, then build `boundary` from the two arrays.
+::: {.callout-note}
+## Syntax: `np.linspace` and `PchipInterpolator`
+
+```python
+T_grid = np.linspace(start, stop, number_of_points)            # both ends included
+boundary = PchipInterpolator(x_nodes, y_nodes, extrapolate=False)
+boundary(275.0)    # evaluate like a function; returns nan outside the nodes
+```
+
+Documentation: [`numpy.linspace`](https://numpy.org/doc/stable/reference/generated/numpy.linspace.html) · [`scipy.interpolate.PchipInterpolator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
+:::
 
 ::: {.callout-tip collapse="true"}
-## Completed replacement: five coexistence solves and the PCHIP boundary
+## Code typed in class: five coexistence solves and the PCHIP boundary
 
 ```{.python code-fold="false"}
-sample_T = np.linspace(250.0, 295.0, 5)  # K
-sample_P = np.array([solve_pressure(T, a_fit, b_fit) for T in sample_T])
-boundary = PchipInterpolator(sample_T, sample_P, extrapolate=False)
+T_grid = np.linspace(250, 295, 5)  # K
+P_grid = [solve_pressure(T, a_fit, b_fit) for T in T_grid]
+boundary = PchipInterpolator(T_grid, P_grid, extrapolate=False)
 ```
 :::
 
@@ -257,6 +286,12 @@ Every numerical check passed, yet the predicted condensation pressure is 16% too
 The two vdW parameter sets differ from each other by at most about 2 bar, much less than either differs from the measurements. Refining the fit or tightening the root tolerance therefore cannot remove the discrepancy, which comes from the vdW form itself. Two constants fitted to the gas cannot also describe the dense liquid, whose volume enters $\Delta G$. For the design question, our program is a verified calculation of the vdW boundary and a useful estimate near the critical point. A dependable answer at 250 K needs a more accurate equation of state, and the same program structure applies to it.
 
 **Numerical verification** asks whether the returned pressure satisfies the model's coexistence condition, and our $\Delta G$, EOS, and interpolation checks answer that. **Comparison with experiment** asks whether the model and its parameters predict real CO₂ adequately, and only independent measurements can answer that.
+
+## Reference notebook for after class
+
+The completed notebook contains every cell typed today. Rerun it, change the fitted data set or the sample temperatures, and compare the result with the tables above.
+
+[Open the reference notebook](../../../wasm-local/l10_phase_diagram_solution.html){target="_blank"} · [Download the reference notebook](../../../activities/l10_phase_diagram_solution.edit.py){download="l10_phase_diagram_solution.edit.py"} · [Download the CO₂ data (CSV)](../../../data/L10-co2-pvt.csv){download="L10-co2-pvt.csv"}
 
 ## Unit 02 Wooclap · final 15 minutes
 

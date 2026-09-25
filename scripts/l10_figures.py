@@ -8,6 +8,7 @@ import csv
 from pathlib import Path
 import re
 import runpy
+import textwrap
 
 import matplotlib
 matplotlib.use("Agg")
@@ -42,7 +43,7 @@ def check_solution(d):
     np.testing.assert_allclose(d["trial_P"], [32.4534526, 45.5978231, 61.5985419], atol=1e-6)
     assert d["checks_passed"]
     assert abs(d["interpolated_P"] - d["direct_P"]) < 0.01
-    assert not np.any(np.isclose(d["sample_T"], d["check_T"]))
+    assert not np.any(np.isclose(d["T_grid"], d["check_T"]))
     assert np.isnan(d["boundary"](300))
     # Span–Wagner ancillary vapour pressure at 280 K is 41.6 bar.
     np.testing.assert_allclose(d["measured_saturation_pressure"](280.0), 41.607, atol=0.01)
@@ -53,7 +54,7 @@ def check_solution(d):
         # Cover the scaffold limits and the lecture's 250–295 K range.
         for T in [0.820001*Tc, 250.0, 270.0, 275.0, 290.0, 295.0, 0.984999*Tc]:
             low, high = d["find_pressure_bracket"](T, a, b)
-            delta = lambda P: d["free_energy_difference_P"](P, T, a, b)
+            delta = lambda P: d["delta_G"](P, T, a, b)
             assert delta(low)*delta(high) < 0
             P = solve(T, a, b)
             pressures.append(P)
@@ -67,8 +68,7 @@ def check_solution(d):
             area, _ = quad(lambda v: R*T/(v-b)-a/v**2-P,
                            volumes[0], volumes[-1], epsabs=1e-10)
             assert abs(area) < 1e-6, (a, b, T, area)
-            minima = d["find_phase_volumes"](
-                lambda v: d["free_energy"](v, T, P, a, b), T, P, a, b)
+            minima = d["phase_volumes"](T, P, a, b)
             np.testing.assert_allclose(minima, volumes[[0, 2]], rtol=2e-6)
         assert np.all(np.diff(pressures[1:-1]) > 0)
         for bad_T in [0, -1, np.nan, 0.8*Tc, 0.99*Tc, Tc, 1.1*Tc]:
@@ -86,17 +86,26 @@ def check_solution(d):
 def check_starter_and_copyable(d):
     starter = load("l10_phase_diagram")
     assert starter["a_fit"] is None and "trial_P" not in starter
-    # Only the introduction and the three student tasks may differ.
+    # Only the introduction and the four live-coded cells may differ.
     def cells(name):
         tree = ast.parse((ROOT / "activities" / f"{name}.edit.py").read_text())
         return {n.name: ast.dump(n) for n in tree.body if isinstance(n, ast.FunctionDef)}
     left, right = cells("l10_phase_diagram"), cells("l10_phase_diagram_solution")
     assert left.keys() == right.keys()
     assert {key for key in left if left[key] != right[key]} == {
-        "introduction", "fit", "pressure_solver", "boundary_points"}
+        "introduction", "live_fit", "live_minimize", "live_root", "live_boundary"}
 
     page = (ROOT / "units/02/L10/index.qmd").read_text()
     blocks = re.findall(r"```\{\.python[^\n]*\}\n(.*?)\n```", page, re.S)
+    # The page must show exactly the code typed in each live cell.
+    source = (ROOT / "activities/l10_phase_diagram_solution.edit.py").read_text()
+    tree = ast.parse(source)
+    live = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name.startswith("live_")]
+    bodies = []
+    for node in live:
+        lines = source.splitlines()[node.body[0].lineno - 1:node.body[-1].lineno - 1]
+        bodies.append(textwrap.dedent("\n".join(lines)).strip())
+    assert [block.strip() for block in blocks] == bodies, "Page code differs from the live cells."
     scope = dict(d)
     for block in blocks:
         exec(compile(block, "L10-copyable-code", "exec"), scope)
@@ -106,12 +115,10 @@ def check_starter_and_copyable(d):
     np.testing.assert_allclose(scope["boundary"](275), d["interpolated_P"])
 
     # Exercise the actual starter cells after pasting the completed code.
+    names = ["vdw_pressure", "a_fit", "b_fit", "free_energy", "phase_volumes",
+             "delta_G", "solve_pressure", "T_grid", "P_grid", "boundary"]
     app = runpy.run_path(str(ROOT / "activities/l10_phase_diagram.edit.py"))["app"]
-    _, completed = app.run(defs={"a_fit": scope["a_fit"], "b_fit": scope["b_fit"],
-                                  "sample_T": scope["sample_T"],
-                                  "solve_pressure": scope["solve_pressure"],
-                                  "sample_P": scope["sample_P"],
-                                  "boundary": scope["boundary"]})
+    _, completed = app.run(defs={name: scope[name] for name in names})
     assert completed["checks_passed"]
     np.testing.assert_allclose(completed["trial_P"], d["trial_P"])
     print(f"Starter stops cleanly; completed replacements and {len(blocks)} page blocks pass.")
