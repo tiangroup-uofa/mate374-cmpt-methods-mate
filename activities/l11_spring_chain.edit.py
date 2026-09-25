@@ -29,8 +29,8 @@ def atom_count(mo):
 def inputs(mo, n_atoms):
     _n = n_atoms.value
     K_MAX = 20.0
-    _labels = ["wall"] + [f"{_i + 1}" for _i in range(_n)]
-    # Node 0 is the wall. Only neighbouring nodes start connected; any other
+    _labels = [f"{_i}" for _i in range(_n + 1)]
+    # Atom 0 is held fixed. Only neighbouring atoms start connected; any other
     # entry stays 0, and dragging it adds a longer-range spring.
     _k0 = [[5.0 if abs(_i - _j) == 1 else 0.0 for _j in range(_n + 1)] for _i in range(_n + 1)]
     springs = mo.ui.matrix(
@@ -63,7 +63,7 @@ def solve(force, np, springs):
     F = np.asarray(force.value, dtype=float)
 
     # Each spring adds k to both diagonal entries and -k between its two atoms.
-    # Removing the wall's row and column leaves the stiffness matrix of the atoms.
+    # Atom 0 has u0 = 0, so removing its row and column leaves the system for atoms 1..n.
     K = (np.diag(S.sum(axis=1)) - S)[1:, 1:]
     solvable = np.linalg.matrix_rank(K) == len(F)
     u = np.linalg.solve(K, F) if solvable else None
@@ -124,7 +124,7 @@ def chain_widget(anywidget, traitlets):
             svg.replaceChildren();
             const springs = model.get("springs"), f = model.get("f"), u = model.get("u");
             const kMax = model.get("k_max");
-            const n = f.length, wall = 40, gap = 140, y = 95, r = 15;
+            const n = f.length, x0Fixed = 45, gap = 140, y = 95, r = 15;
             const solved = u.length === n;
             const disp = solved ? [0, ...u] : new Array(n + 1).fill(0);
 
@@ -143,7 +143,7 @@ def chain_widget(anywidget, traitlets):
             // Magnify displacements so the largest neighbour stretch stays readable.
             const rel = disp.slice(1).map((d, i) => Math.abs(d - disp[i]));
             const pxPerA = Math.min(300, (0.3 * gap) / Math.max(...rel, 1e-9));
-            const rest = disp.map((_, i) => wall + gap * i);
+            const rest = disp.map((_, i) => x0Fixed + gap * i);
             const pos = rest.map((x, i) => x + pxPerA * disp[i]);
             const deepest = Math.max(0, ...springs.map(([i, j]) => j - i));
             const height = deepest > 1 ? 200 + 30 * deepest : 190;
@@ -151,10 +151,6 @@ def chain_widget(anywidget, traitlets):
             const width = Math.max(660, right);
             svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
-            add("line", { x1: wall, y1: y - 40, x2: wall, y2: y + 40, class: "ink", "stroke-width": 3 });
-            for (let j = -40; j < 40; j += 10) {
-              add("line", { x1: wall, y1: y + j, x2: wall - 10, y2: y + j + 10, class: "ink", "stroke-width": 1 });
-            }
             for (let i = 1; i <= n; i++) add("circle", { cx: rest[i], cy: y, r, class: "ghost" });
 
             for (const [i, j, k] of springs) {
@@ -163,15 +159,15 @@ def chain_widget(anywidget, traitlets):
                 fill: "none", stroke: springColour(t),
                 "stroke-width": 1.5 + 3 * t, "stroke-linejoin": "round",
               };
-              const name = i === 0 ? `kw${SUB[j]}` : `k${SUB[i]}${SUB[j]}`;
+              const name = `k${SUB[i]}${SUB[j]}`;
               if (j - i === 1) {
-                const x0 = i ? pos[i] + r : wall, x1 = pos[j] - r;
+                const x0 = pos[i] + r, x1 = pos[j] - r;
                 add("path", { ...style, d: zigzag((s) => [x0 + s * (x1 - x0), y]) });
                 add("text", { x: (x0 + x1) / 2, y: y + 30, class: "label", "text-anchor": "middle" },
                     `${name} = ${k.toFixed(1)}`);
               } else {
                 // Longer-range springs hang below the chain as arcs.
-                const x0 = pos[i], x1 = pos[j], y0 = y + (i ? r : 0), depth = 25 + 30 * (j - i);
+                const x0 = pos[i], x1 = pos[j], y0 = y + r, depth = 25 + 30 * (j - i);
                 const arc = (s) => [x0 + (x1 - x0) * (1 - Math.cos(Math.PI * s)) / 2,
                                     y0 + depth * Math.sin(Math.PI * s)];
                 add("path", { ...style, d: zigzag(arc, 5 + 2 * (j - i), 7) });
@@ -179,6 +175,10 @@ def chain_widget(anywidget, traitlets):
                     `${name} = ${k.toFixed(1)}`);
               }
             }
+
+            add("circle", { cx: pos[0], cy: y, r, class: "fixed-atom" });
+            add("text", { x: pos[0], y: y + 5, class: "atom-label", "text-anchor": "middle" }, "0");
+            add("text", { x: pos[0], y: y - 24, class: "label", "text-anchor": "middle" }, "u₀ = 0 (fixed)");
 
             for (let i = 1; i <= n; i++) {
               add("circle", { cx: pos[i], cy: y, r, class: "atom" });
@@ -202,7 +202,7 @@ def chain_widget(anywidget, traitlets):
               add("text", { x: width - 50 - bar, y: height - 8, class: "label", "text-anchor": "end" }, "0.1 Å displacement");
             } else {
               add("text", { x: width / 2, y: height - 10, class: "warn", "text-anchor": "middle" },
-                  "No unique equilibrium: at least one atom has no path to the wall");
+                  "No unique equilibrium: at least one atom has no spring path to atom 0");
             }
           }
 
@@ -216,6 +216,7 @@ def chain_widget(anywidget, traitlets):
         .spring-chain .ink { stroke: currentColor; }
         .spring-chain .ghost { fill: none; stroke: currentColor; stroke-opacity: 0.35; stroke-dasharray: 4 3; }
         .spring-chain .atom { fill: #1f77b4; stroke: currentColor; stroke-width: 1; }
+        .spring-chain .fixed-atom { fill: #7f7f7f; stroke: currentColor; stroke-width: 2.5; }
         .spring-chain .atom-label { fill: white; font: bold 13px sans-serif; }
         .spring-chain .label { fill: currentColor; font: 12px sans-serif; }
         .spring-chain .force { fill: #2ca02c; font: bold 12px sans-serif; }
