@@ -93,19 +93,19 @@ def chain_widget(anywidget, traitlets):
           return `rgb(${c.join(",")})`;
         }
 
-        // Zigzag along any curve p(s), s in [0, 1], with straight leads at both ends.
-        function zigzag(p, turns = 7, h = 9, lead = 0.07) {
-          const pts = [p(0), p(lead)];
+        // Straight horizontal zigzag with short leads at both ends.
+        function zigzag(x0, x1, y, turns, h) {
+          const lead = Math.min(8, 0.1 * (x1 - x0)), len = x1 - x0 - 2 * lead;
+          let d = `M ${x0} ${y} L ${x0 + lead} ${y}`;
           for (let i = 0; i < 2 * turns; i++) {
-            const s = lead + ((1 - 2 * lead) * (i + 0.5)) / (2 * turns);
-            const [x, y] = p(s), [xa, ya] = p(s - 1e-3), [xb, yb] = p(s + 1e-3);
-            const len = Math.hypot(xb - xa, yb - ya);
-            const sign = i % 2 ? 1 : -1;
-            pts.push([x - (sign * h * (yb - ya)) / len, y + (sign * h * (xb - xa)) / len]);
+            const x = x0 + lead + (len * (i + 0.5)) / (2 * turns);
+            d += ` L ${x.toFixed(1)} ${y + (i % 2 ? h : -h)}`;
           }
-          pts.push(p(1 - lead), p(1));
-          return "M " + pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(" L ");
+          return d + ` L ${x1 - lead} ${y} L ${x1} ${y}`;
         }
+
+        // Longer springs run in their own lanes above and below the centre line.
+        const LANES = [-15, 15, -23, 23, -9, 9];
 
         function render({ model, el }) {
           const svg = document.createElementNS(NS, "svg");
@@ -124,7 +124,7 @@ def chain_widget(anywidget, traitlets):
             svg.replaceChildren();
             const springs = model.get("springs"), f = model.get("f"), u = model.get("u");
             const kMax = model.get("k_max");
-            const n = f.length, x0Fixed = 45, gap = 140, y = 95, r = 15;
+            const n = f.length, x0Fixed = 50, gap = 150, y = 110, r = 30;
             const solved = u.length === n;
             const disp = solved ? [0, ...u] : new Array(n + 1).fill(0);
 
@@ -142,56 +142,65 @@ def chain_widget(anywidget, traitlets):
 
             // Magnify displacements so the largest neighbour stretch stays readable.
             const rel = disp.slice(1).map((d, i) => Math.abs(d - disp[i]));
-            const pxPerA = Math.min(300, (0.3 * gap) / Math.max(...rel, 1e-9));
+            const pxPerA = Math.min(300, (0.25 * gap) / Math.max(...rel, 1e-9));
             const rest = disp.map((_, i) => x0Fixed + gap * i);
             const pos = rest.map((x, i) => x + pxPerA * disp[i]);
-            const deepest = Math.max(0, ...springs.map(([i, j]) => j - i));
-            const height = deepest > 1 ? 200 + 30 * deepest : 190;
-            const right = Math.max(...pos.slice(1).map((x, i) => Math.max(x, x + 70 * f[i]) + 60));
-            const width = Math.max(660, right);
+
+            const near = springs.filter(([i, j]) => j - i === 1);
+            const far = springs.filter(([i, j]) => j - i > 1)
+              .sort((a, b) => (a[1] - a[0]) - (b[1] - b[0]) || a[0] - b[0]);
+            const placed = [];
+            for (const s of far) {
+              const lane = LANES.find((dy) => !placed.some(
+                ([p, q, , pdy]) => pdy === dy && p < s[1] && s[0] < q));
+              placed.push([...s, lane ?? LANES[0]]);
+            }
+
+            const height = 200 + 16 * placed.length;
+            const right = Math.max(...pos.slice(1).map((x, i) => Math.max(x, x + 70 * f[i]) + 70));
+            const width = Math.max(680, right);
             svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
             for (let i = 1; i <= n; i++) add("circle", { cx: rest[i], cy: y, r, class: "ghost" });
 
-            for (const [i, j, k] of springs) {
+            const style = (k) => {
               const t = Math.min(1, k / kMax);
-              const style = {
-                fill: "none", stroke: springColour(t),
-                "stroke-width": 1.5 + 3 * t, "stroke-linejoin": "round",
-              };
-              const name = `k${SUB[i]}${SUB[j]}`;
-              if (j - i === 1) {
-                const x0 = pos[i] + r, x1 = pos[j] - r;
-                add("path", { ...style, d: zigzag((s) => [x0 + s * (x1 - x0), y]) });
-                add("text", { x: (x0 + x1) / 2, y: y + 30, class: "label", "text-anchor": "middle" },
-                    `${name} = ${k.toFixed(1)}`);
-              } else {
-                // Longer-range springs hang below the chain as arcs.
-                const x0 = pos[i], x1 = pos[j], y0 = y + r, depth = 25 + 30 * (j - i);
-                const arc = (s) => [x0 + (x1 - x0) * (1 - Math.cos(Math.PI * s)) / 2,
-                                    y0 + depth * Math.sin(Math.PI * s)];
-                add("path", { ...style, d: zigzag(arc, 5 + 2 * (j - i), 7) });
-                add("text", { x: (x0 + x1) / 2, y: y0 + depth + 22, class: "label", "text-anchor": "middle" },
-                    `${name} = ${k.toFixed(1)}`);
-              }
+              return { fill: "none", stroke: springColour(t), "stroke-width": 1.5 + 3 * t,
+                       "stroke-linejoin": "round" };
+            };
+            // Each spring leaves a ball where its lane meets the ball's edge.
+            const edge = (dy) => Math.sqrt(r * r - dy * dy);
+
+            placed.forEach(([i, j, k, dy], idx) => {
+              const x0 = pos[i] + edge(dy), x1 = pos[j] - edge(dy);
+              add("path", { ...style(k), d: zigzag(x0, x1, y + dy, 6 * (j - i), 3.5) });
+              add("text", { x: (pos[i] + pos[j]) / 2, y: y + r + 38 + 16 * idx, class: "label",
+                            "text-anchor": "middle" },
+                  `k${SUB[i]}${SUB[j]} = ${k.toFixed(1)}`);
+            });
+            for (const [i, j, k] of near) {
+              const x0 = pos[i] + r, x1 = pos[j] - r;
+              add("path", { ...style(k), d: zigzag(x0, x1, y, 7, 8) });
+              add("text", { x: (x0 + x1) / 2, y: y + r + 18, class: "label", "text-anchor": "middle" },
+                  `k${SUB[i]}${SUB[j]} = ${k.toFixed(1)}`);
             }
 
             add("circle", { cx: pos[0], cy: y, r, class: "fixed-atom" });
-            add("text", { x: pos[0], y: y + 5, class: "atom-label", "text-anchor": "middle" }, "0");
-            add("text", { x: pos[0], y: y - 24, class: "label", "text-anchor": "middle" }, "u₀ = 0 (fixed)");
+            add("text", { x: pos[0], y: y + 6, class: "atom-label", "text-anchor": "middle" }, "0");
+            add("text", { x: pos[0], y: y - r - 8, class: "label", "text-anchor": "middle" }, "u₀ = 0 (fixed)");
 
             for (let i = 1; i <= n; i++) {
               add("circle", { cx: pos[i], cy: y, r, class: "atom" });
-              add("text", { x: pos[i], y: y + 5, class: "atom-label", "text-anchor": "middle" }, `${i}`);
-              add("text", { x: pos[i], y: y - 24, class: "label", "text-anchor": "middle" },
+              add("text", { x: pos[i], y: y + 6, class: "atom-label", "text-anchor": "middle" }, `${i}`);
+              add("text", { x: pos[i], y: y - r - 8, class: "label", "text-anchor": "middle" },
                   solved ? `u${SUB[i]} = ${disp[i].toFixed(3)} Å` : `u${SUB[i]} = ?`);
               if (Math.abs(f[i - 1]) > 1e-9) {
                 const len = 70 * f[i - 1];
                 add("line", {
-                  x1: pos[i], y1: y - 50, x2: pos[i] + len, y2: y - 50,
+                  x1: pos[i], y1: y - r - 32, x2: pos[i] + len, y2: y - r - 32,
                   stroke: "#2ca02c", "stroke-width": 3, "marker-end": "url(#force-head)",
                 });
-                add("text", { x: pos[i] + len / 2, y: y - 60, class: "force", "text-anchor": "middle" },
+                add("text", { x: pos[i] + len / 2, y: y - r - 42, class: "force", "text-anchor": "middle" },
                     `F${SUB[i]} = ${f[i - 1].toFixed(1)}`);
               }
             }
@@ -206,6 +215,7 @@ def chain_widget(anywidget, traitlets):
             }
           }
 
+
           draw();
           for (const name of ["springs", "f", "u", "k_max"]) model.on(`change:${name}`, draw);
         }
@@ -217,7 +227,7 @@ def chain_widget(anywidget, traitlets):
         .spring-chain .ghost { fill: none; stroke: currentColor; stroke-opacity: 0.35; stroke-dasharray: 4 3; }
         .spring-chain .atom { fill: #1f77b4; stroke: currentColor; stroke-width: 1; }
         .spring-chain .fixed-atom { fill: #7f7f7f; stroke: currentColor; stroke-width: 2.5; }
-        .spring-chain .atom-label { fill: white; font: bold 13px sans-serif; }
+        .spring-chain .atom-label { fill: white; font: bold 16px sans-serif; }
         .spring-chain .label { fill: currentColor; font: 12px sans-serif; }
         .spring-chain .force { fill: #2ca02c; font: bold 12px sans-serif; }
         .spring-chain .warn { fill: #d62728; font: bold 13px sans-serif; }
