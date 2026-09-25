@@ -1,13 +1,13 @@
 ---
 title: "L10 · Building a phase diagram program"
-subtitle: "From CO₂ gas measurements to a liquid–gas boundary"
+subtitle: "Wrapping up Unit 2: From CO₂ gas measurements to a liquid–gas boundary"
 body-classes: lecture-page
 ---
 
 ::: {.callout-note}
 ## Central question
 
-**Using only gas-phase measurements of CO₂ at 300–330 K, can we predict the pressure at which CO₂ condenses between 250 and 295 K, and how far should we trust that prediction?**
+**How can we build an end-to-end Python program that fits van der Waals parameters to CO₂ measurements and predicts its liquid–gas phase boundary?**
 :::
 
 ## Learning outcomes
@@ -19,78 +19,163 @@ By the end of this lecture, you should be able to:
 3. **Construct** a liquid–gas boundary from a few calculated pressures by interpolation.
 4. **Distinguish** checks that verify the numerical calculation from a comparison that tests the model against measured CO₂.
 
-We have already studied each numerical method separately in [L05–L09](../index.qmd). Today we chain them into one program, which I will type live while you watch and predict what each step returns. Each step below gives the SciPy call with a link to its documentation, because the syntax is the easiest part to miss while the code scrolls past. We will spend **35 minutes on the live program and 15 minutes on the Unit 02 Wooclap questions**. The completed notebook is linked at the end of the lecture for you to rerun afterwards.
+In [L05–L09](../index.qmd), we studied four numerical tasks, mostly through functions of one variable:
+
+- **Root finding:** find $x$ such that $f(x)=0$.
+- **Optimization:** find $x$ that minimizes or maximizes $f(x)$. When derivatives are available, solving $f'(x)=0$ identifies stationary points that we can test for minima or maxima.
+- **Interpolation:** construct a function $\hat f(x)$ that passes through every given data point $(x_i,y_i)$.
+- **Curve fitting:** choose the coefficients of a function $\hat f(x)$ to best describe the data according to an error measure, such as the sum of squared residuals.
+
+Today we combine these methods into **one program** during a live coding demonstration.
 
 ## The engineering question
 
-CO₂ is stored and moved as a pressurized fluid in gas cylinders, beverage and fire-suppression systems, and carbon-capture pipelines. Whether it arrives as a gas or a liquid decides how much a vessel holds and whether a compressor or a pump is needed. At 280 K, for example, liquid CO₂ is several times denser than the gas at the same pressure. The designer therefore needs the **saturation pressure** $P_{\mathrm{sat}}(T)$: at a fixed temperature, CO₂ is a gas below this pressure and condenses to a liquid above it. Plotted against temperature, $P_{\mathrm{sat}}(T)$ is the liquid–gas boundary of a phase diagram.
+:::: {.columns}
+::: {.column width="65%"}
+CO₂ is stored and transported as a pressurized fluid in gas cylinders, beverage and fire-suppression systems, and carbon-capture pipelines. Whether it is a gas or a liquid affects how much a vessel holds and whether a compressor or a pump is needed. The **saturation pressure** $P_{\mathrm{sat}}(T)$ is the pressure at which liquid and gas CO₂ can coexist at temperature $T$.
 
-Suppose our only measurements come from a laboratory study of CO₂ gas at 300–330 K. None of these states is a liquid, and none lies on the boundary we want. The van der Waals (vdW) equation of state carries information from the measured gas into the region where liquid appears, so we state the task precisely before writing any code:
+Imagine that your client is Air Liquide. They provide measurements of CO₂ density, pressure, and temperature and ask for a program that predicts $P_{\mathrm{sat}}(T)$ between **250 and 295 K**. We will fit a van der Waals (vdW) model to the measurements, then use it to calculate the liquid–gas boundary.
+:::
+::: {.column width="35%"}
+![A pressurized CO₂ tank.](../../../assets/L10-co2-tank.jpg){fig-alt="An outdoor insulated tank used to store liquid carbon dioxide." width="100%"}
+:::
+::::
+
+Photo: [Whoisjohngalt, Wikimedia Commons](https://commons.wikimedia.org/wiki/File:A_container_of_liquid_carbon_dioxide.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+
+### What are we given?
 
 | | For this lecture |
 |---|---|
-| **Known data** | 15 measured states $(T_i, v_i, P_i)$ of CO₂ gas, 300–330 K, densities below 10 mol/L |
-| **Model** | vdW equation with two unknown constants $a$ and $b$ |
-| **Wanted** | $P_{\mathrm{sat}}(T)$ in bar for $250\le T\le 295$ K |
-| **Deliverables** | (1) fitted $a,b$ with their pressure error; (2) $P_{\mathrm{sat}}$ at 250, 270, 290 K; (3) a boundary curve from 250 to 295 K; (4) a comparison with measured CO₂ vapour pressures |
-| **Acceptance checks** | free-energy difference $|\Delta G|<10^{-4}$ J/mol and EOS residual $<10^{-3}$ bar at each $P_{\mathrm{sat}}$; interpolated boundary within 0.01 bar of a fresh solve at 275 K |
+| **Known data** | CO₂ pressure–volume–temperature measurements from [Ely, Haynes and Bain (1989)](../references.qmd#ref-ely1989isochoric), using 36 states between 300 and 330 K |
+| **Model** | The vdW equation of state, with two unknown constants $a$ and $b$ |
+| **Wanted** | $P_{\mathrm{sat}}(T)$ between 250 and 295 K, below the temperatures used for fitting |
 
-The calculation needs four of our Unit 02 methods, each answering a different question: regression for $a$ and $b$ (step 1), minimization for the two phase volumes (step 2), root finding for the coexistence pressure (step 3), and interpolation for the boundary (step 4).
+Ely and colleagues measured CO₂ along lines of nearly constant density by heating a sealed cell and recording its pressure. The table below shows how the measurements were reported. Our data file converts molar density $\rho$ in mol/L to molar volume $v=1/\rho$ in L/mol.
 
-Steps 2 and 3 are nested. Every trial pressure chosen by the root finder triggers two new minimizations, so one saturation pressure costs a few dozen minimizations. Step 1 runs once, and its $a$ and $b$ enter every later calculation.
+![CO₂ measurement table from Ely, Haynes and Bain (1989).](../../../assets/L10-nist-data-screenshot.png){fig-alt="A table of experimental CO2 temperatures, pressures, and molar densities." width="90%"}
+
+We fit **15 states from four low-density series**, at nominal densities of about 1, 3, 6.9, and 9.9 mol/L, and reserve the other 21 states to test the model. This lets us compare its performance both within and beyond the density range used for fitting.
+
+![Measured CO₂ pressure against density on five isotherms. Filled circles are the 15 fitting states. Open circles are held back: nine below 10 mol/L and twelve above it.](../../../assets/L10-co2-measurements.png){fig-alt="Pressure rises with density on each isotherm from 300 to 330 K. The fitting points lie at densities of about 1, 3, 6.9, and 9.9 mol/L. Held-back points extend to 16 mol/L." width="90%"}
+
+### Components of the design problem
+
+#### Part 1: Curve fitting
+
+We start with the vdW equation of state introduced in L05:
+
+$$
+P_{\mathrm{vdW}}(T,v;a,b)=\frac{RT}{v-b}-\frac{a}{v^2},
+\qquad v=\frac{V}{n}.
+$$
+
+The parameter $b$ accounts for the volume excluded by the molecules, while $a/v^2$ accounts for the reduction in pressure due to molecular attraction. With $v$ in L/mol and $P$ in bar, we use $R=0.08314462618\ \mathrm{L\,bar/(mol\,K)}$. The units of $a$ and $b$ are $\mathrm{L^2\,bar/mol^2}$ and L/mol, respectively.
+
+**Sanity check:** What are the model's inputs and output? Which quantities are known, and which do we fit?
+
+::: {.callout-tip collapse="true"}
+## Answer: Known states and fitted parameters
+
+Each state supplies two inputs, $T_i$ and $v_i$, and a measured output, $P_i$. The model predicts pressure. We fit one pair of parameters, $a$ and $b$, shared by all 15 states.
+:::
+
+#### Part 2: Finding the two minima
+
+Once $a$ and $b$ are fixed, we use the free-energy function from L07:
+
+$$
+\mathcal G(v;T,P,a,b)
+=-RT\ln\left(\frac{v-b}{v_{\mathrm{ref}}}\right)-\frac{a}{v}+Pv,
+\qquad v>b.
+$$
+
+Here $v_{\mathrm{ref}}=1\ \mathrm{L/mol}$ makes the logarithm dimensionless. The expression gives energy in L bar/mol, which we multiply by 100 to obtain J/mol. At a suitable subcritical temperature and pressure, this curve has two local minima: a liquid-like state at small molar volume and a gas-like state at large molar volume. We find each minimum in its own volume interval.
+
+**Sanity check:** Which variable does the minimizer change, and which quantities stay fixed during each search?
+
+::: {.callout-tip collapse="true"}
+## Answer: Minimize over volume
+
+The minimizer changes $v$, while $T$, $P$, $a$, and $b$ stay fixed. Two searches return $v_{\mathrm{liq}}$ and $v_{\mathrm{gas}}$. Evaluating $\mathcal G$ at these volumes gives $G_{\mathrm{liq}}$ and $G_{\mathrm{gas}}$.
+:::
+
+#### Part 3: Root finding
+
+At coexistence, the two minima have equal free energy. We therefore define the residual
+
+$$
+\Delta G(P;T,a,b)=G_{\mathrm{liq}}-G_{\mathrm{gas}}
+$$
+
+and find the pressure for which $\Delta G=0$. Each trial pressure requires two new volume minimizations.
+
+**Sanity check:** Where did $v$ go? Why can we now solve a problem with pressure as its only unknown?
+
+::: {.callout-tip collapse="true"}
+## Answer: Volume is determined inside the pressure calculation
+
+For each trial $P$, the inner minimizations determine both volumes at the chosen $T$. The outer root finder sees only the resulting free-energy difference. Fixing $T$, $a$, and $b$ leaves one unknown, $P_{\mathrm{sat}}$.
+:::
+
+#### Part 4: Interpolation
+
+Once we can calculate $P_{\mathrm{sat}}$ at any temperature in our range, interpolation is an optional way to reduce repeated computation. We calculate five pairs $(T_i,P_{\mathrm{sat},i})$ and construct a function $\widehat P_{\mathrm{sat}}(T)$ that passes through them.
+
+**Sanity check:** Looking back at L08, which interpolation methods could represent a smoothly rising saturation-pressure curve?
+
+::: {.callout-tip collapse="true"}
+## Answer: Linear, cubic spline, or PCHIP interpolation
+
+Piecewise linear interpolation is a simple starting point. A cubic spline gives a smooth curve, while PCHIP uses piecewise cubic polynomials that preserve monotonicity when the data are monotonic. Compare their predictions with a fresh coexistence calculation between the five temperatures.
+
+We can evaluate any of these interpolators on a grid spaced by 0.01 K. That spacing controls the density of plotted points, while interpolation accuracy depends on the method and the five original calculations.
+:::
 
 ## The live notebook
 
-The notebook supplies the data, the limits of the two free-energy wells, the plots, and a check after each step. I type the four cells marked **Live step**, and each check turns green once its step works. Watch for three things in each cell: the physical quantity it returns, the units, and the arguments passed to the SciPy function.
+We will build the program in the editable notebook and pause after each stage to examine the result. Follow along in class or repeat the calculation at home using the examples below.
+
+::: {.callout-tip}
+## Saving your work and finding the completed example
+
+Use **Open in marimo.app** to work in a separate browser session, where you can download your edited notebook. A [completed reference notebook](#reference-notebook-for-after-class) is linked at the end of these notes.
+:::
 
 ::: {.quarto-wasm-local notebook="l10_phase_diagram.edit.py" view="edit" title="Live demo: fit vdW parameters to CO₂ data and build the liquid–gas boundary" height="1100" loading="lazy" fullscreen="true" marimo-app="true"}
-The live notebook provides the data and the supporting functions. The four live cells are typed in class. The code, tables, and figures below give a printable record of every step.
+The live notebook provides the data and supporting functions. The examples below show how to assemble the fitting, minimization, root-finding, and interpolation steps.
 :::
 
 ## Step 1 · Fitting $a$ and $b$ to gas measurements
 
-The vdW equation corrects the ideal-gas law in two ways. The constant $b$ removes the volume occupied by the molecules themselves, and the term $a/v^2$ lowers the pressure because neighbouring molecules attract each other:
+### The least-squares regression problem
 
-$$
-P_{\mathrm{vdW}}(T,v;a,b)=\frac{RT}{v-b}-\frac{a}{v^2}.
-$$
-
-Here $v$ is the molar volume in L/mol, $R=0.08314462618\ \mathrm{L\,bar/(mol\,K)}$, and $P$ is in bar, so $a$ has units of $\mathrm{L^2\,bar/mol^2}$ and $b$ has units of L/mol. The measured density $\rho$ in mol/L gives $v=1/\rho$.
-
-### The measurements
-
-Ely, Haynes and Bain measured CO₂ along lines of nearly constant density, heating a sealed cell of fixed volume and recording its pressure ([Ely et al., 1989](../references.qmd#ref-ely1989isochoric)). Our file contains 36 of their states between 300 and 330 K. We fit the **15 states at the four lowest nominal densities**, about 1, 3, 6.9, and 9.9 mol/L, and hold the other 21 back to test the result.
-
-![Measured CO₂ pressure against density on five isotherms. Filled circles are the 15 fitting states. Open circles are held back: nine below 10 mol/L and twelve above it.](../../../assets/L10-co2-measurements.png){fig-alt="Pressure rises with density on each isotherm from 300 to 330 K. The 15 filled fitting points lie at densities of about 1, 3, 6.9, and 9.9 mol/L. Open held-back points extend to 16 mol/L, where the isotherms curve upward steeply." width="90%"}
-
-The upper density limit reflects what the vdW form can represent. Near the critical density of CO₂, about 10.6 mol/L, the measured isotherms flatten and then rise steeply. Two constants cannot follow that shape and the dilute-gas behaviour at the same time. Fitting the gas states therefore asks the model to do what it describes best, and we check afterwards how it behaves beyond that range.
-
-### The least-squares problem
-
-Each measured state $i$ gives one residual, the difference between the model pressure at the measured $T_i$ and $v_i$ and the measured pressure $P_i$. Following L09, we choose $a$ and $b$ to minimize the sum of squared residuals:
+Unlike most examples in L09, each measured state has two known inputs, $T_i$ and $v_i$. We predict its pressure and subtract the measured pressure $P_i$ to obtain a residual. The fit chooses $a$ and $b$ to minimize
 
 $$
 \begin{aligned}
-S(a,b)&=\bigl[P_{\mathrm{vdW}}(T_1,v_1;a,b)-P_1\bigr]^2+\bigl[P_{\mathrm{vdW}}(T_2,v_2;a,b)-P_2\bigr]^2+\cdots+\bigl[P_{\mathrm{vdW}}(T_{15},v_{15};a,b)-P_{15}\bigr]^2\\
+S(a,b)&=\bigl[P_{\mathrm{vdW}}(T_1,v_1;a,b)-P_1\bigr]^2
++\bigl[P_{\mathrm{vdW}}(T_2,v_2;a,b)-P_2\bigr]^2+\cdots
++\bigl[P_{\mathrm{vdW}}(T_{15},v_{15};a,b)-P_{15}\bigr]^2\\
 &=\sum_{i=1}^{15}\bigl[P_{\mathrm{vdW}}(T_i,v_i;a,b)-P_i\bigr]^2.
 \end{aligned}
 $$
 
-The model is linear in $a$ but not in $b$, which appears in a denominator. We therefore use [`curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html), which minimizes $S$ iteratively from a starting guess. Its model function must take the known inputs first and the fitted parameters after them. Each state has two known inputs, so our model function receives them together as the pair `(T, v)` and unpacks them inside.
+Using pressure residuals treats $T_i$ and $v_i$ as fixed inputs and gives equal weight to equal pressure errors in bar. We could instead fit density at fixed $T_i,P_i$, but that would require solving the EOS for each predicted density and would define a different fitting objective. The appropriate choice depends on measurement uncertainty. Here, pressure is the directly calculated output of our model and the recorded response in the isochoric experiment.
+
+The model is linear in $a$ but nonlinear in $b$, which appears in a denominator. We use nonlinear least squares directly through [`curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html). Its model function takes the known inputs first and the fitted parameters afterwards. We pass the two input arrays together as `(T, v)`.
 
 ::: {.callout-note}
 ## Syntax: `curve_fit`
 
 ```python
 parameters, covariance = curve_fit(model, x_known, y_measured, p0=(guess_a, guess_b))
-# model(x_known, a, b): known inputs first, then the fitted parameters
+# model(x_known, a, b): known inputs first, then fitted parameters
 ```
-
-Documentation: [`scipy.optimize.curve_fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html). The notebook supplies `T_fit`, `v_fit`, and `P_fit` for the 15 fitting states in K, L/mol, and bar.
 :::
 
 ::: {.callout-tip collapse="true"}
-## Code typed in class: the vdW model and the `curve_fit` call
+## Example code: The vdW pressure model and parameter fit
 
 ```{.python code-fold="false"}
 def vdw_pressure(state, a, b):
@@ -101,40 +186,30 @@ def vdw_pressure(state, a, b):
 print(f"a = {a_fit:.5f} L² bar/mol²,  b = {b_fit:.6f} L/mol")
 ```
 
-The second output of `curve_fit` is the parameter covariance matrix, which we do not use here, so it is assigned to `_`.
+The second output is the parameter covariance matrix. We assign it to `_` because it is not used in the calculations below.
 :::
 
-The fit should give
+The fitted values should be approximately
 
 $$
 a=3.61938\ \mathrm{L^2\,bar/mol^2},\qquad b=0.042460\ \mathrm{L/mol}.
 $$
 
-The notebook compares these values with the course parameters used in L05–L09 and with a fit to all 36 states. The error columns are root-mean-square pressure differences in bar. The last two columns are the model critical point, $T_c=8a/(27Rb)$ and $P_c=a/(27b^2)$. Measured CO₂ has $T_c=304.1$ K and $P_c=73.8$ bar.
+### How well does the model fit?
 
-| Parameters | $a$ | $b$ | Fitting states (15) | Held back, $\rho<10$ (9) | Held back, $\rho>10$ (12) | $T_c$ (K) | $P_c$ (bar) |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Fitted, $\rho<10$ mol/L | 3.61938 | 0.042460 | 1.53 | 2.50 | 133 | 303.8 | 74.4 |
-| Course values (L05–L09) | 3.592 | 0.04267 | 2.62 | 1.81 | 145 | 300.0 | 73.1 |
-| Fitted to all 36 states | 3.014 | 0.03354 | 4.83 | 5.55 | 7.2 | 320.2 | 99.2 |
+Compare the predicted pressure $P_{\mathrm{vdW}}(T_i,v_i)$ with $P_i$ at **all 36 states**, including those held back from the fit. The root-mean-square pressure residual is about **1.53 bar** for the 15 fitting states and **2.50 bar** for the nine held-back states below 10 mol/L. For the twelve denser states, it rises to about **133 bar**. The model captures the low-density trend but performs poorly at high density.
 
-The fitted parameters reproduce the 15 fitting states to about 1.5 bar, within 5% at every state. Both dilute parameter sets describe the held-back gas states similarly, and both fail above 10 mol/L, with root-mean-square errors above 100 bar. Including the dense states improves those errors, but the model critical temperature moves to 320 K, where real CO₂ is already supercritical. We keep the dilute fit because it places the critical point within 0.4 K and 0.6 bar of the measured values, which matters for a boundary that ends at that point.
+::: {.callout-important}
+## Model error at high density
 
-**Discussion:** the fitted set has the smaller error on the fitting states but a larger error on the nine held-back gas states. What does this tell us about judging a fit only on the data used to construct it?
+The vdW equation uses a simple excluded-volume correction and a constant attraction parameter. These approximations cannot reproduce the full density dependence of real CO₂. Other equations of state offer more flexibility: the [Peng–Robinson equation](https://doi.org/10.1021/i160057a011) uses a temperature-dependent attraction term, and the [Span–Wagner reference EOS](../references.qmd#ref-span1996co2) was developed specifically to represent CO₂ over a wide range of conditions. Reducing the numerical solver tolerance leaves these vdW modelling assumptions unchanged.
+:::
 
-## Step 2 · Minimization: which volume does CO₂ choose?
+## Step 2 · Minimization: Which volume does CO₂ choose?
 
-With $a$ and $b$ fixed, we return to the free-energy function from L07. At fixed temperature $T$ and imposed pressure $P$, the preferred molar volume minimizes
+We now minimize the free-energy function introduced above. To find both states, we need two separate search intervals. The supplied helper `turning_volumes(T, a, b)` locates $v_1<v_2$, where the vdW isotherm has zero slope. At pressures where both wells exist, the liquid minimum lies between $b$ and $v_1$, and the gas minimum lies beyond $v_2$.
 
-$$
-\mathcal G(v;T,P,a,b)
-=-RT\ln\left(\frac{v-b}{v_{\mathrm{ref}}}\right)-\frac{a}{v}+Pv,
-\qquad v>b.
-$$
-
-Here $v_{\mathrm{ref}}=1\ \mathrm{L/mol}$ makes the logarithm dimensionless, so with $v$ in L/mol the code can write `np.log(v - b)`. The expression has units of L bar/mol, and multiplying by 100 returns **J/mol**. A term depending only on $T$ cancels when we compare two volumes.
-
-Below the model's critical temperature, a range of pressures gives $\mathcal G(v)$ two minima: a **liquid-like well** at small volume and a **gas-like well** at large volume. The two wells are separated by the volumes $v_1<v_2$ where the vdW isotherm turns, $\partial P/\partial v=0$. The supplied function `turning_volumes(T, a, b)` returns them, so we can search the liquid well between $b$ and $v_1$ and the gas well beyond $v_2$. A bounded minimizer needs exactly this kind of interval, since it searches only between the limits we give it.
+We separate the code into two functions: `find_state_volume` minimizes within one interval, and `phase_volumes` calls it for both states. This keeps the numerical search separate from the choice of liquid and gas intervals.
 
 ::: {.callout-note}
 ## Syntax: `minimize_scalar` with bounds
@@ -142,63 +217,57 @@ Below the model's critical temperature, a range of pressures gives $\mathcal G(v
 ```python
 result = minimize_scalar(fun, bounds=(low, high), args=(T, P, a, b),
                          method="bounded", options={"xatol": 1e-10})
-result.x    # the volume at the bottom of the well
-# fun(v, T, P, a, b): the variable being minimized comes first, args fill the rest
+result.x    # volume at the minimum
+# fun(v, T, P, a, b): vary v and hold the remaining arguments fixed
 ```
 
-Documentation: [`scipy.optimize.minimize_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html). The default volume tolerance is too coarse for a steep liquid well, so we set `xatol`.
+[`method="bounded"`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html) keeps the search inside the chosen interval. This matters because we want one minimum from each well. SciPy's `"golden"` and `"brent"` methods accept a bracket rather than hard bounds and can search beyond an initial pair of points. The tighter volume tolerance helps resolve the steep liquid well.
 :::
 
 ::: {.callout-tip collapse="true"}
-## Code typed in class: the free energy and the two well minima
+## Example code: One bounded search for each phase
 
 ```{.python code-fold="false"}
 def free_energy(v, T, P, a, b):
     return 100*(-R*T*np.log(v - b) - a/v + P*v)  # J/mol
 
+def find_state_volume(T, P, a, b, bounds):
+    result = minimize_scalar(free_energy, bounds=bounds, args=(T, P, a, b),
+                             method="bounded", options={"xatol": 1e-10})
+    if not result.success:
+        raise RuntimeError(result.message)
+    return result.x
+
 def phase_volumes(T, P, a, b):
     v1, v2 = turning_volumes(T, a, b)
-    liquid = minimize_scalar(free_energy, bounds=(1.0001*b, v1), args=(T, P, a, b),
-                             method="bounded", options={"xatol": 1e-10})
-    gas = minimize_scalar(free_energy, bounds=(v2, 5*R*T/P), args=(T, P, a, b),
-                          method="bounded", options={"xatol": 1e-10})
-    return liquid.x, gas.x
+    v_liq = find_state_volume(T, P, a, b, bounds=(1.0001*b, v1))
+    v_gas = find_state_volume(T, P, a, b, bounds=(v2, 5*R*T/P))
+    return v_liq, v_gas
 ```
 
-The gas limit $5RT/P$ is five times the ideal-gas volume, safely beyond the gas minimum.
+The logarithm uses the numerical value of volume in L/mol, consistent with $v_{\mathrm{ref}}=1$ L/mol. The liquid interval starts just above $b$ to avoid the singularity. The gas upper limit is five times the ideal-gas volume, beyond the gas minimum for the conditions used here.
 :::
 
-The notebook's slider then sets the trial pressure at 280 K and plots both wells. Their free-energy difference is
+After minimization, substitute both volumes into the EOS to check that their pressures agree with the imposed $P$. Two converged searches give two candidate states. Comparing their free energies tells us which state is preferred and whether they coexist.
 
-$$
-\Delta G(P;T,a,b)=\mathcal G(v_{\mathrm{liq}};T,P,a,b)
--\mathcal G(v_{\mathrm{gas}};T,P,a,b),
-$$
+## Step 3 · Root finding: The pressure where $\Delta G=0$
 
-where both volumes are recalculated at each trial pressure. At 50 bar, the gas well is lower by about 65 J/mol, so CO₂ stays a gas.
-
-**Prediction:** as the pressure rises, which well drops relative to the other? At what pressure do you estimate the two wells have equal depth?
-
-## Step 3 · Root finding: the pressure where $\Delta G=0$
-
-**Coexistence requires $\Delta G=0$:** neither phase is preferred, and liquid and gas can exist together. At fixed $T$, the pressure is the only unknown, so finding $P_{\mathrm{sat}}$ is a one-variable root-finding problem for $\Delta G(P)$. Each evaluation of $\Delta G$ requires the two minimizations from Step 2, so we write it as a function of $P$ that calls `phase_volumes` inside.
-
-A bracketing method needs an interval where $\Delta G$ changes sign (L05). The supplied function `find_pressure_bracket(T, a, b)` returns one: between the two turning-point pressures both wells exist, and $\Delta G$ has opposite signs at the ends.
+At fixed $T$, coexistence requires $\Delta G(P)=0$. Our residual function calls `phase_volumes` at each trial pressure and subtracts the two minimum free energies. The supplied `find_pressure_bracket(T, a, b)` gives a pressure interval where both wells exist and $\Delta G$ changes sign.
 
 ::: {.callout-note}
-## Syntax: `root_scalar` with a bracket
+## Syntax: `root_scalar` with bisection
 
 ```python
-result = root_scalar(f, args=(T, a, b), bracket=(low, high), method="brentq")
+result = root_scalar(f, args=(T, a, b), bracket=(low, high), method="bisect")
 result.root, result.converged
-# f(P, T, a, b): the unknown comes first, args fill the fixed inputs
+# f(P, T, a, b): vary P and hold T, a, and b fixed
 ```
 
-Documentation: [`scipy.optimize.root_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root_scalar.html). `method="brentq"` selects Brent's bracketing method from L05.
+Start with bisection from L05. Then try `method="brentq"`, which retains a sign-changing bracket while using interpolation steps to accelerate convergence. See [`scipy.optimize.root_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root_scalar.html).
 :::
 
 ::: {.callout-tip collapse="true"}
-## Code typed in class: $\Delta G(P)$ and `solve_pressure`
+## Example code: The free-energy residual and saturation-pressure solver
 
 ```{.python code-fold="false"}
 def delta_G(P, T, a, b):
@@ -207,62 +276,88 @@ def delta_G(P, T, a, b):
 
 def solve_pressure(T, a, b):
     result = root_scalar(delta_G, args=(T, a, b),
-                         bracket=find_pressure_bracket(T, a, b), method="brentq")
+                         bracket=find_pressure_bracket(T, a, b), method="bisect")
+    if not result.converged:
+        raise RuntimeError("The coexistence-pressure solve did not converge.")
     return result.root
 ```
 :::
 
-::: {.callout-note collapse="true"}
-## Supported temperature range of the supplied well limits
-
-The supplied `turning_volumes` supports **$0.82\le T/T_c\le0.985$**, where it resolves two distinct wells reliably, and reports an error outside this range. For the fitted parameters that is 249–299 K. At or above $T_c$, distinct liquid and gas volumes disappear.
-:::
-
-The check cell then calls `solve_pressure` at three temperatures with the fitted $a$ and $b$ (deliverable 2):
-
-| $T$ (K) | $P_{\mathrm{sat}}$, fitted vdW (bar) |
-|---:|---:|
-| 250 | 32.4535 |
-| 270 | 45.5978 |
-| 290 | 61.5985 |
-
-The notebook also checks $|\Delta G|<10^{-4}$ J/mol and the EOS residual $|P_{\mathrm{vdW}}(v)-P|<10^{-3}$ bar at both volumes. These checks test the equations behind the returned pressure. A solver's success flag alone does not show that we supplied the correct physical problem.
+**Sanity check:** At $T=275$ K, using the fitted $a$ and $b$, you should obtain $P_{\mathrm{sat}}\approx49.32$ bar. Check that $\Delta G$ is close to zero at this pressure and that both phase volumes reproduce it through the EOS.
 
 ## Step 4 · From five pressures to a phase boundary
 
-Each saturation pressure costs dozens of minimizations, so we calculate only five and interpolate between them (L08). We use `PchipInterpolator`, which preserves the increasing trend of these pressures between the sample points, with extrapolation disabled so the curve stops at 250 and 295 K.
+Each root solve repeatedly calls the two minimizers. If we want many points for a phase-boundary plot, we can calculate five saturation pressures and interpolate between them. Start with linear interpolation, then compare a cubic spline and PCHIP using the same five points.
 
 ::: {.callout-note}
-## Syntax: `np.linspace` and `PchipInterpolator`
+## Syntax: Equally spaced temperatures with `np.linspace`
 
 ```python
-T_grid = np.linspace(start, stop, number_of_points)            # both ends included
-boundary = PchipInterpolator(x_nodes, y_nodes, extrapolate=False)
-boundary(275.0)    # evaluate like a function; returns nan outside the nodes
+T_grid = np.linspace(250, 295, 5)  # five temperatures, including both endpoints
 ```
 
-Documentation: [`numpy.linspace`](https://numpy.org/doc/stable/reference/generated/numpy.linspace.html) · [`scipy.interpolate.PchipInterpolator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
+[`numpy.linspace`](https://numpy.org/doc/stable/reference/generated/numpy.linspace.html) takes the first value, last value, and number of points. These five temperatures are where we solve the coexistence problem directly.
+:::
+
+The following helper gives the three interpolation methods a common interface. It returns a function that we can evaluate at any temperature inside the sampled interval.
+
+::: {.callout-tip collapse="true"}
+## Example code: A choice of interpolation methods
+
+```{.python code-fold="false"}
+from scipy.interpolate import CubicSpline, PchipInterpolator
+
+def interpolate_boundary(T_nodes, P_nodes, method="linear"):
+    if method == "linear":
+        return lambda T: np.interp(T, T_nodes, P_nodes, left=np.nan, right=np.nan)
+    if method == "cubic":
+        return CubicSpline(T_nodes, P_nodes, extrapolate=False)
+    if method == "pchip":
+        return PchipInterpolator(T_nodes, P_nodes, extrapolate=False)
+    raise ValueError("Choose 'linear', 'cubic', or 'pchip'.")
+```
+
+Documentation: [`numpy.interp`](https://numpy.org/doc/stable/reference/generated/numpy.interp.html) · [`CubicSpline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html) · [`PchipInterpolator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html).
+:::
+
+::: {.callout-note}
+## Syntax: Constructing and evaluating the boundary
+
+```python
+boundary = interpolate_boundary(T_grid, P_grid, method="linear")
+boundary(275.0)    # pressure in bar; returns nan outside the sampled interval
+```
 :::
 
 ::: {.callout-tip collapse="true"}
-## Code typed in class: five coexistence solves and the PCHIP boundary
+## Example code: Five coexistence calculations and a dense plotting grid
 
 ```{.python code-fold="false"}
-T_grid = np.linspace(250, 295, 5)  # K
+T_grid = np.linspace(250, 295, 5)
 P_grid = [solve_pressure(T, a_fit, b_fit) for T in T_grid]
-boundary = PchipInterpolator(T_grid, P_grid, extrapolate=False)
+boundary = interpolate_boundary(T_grid, P_grid, method="linear")
+
+T_plot = np.linspace(250, 295, 4501)  # spacing of 0.01 K
+P_plot = boundary(T_plot)
 ```
 :::
 
-At 275 K, which is not one of the five sample temperatures, a fresh `solve_pressure` gives 49.3239 bar and the interpolated boundary gives 49.3220 bar. The difference of 0.002 bar passes our acceptance check, so the interpolated curve represents the vdW calculation well between the samples (deliverable 3).
+At 275 K, which lies between the five sample temperatures, compare `boundary(275.0)` with a fresh `solve_pressure(275.0, a_fit, b_fit)`. The direct calculation gives about **49.3239 bar**. PCHIP, used in the completed reference notebook, gives **49.3220 bar**, a difference of about 0.002 bar. Repeat the comparison with linear and cubic interpolation to see how much the method matters.
 
-![CO₂ liquid–gas boundary predicted from gas-phase data. The red curve interpolates five vdW coexistence solves with the fitted parameters, and the dashed curve uses the course parameters. The black curve is measured CO₂. Open squares mark the two model critical points, and blue crosses mark the 15 fitting states.](../../../assets/L10-phase-boundary.png){fig-alt="Pressure against temperature from 245 to 335 K. The measured CO2 saturation curve rises from about 15 bar at 245 K to the critical point at 304 K and 74 bar. Both vdW curves lie well above it at low temperature and approach it near the critical point. The fitting states lie to the right of the critical temperature." width="100%"}
+## Answering the engineering question
 
-### Answering the engineering question
+Our fit gives $a\approx3.61938$ and $b\approx0.042460$, close to the course values $a=3.592$ and $b=0.04267$. A common way to determine vdW parameters is to match the critical temperature and pressure. Here we fitted pressure–volume–temperature data instead, yet the resulting model critical point,
 
-The final table compares the fitted-model prediction with the measured CO₂ vapour pressure, calculated from the reference correlation of [Span and Wagner (1996)](../references.qmd#ref-span1996co2), which summarizes experimental saturation data (deliverable 4).
+$$
+T_c=\frac{8a}{27Rb}\approx303.8\ \mathrm{K},
+\qquad P_c=\frac{a}{27b^2}\approx74.4\ \mathrm{bar},
+$$
 
-| $T$ (K) | vdW, fitted (bar) | vdW, course values (bar) | Measured CO₂ (bar) | Fitted vs measured |
+is close to the measured CO₂ values of 304.1 K and 73.8 bar. This agreement is encouraging, but the rest of the phase boundary still needs comparison with experiment.
+
+The table below compares direct vdW coexistence calculations with the CO₂ vapour-pressure correlation of [Span and Wagner (1996)](../references.qmd#ref-span1996co2), which represents experimental saturation data.
+
+| $T$ (K) | vdW, fitted (bar) | vdW, course values (bar) | CO₂ reference (bar) | Fitted vs reference |
 |---:|---:|---:|---:|---:|
 | 250 | 32.45 | 33.75 | 17.85 | +82% |
 | 260 | 38.68 | 40.16 | 24.19 | +60% |
@@ -270,104 +365,43 @@ The final table compares the fitted-model prediction with the measured CO₂ vap
 | 280 | 53.23 | 55.13 | 41.61 | +28% |
 | 290 | 61.60 | 63.72 | 53.18 | +16% |
 
-Every numerical check passed, yet the predicted condensation pressure is 16% too high at 290 K and 82% too high at 250 K. The error grows as we move away from the critical point, which the fit placed almost exactly. The direction of the error matters for design. A vessel held at 250 K and operated below the vdW boundary of 32 bar would be expected to contain gas, but real CO₂ condenses there above 18 bar.
+![CO₂ liquid–gas boundary predicted from gas-phase data. The red curve uses PCHIP through five fitted-vdW coexistence calculations, and the dashed curve uses the course parameters. The black curve is the CO₂ reference. Open squares mark the model critical points, and blue crosses mark the 15 fitting states.](../../../assets/L10-phase-boundary.png){fig-alt="Pressure against temperature. Both vdW boundaries lie above the CO2 reference curve, with a larger relative discrepancy at lower temperatures. Their critical points lie close to the measured critical point." width="100%"}
 
-The two vdW parameter sets differ from each other by at most about 2 bar, much less than either differs from the measurements. Refining the fit or tightening the root tolerance therefore cannot remove the discrepancy, which comes from the vdW form itself. Two constants fitted to the gas cannot also describe the dense liquid, whose volume enters $\Delta G$. For the design question, our program is a verified calculation of the vdW boundary and a useful estimate near the critical point. A dependable answer at 250 K needs a more accurate equation of state, and the same program structure applies to it.
+The fitted model overpredicts saturation pressure throughout this range. Its relative error grows as temperature decreases, farther from the temperatures used for fitting. Matching the critical point therefore does not establish accuracy along the whole liquid–gas boundary.
 
-**Numerical verification** asks whether the returned pressure satisfies the model's coexistence condition, and our $\Delta G$, EOS, and interpolation checks answer that. **Comparison with experiment** asks whether the model and its parameters predict real CO₂ adequately, and only independent measurements can answer that.
+The EOS residuals, free-energy difference, and fresh interpolation checks test the **numerical calculation**. Comparing the resulting boundary with experimental data tests the **physical model**. Once the numerical results are stable under tighter tolerances, the large remaining discrepancy points to modelling error. For the client's saturation-pressure predictions, we would need an EOS validated across the required temperature range, such as the CO₂-specific Span–Wagner model.
 
 ## Reference notebook for after class
 
-The completed notebook contains every cell typed today. Rerun it, change the fitted data set or the sample temperatures, and compare the result with the tables above.
+The completed notebook contains the full calculation. Rerun it, change the fitted data set or sample temperatures, and compare the result with the tables above.
 
 [Open the reference notebook](../../../wasm-local/l10_phase_diagram_solution.html){target="_blank"} · [Download the reference notebook](../../../activities/l10_phase_diagram_solution.edit.py){download="l10_phase_diagram_solution.edit.py"} · [Download the CO₂ data (CSV)](../../../data/L10-co2-pvt.csv){download="L10-co2-pvt.csv"}
 
-## Unit 02 Wooclap · final 15 minutes
-
-We will finish with six questions about method selection, convergence, phase stability, and what our checks establish. Vote individually, discuss a divided result with your neighbour, then explain the reason for your choice.
-
-### Q1 · Which numerical task?
-
-**Matching · 90 seconds.** Match each question to its most direct numerical task. Use each task once: **root finding, minimization, interpolation, regression**.
-
-| Physical or numerical question | Your choice |
-|---|---|
-| At fixed $T,P$, which volume lies at the bottom of a free-energy well? | |
-| At fixed $T$, which pressure makes the two minimum free energies equal? | |
-| Which curve passes through five calculated pressures to estimate between them? | |
-| Which $a,b$ best represent 15 measured gas states overall? | |
-
-### Q2 · What does the bracket establish?
-
-**Single choice · 60 seconds.** Both free-energy minima exist throughout a pressure interval. Their difference $\Delta G(P)$ is continuous there and has opposite signs at the endpoints. What follows from this information?
-
-A. There is exactly one coexistence pressure in the interval.
-B. There is at least one coexistence pressure in the interval.
-C. Newton–Raphson converges from every starting pressure in the interval.
-D. Every pressure in the interval gives two equally stable phases.
-
-### Q3 · The volume has stopped changing
-
-**Single choice · 60 seconds.** A fixed-point volume calculation gives a step of $10^{-8}$ L/mol and an EOS pressure residual of $2$ bar. The acceptance limits are $10^{-6}$ L/mol and $0.01$ bar, respectively. What should we report?
-
-A. Accepted: the volume step is small enough.
-B. Accepted: printing fewer volume digits will remove the discrepancy.
-C. Not accepted: the pressure equation is still unsatisfied.
-D. No physical solution exists at these conditions.
-
-### Q4 · Two successful minimizations
-
-**Single choice · 75 seconds.** At one subcritical temperature and trial pressure, both volume minimizations converge and pass their local-minimum checks. They give
-
-$$
-G_{\mathrm{liq}}=-1200\ \mathrm{J/mol},\qquad
-G_{\mathrm{gas}}=-1250\ \mathrm{J/mol}.
-$$
-
-Which interpretation is justified within this liquid–gas model?
-
-A. The phases coexist because both minimizations converged.
-B. The liquid is favoured because its volume is smaller.
-C. The gas is favoured, and this pressure is not the coexistence pressure.
-D. One minimization must have failed because the energies differ.
-
-### Q5 · Exact at five temperatures
-
-**Single choice · 60 seconds.** An interpolator reproduces all five calculated saturation pressures. Which additional test most directly checks its accuracy between those temperatures?
-
-A. Print the original pressures with more decimal places.
-B. Confirm again that the interpolator passes through the five points.
-C. Compare with a fresh coexistence solve at an intermediate temperature.
-D. Replace it with a higher-degree polynomial without calculating more points.
-
-### Q6 · Same model, different fitted parameters
-
-**Single choice · 75 seconds.** Two vdW fits use the same 15 CO₂ states. One minimizes squared pressure residuals $(P_{\mathrm{vdW}}-P_i)^2$ and gives $a=3.619$, $b=0.04246$. The other minimizes squared relative residuals $[(P_{\mathrm{vdW}}-P_i)/P_i]^2$ and gives $a=3.671$, $b=0.04309$. Both optimizations converge accurately. Why do the parameters differ?
-
-A. Dividing by $P_i$ changes how each state's discrepancy contributes to the objective.
-B. One optimizer must have failed.
-C. The relative residuals use fewer data points.
-D. They cannot differ if the numerical tolerance is small enough.
-
-::: {.callout-note collapse="true"}
-## Wooclap answer key and discussion prompts
-
-Allow about seven minutes for the initial responses and eight for explanations and a revote where useful. Shuffle the matching choices in Wooclap.
-
-| Question | Answer and reasoning | Misconceptions diagnosed | Follow-up |
-|---|---|---|---|
-| **1 · Apply** | Minimization, root finding, interpolation, regression, in that order. The outer root solver changes pressure, the inner minimizers change volume, and the fit changes $a,b$. | Confusing the unknown of one calculation with another, or exact matching with fitting. | Which inputs stay fixed inside each numerical call? |
-| **2 · Understand** | **B.** Continuity and a sign change establish at least one zero. | A assumes uniqueness from a sign change alone. C transfers the bracketing guarantee to an open method. D confuses two minima with equal minima. | Why must the supplied code keep both minima available throughout the bracket? |
-| **3 · Analyze** | **C.** The pressure residual is 200 times its tolerance. | A confuses a small step with solving the equation. B confuses display precision with numerical accuracy. D turns an iteration failure into a claim of nonexistence. | Our coexistence residual is tiny, but the CO₂ condensation pressure at 250 K is 82% above the measured value. What should we investigate instead of reducing the solver tolerance? |
-| **4 · Analyze** | **C.** The gas has lower free energy and $\Delta G=+50$ J/mol. | A confuses solver convergence with coexistence. B selects by volume rather than free energy. D assumes different local minima indicate an error. | What value must the outer pressure solver make zero? |
-| **5 · Evaluate** | **C.** A new temperature tests a prediction where no interpolation condition was imposed. | A substitutes extra digits for evidence. B only rechecks the construction. D assumes more flexibility improves accuracy. | Does agreement with that fresh solve also establish agreement with experiment? |
-| **6 · Analyze** | **A.** Relative residuals give the low-pressure states more weight than absolute residuals do, so the minimum of the objective moves. | B treats a changed objective as solver failure. C confuses transformed values with fewer data. D assumes all objectives share a minimum. | Which residual is more appropriate if the pressure uncertainty is roughly proportional to pressure? |
-
-The follow-up to Q3 separates numerical verification from physical validation. The six questions revisit L05–L09 through the steps of today's program.
-:::
-
 ## What carries over to the next problem?
 
-Our program started from measurements, fitted a model, and then called smaller functions with clear responsibilities to return a quantity we could test. In the upcoming Lennard–Jones work, the physical function will change. Stating the known data and the unknown, selecting the numerical task for each step, and checking the result both numerically and against experiment will remain the same.
+Even when a curve has one input and one output, constructing it may require solving for several coefficients at once. In interpolation, these coefficients must satisfy all the data-point conditions. In curve fitting, they must jointly minimize the fitting objective. This leads us to **systems of equations**, where several equations share several unknowns:
 
-**Exit question:** name one check that verifies today's numerical calculation and one comparison that tests its physical prediction.
+$$
+\begin{aligned}
+f_1(x_1,x_2,\ldots,x_n)&=0,\\
+f_2(x_1,x_2,\ldots,x_n)&=0,\\
+&\ \vdots\\
+f_n(x_1,x_2,\ldots,x_n)&=0.
+\end{aligned}
+$$
+
+Here $x_1,\ldots,x_n$ are the unknowns, and each $f_i$ describes one equation they must satisfy. When the equations are linear, a two-unknown example takes the form
+
+$$
+\begin{aligned}
+a_{11}x_1+a_{12}x_2&=b_1,\\
+a_{21}x_1+a_{22}x_2&=b_2,
+\end{aligned}
+\qquad\Longleftrightarrow\qquad
+\begin{bmatrix}a_{11}&a_{12}\\a_{21}&a_{22}\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\end{bmatrix}
+=
+\begin{bmatrix}b_1\\b_2\end{bmatrix}.
+$$
+
+We write this compactly as $A\mathbf{x}=\mathbf{b}$: $A$ contains the known coefficients, $\mathbf{x}$ contains the unknowns, and $\mathbf{b}$ contains the known right-hand sides. In the next unit, we will study matrix operations and methods for solving these systems, then use linear algebra to work with higher-dimensional data, including an introduction to machine learning.
