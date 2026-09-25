@@ -35,18 +35,7 @@ Suppose our only measurements come from a laboratory study of CO₂ gas at 300�
 | **Deliverables** | (1) fitted $a,b$ with their pressure error; (2) $P_{\mathrm{sat}}$ at 250, 270, 290 K; (3) a boundary curve from 250 to 295 K; (4) a comparison with measured CO₂ vapour pressures |
 | **Acceptance checks** | free-energy difference $|\Delta G|<10^{-4}$ J/mol and EOS residual $<10^{-3}$ bar at each $P_{\mathrm{sat}}$; interpolated boundary within 0.01 bar of a fresh solve at 275 K |
 
-The calculation needs four of our Unit 02 methods, each answering a different question. Read the diagram from left to right. Each box is one step of the program, and the steps in the shaded box repeat for every trial pressure until $\Delta G=0$.
-
-```{mermaid}
-flowchart LR
-    B["1 · Fit a, b to gas data<br/>curve_fit"] --> L
-    subgraph L["repeat at each T"]
-        direction LR
-        C["2 · Two wells<br/>minimize_scalar"] <--> D["3 · ΔG = 0<br/>root_scalar"]
-    end
-    L --> E["4 · Boundary<br/>PchipInterpolator"]
-    style L fill:#fff8e1,stroke:#b08900,color:#5c4700
-```
+The calculation needs four of our Unit 02 methods, each answering a different question: regression for $a$ and $b$ (step 1), minimization for the two phase volumes (step 2), root finding for the coexistence pressure (step 3), and interpolation for the boundary (step 4).
 
 Steps 2 and 3 are nested. Every trial pressure chosen by the root finder triggers two new minimizations, so one saturation pressure costs a few dozen minimizations. Step 1 runs once, and its $a$ and $b$ enter every later calculation.
 
