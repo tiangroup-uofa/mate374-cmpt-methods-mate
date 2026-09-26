@@ -220,19 +220,54 @@ def chain_widget(anywidget, traitlets):
           }
 
 
-          // Tint the spring-constant matrix cells with the same colour as their springs.
+          // Mark each occupied off-diagonal band of the spring-constant matrix with a
+          // dashed line in that band's colour, above and below the diagonal.
           function tintMatrix() {
-            const n = model.get("f").length, kMax = model.get("k_max");
+            const n = model.get("f").length;
             for (const host of document.querySelectorAll("marimo-matrix")) {
-              const cells = host.shadowRoot?.querySelectorAll("td[aria-label]") ?? [];
+              const root = host.shadowRoot;
+              const cells = root?.querySelectorAll("td[aria-label]") ?? [];
               if (cells.length !== (n + 1) * (n + 1)) continue;
-              for (const cell of cells) {
-                const [i, j] = cell.getAttribute("aria-label").split(",").map(Number);
-                const k = Number(cell.getAttribute("aria-valuenow"));
-                cell.style.backgroundColor = i !== j && k > 0
-                  ? springColour(Math.abs(i - j), Math.min(1, k / kMax), 0.5)
-                  : "";
+              root.querySelector("svg.band-lines")?.remove();
+              const cell = {}, value = {};
+              for (const c of cells) {
+                const key = c.getAttribute("aria-label").replace(/\s/g, "");
+                cell[key] = c;
+                value[key] = Number(c.getAttribute("aria-valuenow"));
               }
+              host.style.position = "relative";
+              host.style.display = "inline-block";
+              const box = host.getBoundingClientRect();
+              const overlay = document.createElementNS(NS, "svg");
+              overlay.setAttribute("class", "band-lines");
+              overlay.setAttribute("width", box.width);
+              overlay.setAttribute("height", box.height);
+              overlay.style.cssText = "position:absolute;left:0;top:0;z-index:0;pointer-events:none;overflow:visible";
+              // Draw the lines underneath the table so the numbers stay on top.
+              const table = root.querySelector("table");
+              if (table) table.style.cssText += ";position:relative;z-index:1";
+              const centre = (key) => {
+                const r = cell[key].getBoundingClientRect();
+                return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top];
+              };
+              for (let b = 1; b <= n; b++) {
+                let used = false;
+                for (let i = 0; i + b <= n; i++) used ||= value[`${i},${i + b}`] > 0;
+                if (!used) continue;
+                for (const [first, last] of [[`0,${b}`, `${n - b},${n}`], [`${b},0`, `${n},${n - b}`]]) {
+                  const [x1, y1] = centre(first), [x2, y2] = centre(last);
+                  const pad = 12 / Math.hypot(x2 - x1, y2 - y1 || 1);
+                  const line = document.createElementNS(NS, "line");
+                  for (const [key, v] of Object.entries({
+                    x1: x1 - pad * (x2 - x1), y1: y1 - pad * (y2 - y1),
+                    x2: x2 + pad * (x2 - x1), y2: y2 + pad * (y2 - y1),
+                    stroke: springColour(b, 1, 0.55), "stroke-width": 3, "stroke-dasharray": "7 5",
+                    "stroke-linecap": "round",
+                  })) line.setAttribute(key, v);
+                  overlay.appendChild(line);
+                }
+              }
+              root.prepend(overlay);
             }
           }
           const tintSoon = () => [0, 150, 500, 1200].forEach((ms) => setTimeout(tintMatrix, ms));
