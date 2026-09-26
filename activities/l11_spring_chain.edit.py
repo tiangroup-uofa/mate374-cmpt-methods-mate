@@ -92,17 +92,6 @@ def chain_widget(anywidget, traitlets):
           return `rgb(${c.join(",")})`;
         }
 
-        // Straight horizontal zigzag with short leads at both ends.
-        function zigzag(x0, x1, y, turns, h) {
-          const lead = Math.min(8, 0.1 * (x1 - x0)), len = x1 - x0 - 2 * lead;
-          let d = `M ${x0} ${y} L ${x0 + lead} ${y}`;
-          for (let i = 0; i < 2 * turns; i++) {
-            const x = x0 + lead + (len * (i + 0.5)) / (2 * turns);
-            d += ` L ${x.toFixed(1)} ${y + (i % 2 ? h : -h)}`;
-          }
-          return d + ` L ${x1 - lead} ${y} L ${x1} ${y}`;
-        }
-
         // Longer springs run in their own lanes above and below the centre line.
         const LANES = [-12, 12, -18, 18];
 
@@ -164,24 +153,25 @@ def chain_widget(anywidget, traitlets):
 
             for (let i = 1; i <= n; i++) add("circle", { cx: rest[i], cy: y, r, class: "ghost" });
 
-            const style = (k) => {
+            // Each spring is a straight bond; stiffer bonds are darker and thicker.
+            const bond = (x0, x1, yb, k, maxWidth) => {
               const t = Math.min(1, k / kMax);
-              return { fill: "none", stroke: springColour(t), "stroke-width": 1.5 + 3 * t,
-                       "stroke-linejoin": "round" };
+              add("line", { x1: x0, y1: yb, x2: x1, y2: yb, stroke: springColour(t),
+                            "stroke-width": 2 + (maxWidth - 2) * t });
             };
             // Each spring leaves a ball where its lane meets the ball's edge.
             const edge = (dy) => Math.sqrt(r * r - dy * dy);
 
             placed.forEach(([i, j, k, dy], idx) => {
               const x0 = pos[i] + edge(dy), x1 = pos[j] - edge(dy);
-              add("path", { ...style(k), d: zigzag(x0, x1, y + dy, 5 * (j - i), 3) });
+              bond(x0, x1, y + dy, k, 5);
               add("text", { x: (pos[i] + pos[j]) / 2, y: y + r + 34 + 15 * idx, class: "label",
                             "text-anchor": "middle" },
                   k.toFixed(1));
             });
             for (const [i, j, k] of near) {
               const x0 = pos[i] + r, x1 = pos[j] - r;
-              add("path", { ...style(k), d: zigzag(x0, x1, y, 6, 6) });
+              bond(x0, x1, y, k, 10);
               add("text", { x: (x0 + x1) / 2, y: y + r + 18, class: "label", "text-anchor": "middle" },
                   k.toFixed(1));
             }
