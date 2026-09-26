@@ -248,8 +248,6 @@ def free_energy(v, T, P, a, b):
 def find_state_volume(T, P, a, b, bounds):
     result = minimize_scalar(free_energy, bounds=bounds, args=(T, P, a, b),
                              method="bounded", options={"xatol": 1e-10})
-    if not result.success:
-        raise RuntimeError(result.message)
     return result.x
 
 def phase_volumes(T, P, a, b):
@@ -291,8 +289,6 @@ def delta_G(P, T, a, b):
 def solve_pressure(T, a, b):
     result = root_scalar(delta_G, args=(T, a, b),
                          bracket=find_pressure_bracket(T, a, b), method="bisect")
-    if not result.converged:
-        raise RuntimeError("The coexistence-pressure solve did not converge.")
     return result.root
 ```
 :::

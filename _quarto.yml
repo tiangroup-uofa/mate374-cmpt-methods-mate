@@ -112,6 +112,8 @@ website:
         contents:
           - href: assignments/A1/index.qmd
             text: "A1 · Trust a computational result"
+          - href: assignments/A2/index.qmd
+            text: "A2 · Working with functions"
       - href: project/index.qmd
         text: Project
 

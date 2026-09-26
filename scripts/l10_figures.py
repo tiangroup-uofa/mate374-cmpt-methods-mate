@@ -39,7 +39,8 @@ def check_solution(d):
     solve = d["solve_pressure"]
     R = d["R"]
     np.testing.assert_allclose([d["a_fit"], d["b_fit"]], [3.58867, 0.042212], rtol=2e-5)
-    np.testing.assert_allclose(d["trial_P"], [32.9521642, 46.2704879, 62.4754738], atol=1e-6)
+    np.testing.assert_allclose(d["reference_P"], [32.9521642, 46.2704879, 62.4754738], atol=1e-7)
+    np.testing.assert_allclose(d["trial_P"], d["reference_P"], atol=1e-6)
     assert d["checks_passed"]
     np.testing.assert_allclose(d["boundary"](275), np.interp(275, d["T_grid"], d["P_grid"]))
     assert abs(d["interpolated_P"] - d["direct_P"]) < 0.1
