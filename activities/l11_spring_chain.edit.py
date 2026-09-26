@@ -85,7 +85,6 @@ def chain_widget(anywidget, traitlets):
         k_max = traitlets.Float(20.0).tag(sync=True)
         _esm = r"""
         const NS = "http://www.w3.org/2000/svg";
-        const SUB = ["₀", "₁", "₂", "₃", "₄", "₅"];
         const SOFT = [242, 176, 67], STIFF = [106, 61, 154];
 
         function springColour(t) {
@@ -105,7 +104,7 @@ def chain_widget(anywidget, traitlets):
         }
 
         // Longer springs run in their own lanes above and below the centre line.
-        const LANES = [-15, 15, -23, 23, -9, 9];
+        const LANES = [-12, 12, -18, 18];
 
         function render({ model, el }) {
           const svg = document.createElementNS(NS, "svg");
@@ -124,7 +123,7 @@ def chain_widget(anywidget, traitlets):
             svg.replaceChildren();
             const springs = model.get("springs"), f = model.get("f"), u = model.get("u");
             const kMax = model.get("k_max");
-            const n = f.length, x0Fixed = 50, gap = 150, y = 110, r = 30;
+            const n = f.length, x0Fixed = 30, gap = 110, y = 90, r = 23;
             const solved = u.length === n;
             const disp = solved ? [0, ...u] : new Array(n + 1).fill(0);
 
@@ -156,10 +155,12 @@ def chain_widget(anywidget, traitlets):
               placed.push([...s, lane ?? LANES[0]]);
             }
 
-            const height = 200 + 16 * placed.length;
-            const right = Math.max(...pos.slice(1).map((x, i) => Math.max(x, x + 70 * f[i]) + 70));
-            const width = Math.max(680, right);
+            const height = 160 + 16 * placed.length;
+            const right = Math.max(...pos.slice(1).map((x, i) => Math.max(x, x + 60 * f[i]) + 40));
+            const width = Math.max(420, right);
             svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            svg.setAttribute("width", width);
+            svg.setAttribute("height", height);
 
             for (let i = 1; i <= n; i++) add("circle", { cx: rest[i], cy: y, r, class: "ghost" });
 
@@ -173,35 +174,35 @@ def chain_widget(anywidget, traitlets):
 
             placed.forEach(([i, j, k, dy], idx) => {
               const x0 = pos[i] + edge(dy), x1 = pos[j] - edge(dy);
-              add("path", { ...style(k), d: zigzag(x0, x1, y + dy, 6 * (j - i), 3.5) });
-              add("text", { x: (pos[i] + pos[j]) / 2, y: y + r + 38 + 16 * idx, class: "label",
+              add("path", { ...style(k), d: zigzag(x0, x1, y + dy, 5 * (j - i), 3) });
+              add("text", { x: (pos[i] + pos[j]) / 2, y: y + r + 34 + 15 * idx, class: "label",
                             "text-anchor": "middle" },
-                  `k${SUB[i]}${SUB[j]} = ${k.toFixed(1)}`);
+                  k.toFixed(1));
             });
             for (const [i, j, k] of near) {
               const x0 = pos[i] + r, x1 = pos[j] - r;
-              add("path", { ...style(k), d: zigzag(x0, x1, y, 7, 8) });
+              add("path", { ...style(k), d: zigzag(x0, x1, y, 6, 6) });
               add("text", { x: (x0 + x1) / 2, y: y + r + 18, class: "label", "text-anchor": "middle" },
-                  `k${SUB[i]}${SUB[j]} = ${k.toFixed(1)}`);
+                  k.toFixed(1));
             }
 
             add("circle", { cx: pos[0], cy: y, r, class: "fixed-atom" });
             add("text", { x: pos[0], y: y + 6, class: "atom-label", "text-anchor": "middle" }, "0");
-            add("text", { x: pos[0], y: y - r - 8, class: "label", "text-anchor": "middle" }, "u₀ = 0 (fixed)");
+            add("text", { x: pos[0], y: y - r - 8, class: "label", "text-anchor": "middle" }, "fixed");
 
             for (let i = 1; i <= n; i++) {
               add("circle", { cx: pos[i], cy: y, r, class: "atom" });
               add("text", { x: pos[i], y: y + 6, class: "atom-label", "text-anchor": "middle" }, `${i}`);
               add("text", { x: pos[i], y: y - r - 8, class: "label", "text-anchor": "middle" },
-                  solved ? `u${SUB[i]} = ${disp[i].toFixed(3)} Å` : `u${SUB[i]} = ?`);
+                  solved ? disp[i].toFixed(3) : "?");
               if (Math.abs(f[i - 1]) > 1e-9) {
-                const len = 70 * f[i - 1];
+                const len = 60 * f[i - 1];
                 add("line", {
-                  x1: pos[i], y1: y - r - 32, x2: pos[i] + len, y2: y - r - 32,
+                  x1: pos[i], y1: y - r - 28, x2: pos[i] + len, y2: y - r - 28,
                   stroke: "#2ca02c", "stroke-width": 3, "marker-end": "url(#force-head)",
                 });
-                add("text", { x: pos[i] + len / 2, y: y - r - 42, class: "force", "text-anchor": "middle" },
-                    `F${SUB[i]} = ${f[i - 1].toFixed(1)}`);
+                add("text", { x: pos[i] + len / 2, y: y - r - 36, class: "force", "text-anchor": "middle" },
+                    f[i - 1].toFixed(1));
               }
             }
 
@@ -216,20 +217,38 @@ def chain_widget(anywidget, traitlets):
           }
 
 
+          // Tint the spring-constant matrix cells with the same colour as their springs.
+          function tintMatrix() {
+            const n = model.get("f").length, kMax = model.get("k_max");
+            for (const host of document.querySelectorAll("marimo-matrix")) {
+              const cells = host.shadowRoot?.querySelectorAll("td[aria-label]") ?? [];
+              if (cells.length !== (n + 1) * (n + 1)) continue;
+              for (const cell of cells) {
+                const [i, j] = cell.getAttribute("aria-label").split(",").map(Number);
+                const k = Number(cell.getAttribute("aria-valuenow"));
+                cell.style.backgroundColor = i !== j && k > 0
+                  ? springColour(Math.min(1, k / kMax)).replace("rgb", "rgba").replace(")", ", 0.45)")
+                  : "";
+              }
+            }
+          }
+          const tintSoon = () => [0, 150, 500, 1200].forEach((ms) => setTimeout(tintMatrix, ms));
+
           draw();
-          for (const name of ["springs", "f", "u", "k_max"]) model.on(`change:${name}`, draw);
+          tintSoon();
+          for (const name of ["springs", "f", "u", "k_max"]) model.on(`change:${name}`, () => { draw(); tintSoon(); });
         }
         export default { render };
         """
         _css = r"""
-        .spring-chain { width: 100%; max-width: 760px; display: block; color: inherit; }
+        .spring-chain { max-width: 100%; height: auto; margin: 0 auto; display: block; color: inherit; }
         .spring-chain .ink { stroke: currentColor; }
         .spring-chain .ghost { fill: none; stroke: currentColor; stroke-opacity: 0.35; stroke-dasharray: 4 3; }
         .spring-chain .atom { fill: #1f77b4; stroke: currentColor; stroke-width: 1; }
         .spring-chain .fixed-atom { fill: #7f7f7f; stroke: currentColor; stroke-width: 2.5; }
-        .spring-chain .atom-label { fill: white; font: bold 16px sans-serif; }
-        .spring-chain .label { fill: currentColor; font: 12px sans-serif; }
-        .spring-chain .force { fill: #2ca02c; font: bold 12px sans-serif; }
+        .spring-chain .atom-label { fill: white; font: bold 15px sans-serif; }
+        .spring-chain .label { fill: currentColor; font: 13px sans-serif; }
+        .spring-chain .force { fill: #2ca02c; font: bold 13px sans-serif; }
         .spring-chain .warn { fill: #d62728; font: bold 13px sans-serif; }
         """
 
