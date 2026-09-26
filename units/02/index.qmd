@@ -25,4 +25,6 @@ L05 introduces bracketing. L06 develops secant, Newton–Raphson, and fixed-poin
 9. [L09 · Approximating data with a function](L09/index.qmd)
 10. [L10 · Building a phase diagram program](L10/index.qmd)
 
+[Summary and preparation](summary.qmd) — concepts, hand calculations, Python reference, and questions for midterm and final preparation.
+
 [Unit 02 references](references.qmd)

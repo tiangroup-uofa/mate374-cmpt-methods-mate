@@ -1,0 +1,190 @@
+---
+title: "L11 · Recap of linear algebra"
+subtitle: "Coupled equations, matrix basics, and an atomic spring chain"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Central question
+
+How do we solve simultaneous equations, $A\mathbf{x}=\mathbf{b}$, and what do they represent in materials systems?
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Explain** how the harmonic approximation connects an interatomic potential to Hooke's law.
+2. **Construct** the force-balance equations and stiffness matrix for a small atomic chain.
+3. **Calculate** equilibrium displacements using `np.linalg.solve`.
+4. **Check** a solution using force balance and the system's boundary conditions.
+
+## Why do simultaneous equations keep appearing?
+
+In Unit 02, we began with functions of one variable. When we wanted to determine interpolation or fitting coefficients, several unknowns appeared together: changing one coefficient changed the same predicted values as changing another. The resulting equations had to be solved simultaneously. We encountered the same structure when determining [spline coefficients](../../02/L08/index.qmd) and [least-squares parameters](../../02/L09/index.qmd).
+
+Coupling also comes from physical interactions. Kirchhoff's laws connect currents and voltages in an electrical circuit. Material balances connect flows through a network of reactors. In a solid, moving one atom changes the forces on its neighbors. Each equation describes part of the system, but its unknowns are shared with other equations.
+
+A system with $n$ unknowns generally needs $n$ independent equations for a unique solution. Counting equations is a useful start, but two equations can express the same constraint. Our atomic example will show how a physical boundary condition supplies a constraint that would otherwise be missing.
+
+## From interatomic energy to a spring
+
+The energy between two atoms depends on their separation $r$. In Assignments [A1](../../../assignments/A1/index.qmd) and [A2](../../../assignments/A2/index.qmd), we used this dependence to describe attraction, repulsion, and a preferred spacing. One familiar example is the [Lennard–Jones potential](https://en.wikipedia.org/wiki/Lennard-Jones_potential), also called the 12–6 potential:
+
+$$
+V(r)=4\epsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right].
+$$
+
+Here $\epsilon>0$ is the well depth, $\sigma$ is the separation where $V=0$, and the minimum occurs at $r_0=2^{1/6}\sigma$, where $V(r_0)=-\epsilon$. Other pair potentials have different shapes, but many have a smooth minimum at an equilibrium separation.
+
+Close to that minimum, write the change in separation as $\Delta r=r-r_0$. A quadratic approximation gives
+
+$$
+V(r_0+\Delta r)\approx V(r_0)+V'(r_0)\Delta r+\frac12V''(r_0)(\Delta r)^2.
+$$
+
+At the minimum, $V'(r_0)=0$. For a minimum with positive curvature, define the spring constant $k=V''(r_0)>0$:
+
+$$
+\boxed{V(r_0+\Delta r)\approx V(r_0)+\frac12k(\Delta r)^2.}
+$$
+
+This is the **harmonic approximation**. It connects the [quadratic functions used in fitting](../../02/L09/index.qmd) with a physical model of a bond. The curvature measures how rapidly the energy rises when the bond is stretched or compressed. A flatter minimum gives a softer bond. If energy is measured in eV and distance in Å, $k$ has units of eV/Å².
+
+The force associated with increasing separation is the negative derivative of the potential energy:
+
+$$
+\boxed{F=-\frac{dV}{dr}\approx-k\Delta r.}
+$$
+
+This is Hooke's law. Stretching the bond gives a restoring force toward smaller separation, while compression gives a force toward larger separation.
+
+::: {.callout-note collapse="true"}
+## Why is force the negative energy derivative?
+
+When a conservative force does work $dW=F\,dr$, the potential energy changes by $dV=-dW$. Thus $F=-dV/dr$. Near a stable equilibrium, the force points toward the energy minimum. The two atoms experience equal and opposite forces.
+:::
+
+The approximation describes small displacements around a stable spacing. At larger separations, the asymmetry and eventual weakening of the actual potential become important.
+
+## A row of atoms with coupled displacements
+
+Consider three moving atoms connected by springs to a fixed atom 0:
+
+```text
+fixed
+  0 ── k₁ ── 1 ── k₂ ── 2 ── k₃ ── 3  → F₃
+```
+
+All motion is along the chain. Let $u_1$, $u_2$, and $u_3$ be displacements from the reference positions, with positive displacement to the right. Atom 0 is held at $u_0=0$. The known applied forces are $F_1$, $F_2$, and $F_3$, and all three spring constants are positive.
+
+The first spring extends by $u_1$, the second by $u_2-u_1$, and the third by $u_3-u_2$. Therefore the spring force on atom 1 is $-k_1u_1+k_2(u_2-u_1)$. At equilibrium, adding its applied force gives zero:
+
+$$
+-k_1u_1+k_2(u_2-u_1)+F_1=0.
+$$
+
+Applying the same force balance to atoms 2 and 3 gives
+
+$$
+\begin{aligned}
+(k_1+k_2)u_1-k_2u_2&=F_1,\\
+-k_2u_1+(k_2+k_3)u_2-k_3u_3&=F_2,\\
+-k_3u_2+k_3u_3&=F_3.
+\end{aligned}
+$$
+
+These equations share unknown displacements because neighboring atoms share a spring. To determine how far any atom moves, we must satisfy all three balances.
+
+### Where are the masses?
+
+For an atom of mass $m_i$, Newton's law is $m_i\ddot u_i=F_i+F_i^{\mathrm{spring}}$, where $\ddot u_i$ is its acceleration. At static equilibrium, the acceleration is zero, so mass does not enter the displacement calculation. The same spring–mass system can describe vibrations when we retain acceleration and let the displacements vary with time. Here we calculate its equilibrium response to applied forces.
+
+## The matrix represents the force balances
+
+Collecting the coefficients gives
+
+$$
+\underbrace{\begin{bmatrix}
+k_1+k_2&-k_2&0\\
+-k_2&k_2+k_3&-k_3\\
+0&-k_3&k_3
+\end{bmatrix}}_{K}
+\underbrace{\begin{bmatrix}u_1\\u_2\\u_3\end{bmatrix}}_{\mathbf{u}}
+=
+\underbrace{\begin{bmatrix}F_1\\F_2\\F_3\end{bmatrix}}_{\mathbf{F}}.
+$$
+
+This has the form $A\mathbf{x}=\mathbf{b}$, with stiffness matrix $K$, unknown displacement vector $\mathbf{u}$, and known applied-force vector $\mathbf{F}$. Each row is one atom's force-balance equation. Each column contains the coefficients multiplying one displacement. Multiplying the first row by the displacement vector means $(k_1+k_2)u_1+(-k_2)u_2+0u_3$.
+
+The diagonal entry adds the stiffnesses attached to an atom. A negative off-diagonal entry describes its coupling to another moving atom, and a zero means there is no direct spring between that pair. This matrix is symmetric: the spring connecting atoms 1 and 2 contributes the same coefficient in positions $(1,2)$ and $(2,1)$.
+
+With $N$ moving atoms, $K$ is an $N\times N$ matrix and both vectors have $N$ entries. Nearest-neighbor coupling produces a **tridiagonal** matrix, whose nonzero entries lie on the main diagonal and the two adjacent diagonals. A spring joining more distant atoms adds entries farther from the main diagonal.
+
+### Why fix atom 0?
+
+If the entire chain were free, adding the same displacement to every atom would leave every spring extension unchanged. Force balances could not determine that rigid translation. Fixing atom 0 removes this freedom, provided every moving atom remains connected to it through a path of springs. If a group becomes disconnected, a unique equilibrium displacement is no longer determined. An unbalanced applied force on that free group can also make static equilibrium impossible.
+
+## Interactive spring-chain calculation
+
+Before changing the controls, predict how the displacements will respond if you double every spring constant while holding the applied forces fixed. Then change one spring at a time and inspect the corresponding matrix entries. The spring-constant input describes connections between atoms, while the displayed stiffness matrix $K$ collects their force-balance coefficients.
+
+::: {.quarto-wasm-local notebook="l11_spring_chain.edit.py" view="app" title="Atomic spring chain: from bond stiffness to equilibrium displacements" height="1100" loading="lazy" fullscreen="true" marimo-app="true"}
+For three moving atoms with $k_1=k_2=k_3=5$ eV/Å² and applied forces $(0,0,0.5)$ eV/Å,
+
+$$
+\begin{bmatrix}10&-5&0\\-5&10&-5\\0&-5&5\end{bmatrix}
+\begin{bmatrix}0.1\\0.2\\0.3\end{bmatrix}
+=
+\begin{bmatrix}0\\0\\0.5\end{bmatrix}.
+$$
+
+The displacements are $(0.1,0.2,0.3)$ Å. Each spring stretches by $0.1$ Å and carries a force of $0.5$ eV/Å. Doubling every spring constant halves every displacement at the same applied load. The chain diagram above shows the fixed boundary and the three bonds.
+:::
+
+## Solving the system in Python
+
+NumPy stores the coefficients in a two-dimensional array. `np.linalg.solve` takes a square, nonsingular coefficient matrix and the right-hand side, and returns the unknown vector.
+
+```{python}
+#| eval: false
+import numpy as np
+
+K = np.array([[10.0, -5.0,  0.0],
+              [-5.0, 10.0, -5.0],
+              [ 0.0, -5.0,  5.0]])  # eV/Å²
+F = np.array([0.0, 0.0, 0.5])        # eV/Å
+u = np.linalg.solve(K, F)            # Å: [0.1, 0.2, 0.3]
+residual = K @ u - F                 # eV/Å
+```
+
+In NumPy, `K @ u` performs matrix–vector multiplication. `K * u` instead multiplies entries using array broadcasting and does not calculate the force-balance vector. `K.T` is the transpose, formed by exchanging rows and columns. For this symmetric stiffness matrix, `K.T` and `K` have the same entries.
+
+Although the formal solution can be written as $\mathbf{u}=K^{-1}\mathbf{F}$, use `solve` to compute it without explicitly constructing the inverse. The residual $K\mathbf{u}-\mathbf{F}$ measures how closely the returned displacements satisfy the equations. It should be close to zero to floating-point precision for this small example.
+
+## What the displacements tell us
+
+For the default end load, the same force passes through every spring. Their extensions are $F_3/k_1$, $F_3/k_2$, and $F_3/k_3$, so the displacement of atom 3 is their sum. Softening one spring increases its extension and moves every atom beyond it farther to the right. This gives a direct physical check on the matrix solution.
+
+The units provide another check: stiffness in eV/Å² multiplied by displacement in Å gives force in eV/Å. A small residual confirms that the calculated displacements satisfy the chosen harmonic model. Comparison with a full pair potential or measurements would address whether that model describes the material at the applied load.
+
+## What to keep
+
+- The curvature of an interatomic energy minimum defines a harmonic spring constant.
+- Shared bonds couple atomic displacements and produce simultaneous force-balance equations.
+- Matrix rows encode equations, and matrix columns correspond to unknowns.
+- Boundary conditions determine whether the equilibrium displacements are unique.
+- `np.linalg.solve` computes the displacements, and `K @ u - F` checks force balance.
+
+## Check your understanding
+
+1. Why does stretching a harmonic bond produce a restoring force?
+2. Which entries of $K$ change if the spring between atoms 1 and 2 becomes stiffer?
+3. Why does a nearest-neighbor chain give a tridiagonal matrix?
+4. What happens to the default displacements if the applied end force changes sign?
+5. Why do masses affect vibration but not the static solution calculated here?
+6. If you remove the spring joining atom 0 to atom 1, what physical freedom prevents a unique displacement solution?
+
+## Next
+
+The spring chain makes the coefficients and unknowns visible. We can now examine how a linear solver eliminates unknowns and what can make a matrix problem sensitive to numerical error.

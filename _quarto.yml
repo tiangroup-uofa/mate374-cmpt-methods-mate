@@ -19,7 +19,6 @@ project:
     - "syllabus/**/*.qmd"
     - "introduction/**/*.qmd"
     - "units/**/*.qmd"
-    - "!units/03/**"
     - "assignments/**/*.qmd"
     - "!assignments/A2/q3-lj-estimation-backup.qmd"
     - "project/**/*.qmd"
@@ -77,6 +76,8 @@ website:
                 text: "Lecture 03"
               - href: units/01/L04/index.qmd
                 text: "Lecture 04"
+              - href: units/01/summary.qmd
+                text: "Summary and preparation"
               - href: units/01/references.qmd
                 text: "References"
           - section: "02 · Working with functions"
@@ -94,8 +95,15 @@ website:
                 text: "Lecture 09"
               - href: units/02/L10/index.qmd
                 text: "Lecture 10"
+              - href: units/02/summary.qmd
+                text: "Summary and preparation"
               - href: units/02/references.qmd
                 text: "References"
+          - section: "03 · Systems of equations"
+            href: units/03/index.qmd
+            contents:
+              - href: units/03/L11/index.qmd
+                text: "Lecture 11"
       - href: seminars/index.qmd
         text: "Seminar materials"
         contents:

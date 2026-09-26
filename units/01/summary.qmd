@@ -1,0 +1,108 @@
+---
+title: "Unit 01 · Summary and preparation"
+subtitle: "Numerical thinking, computer numbers, and performance"
+---
+
+Use this page to prepare for the midterm and final. Practise the hand calculations, explain the concepts in your own words, and use the linked lectures to revisit examples.
+
+## Concepts to explain
+
+### Modeling and numerical methods
+
+From [L01](L01/index.qmd), explain how a materials question becomes a mathematical model, a numerical calculation, and an interpreted result. Describe the assumptions made at each stage and the advantages of modeling when experiments are expensive, slow, or difficult to control. A materials simulation uses a physical model together with numerical methods, such as solving equations or sampling configurations.
+
+### Sources of error
+
+Distinguish the following errors using examples from [L01](L01/index.qmd) and [L02](L02/index.qmd):
+
+| Source | Example | How to investigate or reduce it |
+|---|---|---|
+| Modeling error | A pair potential omits relevant atomic interactions. | Compare with physical evidence and improve the model where needed. |
+| Truncation error | An infinite series is stopped after a finite number of terms. | Retain more terms and examine convergence. |
+| Round-off error | A real number is stored with a finite number of binary digits. | Compare precisions and consider how arithmetic propagates error. |
+| Statistical or sampling error | Repeated Buffon's needle experiments give different estimates of $\pi$. | Increase the sample size and examine variation across repeated runs. |
+
+Changing the physical model addresses modeling error. Increasing the number of terms in a series addresses truncation error. Explain why these changes answer different questions.
+
+### Numbers inside a computer
+
+From [L03](L03/index.qmd), explain binary place values and why finite binary representations introduce round-off error. Decimal fractions such as $0.1$ and $3.14$ have repeating binary expansions, so a floating-point representation must round them.
+
+For a normalized IEEE 754 number, interpret
+
+$$
+x=(-1)^s(1.f)_2\,2^{e-b},
+$$
+
+where $s$ is the sign bit, $f$ contains the fraction bits, $e$ is the stored exponent, and $b$ is the exponent bias. The bias lets an unsigned exponent field encode both positive and negative exponents.
+
+| Format | Sign bits | Exponent bits | Fraction bits | Bias |
+|---|---:|---:|---:|---:|
+| `float32` (single precision) | 1 | 8 | 23 | 127 |
+| `float64` (double precision) | 1 | 11 | 52 | 1023 |
+
+Use the lecture widget to identify these fields for a real number. Explain how double precision changes both precision and representable range.
+
+### Performance
+
+From [L04](L04/index.qmd), describe how to measure elapsed time and estimate how runtime changes with problem size. Distinguish a measured timing from an estimate based on operation count or scaling. Repeat short measurements because timings depend on other work running on the computer.
+
+Recognize four acceleration approaches: NumPy vectorization, just-in-time compilation with Numba, parallel work across CPUs, and GPU acceleration. Explain the basic idea of each and what kind of work it can help. Coding these acceleration methods is outside this summary's preparation tasks.
+
+## Hand calculations and practice
+
+1. Convert decimal integers to binary and binary integers to decimal.
+2. Convert a binary fraction by expanding its place values. For example,
+   $$
+   (1011.101)_2=8+2+1+\frac12+\frac18=11.625.
+   $$
+3. Explain why a reduced fraction has a terminating binary expansion only when its denominator is a power of two. Apply this to $0.1$ and $3.14$.
+4. Given a normalized floating-point number's sign, fraction, and stored exponent, calculate its value using the bias.
+5. If runtime grows as $N^2$, estimate the effect of doubling $N$. Compare that estimate with linear scaling.
+
+## Python reference
+
+### Integer conversion and precision
+
+```{python}
+#| eval: false
+import numpy as np
+
+bin(13)                 # '0b1101'
+int("1101", 2)           # 13
+x_single = np.float32(0.1)
+x_double = np.float64(0.1)
+```
+
+NumPy supports several numeric types. An array made from ordinary Python floating-point values normally uses `float64`, while an array made from integers normally has an integer type. Specify `dtype` when precision matters.
+
+### Elapsed time
+
+```{python}
+#| eval: false
+import time
+
+start = time.perf_counter()
+result = your_function()
+end = time.perf_counter()
+elapsed = end - start      # seconds
+```
+
+## Preparation questions
+
+1. What are the advantages of modeling a materials problem? Describe the main stages from problem formulation through numerical solution to interpretation.
+2. What is a numerical model, and how does it relate to the mathematical model?
+3. What is truncation error? Give a way to reduce it and a way to check that it decreases.
+4. Why does increasing the number of Buffon trials reduce sampling error without eliminating modeling or round-off error?
+5. What is the difference between single and double precision? What does exponent bias mean?
+6. Why should software output be checked even when the program runs successfully?
+7. How could you check software output without access to its source code? Consider known solutions, limiting cases, conservation, convergence, and comparison with measurements.
+8. Which acceleration approach would you consider for a calculation that applies the same arithmetic to a large array, and why?
+
+## Lecture links
+
+- [L01 · A numerical mindset for materials engineers](L01/index.qmd)
+- [L02 · Choosing and judging a numerical method](L02/index.qmd)
+- [L03 · Numbers inside a computer](L03/index.qmd)
+- [L04 · Making a computation faster](L04/index.qmd)
+- [Unit 01 landing page](index.qmd)

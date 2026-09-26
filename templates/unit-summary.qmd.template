@@ -1,0 +1,59 @@
+---
+title: "Unit NN · Summary and preparation"
+subtitle: "The unit's main concepts and methods"
+---
+
+<!--
+AGENT-ONLY SCAFFOLD. Adapt to units/NN/summary.qmd. Replace placeholders
+and remove authoring notes. Preserve the instructor's assessment scope.
+Link this separate page from the unit landing page, units/index.qmd, and
+website.sidebar in _quarto.yml. Confirm project.render includes the page.
+Keep this template outside HTML/PDF render targets.
+-->
+
+Use this page to prepare for the midterm and final. Practise the hand calculations, explain the concepts in your own words, and use the linked lectures to revisit examples.
+
+Connect the unit's materials question to the numerical methods in one short paragraph.
+
+## Concepts to explain
+
+### First concept or method
+
+Link to the relevant lecture. Identify known quantities, unknowns, assumptions,
+and the central equation. Explain what students should be able to describe.
+
+### Related concept or method
+
+Explain the relationship to the previous method. Use a comparison table when
+it clarifies method choice, error sources, conditions, or computational cost.
+Preserve distinctions between required practice and optional extensions.
+
+## Hand calculations and practice
+
+1. Specify a concrete calculation students should practise.
+2. Include interpretation or diagnosis of a numerical result.
+3. Identify any supplied-code exercise and the quantities students must change.
+
+## Python reference
+
+Introduce the call patterns students should recognize. State which inputs they
+must supply, what the result contains, and what conditions the method needs.
+Use eval: false for illustrative snippets with placeholder inputs.
+
+```{python}
+#| eval: false
+# Replace with a short, accurate call pattern from the unit.
+```
+
+## Preparation questions
+
+1. Ask students to explain a central concept in their own words.
+2. Compare methods using their assumptions and expected behavior.
+3. Ask for a hand calculation or interpretation of a result.
+4. Connect the methods to the unit's materials application.
+
+## Lecture links
+
+- [Lxx · Lecture title](Lxx/index.qmd)
+- [Lyy · Lecture title](Lyy/index.qmd)
+- [Unit NN landing page](index.qmd)

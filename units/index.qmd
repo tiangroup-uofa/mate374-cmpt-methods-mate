@@ -11,6 +11,8 @@ toc: false
 3. [L03 · Numbers inside a computer](01/L03/index.qmd) — binary representation and finite precision.
 4. [L04 · Making a computation faster](01/L04/index.qmd) — performance without sacrificing correctness.
 
+[Unit 01 · Summary and preparation](01/summary.qmd)
+
 ## [02 · Working with Functions](02/index.qmd)
 
 5. [L05 · Finding a desired state by root finding](02/L05/index.qmd)
@@ -19,3 +21,9 @@ toc: false
 8. [L08 · Fitting data with a function — the exact approach](02/L08/index.qmd) — interpolation and a sparse phase boundary.
 9. [L09 · Approximating data with a function](02/L09/index.qmd) — least squares and Arrhenius fitting.
 10. [L10 · Building a phase diagram program](02/L10/index.qmd) — fitting vdW parameters to CO₂ data, coexistence pressure, phase boundaries, and model validation.
+
+[Unit 02 · Summary and preparation](02/summary.qmd)
+
+## [03 · Systems of equations](03/index.qmd)
+
+11. [L11 · Recap of linear algebra](03/L11/index.qmd) — harmonic bonds, coupled force balances, stiffness matrices, and equilibrium displacements.

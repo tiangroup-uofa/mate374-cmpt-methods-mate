@@ -1,0 +1,161 @@
+---
+title: "Unit 02 · Summary and preparation"
+subtitle: "Roots, minima, interpolation, and fitting"
+---
+
+Use this page to prepare for the midterm and final. Practise identifying the known quantities, the unknowns, and the numerical problem before choosing a Python function.
+
+The unit follows the construction of a CO₂ phase diagram from a van der Waals model. Most of our methods act on a function with one scalar input and one scalar output, $f(x)$. Root finding and minimization start from a specified function. Interpolation and fitting start from data and determine a function that describes them.
+
+## Concepts to explain
+
+### Root finding
+
+From [L05](L05/index.qmd) and [L06](L06/index.qmd), explain how a target condition $f(x)=P$ becomes the residual equation $F(x)=f(x)-P=0$.
+
+- **Bracketing methods:** maintain an interval containing a root. For a continuous residual, opposite signs at the endpoints guarantee at least one root between them. Explain how bisection halves that interval. As an extension, explain how false position uses a straight-line estimate of the crossing.
+- **Open methods:** start from one or more guesses. Newton–Raphson uses the function and its derivative, while the secant method estimates a slope using two function values. These methods can converge quickly, but their success depends on the function and starting guesses.
+- **Fixed-point iteration:** rewrite the equation as $x=g(x)$ and calculate $x_{n+1}=g(x_n)$. A sufficient local condition is $|g'(x)|<1$ in a neighborhood of the fixed point. A contraction with Lipschitz constant $L<1$ on a closed interval that maps into itself guarantees convergence there.
+
+Explain why a continuous function and a valid bracket make bisection reliable, and why different rearrangements of the same equation can make fixed-point iteration converge or diverge.
+
+### Minimization
+
+From [L07](L07/index.qmd), identify stationary points using $f'(x)=0$. At a stationary point, $f''(x)>0$ indicates a local minimum and $f''(x)<0$ a local maximum. A zero second derivative requires further investigation. Endpoints must also be considered when finding a minimum on a bounded interval.
+
+Describe how golden-section search narrows an interval using function values, assuming a unimodal function on that interval. Compare this with bisection's use of residual signs. Newton's method can locate stationary points by solving $f'(x)=0$, but the result still needs classification. In one-dimensional gradient descent,
+
+$$
+x_{n+1}=x_n-\alpha f'(x_n),
+$$
+
+the step size $\alpha$ controls how far each update moves downhill and whether the iteration converges.
+
+### Interpolation
+
+From [L08](L08/index.qmd), distinguish:
+
+- **Interpolation:** estimate values within the range of known data, for example a phase-boundary temperature between two measured compositions. An interpolating function passes through the supplied points.
+- **Extrapolation:** estimate values outside that range, for example beyond the largest measured composition. Behavior outside the data range depends strongly on the chosen function.
+
+For $n$ distinct input values, there is a unique interpolating polynomial of degree **at most** $n-1$. Some data can be represented by a lower degree. Lagrange and Newton forms represent this same polynomial in different bases. Explain their construction conceptually, without manually coding or deriving either method.
+
+A single high-degree polynomial can oscillate strongly, especially near the ends of an interval with equally spaced points (Runge's phenomenon). Piecewise interpolation uses a low-degree function on each interval instead.
+
+For $n$ data points there are $n-1$ intervals:
+
+| Piecewise function | Coefficients | Conditions |
+|---|---:|---|
+| Linear | $2(n-1)$ | Both endpoint values on every interval |
+| Quadratic spline | $3(n-1)$ | Endpoint values, first-derivative continuity at interior knots, one additional boundary condition |
+| Cubic spline | $4(n-1)$ | Endpoint values, first- and second-derivative continuity at interior knots, two boundary conditions |
+
+Be able to count unknowns and equations. Detailed spline-matrix derivations are available in the lecture for review alongside linear algebra.
+
+### Least-squares fitting
+
+From [L09](L09/index.qmd), write residuals for known data $(x_i,y_i)$ and a model $\hat f(x;\boldsymbol\theta)$ with unknown parameters $\boldsymbol\theta$:
+
+$$
+r_i=\hat f(x_i;\boldsymbol\theta)-y_i,
+\qquad S=r_1^2+r_2^2+\cdots+r_n^2.
+$$
+
+Least squares chooses parameters that minimize $S$. Explain why a fitted curve generally does not pass through every point. For a straight line $y=a+bx$, locate and interpret the lecture's formulas involving $S_x$, $S_y$, $S_{xx}$, and $S_{xy}$.
+
+Practise using the lecture's conversion table to linearize relationships such as Arrhenius behavior. Explain how transforming the response changes the residuals being minimized. Assess a fit using residual size, residual patterns, and physical plausibility, as well as any reported goodness-of-fit statistic.
+
+## Hand calculations and practice
+
+1. Construct a residual for a specified target pressure or property value.
+2. Carry out several bisection steps and identify the interval retained each time.
+3. Rearrange a root equation into fixed-point form, calculate successive iterates, and examine the convergence condition. Write the same iteration using a supplied Python function and loop.
+4. Classify stationary points and compare them with endpoints when seeking a minimum.
+5. Count coefficients and continuity conditions for piecewise linear, quadratic, and cubic interpolation of $n$ points.
+6. Write the least-squares objective for a supplied model and data set. Identify which quantities are measured and which are fitted.
+7. Linearize an Arrhenius equation and relate the fitted slope to the activation energy.
+
+## Python reference
+
+The examples below show call patterns. Supply the functions, data, bounds, and starting guesses appropriate to the problem.
+
+### Roots and minima
+
+```{python}
+#| eval: false
+import numpy as np
+from scipy.optimize import root_scalar, minimize_scalar, minimize, curve_fit
+
+bracketed = root_scalar(F, bracket=(a, b), method="bisect")
+newton = root_scalar(F, x0=x0, fprime=dF, method="newton")
+secant = root_scalar(F, x0=x0, x1=x1, method="secant")
+root = bracketed.root
+converged = bracketed.converged
+
+x_grid = np.linspace(a, b, 1001)
+x_grid_min = x_grid[np.argmin(f(x_grid))]
+minimum = minimize_scalar(f, bounds=(a, b), method="bounded")
+x_min = minimum.x
+
+# A stationary point: classify it before calling it a minimum.
+stationary = root_scalar(df, x0=x0, fprime=d2f, method="newton")
+
+# A general optimizer expects an array of unknowns.
+local_minimum = minimize(lambda x: f(x[0]), x0=[x0], method="BFGS")
+```
+
+A grid minimum is a useful first estimate whose resolution depends on the spacing. `minimize_scalar` provides scalar methods, including bounded and unbounded searches. `minimize` handles an array of unknowns and is useful for general optimization problems. Check the solver's convergence or success information and evaluate the result in the original problem.
+
+### Interpolation and fitting
+
+```{python}
+#| eval: false
+from numpy.polynomial import Polynomial
+from scipy.interpolate import lagrange, CubicSpline, PchipInterpolator
+
+# One global polynomial through n distinct inputs (subject to round-off).
+p = Polynomial.fit(x_data, y_data, deg=len(x_data) - 1)
+p_lagrange = lagrange(x_data, y_data)
+
+# Piecewise interpolation; x_data must be in increasing order.
+y_linear = np.interp(x_query, x_data, y_data)
+cubic = CubicSpline(x_data, y_data)
+shape_preserving = PchipInterpolator(x_data, y_data)
+y_cubic = cubic(x_query)
+
+# Polynomial least squares and general nonlinear least squares.
+line = Polynomial.fit(x_data, y_data, deg=1)
+parameters, covariance = curve_fit(model, x_data, y_data, p0=initial_parameters)
+
+# Alternatively, minimize an explicitly defined sum of squared residuals.
+def objective(parameters):
+    residuals = model(x_data, *parameters) - y_data
+    return np.sum(residuals**2)
+
+fit = minimize(objective, x0=initial_parameters)
+```
+
+`PchipInterpolator` preserves monotonicity in monotone data and has a continuous first derivative. `CubicSpline` has continuous first and second derivatives, but may overshoot between points. Choose according to the shape and smoothness needed.
+
+## Preparation questions
+
+1. What distinguishes root finding from minimization? When can one be expressed using the other?
+2. What conditions justify a root bracket? What can go wrong if the residual is discontinuous?
+3. What information do Newton–Raphson and secant methods use? Why can an open method fail?
+4. What is the difference between interpolation and extrapolation?
+5. What is the main idea of least-squares regression? How does a lower-degree polynomial fit differ from exact polynomial interpolation?
+6. What is useful about the Lagrange representation of an interpolating polynomial?
+7. Why use piecewise approximation? What smoothness conditions define quadratic and cubic splines?
+8. For $n$ points, how many coefficients and equations are needed for quadratic and cubic splines?
+9. Why might a straight-looking Arrhenius plot still give an inadequate model?
+10. In the [L10 phase-diagram program](L10/index.qmd), where do fitting, root finding, and interpolation enter? What evidence is needed to compare the predicted boundary with CO₂ measurements?
+
+## Lecture links
+
+- [L05 · Finding a desired state by root finding](L05/index.qmd)
+- [L06 · Root finding in an open domain](L06/index.qmd)
+- [L07 · Finding extrema in one dimension](L07/index.qmd)
+- [L08 · Fitting data with a function — the exact approach](L08/index.qmd)
+- [L09 · Approximating data with a function](L09/index.qmd)
+- [L10 · Building a phase diagram program](L10/index.qmd)
+- [Unit 02 landing page](index.qmd)

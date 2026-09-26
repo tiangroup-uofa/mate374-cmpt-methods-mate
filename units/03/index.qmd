@@ -1,0 +1,16 @@
+---
+title: "Unit 03 · Systems of equations"
+toc: false
+---
+
+How do interactions between parts of a material become a system of equations? In Unit 02, interpolation and fitting introduced several unknown coefficients at once. We now turn to physical systems in which the unknowns are coupled by forces or balance laws.
+
+We will ask the following questions:
+
+1. **How does an atomic bond become a matrix coefficient?** A harmonic spring chain connects interatomic energy, force balance, and equilibrium displacements.
+2. **What determines whether a system has a unique solution?** Independent equations and boundary conditions constrain the unknowns.
+3. **How can we check a computed solution?** Substitution into the original equations measures the residual, while units and limiting cases connect the result to the material.
+
+We begin with an atomic chain so that each matrix entry has a physical meaning, then use Python to calculate its equilibrium displacements.
+
+- [L11 · Recap of linear algebra](L11/index.qmd)
