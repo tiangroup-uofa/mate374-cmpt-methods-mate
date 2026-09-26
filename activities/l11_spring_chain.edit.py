@@ -85,11 +85,14 @@ def chain_widget(anywidget, traitlets):
         k_max = traitlets.Float(20.0).tag(sync=True)
         _esm = r"""
         const NS = "http://www.w3.org/2000/svg";
-        const SOFT = [242, 176, 67], STIFF = [106, 61, 154];
+        // One hue per neighbour order: 1st orange, 2nd purple, 3rd red, 4th brown.
+        const BAND = [null, [224, 130, 20], [118, 92, 176], [200, 60, 60], [140, 100, 40]];
 
-        function springColour(t) {
-          const c = SOFT.map((s, i) => Math.round(s + t * (STIFF[i] - s)));
-          return `rgb(${c.join(",")})`;
+        // Soft springs are a pale shade of their hue; stiff springs are the full hue.
+        function springColour(band, t, alpha = 1) {
+          const w = 0.4 + 0.6 * t;
+          const c = BAND[band].map((v) => Math.round(255 - w * (255 - v)));
+          return `rgba(${c.join(",")}, ${alpha})`;
         }
 
         // Straight horizontal zigzag with short leads at both ends.
@@ -164,9 +167,9 @@ def chain_widget(anywidget, traitlets):
 
             for (let i = 1; i <= n; i++) add("circle", { cx: rest[i], cy: y, r, class: "ghost" });
 
-            const style = (k) => {
+            const style = (k, band) => {
               const t = Math.min(1, k / kMax);
-              return { fill: "none", stroke: springColour(t), "stroke-width": 1.5 + 3 * t,
+              return { fill: "none", stroke: springColour(band, t), "stroke-width": 1.5 + 3 * t,
                        "stroke-linejoin": "round" };
             };
             // Each spring leaves a ball where its lane meets the ball's edge.
@@ -174,14 +177,14 @@ def chain_widget(anywidget, traitlets):
 
             placed.forEach(([i, j, k, dy], idx) => {
               const x0 = pos[i] + edge(dy), x1 = pos[j] - edge(dy);
-              add("path", { ...style(k), d: zigzag(x0, x1, y + dy, 5 * (j - i), 3) });
+              add("path", { ...style(k, j - i), d: zigzag(x0, x1, y + dy, 5 * (j - i), 3) });
               add("text", { x: (pos[i] + pos[j]) / 2, y: y + r + 34 + 15 * idx, class: "label",
                             "text-anchor": "middle" },
                   k.toFixed(1));
             });
             for (const [i, j, k] of near) {
               const x0 = pos[i] + r, x1 = pos[j] - r;
-              add("path", { ...style(k), d: zigzag(x0, x1, y, 6, 6) });
+              add("path", { ...style(k, 1), d: zigzag(x0, x1, y, 6, 6) });
               add("text", { x: (x0 + x1) / 2, y: y + r + 18, class: "label", "text-anchor": "middle" },
                   k.toFixed(1));
             }
@@ -227,7 +230,7 @@ def chain_widget(anywidget, traitlets):
                 const [i, j] = cell.getAttribute("aria-label").split(",").map(Number);
                 const k = Number(cell.getAttribute("aria-valuenow"));
                 cell.style.backgroundColor = i !== j && k > 0
-                  ? springColour(Math.min(1, k / kMax)).replace("rgb", "rgba").replace(")", ", 0.45)")
+                  ? springColour(Math.abs(i - j), Math.min(1, k / kMax), 0.5)
                   : "";
               }
             }
