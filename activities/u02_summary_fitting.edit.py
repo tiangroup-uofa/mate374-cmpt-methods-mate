@@ -26,6 +26,7 @@ def _(np):
 
 @app.cell
 def _(Polynomial, np, x_data, y_data):
+    # Use degree 1 polynomial (linear fitting)
     line = Polynomial.fit(x_data, y_data, deg=1)
     print("Line: intercept, slope =", line.convert().coef)
     print("Residuals:", line(x_data) - y_data)
@@ -36,20 +37,25 @@ def _(Polynomial, np, x_data, y_data):
 @app.cell
 def _(curve_fit, minimize, np, x_data, y_data):
     def model(x, amplitude, rate):
+        """General non-linear model, 2 parameters"""
         return amplitude * np.exp(rate * x)
-
-    initial_parameters = [1.0, 0.5]
-    parameters, covariance = curve_fit(model, x_data, y_data, p0=initial_parameters)
 
     def objective(parameters):
         residuals = model(x_data, *parameters) - y_data
         return np.sum(residuals**2)
 
-    fit = minimize(objective, x0=initial_parameters)
+    initial_parameters = [1.0, 0.5]
+
+    # Use curve_fit, just supply the function to fit itself!
+    parameters, covariance = curve_fit(model, x_data, y_data, p0=initial_parameters)
     print("curve_fit [amplitude, rate]:", parameters)
-    print("Sum of squares:", objective(parameters))
+
+
+    # Use general minimize function: use objective (residual)
+    # instead of direct fitting
+    fit = minimize(objective, x0=initial_parameters)
+
     print("minimize [amplitude, rate]:", fit.x, "success:", fit.success)
-    print("Sum of squares:", fit.fun)
     return
 
 

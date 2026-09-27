@@ -18,19 +18,22 @@ def _():
 
 @app.cell
 def _(np, time):
-    # Change N and rerun. The timed work includes array creation.
-    N = 100_000
-
     def your_function(n):
+        """A simple function to calculate the summed squares"""
         values = np.arange(n, dtype=np.float64)
         return np.sum(values**2)
+    return your_function
 
+@app.cell
+def _(time, your_function):
+    N = 100_000
+
+    # Example code block to measure time
     start = time.perf_counter()
     result = your_function(N)
     end = time.perf_counter()
     elapsed = end - start
 
-    print(f"Sum of squares: {result:.6g}")
     print(f"Elapsed time: {elapsed:.6g} seconds")
     return
 

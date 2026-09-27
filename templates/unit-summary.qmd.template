@@ -1,51 +1,97 @@
 ---
-title: "Unit NN · Summary and preparation"
+title: "Unit NN · Summary and exam preparation"
 subtitle: "Unit topic"
 ---
 
 <!--
 AGENT-ONLY SCAFFOLD. Adapt to units/NN/summary.qmd and remove these notes.
-Use one section per lecture, in teaching order, with a concise topic title.
-Keep the review points short enough for the instructor to discuss in class.
-Put Python knowledge INSIDE its lecture section, not in a separate unit-wide
-reference. Do not expand the summary into another set of lecture notes.
-Preserve the instructor's scope and hand-calculation expectations.
-Link from the unit landing page, units/index.qmd, and website.sidebar.
-Keep templates outside render targets.
+
+Before editing:
+- Read the instructor's current summary, relevant lectures, and unit landing page.
+  The instructor's wording, ordering, inclusions, and deletions define the scope.
+- Use the terminology actually taught and retained by the instructor. Do not add
+  abstract vocabulary, formal convergence theorems, or new physical examples to
+  make a summary sound more complete. Do not restore material the instructor cut.
+- Preserve EVERY instructor-supplied example question, its separate identity,
+  hints, and original order. Do not replace the list with shorter, merged, or
+  newly generated questions. Check drafts, backups, and history if questions are
+  missing, without modifying recovery files. If the originals cannot be found,
+  ASK the instructor. Never silently reduce the list or invent replacements.
+
+Structure and preparation expectations:
+- Use one section per lecture, in teaching order, with a concise topic title.
+  Keep review points brief enough for classroom discussion, with equations visible.
+- Keep the instructor's point order WITHIN each lecture. Add inline preparation
+  labels in place, not separate sections grouped by category.
+- Keep "How to prepare" at the TOP of EVERY summary, before the lecture sections.
+  Use the standard Quarto note callout below, with no custom box styling.
+  Copy the four-icon key unchanged. styles.css displays square SVG symbols
+  from assets/prep-{practice,recall,explain,recognize}.svg. These are respectively
+  pen on book, brain, people discussing, and magnifying glass. Replace those files
+  to change the artwork. Do not display text badges beside the review points.
+  Span text remains available to assistive technology and static/PDF output.
+- P: actual pen-and-paper practice, with provided functions/widgets as support.
+  Do not turn method recognition into a hand derivation or coding requirement.
+- R: clear recall of concepts, definitions, conditions, and distinctions.
+- E: an explanation in the student's own words, without detailed algorithm recall.
+- N: recognition of method names and where to find them. Link the lecture section
+  or point to the notebook containing them. Do not demand implementation.
+- For a mixed point, put the appropriate label before each relevant clause,
+  preserving their order. Keep explicit limits such as no derivation, formulas
+  provided, or code not memorized. Scope notes need no preparation label.
+
+Python knowledge:
+- Keep it INSIDE the corresponding lecture section, with only the simple calls,
+  inputs, or outputs the instructor retained. Omit it when there is no requirement.
+- Do NOT put preparation labels or icons in Python knowledge sections.
+- Use inline editable marimo embeds, with runnable inputs and sources under
+  activities/. No executable {python} blocks and no unit-wide API reference.
+- Preserve simplified notebooks. Remove unused imports/dependencies left by cuts,
+  rather than restoring deleted examples. Match titles and static/PDF fallbacks
+  to what the current notebook actually contains.
+
+After editing:
+- Proofread every sentence, fix unfinished wording, and remove authoring notes.
+- Compare all points and questions against the instructor's source for omissions.
+- Link from the unit landing page, units/index.qmd, and website.sidebar, and confirm
+  project.render includes the page. Keep templates outside render targets.
 -->
 
 One sentence connecting the unit's methods to its materials question.
 
+::: {.callout-note .prep-key}
+## How to prepare
+
+- [P · Practice]{.prep-label .prep-practice} **Practice:** Work on paper, with help from the provided functions or widgets when useful.
+- [R · Recall]{.prep-label .prep-recall} **Recall:** Know the concepts clearly and distinguish related ideas.
+- [E · Explain]{.prep-label .prep-explain} **Explain:** Describe the idea in your own words, without memorizing detailed algorithms.
+- [N · Recognize]{.prep-label .prep-recognize} **Recognize:** Know the method names and where to find them in the linked lecture or notebook.
+:::
+
 ## [Lxx · Short topic title](Lxx/index.qmd)
 
-- Central concept or method students should explain.
-- Essential equation, assumption, or comparison.
-- Specific hand calculation students should practise.
+<!-- Replace these illustrative points in the instructor's order, not label order. -->
+- [R · Recall]{.prep-label .prep-recall} Concept, condition, or distinction retained by the instructor.
+- [P · Practice]{.prep-label .prep-practice} Specific hand calculation, with the permitted support and required steps.
+- [E · Explain]{.prep-label .prep-explain} Method students should describe in their own words, at the requested level of detail.
+- [N · Recognize]{.prep-label .prep-recognize} Method name and a link to where students can find it.
 
 ### Python knowledge
 
-One or two sentences naming the calls and inputs students should recognize.
-Omit this subsection for lectures with no Python review requirement.
+One short sentence identifying the simple call, input, or output students should know. No preparation label here.
 
 ::: {.quarto-wasm-local notebook="uNN_summary_topic.edit.py" view="edit" title="Specific calculation students can edit and run" height="650" loading="lazy" fullscreen="true"}
-Concise static/PDF fallback: the problem, function call, and expected result.
+Concise static/PDF fallback matching the current notebook: the problem, function call, and expected result.
 :::
 
-**Question:** A short explanation or interpretation question for this lecture.
+<!-- Keep any instructor-supplied lecture-level questions here, in order. -->
 
 ## [Lyy · Short topic title](Lyy/index.qmd)
 
-- Repeat the lecture-level structure with the next topic.
-- Keep equations visible and avoid introductory or concluding filler.
+- [E · Explain]{.prep-label .prep-explain} Next lecture's preparation point, preserving the instructor's sequence and scope.
 
-## Short-answer practice
+## Example short-answer questions for this unit
 
-1. Optional cross-lecture comparison from the instructor's question list.
-2. Optional synthesis question connecting the methods to the materials problem.
-
-<!--
-All Python examples must be inline editable marimo embeds with runnable
-inputs, backed by activities/ sources. No static Python blocks or undefined
-placeholder inputs. Reuse a small existing notebook if it fits this lecture's
-review task; do not combine several lectures' Python into one large embed.
--->
+<!-- Insert the COMPLETE instructor-supplied list in its original order.
+Do not treat these questions as optional or replace them with generic comparisons.
+If the original list is unavailable, ask before completing this section. -->

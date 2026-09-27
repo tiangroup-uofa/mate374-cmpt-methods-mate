@@ -1,36 +1,45 @@
 ---
-title: "Unit 01 · Summary and preparation"
+title: "Unit 01 · Summary and exam preparation"
 subtitle: "Numerical thinking"
 ---
 
-Review these points for the midterm and final. Practise the calculations and explain the methods in your own words.
+Review these points for the midterm and final.
+
+::: {.callout-note .prep-key}
+## How to prepare
+
+- [P · Practice]{.prep-label .prep-practice} **Practice:** Work on paper, with help from the provided functions or widgets when useful.
+- [R · Recall]{.prep-label .prep-recall} **Recall:** Know the concepts clearly and distinguish related ideas.
+- [E · Explain]{.prep-label .prep-explain} **Explain:** Describe the idea in your own words, without memorizing detailed algorithms.
+- [N · Recognize]{.prep-label .prep-recognize} **Recognize:** Know the method names and where to find them in the linked lecture or notebook.
+:::
 
 ## [L01 · Modeling](L01/index.qmd)
 
-- Explain the connection between a materials question, a mathematical model, and a numerical method.
-- Describe the main stages: formulate the model, calculate a solution, interpret and validate the result.
-- Distinguish a general numerical method from a materials simulation that uses it.
-- Explain why modeling is useful and what assumptions limit its predictions.
+- [R · Recall]{.prep-label .prep-recall} Explain the connection between a **materials question**, a **mathematical model**, and a **numerical method**.
+- [R · Recall]{.prep-label .prep-recall} Describe the main stages: formulate the model, calculate a solution, interpret and validate the result.
+- [R · Recall]{.prep-label .prep-recall} Distinguish a general numerical method from a **materials simulation** that uses it.
+- [E · Explain]{.prep-label .prep-explain} Explain why modeling is useful and what assumptions limit its predictions.
 
-**Questions:** How would you approach a materials problem using modeling? How could you check software output without access to its source code?
+**Example Questions:** How would you approach a materials problem using modeling? How could you check software output without access to its source code?
 
 ## [L02 · Errors and convergence](L02/index.qmd)
 
-- **Modeling error:** the physical model omits or approximates relevant behavior.
-- **Truncation error:** a calculation omits terms or replaces a continuous process with a finite approximation.
-- **Round-off error:** numbers and arithmetic have finite precision.
-- **Sampling error:** random experiments, such as Buffon's needle, vary between runs.
-- Compare accuracy and computational cost. Explain what a convergence study changes and what error it investigates.
+- [R · Recall]{.prep-label .prep-recall} **Modeling error:** the physical model omits or approximates relevant behavior.
+- [R · Recall]{.prep-label .prep-recall} **Truncation error:** a calculation omits terms or replaces a continuous process with a finite approximation.
+- [R · Recall]{.prep-label .prep-recall} **Round-off error:** numbers and arithmetic have finite precision.
+- [R · Recall]{.prep-label .prep-recall} **Sampling error:** random experiments, such as Buffon's needle, vary between runs.
+- [E · Explain]{.prep-label .prep-explain} Compare accuracy and computational cost. Explain what a convergence study changes and what error it investigates.
 
-**Questions:** How would you reduce each error? Why does adding terms to a series address a different error from improving the physical model?
+**Example Questions:** How would you reduce each error? Why does adding terms to a series address a different error from improving the physical model?
 
 ## [L03 · Computer numbers](L03/index.qmd)
 
-- Convert integers between binary and decimal by hand.
-- Expand binary fractions using place values: $(1011.101)_2=8+2+1+1/2+1/8=11.625$.
-- Explain why $0.1$ and $3.14$ have repeating binary expansions and require rounding.
-- Recognize `float32` and `float64`. Use the lecture widget to identify sign, significand, and exponent.
-- For a normalized IEEE 754 number, interpret $x=(-1)^s(1.f)_2\,2^{e-b}$, including the exponent bias $b$.
+- [P · Practice]{.prep-label .prep-practice} Convert integers between binary and decimal by hand.
+- [P · Practice]{.prep-label .prep-practice} Expand binary fractions using place values: $(1011.101)_2=8+2+1+1/2+1/8=11.625$. Hand conversion from decimal fractions to binary is **not required**.
+- [R · Recall]{.prep-label .prep-recall} Explain why $0.1$ and $3.14$ have repeating binary expansions and require rounding.
+- [R · Recall]{.prep-label .prep-recall} Recognize common precisions used in scientific programs like `float32` and `float64`. [P · Practice]{.prep-label .prep-practice} Use the lecture widget to identify sign, significand, and exponent.
+- [R · Recall]{.prep-label .prep-recall} For a normalized IEEE 754 number, interpret the meaning of $s$, $f$, $e$ and $b$ in $x=(-1)^s(1.f)_2\,2^{e-b}$. Recognize why we need to include the exponent bias $b$.
 
 ### Python knowledge
 
@@ -44,16 +53,28 @@ Use `bin()` and `int(..., 2)` for integer conversion. NumPy supports different p
 
 ## [L04 · Performance](L04/index.qmd)
 
-- Measure a function's elapsed time and explain why repeated measurements vary.
-- Estimate runtime from problem size and scaling. What happens when $N$ doubles for an $O(N)$ or $O(N^2)$ calculation?
-- Recall ways to accelerate Python: NumPy vectorization, Numba compilation, parallel CPUs, and GPUs. Explain their basic ideas; implementation is not required.
+- [E · Explain]{.prep-label .prep-explain} Measure a function's elapsed time and explain how measurements for smaller calculations can predict the same algorithm's runtime for much larger inputs.
+- [E · Explain]{.prep-label .prep-explain} Recall ways to accelerate Python: NumPy vectorization, Numba compilation, parallel CPUs, and GPUs. Explain their basic ideas. Implementation is **not required**.
 
 ### Python knowledge
 
-Measure elapsed time with `time.perf_counter()`. Change `N` below and repeat the measurement.
+Measure elapsed time with `time.perf_counter()`.
 
 ::: {.quarto-wasm-local notebook="u01_summary_timing.edit.py" view="edit" title="Time a NumPy calculation" height="600" loading="lazy" fullscreen="true"}
 Record `start = time.perf_counter()` before the calculation and `end = time.perf_counter()` after it. `end - start` gives elapsed seconds.
 :::
 
-**Question:** Which acceleration approach would you consider for repeated arithmetic on a large array, and why?
+**Example Question:** Which acceleration approach would you consider for repeated arithmetic on a large array, and why?
+
+## Example short-answer questions for this unit
+
+1. Write the basic advantages of modeling.
+2. If you have to solve a problem using modeling, what is a strategy you would use?
+3. Write 3 basic phases in modeling.
+4. What is a numerical model?
+5. What is a truncation error?
+6. How can we reduce a truncation error?
+7. What is the difference between double precision and single precision?
+8. Explain what bias (or exponent offset) means in IEEE 754.
+9. Why is any validation of software important?
+10. How would you validate a software output when you have no access to source code?

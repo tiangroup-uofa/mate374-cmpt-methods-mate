@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Explain: people discussing</title>
+  <rect width="32" height="32" rx="4" fill="#f3edfc"/>
+  <g fill="none" stroke="#60418c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 4h12v7h-5l-4 3v-3h-3Z"/>
+    <circle cx="7" cy="19" r="3"/>
+    <circle cx="25" cy="19" r="3"/>
+    <path d="M2 28c0-7 10-7 10 0M20 28c0-7 10-7 10 0"/>
+  </g>
+</svg>

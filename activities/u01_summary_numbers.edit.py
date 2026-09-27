@@ -11,13 +11,7 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import numpy as np
-    return (np,)
-
-
-@app.cell
-def _():
-    # Change the integer and binary string, then run the cell.
+    # bin() and int() used to convert decimal and binary integers
     print(bin(13))
     print(int("1101", 2))
     return
@@ -25,7 +19,8 @@ def _():
 
 @app.cell
 def _(np):
-    # More displayed digits reveal the stored approximations to 0.1.
+    # numpy allows explicit definition of float32 and float64
+    import numpy as np
     x_single = np.float32(0.1)
     x_double = np.float64(0.1)
     print(f"float32: {x_single:.20f}")

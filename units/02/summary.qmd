@@ -1,16 +1,29 @@
 ---
-title: "Unit 02 · Summary and preparation"
+title: "Unit 02 · Summary and exam preparation"
 subtitle: "Working with functions"
 ---
 
-We used the van der Waals model and CO₂ phase diagram to study functions with one scalar input and output. For each problem, identify the known quantities, the unknowns, and the method.
+We used the van der Waals model and CO₂ phase diagram to study functions with one scalar input and output.
+
+::: {.callout-note .prep-key}
+## How to prepare
+
+- [P · Practice]{.prep-label .prep-practice} **Practice:** Work on paper, with help from the provided functions or widgets when useful.
+- [R · Recall]{.prep-label .prep-recall} **Recall:** Know the concepts clearly and distinguish related ideas.
+- [E · Explain]{.prep-label .prep-explain} **Explain:** Describe the idea in your own words, without memorizing detailed algorithms.
+- [N · Recognize]{.prep-label .prep-recognize} **Recognize:** Know the method names and where to find them in the linked lecture or notebook.
+:::
+
+- [R · Recall]{.prep-label .prep-recall} **Key identification:** For each problem, identify the **known quantities**, the **unknowns**, and the **method**.
+- **Not required for exams:** memorizing the mathematical forms of the vdW equation of state or the Gibbs free energy of the vdW liquid.
+- **Scope:** We work with functions of one variable, such as $x$, and one scalar output, $f(x)$.
 
 ## [L05 · Bracketing roots](L05/index.qmd)
 
-- Rewrite a target $f(x)=P$ as a residual $F(x)=f(x)-P=0$.
-- Explain bisection in your own words and carry out its interval updates by hand.
-- A continuous function with opposite signs at the endpoints has at least one root in the interval.
-- Explain why bisection converges for a valid bracket. Optional: how can false position improve the estimate?
+- [P · Practice]{.prep-label .prep-practice} Rewrite a target $f(x)=P$ as a residual $F(x)=f(x)-P=0$.
+- [P · Practice]{.prep-label .prep-practice} Explain the **bisection method** in your own words and carry out its interval updates by hand.
+- [R · Recall]{.prep-label .prep-recall} **Bracketing condition:** A continuous function with opposite signs at the endpoints has at least one root in the interval: $F(x_i)F(x_{i+1})<0$.
+- [E · Explain]{.prep-label .prep-explain} Explain why using function values to estimate the root, as in false position (*regula falsi*), may be faster than bisection.
 
 ### Python knowledge
 
@@ -20,31 +33,34 @@ Use `scipy.optimize.root_scalar` with `bracket` and `method`. Identify `.root` a
 For $f(x)=x^2$ and target $P=2$, use $F(x)=x^2-2$ with bracket $(1,2)$. `root_scalar(F, bracket=(1, 2), method="bisect")` gives $x\approx1.414214$.
 :::
 
-## [L06 · Open root methods](L06/index.qmd)
+## [L06 · Open-domain methods](L06/index.qmd)
 
-- Compare the information used by Newton–Raphson and secant methods: a derivative versus a slope from two function values.
-- Rearrange $F(x)=0$ into $x=g(x)$ and calculate fixed-point iterates $x_{n+1}=g(x_n)$ by hand and in a loop.
-- Recall the contraction condition: $g$ maps the interval into itself and has Lipschitz constant $L<1$. Near a root, $|g'(x)|<1$ is a sufficient local convergence condition.
-- Explain why open methods can converge quickly but depend on the initial guess and function behavior.
+- [R · Recall]{.prep-label .prep-recall} Compare the information used by **Newton–Raphson** and **secant** methods: a derivative versus a slope from two function values.
+- [P · Practice]{.prep-label .prep-practice} Sketch one **Newton–Raphson** update on paper: draw the tangent at the current estimate and find where it crosses the $x$-axis.
+- [P · Practice]{.prep-label .prep-practice} Rearrange $F(x)=0$ into $x=g(x)$ and calculate **fixed-point** iterates $x_{n+1}=g(x_n)$ by hand and in a loop using a provided function.
+- [R · Recall]{.prep-label .prep-recall} Recall the **Lipschitz convergence criterion** for fixed-point iteration: near a root, $|g'(x)|<1$. [P · Practice]{.prep-label .prep-practice} Work through the [fixed-point seminar example](../../seminars/S03-fixed-point/index.qmd) for different starting regions.
+- [E · Explain]{.prep-label .prep-explain} Explain why open-domain methods can converge quickly but depend on the **initial guess** and **function behavior**.
+- [E · Explain]{.prep-label .prep-explain} Describe why an iterative program checks that both the change $|\Delta x|$ and the residual $|F(x)|$ are sufficiently small before reporting convergence.
 
 ### Python knowledge
 
-Use `root_scalar` with `x0` and `fprime` for Newton, or `x0` and `x1` for secant. Practise writing the fixed-point loop with a supplied function.
+Use `method="newton"` in `scipy.optimize.root_scalar`, with an initial guess `x0` and derivative `fprime`.
 
-::: {.quarto-wasm-local notebook="u02_summary_open_roots.edit.py" view="edit" title="Newton, secant, and a fixed-point loop" height="750" loading="lazy" fullscreen="true"}
-For $F(x)=x^2-2$, Newton and secant converge to $\sqrt{2}$ from positive guesses near the root. The rearrangement $g(x)=(x+2/x)/2$ also converges there, while $g(x)=2/x$ alternates between 1 and 2 from $x_0=1$.
+::: {.quarto-wasm-local notebook="u02_summary_open_roots.edit.py" view="edit" title="Newton root finding" height="750" loading="lazy" fullscreen="true"}
+For $F(x)=x^2-2$ and $F'(x)=2x$, `root_scalar(F, x0=1.0, fprime=dF, method="newton")` gives $x\approx1.414214$. The result's `.root` contains the root and `.converged` reports convergence.
 :::
 
 ## [L07 · Minima and maxima](L07/index.qmd)
 
-- At a stationary point, $f'=0$. Positive $f''$ indicates a local minimum, negative $f''$ a local maximum; $f''=0$ needs further investigation. Check endpoints on a bounded interval.
-- Explain golden-section search for a unimodal function and compare it with bisection.
-- Find stationary points by solving $f'=0$ with Newton's method. Classify the result.
-- Explain gradient descent, $x_{n+1}=x_n-\alpha f'(x_n)$, and the effect of step size $\alpha$.
+- [R · Recall]{.prep-label .prep-recall} **Criteria for minima and maxima:** at a stationary point, $f'(x)=0$. Positive $f''$ indicates a local minimum and negative $f''$ a local maximum.
+- [R · Recall]{.prep-label .prep-recall} Describe the difference between a **local** and **global** minimum and illustrate them with a sketch.
+- [E · Explain]{.prep-label .prep-explain} Describe golden-section search graphically as an analog of bisection for minimization. **No derivation needed**.
+- [P · Practice]{.prep-label .prep-practice} Find stationary points by solving $f'=0$ with Newton–Raphson. Use the second derivative to classify each as a minimum or maximum.
+- [E · Explain]{.prep-label .prep-explain} Briefly explain gradient descent, $x_{n+1}=x_n-\alpha f'(x_n)$, and the effect of step size $\alpha$.
 
 ### Python knowledge
 
-Estimate a minimum with a grid and `np.argmin`. Use `minimize_scalar` for a scalar search and `minimize` for general optimization with an array of unknowns.
+Estimate a minimum with a grid and `np.argmin`. Use `minimize_scalar` for a bounded search. Find `minimize` for general optimization in the [L07 examples](L07/index.qmd#hands-on-compare-the-vdw-minima).
 
 ::: {.quarto-wasm-local notebook="u02_summary_minima.edit.py" view="edit" title="Grid search, bounded minimization, and stationary points" height="750" loading="lazy" fullscreen="true"}
 For $f(x)=(x-2)^2-1$, the minimum is at $x=2$, with $f=-1$. The grid estimate is `x_grid[np.argmin(f(x_grid))]`. `minimize_scalar(f, bounds=(0, 4), method="bounded")` returns the minimizer in `.x` and convergence status in `.success`.
@@ -52,12 +68,13 @@ For $f(x)=(x-2)^2-1$, the minimum is at $x=2$, with $f=-1$. The grid estimate is
 
 ## [L08 · Interpolation](L08/index.qmd)
 
-- **Interpolation:** estimate within the data range using a function through the supplied points.
-- **Extrapolation:** estimate beyond that range, where the assumed function strongly affects the prediction.
-- For $n$ distinct inputs, the unique interpolating polynomial has degree at most $n-1$.
-- Recognize Lagrange and Newton forms. Manual coding or derivation is not required.
-- Explain high-degree oscillations (Runge's phenomenon) and the advantages of piecewise interpolation.
-- Count coefficients and equations for $n$ points, giving $n-1$ intervals:
+- [R · Recall]{.prep-label .prep-recall} Distinguish **interpolation** from **extrapolation**:
+    - **Interpolation:** estimate within the data range. In exact interpolation, the function passes through the supplied points.
+    - **Extrapolation:** estimate beyond that range, where the assumed function strongly affects the prediction.
+- [R · Recall]{.prep-label .prep-recall} For $n$ distinct inputs, the unique interpolating polynomial has degree at most $n-1$.
+- [N · Recognize]{.prep-label .prep-recognize} Recognize **Lagrange** and **Newton** forms for interpolation with one polynomial, and find them in [L08](L08/index.qmd#one-polynomial-through-the-data). Manual coding or derivation is **not required**.
+- [E · Explain]{.prep-label .prep-explain} Explain high-degree oscillations (Runge's phenomenon) and the advantages of piecewise interpolation.
+- [R · Recall]{.prep-label .prep-recall} Count coefficients and equations for $n$ points, giving $n-1$ intervals. Deriving or solving the spline equations is **not required**:
 
 | Piecewise form | Coefficients | Conditions in addition to interval endpoint values |
 |---|---:|---|
@@ -65,21 +82,23 @@ For $f(x)=(x-2)^2-1$, the minimum is at $x=2$, with $f=-1$. The grid estimate is
 | Quadratic spline | $3(n-1)$ | First-derivative continuity; one boundary condition |
 | Cubic spline | $4(n-1)$ | First- and second-derivative continuity; two boundary conditions |
 
+- [N · Recognize]{.prep-label .prep-recognize} Use linear interpolation for an initial estimate, and consider a cubic spline or PCHIP for most practical cases. The calls are in the notebook below.
+
 ### Python knowledge
 
-Recognize `Polynomial.fit(..., deg=n-1)` and `scipy.interpolate.lagrange` for global polynomials, `np.interp` for piecewise linear interpolation, and `CubicSpline` or `PchipInterpolator` for piecewise cubics. PCHIP preserves monotonicity in monotone data.
+Find `np.interp`, `CubicSpline`, and `PchipInterpolator` in the example below.
 
-::: {.quarto-wasm-local notebook="u02_summary_interpolation.edit.py" view="edit" title="Global and piecewise interpolation" height="700" loading="lazy" fullscreen="true"}
-The notebook estimates $y$ at $x=1.5$ from five data points. A global polynomial of degree four, a cubic spline, and PCHIP all pass through the original data but can differ between them.
+::: {.quarto-wasm-local notebook="u02_summary_interpolation.edit.py" view="edit" title="Linear interpolation, cubic spline, and PCHIP" height="700" loading="lazy" fullscreen="true"}
+The notebook estimates $y$ at $x=1.5$ from five data points. `np.interp` gives the piecewise linear estimate $2.45$. `CubicSpline` and `PchipInterpolator` give cubic estimates. All three pass through the supplied points but can differ between them.
 :::
 
 ## [L09 · Least-squares fitting](L09/index.qmd)
 
-- Identify the known data $(x_i,y_i)$ and unknown model parameters $\boldsymbol\theta$.
-- Write residuals $r_i=\hat f(x_i;\boldsymbol\theta)-y_i$ and minimize $S=r_1^2+\cdots+r_n^2$.
-- Locate and use the straight-line fitting formulas involving $S_x$, $S_y$, $S_{xx}$, and $S_{xy}$.
-- Practise linearizing nonlinear relationships using the lecture's conversion table. Relate an Arrhenius slope to activation energy.
-- Assess residual size and patterns. Explain how transforming the response changes the least-squares objective.
+- [R · Recall]{.prep-label .prep-recall} Identify the known data $(x_i,y_i)$ and unknown model parameters $\boldsymbol\theta$.
+- [R · Recall]{.prep-label .prep-recall} Recall the objective of least-squares fitting: minimize the sum of squared residuals. Distinguish parameters that have not yet been optimized from **underfitting** and **overfitting**.
+- [P · Practice]{.prep-label .prep-practice} Write residuals $r_i=\hat f(x_i;\boldsymbol\theta)-y_i$ and the quantity to minimize, $S=r_1^2+\cdots+r_n^2$.
+- [P · Practice]{.prep-label .prep-practice} Locate and use the straight-line fitting formulas involving $S_x$, $S_y$, $S_{xx}$, and $S_{xy}$. **No derivation needed**. The formulas will be provided if needed.
+- [P · Practice]{.prep-label .prep-practice} Convert nonlinear equations to linear form using the [lecture's conversion table](L09/index.qmd#tbl-linearizing-models), and convert the fitted coefficients back to the original parameters.
 
 ### Python knowledge
 
@@ -91,18 +110,27 @@ Use `Polynomial.fit` for polynomial least squares and `curve_fit` for a general 
 
 ## [L10 · The phase-diagram program](L10/index.qmd)
 
-- Trace the calculation: fit vdW parameters to gas data, find coexistence conditions, and repeat over temperature to obtain a phase boundary.
-- Identify where fitting, root finding, and interpolation enter the program.
-- Compare the predicted boundary with CO₂ data. Distinguish solver convergence from agreement with measurements.
+This is a demo class. The example code **does not need to be memorized**. Use the class as a conceptual guide.
+
+- [E · Explain]{.prep-label .prep-explain} Trace the calculation: fit vdW parameters to gas data, find coexistence conditions, and repeat over temperature to obtain a phase boundary.
+- [R · Recall]{.prep-label .prep-recall} Identify where fitting, root finding, and interpolation enter the program.
+- [R · Recall]{.prep-label .prep-recall} Compare the predicted boundary with CO₂ data. Distinguish solver convergence from agreement with measurements.
 
 ### Python knowledge
 
 Review the [editable phase-diagram notebook](L10/index.qmd). Identify each function's inputs and outputs, and follow how one result becomes the next calculation's input.
 
-## Short-answer practice
+## Example short-answer questions for this unit
 
-1. Why can a bracketing method be reliable when an open method fails?
-2. How do exact polynomial interpolation and least-squares regression differ?
-3. What is useful about the Lagrange representation? Why might you choose piecewise interpolation instead?
-4. How many coefficients and conditions are needed for quadratic and cubic splines through $n$ points?
-5. How would you judge a fit beyond looking at whether the curve appears close to the data?
+Adapted from past MATE 374 questions.
+
+1. What is the difference between interpolation and extrapolation?
+2. What is the main idea of the concept underlying linear least squares regression?
+3. For $n$ given points to be interpolated by a polynomial function, what is the difference between direct fit polynomial function and least square polynomial regression?
+4. The main advantages of the concept underlying Lagrange polynomials.
+5. What are the main advantages piecewise approximation?
+6. Write the basic properties of quadratic splines. (Continuity of the first derivative.)
+7. Write the basic properties of cubic splines. (Continuity of the first and second derivatives.)
+8. How many coefficients have to be determined for quadratic splines for overall $n$ points?
+9. How many equations do we need to solve to define the coefficients?
+10. How many coefficients have to be determined for cubic splines for overall $n$ points?

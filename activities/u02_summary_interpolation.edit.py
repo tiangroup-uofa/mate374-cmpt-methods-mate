@@ -12,9 +12,8 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import numpy as np
-    from numpy.polynomial import Polynomial
-    from scipy.interpolate import lagrange, CubicSpline, PchipInterpolator
-    return CubicSpline, PchipInterpolator, Polynomial, lagrange, np
+    from scipy.interpolate import CubicSpline, PchipInterpolator
+    return CubicSpline, PchipInterpolator, np
 
 
 @app.cell
@@ -27,16 +26,12 @@ def _(np):
 
 
 @app.cell
-def _(CubicSpline, PchipInterpolator, Polynomial, lagrange, np, x_data, x_query, y_data):
-    p = Polynomial.fit(x_data, y_data, deg=len(x_data) - 1)
-    p_lagrange = lagrange(x_data, y_data)
+def _(CubicSpline, PchipInterpolator, np, x_data, x_query, y_data):
     y_linear = np.interp(x_query, x_data, y_data)
     cubic = CubicSpline(x_data, y_data)
     pchip = PchipInterpolator(x_data, y_data)
 
     print(f"Estimates at x = {x_query}:")
-    print("Global polynomial:", p(x_query))
-    print("Lagrange polynomial:", p_lagrange(x_query))
     print("Piecewise linear:", y_linear)
     print("Cubic spline:", cubic(x_query))
     print("PCHIP:", pchip(x_query))

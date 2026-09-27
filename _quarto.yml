@@ -9,6 +9,8 @@ project:
   resources:
     - "wasm-local/**"
     - "assets/L01-fast16-implosion-poster.png"
+    - "assets/prep-*.svg"
+    - "assets/preparation-icons-license.txt"
     - "scripts/l03_error_figures.py"
     - "scripts/binary_place_values.py"
     - "scripts/polygon_precision.py"

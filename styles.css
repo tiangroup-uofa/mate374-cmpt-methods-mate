@@ -107,6 +107,65 @@ blockquote {
   background: color-mix(in srgb, white 50%, transparent);
 }
 
+/* Summary preparation icons. Keep the span text for assistive technology and
+   non-HTML output; only the square SVG is visible in the web page. */
+.prep-key ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.prep-key li + li {
+  margin-top: 0.4rem;
+}
+
+.prep-label {
+  position: relative;
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  margin-right: 0.3em;
+  overflow: hidden;
+  text-indent: 2em;
+  white-space: nowrap;
+  vertical-align: -0.3em;
+}
+
+.prep-label::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--prep-icon) center / contain no-repeat;
+  text-indent: 0;
+}
+
+.prep-practice {
+  --prep-icon: url("assets/prep-practice.svg");
+}
+
+.prep-recall {
+  --prep-icon: url("assets/prep-recall.svg");
+}
+
+.prep-explain {
+  --prep-icon: url("assets/prep-explain.svg");
+}
+
+.prep-recognize {
+  --prep-icon: url("assets/prep-recognize.svg");
+}
+
+@media print {
+  .prep-key {
+    break-inside: avoid;
+  }
+
+  .prep-label {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
 /* Preserve a useful minimum space while the browser-side Python runtime loads. */
 marimo-island[data-status="running"] {
   min-height: 2.5rem;

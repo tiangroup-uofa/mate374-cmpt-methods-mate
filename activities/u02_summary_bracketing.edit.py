@@ -17,16 +17,19 @@ def _():
 
 @app.cell
 def _(root_scalar):
-    # Change P and choose endpoints that bracket the new root.
+    # The target to be reached so f(x) = P
     P = 2.0
 
     def f(x):
+        """Normal function"""
         return x**2
 
     def F(x):
+        """The residual function"""
         return f(x) - P
 
     result = root_scalar(F, bracket=(1.0, 2.0), method="bisect")
+    # Use result.root and result.converged for the final result!
     print("Root:", result.root)
     print("Converged:", result.converged)
     print("Residual:", F(result.root))
