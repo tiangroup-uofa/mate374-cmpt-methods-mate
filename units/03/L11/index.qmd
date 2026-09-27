@@ -146,17 +146,11 @@ The displacements are $(0.1,0.2,0.3)$ Å. Each spring stretches by $0.1$ Å and 
 
 NumPy stores the coefficients in a two-dimensional array. `np.linalg.solve` takes a square, nonsingular coefficient matrix and the right-hand side, and returns the unknown vector.
 
-```{python}
-#| eval: false
-import numpy as np
+Edit the applied end force below. Predict the effect of doubling it or reversing its sign, then compare the displacements and force-balance residual.
 
-K = np.array([[10.0, -5.0,  0.0],
-              [-5.0, 10.0, -5.0],
-              [ 0.0, -5.0,  5.0]])  # eV/Å²
-F = np.array([0.0, 0.0, 0.5])        # eV/Å
-u = np.linalg.solve(K, F)            # Å: [0.1, 0.2, 0.3]
-residual = K @ u - F                 # eV/Å
-```
+::: {.quarto-wasm-local notebook="l11_linear_solve.edit.py" view="edit" title="Solve the atomic force balances with NumPy" height="750" loading="lazy" fullscreen="true"}
+For the stiffness matrix above and applied forces $(0,0,0.5)$ eV/Å, `u = np.linalg.solve(K, F)` gives displacements $(0.1,0.2,0.3)$ Å. The residual `K @ u - F` is zero to floating-point precision. Doubling the applied force doubles the displacements, while reversing its sign reverses them.
+:::
 
 In NumPy, `K @ u` performs matrix–vector multiplication. `K * u` instead multiplies entries using array broadcasting and does not calculate the force-balance vector. `K.T` is the transpose, formed by exchanging rows and columns. For this symmetric stiffness matrix, `K.T` and `K` have the same entries.
 

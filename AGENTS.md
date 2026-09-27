@@ -23,6 +23,10 @@ Before adding content, read its matching template and the relevant existing land
 - **New unit and its lectures:** create the unit landing page and lecture pages from their templates; add the unit and lecture links to `units/index.qmd` and a matching section in the sidebar. Follow the existing unit landing-page style.
 - **New assignment:** add the corresponding student-facing marimo activity notebook source(s) under `activities/`, link or describe them in the assignment, and add the assignment to its landing page. Never ask students to use or run a plain Python script.
 
+## Python examples in course pages
+
+Use embedded, editable marimo notebooks for student-facing Python calculations, with runnable inputs and sources under `activities/`. If a static listing is appropriate, use a plain `python` code fence, never an executable `{python}` block (even with `eval: false`). Rendering the page must not require a Python kernel. Provide prose/equation fallbacks for marimo embeds.
+
 ## Preview and render scope
 
 - **Whole-site HTML:** `quarto preview` or `quarto render --to html`.

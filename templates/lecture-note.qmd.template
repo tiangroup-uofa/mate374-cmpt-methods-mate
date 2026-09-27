@@ -49,7 +49,11 @@ Explain why the second case follows from the first. Compare assumptions, results
 
 ## Python calculation
 
-Show the numerical call students should learn to read or adapt. Explain its inputs and connect the returned result to the physical quantities. Collapse supporting or plotting code where appropriate.
+Embed an editable marimo notebook for the numerical calculation students should learn to read or adapt. Keep its source under activities/ and supply runnable inputs. Explain the inputs and connect the returned result to the physical quantities. Use a prose/equation fallback for static output. If a static code listing is needed, use a plain ```python fence, never an executable ```{python} block: lecture rendering must not require a Python kernel.
+
+::: {.quarto-wasm-local notebook="lxx_calculation.edit.py" view="edit" title="Specific calculation students can edit and run" height="700" loading="lazy" fullscreen="true"}
+State the numerical problem, representative result, and its physical interpretation.
+:::
 
 ## Materials interpretation and credibility check
 
