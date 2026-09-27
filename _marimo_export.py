@@ -49,7 +49,7 @@ def export_mode_and_outstem(py_file: Path) -> tuple[str, str]:
 
 
 def rendered_qmd_sources(project_root: Path) -> list[Path]:
-    """Mirror the full-profile page roots, excluding the intentionally omitted unit."""
+    """Scan the course page roots for notebook references, including every unit."""
     pages = set(project_root.glob("*.qmd"))
     for directory in FULL_SITE_QMD_DIRS:
         source_dir = project_root / directory
@@ -62,8 +62,6 @@ def rendered_qmd_sources(project_root: Path) -> list[Path]:
         if path.is_file()
         and not path.name.startswith(".#")
         and path.relative_to(project_root).as_posix() not in NON_RENDERED_QMD_SOURCES
-        and path.relative_to(project_root).as_posix() != "units/03"
-        and not path.relative_to(project_root).as_posix().startswith("units/03/")
     )
 
 
