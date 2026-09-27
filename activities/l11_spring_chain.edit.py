@@ -42,7 +42,7 @@ def introduction(mo):
 
 @app.cell(hide_code=True)
 def atom_count(mo):
-    n_atoms = mo.ui.slider(1, 4, value=3, step=1, label="Atoms", show_value=True)
+    n_atoms = mo.ui.slider(1, 4, value=2, step=1, label="Moving atoms", show_value=True)
     return (n_atoms,)
 
 
@@ -300,9 +300,9 @@ def interpretation(F, K, mo, np, solvable, u):
     mo.vstack([
         equilibrium_report,
         mo.md(r"""
-        **Default case:** three springs of 5 eV/Å² carry an end load of
+        **Default case:** two springs of 5 eV/Å² carry an end load of
         0.5 eV/Å. Each stretches by 0.1 Å, giving displacements
-        $(0.1, 0.2, 0.3)$ Å. Check this by multiplying the displayed matrix
+        $(0.1, 0.2)$ Å. Check this by multiplying the displayed matrix
         and displacement vector.
 
         **Explore:** soften one bond, reverse the end force, or add a spring

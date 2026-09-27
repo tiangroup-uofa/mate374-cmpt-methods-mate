@@ -12,7 +12,7 @@ This unit serves as a general prelude to the course. Across four lectures, we wi
 3. [L03 · Numbers inside a computer](L03/index.qmd)
 4. [L04 · Making a computation faster](L04/index.qmd)
 
-[Summary and preparation](summary.qmd) — concepts, hand calculations, Python reference, and questions for midterm and final preparation.
+[Summary and preparation](summary.qmd) — lecture-by-lecture review points, Python examples, and practice questions.
 
 [Unit 01 references](references.qmd)
 

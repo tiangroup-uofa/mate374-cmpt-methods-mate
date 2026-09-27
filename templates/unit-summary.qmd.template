@@ -1,61 +1,51 @@
 ---
 title: "Unit NN · Summary and preparation"
-subtitle: "The unit's main concepts and methods"
+subtitle: "Unit topic"
 ---
 
 <!--
-AGENT-ONLY SCAFFOLD. Adapt to units/NN/summary.qmd. Replace placeholders
-and remove authoring notes. Preserve the instructor's assessment scope.
-Link this separate page from the unit landing page, units/index.qmd, and
-website.sidebar in _quarto.yml. Confirm project.render includes the page.
-Keep this template outside HTML/PDF render targets.
+AGENT-ONLY SCAFFOLD. Adapt to units/NN/summary.qmd and remove these notes.
+Use one section per lecture, in teaching order, with a concise topic title.
+Keep the review points short enough for the instructor to discuss in class.
+Put Python knowledge INSIDE its lecture section, not in a separate unit-wide
+reference. Do not expand the summary into another set of lecture notes.
+Preserve the instructor's scope and hand-calculation expectations.
+Link from the unit landing page, units/index.qmd, and website.sidebar.
+Keep templates outside render targets.
 -->
 
-Use this page to prepare for the midterm and final. Practise the hand calculations, explain the concepts in your own words, and use the linked lectures to revisit examples.
+One sentence connecting the unit's methods to its materials question.
 
-Connect the unit's materials question to the numerical methods in one short paragraph.
+## [Lxx · Short topic title](Lxx/index.qmd)
 
-## Concepts to explain
+- Central concept or method students should explain.
+- Essential equation, assumption, or comparison.
+- Specific hand calculation students should practise.
 
-### First concept or method
+### Python knowledge
 
-Link to the relevant lecture. Identify known quantities, unknowns, assumptions,
-and the central equation. Explain what students should be able to describe.
+One or two sentences naming the calls and inputs students should recognize.
+Omit this subsection for lectures with no Python review requirement.
 
-### Related concept or method
-
-Explain the relationship to the previous method. Use a comparison table when
-it clarifies method choice, error sources, conditions, or computational cost.
-Preserve distinctions between required practice and optional extensions.
-
-## Hand calculations and practice
-
-1. Specify a concrete calculation students should practise.
-2. Include interpretation or diagnosis of a numerical result.
-3. Identify any supplied-code exercise and the quantities students must change.
-
-## Python reference
-
-Embed every Python/NumPy/SciPy example as an inline, editable marimo notebook.
-Keep its source under activities/ and supply concrete functions, data, and
-parameters so students can run it immediately. Do not use static Python code
-blocks or snippets with undefined inputs. Explain what students should change,
-what the result contains, and what conditions the method needs.
-
-::: {.quarto-wasm-local notebook="uNN_summary_topic.edit.py" view="edit" title="Specific calculation students can edit and run" height="700" loading="lazy" fullscreen="true"}
-Replace this text with a concise static/PDF fallback: the numerical problem,
-representative result, and key function calls explained in prose.
+::: {.quarto-wasm-local notebook="uNN_summary_topic.edit.py" view="edit" title="Specific calculation students can edit and run" height="650" loading="lazy" fullscreen="true"}
+Concise static/PDF fallback: the problem, function call, and expected result.
 :::
 
-## Preparation questions
+**Question:** A short explanation or interpretation question for this lecture.
 
-1. Ask students to explain a central concept in their own words.
-2. Compare methods using their assumptions and expected behavior.
-3. Ask for a hand calculation or interpretation of a result.
-4. Connect the methods to the unit's materials application.
+## [Lyy · Short topic title](Lyy/index.qmd)
 
-## Lecture links
+- Repeat the lecture-level structure with the next topic.
+- Keep equations visible and avoid introductory or concluding filler.
 
-- [Lxx · Lecture title](Lxx/index.qmd)
-- [Lyy · Lecture title](Lyy/index.qmd)
-- [Unit NN landing page](index.qmd)
+## Short-answer practice
+
+1. Optional cross-lecture comparison from the instructor's question list.
+2. Optional synthesis question connecting the methods to the materials problem.
+
+<!--
+All Python examples must be inline editable marimo embeds with runnable
+inputs, backed by activities/ sources. No static Python blocks or undefined
+placeholder inputs. Reuse a small existing notebook if it fits this lecture's
+review task; do not combine several lectures' Python into one large embed.
+-->

@@ -19,7 +19,7 @@ Read the template, copy the relevant scaffold to its destination, replace placeh
 Before adding content, read its matching template and the relevant existing landing page; follow their structure and style. For every new page, update the appropriate landing-page links and site navigation in the root `_quarto.yml` (`website.sidebar` for unit and lecture entries, `website.navbar` for top-level categories), and confirm `project.render` includes it.
 
 - **New lecture:** add it in sequence to its unit landing page.
-- **Unit summary:** keep it as a separate preparation page, linked from its unit landing page, `units/index.qmd`, and the unit's sidebar section. All Python/NumPy/SciPy examples must be inline, editable marimo embeds with runnable inputs, not static code blocks. Keep the notebook sources under `activities/` and include a prose static/PDF fallback.
+- **Unit summary:** keep it as a separate preparation page, linked from its unit landing page, `units/index.qmd`, and the unit's sidebar section. Organize it by lecture, using concise topic titles and short review points suitable for classroom discussion. Keep Python knowledge inside the corresponding lecture section, not in a separate unit-wide reference. All Python/NumPy/SciPy examples must be inline, editable marimo embeds with runnable inputs, not static code blocks. Keep the notebook sources under `activities/` and include a prose static/PDF fallback.
 - **New unit and its lectures:** create the unit landing page and lecture pages from their templates; add the unit and lecture links to `units/index.qmd` and a matching section in the sidebar. Follow the existing unit landing-page style.
 - **New assignment:** add the corresponding student-facing marimo activity notebook source(s) under `activities/`, link or describe them in the assignment, and add the assignment to its landing page. Never ask students to use or run a plain Python script.
 
@@ -54,6 +54,10 @@ Keep work-in-progress notes, plans, and questions for the instructor in separate
 
 - **NEVER** insert planning questions, draft-status notices, or requests for instructor decisions as callouts or other text in course materials.
 - **NEVER** use course text as a “schooling ground” to lecture, scold, or patronize the reader or instructor. Keep authoring commentary and editorial advice in the separate `.txt` notes. Student-facing text must teach the course subject respectfully.
+
+## Lecture scope and reading length
+
+Preserve the instructor's intended teaching sequence and substantive draft coverage. When a draft appears incomplete, inspect available draft/autosave copies before replacing it; do not modify those recovery files. For lecture length, use past lectures as the baseline: Quarto's reading-time estimate for L01–L10 has a median of 17 minutes, with most around 14–19 minutes (L08–L09 are longer). Treat this as a calibration, not a quota: retain worked mathematics and explanations rather than adding filler or compressing a lecture into summary bullets. Quarto estimates reading time at 200 words/minute and does not measure time spent solving problems or using demos.
 
 ## Writing style
 

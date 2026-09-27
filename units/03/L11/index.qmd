@@ -1,184 +1,430 @@
 ---
 title: "L11 · Recap of linear algebra"
-subtitle: "Coupled equations, matrix basics, and an atomic spring chain"
+subtitle: "Systems of equations, matrix basics, and solutions in Python"
 body-classes: lecture-page
 ---
 
 ::: {.callout-note}
 ## Central question
 
-How do we solve simultaneous equations, $A\mathbf{x}=\mathbf{b}$, and what do they represent in materials systems?
+Why does $A\mathbf{x}=\mathbf{b}$ keep appearing in numerical methods, and what does it represent in materials systems?
 :::
+
+In Unit 02, we started with a function of one variable. Finding its interpolation or least-squares coefficients soon brought us to several equations with several unknowns. The coefficients must satisfy the equations together. For a square linear system with $n$ unknowns, we need $n$ independent equations to obtain a unique solution.
+
+This coupling also appears in engineering: Kirchhoff's laws connect currents in a circuit, material balances connect flows between reactors, and mechanical constraints connect the motion of gears. In materials, moving one atom changes the forces on its neighbors. These are different physical problems with a common mathematical structure.
+
+This lecture is a crash course on linear algebra and matrix operations. We will start with atomic forces, write the coupled equations, then review the scalars, vectors, and matrices needed to solve them in Python.
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to:
 
-1. **Explain** how the harmonic approximation connects an interatomic potential to Hooke's law.
-2. **Construct** the force-balance equations and stiffness matrix for a small atomic chain.
-3. **Calculate** equilibrium displacements using `np.linalg.solve`.
-4. **Check** a solution using force balance and the system's boundary conditions.
+1. **Formulate** the force-balance equations for a small harmonic chain.
+2. **Calculate** vector and matrix operations with compatible dimensions.
+3. **Represent** scalars, vectors, and matrices in NumPy, including explicit row and column shapes.
+4. **Solve** a square linear system using inversion and a direct solver, and interpret its residual.
 
-## Why do simultaneous equations keep appearing?
+## From interatomic energy to Hooke's law
 
-In Unit 02, we began with functions of one variable. When we wanted to determine interpolation or fitting coefficients, several unknowns appeared together: changing one coefficient changed the same predicted values as changing another. The resulting equations had to be solved simultaneously. We encountered the same structure when determining [spline coefficients](../../02/L08/index.qmd) and [least-squares parameters](../../02/L09/index.qmd).
-
-Coupling also comes from physical interactions. Kirchhoff's laws connect currents and voltages in an electrical circuit. Material balances connect flows through a network of reactors. In a solid, moving one atom changes the forces on its neighbors. Each equation describes part of the system, but its unknowns are shared with other equations.
-
-A system with $n$ unknowns generally needs $n$ independent equations for a unique solution. Counting equations is a useful start, but two equations can express the same constraint. Our atomic example will show how a physical boundary condition supplies a constraint that would otherwise be missing.
-
-## From interatomic energy to a spring
-
-The energy between two atoms depends on their separation $r$. In Assignments [A1](../../../assignments/A1/index.qmd) and [A2](../../../assignments/A2/index.qmd), we used this dependence to describe attraction, repulsion, and a preferred spacing. One familiar example is the [Lennard–Jones potential](https://en.wikipedia.org/wiki/Lennard-Jones_potential), also called the 12–6 potential:
+In Assignments [A1](../../../assignments/A1/index.qmd) and [A2](../../../assignments/A2/index.qmd), the pair energy $V(r)$ described how two atoms interact at separation $r$. The [Lennard–Jones potential](https://en.wikipedia.org/wiki/Lennard-Jones_potential), or 12–6 potential, is one example:
 
 $$
 V(r)=4\epsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right].
 $$
 
-Here $\epsilon>0$ is the well depth, $\sigma$ is the separation where $V=0$, and the minimum occurs at $r_0=2^{1/6}\sigma$, where $V(r_0)=-\epsilon$. Other pair potentials have different shapes, but many have a smooth minimum at an equilibrium separation.
+Its equilibrium separation is $r_0=2^{1/6}\sigma$, and its well depth is $\epsilon>0$, so $V(r_0)=-\epsilon$. Around a smooth minimum, many pair potentials can be approximated by a quadratic, connecting the potential to the [polynomial functions used in fitting](../../02/L09/index.qmd).
 
-Close to that minimum, write the change in separation as $\Delta r=r-r_0$. A quadratic approximation gives
-
-$$
-V(r_0+\Delta r)\approx V(r_0)+V'(r_0)\Delta r+\frac12V''(r_0)(\Delta r)^2.
-$$
-
-At the minimum, $V'(r_0)=0$. For a minimum with positive curvature, define the spring constant $k=V''(r_0)>0$:
+Write the change in separation as $\Delta r=r-r_0$. Since $V'(r_0)=0$, the harmonic approximation is
 
 $$
-\boxed{V(r_0+\Delta r)\approx V(r_0)+\frac12k(\Delta r)^2.}
+V(r_0+\Delta r)\approx V(r_0)+\frac12k(\Delta r)^2,
+\qquad k=V''(r_0).
 $$
 
-This is the **harmonic approximation**. It connects the [quadratic functions used in fitting](../../02/L09/index.qmd) with a physical model of a bond. The curvature measures how rapidly the energy rises when the bond is stretched or compressed. A flatter minimum gives a softer bond. If energy is measured in eV and distance in Å, $k$ has units of eV/Å².
-
-The force associated with increasing separation is the negative derivative of the potential energy:
+For a minimum with positive curvature, $k>0$: stretching or compressing the bond raises its energy. A larger curvature means a stiffer bond. Taking the negative derivative gives the restoring force,
 
 $$
-\boxed{F=-\frac{dV}{dr}\approx-k\Delta r.}
+\boxed{F_{\mathrm{spring}}=-\frac{dV}{dr}\approx-k\Delta r.}
 $$
 
-This is Hooke's law. Stretching the bond gives a restoring force toward smaller separation, while compression gives a force toward larger separation.
+That is Hooke's law. Close to equilibrium, we can picture two atoms as masses connected by a spring. With energy in eV and distance in Å, the spring constant has units of eV/Å².
 
 ::: {.callout-note collapse="true"}
-## Why is force the negative energy derivative?
+## Why does force have a minus sign?
 
-When a conservative force does work $dW=F\,dr$, the potential energy changes by $dV=-dW$. Thus $F=-dV/dr$. Near a stable equilibrium, the force points toward the energy minimum. The two atoms experience equal and opposite forces.
+A conservative force does work $dW=F\,dr$, while the potential energy changes by $dV=-dW$. Therefore $F=-dV/dr$. Stretching a bond above its equilibrium length produces a force toward smaller separation.
 :::
 
-The approximation describes small displacements around a stable spacing. At larger separations, the asymmetry and eventual weakening of the actual potential become important.
+## From one spring to simultaneous equations
 
-## A row of atoms with coupled displacements
+### Two atoms: one unknown displacement
 
-Consider three moving atoms connected by springs to a fixed atom 0:
+Hold atom 0 fixed and pull atom 1 to the right with an external force $F_{\mathrm{ext}}$. Let $u_1$ be atom 1's displacement to the right from its equilibrium position. The spring extension is $u_1$, so static force balance gives
+
+$$
+-ku_1+F_{\mathrm{ext}}=0
+\quad\Longrightarrow\quad
+ku_1=F_{\mathrm{ext}}.
+$$
+
+One equation determines one unknown: $u_1=F_{\mathrm{ext}}/k$. The applied force and the restoring force have opposite signs.
+
+### Three atoms: two coupled displacements
+
+Now add a second moving atom and apply the force at the end:
 
 ```text
 fixed
-  0 ── k₁ ── 1 ── k₂ ── 2 ── k₃ ── 3  → F₃
+  0 ── k₁ ── 1 ── k₂ ── 2  → Fext
 ```
 
-All motion is along the chain. Let $u_1$, $u_2$, and $u_3$ be displacements from the reference positions, with positive displacement to the right. Atom 0 is held at $u_0=0$. The known applied forces are $F_1$, $F_2$, and $F_3$, and all three spring constants are positive.
-
-The first spring extends by $u_1$, the second by $u_2-u_1$, and the third by $u_3-u_2$. Therefore the spring force on atom 1 is $-k_1u_1+k_2(u_2-u_1)$. At equilibrium, adding its applied force gives zero:
-
-$$
--k_1u_1+k_2(u_2-u_1)+F_1=0.
-$$
-
-Applying the same force balance to atoms 2 and 3 gives
+The spring extensions are $u_1$ and $u_2-u_1$. Atom 1 feels both springs, while atom 2 feels the second spring and the applied force:
 
 $$
 \begin{aligned}
-(k_1+k_2)u_1-k_2u_2&=F_1,\\
--k_2u_1+(k_2+k_3)u_2-k_3u_3&=F_2,\\
--k_3u_2+k_3u_3&=F_3.
+\text{Atom 1:}\quad -k_1u_1+k_2(u_2-u_1)&=0,\\
+\text{Atom 2:}\quad -k_2(u_2-u_1)+F_{\mathrm{ext}}&=0.
 \end{aligned}
 $$
 
-These equations share unknown displacements because neighboring atoms share a spring. To determine how far any atom moves, we must satisfy all three balances.
-
-### Where are the masses?
-
-For an atom of mass $m_i$, Newton's law is $m_i\ddot u_i=F_i+F_i^{\mathrm{spring}}$, where $\ddot u_i$ is its acceleration. At static equilibrium, the acceleration is zero, so mass does not enter the displacement calculation. The same spring–mass system can describe vibrations when we retain acceleration and let the displacements vary with time. Here we calculate its equilibrium response to applied forces.
-
-## The matrix represents the force balances
-
-Collecting the coefficients gives
+Collecting the unknown displacements on the left gives
 
 $$
-\underbrace{\begin{bmatrix}
-k_1+k_2&-k_2&0\\
--k_2&k_2+k_3&-k_3\\
-0&-k_3&k_3
-\end{bmatrix}}_{K}
-\underbrace{\begin{bmatrix}u_1\\u_2\\u_3\end{bmatrix}}_{\mathbf{u}}
+\begin{aligned}
+(k_1+k_2)u_1-k_2u_2&=0,\\
+-k_2u_1+k_2u_2&=F_{\mathrm{ext}}.
+\end{aligned}
+$$
+
+There are two equations for two unknowns. We can collect their coefficients into a **matrix** and their unknowns into a **vector**:
+
+$$
+\underbrace{\begin{bmatrix}k_1+k_2&-k_2\\-k_2&k_2\end{bmatrix}}_{K}
+\underbrace{\begin{bmatrix}u_1\\u_2\end{bmatrix}}_{\mathbf{u}}
 =
-\underbrace{\begin{bmatrix}F_1\\F_2\\F_3\end{bmatrix}}_{\mathbf{F}}.
+\underbrace{\begin{bmatrix}0\\F_{\mathrm{ext}}\end{bmatrix}}_{\mathbf{F}}.
 $$
 
-This has the form $A\mathbf{x}=\mathbf{b}$, with stiffness matrix $K$, unknown displacement vector $\mathbf{u}$, and known applied-force vector $\mathbf{F}$. Each row is one atom's force-balance equation. Each column contains the coefficients multiplying one displacement. Multiplying the first row by the displacement vector means $(k_1+k_2)u_1+(-k_2)u_2+0u_3$.
+Here $K$ is the **stiffness matrix**, $\mathbf{u}$ is the displacement vector, and $\mathbf{F}$ is the applied-force vector. This is $K\mathbf{u}=\mathbf{F}$, a physical example of $A\mathbf{x}=\mathbf{b}$. We will return to its solution after reviewing these objects and their operations.
 
-The diagonal entry adds the stiffnesses attached to an atom. A negative off-diagonal entry describes its coupling to another moving atom, and a zero means there is no direct spring between that pair. This matrix is symmetric: the spring connecting atoms 1 and 2 contributes the same coefficient in positions $(1,2)$ and $(2,1)$.
+### What makes the equations linear?
 
-With $N$ moving atoms, $K$ is an $N\times N$ matrix and both vectors have $N$ entries. Nearest-neighbor coupling produces a **tridiagonal** matrix, whose nonzero entries lie on the main diagonal and the two adjacent diagonals. A spring joining more distant atoms adds entries farther from the main diagonal.
+Each unknown displacement is multiplied by a known coefficient, and these contributions are added. There are no products such as $u_1u_2$ or powers such as $u_1^2$. The constants $k_1$ and $k_2$ belong to the model, the applied force is prescribed, and the displacements are what we calculate. If we retained the full Lennard–Jones force instead of its harmonic approximation, the force balances would generally be nonlinear in the displacements.
 
-### Why fix atom 0?
+Linearity is always judged with respect to the unknowns. For example, fitting $y=a+bx+cx^2$ at known input values leads to equations linear in the unknown coefficients $a$, $b$, and $c$, even though the fitted curve is quadratic in $x$. At $x=2$, the equation is $a+2b+4c=y$. The corresponding matrix row is $[1,2,4]$. This is the same coefficient-collection step we used for the springs.
 
-If the entire chain were free, adding the same displacement to every atom would leave every spring extension unchanged. Force balances could not determine that rigid translation. Fixing atom 0 removes this freedom, provided every moving atom remains connected to it through a path of springs. If a group becomes disconnected, a unique equilibrium displacement is no longer determined. An unbalanced applied force on that free group can also make static equilibrium impossible.
+For a linear system with fixed $K$, doubling the applied forces doubles the solution displacements. Likewise, adding two applied-force vectors adds their corresponding displacement solutions. This property, called **superposition**, will follow directly from the matrix multiplication rules below.
 
-## Interactive spring-chain calculation
+### Explore the spring chain
 
-Before changing the controls, predict how the displacements will respond if you double every spring constant while holding the applied forces fixed. Then change one spring at a time and inspect the corresponding matrix entries. The spring-constant input describes connections between atoms, while the displayed stiffness matrix $K$ collects their force-balance coefficients.
+Start with two moving atoms in the demo and compare its matrix with the equations above. Add another atom: how many equations and unknowns do you now need? Change one spring constant and identify the affected entries in $K$.
 
-::: {.quarto-wasm-local notebook="l11_spring_chain.edit.py" view="app" title="Atomic spring chain: from bond stiffness to equilibrium displacements" height="1100" loading="lazy" fullscreen="true" marimo-app="true"}
-For three moving atoms with $k_1=k_2=k_3=5$ eV/Å² and applied forces $(0,0,0.5)$ eV/Å,
+::: {.quarto-wasm-local notebook="l11_spring_chain.edit.py" view="app" title="Atomic springs and their force-balance matrix" height="1100" loading="lazy" fullscreen="true" marimo-app="true"}
+With two moving atoms, $k_1=k_2=5$ eV/Å², and $F_{\mathrm{ext}}=0.5$ eV/Å,
 
 $$
-\begin{bmatrix}10&-5&0\\-5&10&-5\\0&-5&5\end{bmatrix}
-\begin{bmatrix}0.1\\0.2\\0.3\end{bmatrix}
+\begin{bmatrix}10&-5\\-5&5\end{bmatrix}
+\begin{bmatrix}0.1\\0.2\end{bmatrix}
 =
-\begin{bmatrix}0\\0\\0.5\end{bmatrix}.
+\begin{bmatrix}0\\0.5\end{bmatrix}.
 $$
 
-The displacements are $(0.1,0.2,0.3)$ Å. Each spring stretches by $0.1$ Å and carries a force of $0.5$ eV/Å. Doubling every spring constant halves every displacement at the same applied load. The chain diagram above shows the fixed boundary and the three bonds.
+Both springs extend by $0.1$ Å. The second atom moves $0.2$ Å because its displacement includes both extensions.
 :::
 
-## Solving the system in Python
+The atoms have mass, but at static equilibrium their acceleration is zero. Mass enters the time-dependent equation $m_i\ddot u_i=F_i^{\mathrm{spring}}+F_i^{\mathrm{ext}}$ when we calculate motion or vibration.
 
-NumPy stores the coefficients in a two-dimensional array. `np.linalg.solve` takes a square, nonsingular coefficient matrix and the right-hand side, and returns the unknown vector.
+## Scalars and vectors
 
-Edit the applied end force below. Predict the effect of doubling it or reversing its sign, then compare the displacements and force-balance residual.
+### Scalars
 
-::: {.quarto-wasm-local notebook="l11_linear_solve.edit.py" view="edit" title="Solve the atomic force balances with NumPy" height="750" loading="lazy" fullscreen="true"}
-For the stiffness matrix above and applied forces $(0,0,0.5)$ eV/Å, `u = np.linalg.solve(K, F)` gives displacements $(0.1,0.2,0.3)$ Å. The residual `K @ u - F` is zero to floating-point precision. Doubling the applied force doubles the displacements, while reversing its sign reverses them.
+A **scalar** is a single number. Energy, pressure, and entropy are examples of scalar physical quantities. In Python, a real-valued scalar can be stored as a `float` or a NumPy floating-point value such as `np.float64`.
+
+### Vectors and their shapes
+
+A physical vector, such as displacement, velocity, or force, has magnitude and direction. Its components depend on the chosen coordinates. We also use vectors to collect related unknowns: the components of our chain's displacement vector describe different atoms moving along one line.
+
+A vector can be written as a column or a row. **Transposition**, denoted by $T$, exchanges the two:
+
+$$
+\mathbf{a}=\begin{bmatrix}1\\2\\3\end{bmatrix},
+\qquad
+\mathbf{a}^{T}=\begin{bmatrix}1&2&3\end{bmatrix}.
+$$
+
+In NumPy, `np.array([1.0, 2.0, 3.0])` has shape `(3,)`: it has one axis. A column array has shape `(3, 1)`, and a row array has shape `(1, 3)`.
+
+These arrays contain the same three values, but their dimensions determine which operations NumPy performs. The one-dimensional representation is convenient for `np.linalg.solve`, while explicit rows and columns make matrix-product dimensions visible. Reshaping changes how the entries are arranged along array axes without changing the values themselves. The `-1` in a reshape tells NumPy to infer that dimension from the number of entries.
+
+A physical interpretation still comes from the model. Three entries might represent the Cartesian coordinates of one atom, or the longitudinal displacements of three atoms. The array shape alone does not tell us which. In our chain, every entry has units of length and the subscript identifies an atom, so $u_2$ is not a second spatial direction.
+
+::: {.callout-important}
+## Why does `a.T` leave my vector unchanged?
+
+A one-dimensional array has no separate row and column axes to exchange. Use `a.reshape(-1, 1)` to make a column or `a.reshape(1, -1)` to make a row. Transposing either two-dimensional array exchanges its dimensions. Inspect `.shape` to see the difference.
 :::
 
-In NumPy, `K @ u` performs matrix–vector multiplication. `K * u` instead multiplies entries using array broadcasting and does not calculate the force-balance vector. `K.T` is the transpose, formed by exchanging rows and columns. For this symmetric stiffness matrix, `K.T` and `K` have the same entries.
+### Vector addition, scaling, and products
 
-Although the formal solution can be written as $\mathbf{u}=K^{-1}\mathbf{F}$, use `solve` to compute it without explicitly constructing the inverse. The residual $K\mathbf{u}-\mathbf{F}$ measures how closely the returned displacements satisfy the equations. It should be close to zero to floating-point precision for this small example.
+Addition and scalar multiplication act on each component. For $\mathbf{a}=(1,2,3)^T$ and $\mathbf{b}=(4,5,6)^T$,
 
-## What the displacements tell us
+$$
+\mathbf{a}+\mathbf{b}=\begin{bmatrix}5\\7\\9\end{bmatrix},
+\qquad
+2\mathbf{a}=\begin{bmatrix}2\\4\\6\end{bmatrix}.
+$$
 
-For the default end load, the same force passes through every spring. Their extensions are $F_3/k_1$, $F_3/k_2$, and $F_3/k_3$, so the displacement of atom 3 is their sum. Softening one spring increases its extension and moves every atom beyond it farther to the right. This gives a direct physical check on the matrix solution.
+The vectors must have corresponding components for addition to be meaningful. Adding a force on atom 1 to a displacement of atom 1 would have no physical meaning even if the arrays had compatible shapes. NumPy tracks shapes and numerical types, but we are responsible for interpreting the components and keeping their units consistent.
 
-The units provide another check: stiffness in eV/Å² multiplied by displacement in Å gives force in eV/Å. A small residual confirms that the calculated displacements satisfy the chosen harmonic model. Comparison with a full pair potential or measurements would address whether that model describes the material at the applied load.
+The **inner product** multiplies corresponding components and adds the results:
 
-## What to keep
+$$
+\mathbf{a}\cdot\mathbf{b}
+=a_1b_1+a_2b_2+a_3b_3
+=1(4)+2(5)+3(6)=32.
+$$
 
-- The curvature of an interatomic energy minimum defines a harmonic spring constant.
-- Shared bonds couple atomic displacements and produce simultaneous force-balance equations.
-- Matrix rows encode equations, and matrix columns correspond to unknowns.
-- Boundary conditions determine whether the equilibrium displacements are unique.
-- `np.linalg.solve` computes the displacements, and `K @ u - F` checks force balance.
+The result is a scalar. Geometrically, $\mathbf{a}\cdot\mathbf{b}=\|\mathbf{a}\|\,\|\mathbf{b}\|\cos\theta$, where $\theta$ is the angle between the vectors. Perpendicular vectors have zero inner product. The **Euclidean norm**, or length, follows from the inner product of a vector with itself:
 
-## Check your understanding
+$$
+\|\mathbf{a}\|=\sqrt{a_1^2+a_2^2+a_3^2}
+=\sqrt{\mathbf{a}\cdot\mathbf{a}}.
+$$
 
-1. Why does stretching a harmonic bond produce a restoring force?
-2. Which entries of $K$ change if the spring between atoms 1 and 2 becomes stiffer?
-3. Why does a nearest-neighbor chain give a tridiagonal matrix?
-4. What happens to the default displacements if the applied end force changes sign?
-5. Why do masses affect vibration but not the static solution calculated here?
-6. If you remove the spring joining atom 0 to atom 1, what physical freedom prevents a unique displacement solution?
+::: {.callout-important}
+## NumPy: `*` and `@` are different products
 
-## Next
+For one-dimensional arrays, `a * b` gives the entrywise (Hadamard) product: `[4, 10, 18]`. The inner product is `a @ b`, `np.dot(a, b)`, or `a.dot(b)`, giving `32`. Use `np.linalg.norm(a)` for the vector's length.
+:::
 
-The spring chain makes the coefficients and unknowns visible. We can now examine how a linear solver eliminates unknowns and what can make a matrix problem sensitive to numerical error.
+## Matrices
+
+### Rows, columns, and entries
+
+A **matrix** is a rectangular array of numbers. A matrix with $m$ rows and $n$ columns has shape $m\times n$:
+
+$$
+A=\underbrace{\begin{bmatrix}
+a_{11}&a_{12}&\cdots&a_{1n}\\
+a_{21}&a_{22}&\cdots&a_{2n}\\
+\vdots&\vdots&\ddots&\vdots\\
+a_{m1}&a_{m2}&\cdots&a_{mn}
+\end{bmatrix}}_{n\text{ columns; }m\text{ rows}}.
+$$
+
+The entry $a_{ij}$ is in row $i$, column $j$. In a system $A\mathbf{x}=\mathbf{b}$, the $m$ rows represent equations and the $n$ columns correspond to unknowns. In NumPy, nested lists form the rows of a two-dimensional array. `A.shape` returns `(m, n)`, and `A.T` has shape `(n, m)`.
+
+::: {.callout-important}
+## Row before column
+
+Both shape and indexing use **row, column** order. Mathematical $a_{12}$ is the entry in row 1, column 2. Python indexing starts at zero, so this entry is `A[0, 1]`.
+:::
+
+### Addition, scaling, and transposition
+
+Matrices of the same shape can be added entry by entry. In the spring example, each bond contributes a small set of coefficients, and the complete stiffness matrix is their sum:
+
+$$
+K=\begin{bmatrix}k_1&0\\0&0\end{bmatrix}
++\begin{bmatrix}k_2&-k_2\\-k_2&k_2\end{bmatrix}.
+$$
+
+The first matrix represents the bond to fixed atom 0. The second represents the bond between the two moving atoms: it affects both force balances. Adding the contributions explains why the first diagonal entry is $k_1+k_2$ and why a bond between moving atoms produces two negative off-diagonal entries.
+
+A transpose exchanges row and column positions, so $(A^T)_{ij}=A_{ji}$. For example, the first row $[1,2,3]$ of a $2\times3$ matrix becomes the first column of its $3\times2$ transpose. Transposing twice returns the original array. Our spring matrix is unchanged by transposition because each bond enters the two coupled equations symmetrically.
+
+### Matrix–vector multiplication
+
+Scalar multiplication, such as $2A$, multiplies every entry. Multiplication by a vector instead takes the inner product of each matrix row with that vector. For example,
+
+$$
+\begin{bmatrix}1&2&3\\4&5&6\end{bmatrix}
+\begin{bmatrix}1\\0\\-1\end{bmatrix}
+=
+\begin{bmatrix}1(1)+2(0)+3(-1)\\4(1)+5(0)+6(-1)\end{bmatrix}
+=
+\begin{bmatrix}-2\\-2\end{bmatrix}.
+$$
+
+The matrix has three columns, so the input vector needs three components. Its two rows produce two output components. This row-by-row operation is how $K\mathbf{u}$ reconstructs the left sides of our force-balance equations.
+
+In NumPy, use `A @ x` or `np.dot(A, x)`. With `A.shape == (m, n)` and `x.shape == (n,)`, the result has shape `(m,)`. With a column array of shape `(n, 1)`, the result has shape `(m, 1)`.
+
+::: {.callout-important}
+## `A * x` does not perform matrix–vector multiplication
+
+`*` multiplies entries. NumPy may repeat the vector across rows using **broadcasting**, so `A * x` can run successfully while returning a matrix instead of the intended vector. Check the operation and the output shape.
+:::
+
+### A second way to read the product
+
+The same matrix–vector product can be read as a weighted combination of the matrix's columns:
+
+$$
+\begin{bmatrix}1&2&3\\4&5&6\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\\x_3\end{bmatrix}
+=x_1\begin{bmatrix}1\\4\end{bmatrix}
++x_2\begin{bmatrix}2\\5\end{bmatrix}
++x_3\begin{bmatrix}3\\6\end{bmatrix}.
+$$
+
+The row interpretation tells us how to calculate each output. The column interpretation tells us what each input contributes. In $K\mathbf{u}$, column 1 gives the force-balance contributions from $u_1$, while column 2 gives those from $u_2$. Each column is multiplied by its own unknown displacement before the contributions are added.
+
+For the small matrix above, try the input vectors $(1,0,0)^T$, $(0,1,0)^T$, and $(0,0,1)^T$. Each selects one column. These **basis vectors** isolate the action of the matrix on one input component at a time. They also explain why the identity matrix has unit columns and leaves any vector unchanged.
+
+### Matrix–matrix multiplication
+
+Each entry in a matrix product is the inner product of a row from the first matrix and a column from the second. The dimensions must match at the join:
+
+$$
+\underbrace{A}_{m\times n}\;
+\underbrace{B}_{n\times p}
+=\underbrace{AB}_{m\times p}.
+$$
+
+For example,
+
+$$
+\begin{bmatrix}1&2&3\\4&5&6\end{bmatrix}
+\begin{bmatrix}1&0\\0&1\\1&1\end{bmatrix}
+=
+\begin{bmatrix}4&5\\10&11\end{bmatrix}.
+$$
+
+The first entry is $1(1)+2(0)+3(1)=4$. The other entries follow the same row–column rule. In NumPy, this is `A @ B`. Matrix multiplication generally depends on order: $AB$ and $BA$ can have different shapes and values, and one may be undefined.
+
+### Row and column products
+
+Explicit row and column vectors make the dimension rule especially clear. Using $\mathbf{a}=(1,2,3)^T$ from above,
+
+$$
+\underbrace{\mathbf{a}^T}_{1\times3}
+\underbrace{\mathbf{a}}_{3\times1}
+=\underbrace{\begin{bmatrix}14\end{bmatrix}}_{1\times1},
+\qquad
+\underbrace{\mathbf{a}}_{3\times1}
+\underbrace{\mathbf{a}^T}_{1\times3}
+=\underbrace{\begin{bmatrix}1&2&3\\2&4&6\\3&6&9\end{bmatrix}}_{3\times3}.
+$$
+
+The first calculation is the inner product expressed using two-dimensional arrays. The second is an **outer product**, which retains every pairwise multiplication instead of adding along a shared component index. Each column is the original vector scaled by one entry of the row vector.
+
+The numbers in the input arrays are identical in these two calculations, yet the outputs are different objects. With one-dimensional NumPy arrays, `a @ a` returns a scalar directly. With an explicit row and column, `row @ column` returns a two-dimensional array of shape `(1, 1)`. Both represent the same inner-product value, but their array shapes differ. This distinction becomes important when a result is passed into another matrix calculation.
+
+When a multiplication fails or returns an unexpected object, write down the shapes before changing the code. Which dimension should be summed over? Which dimensions should remain? For the spring equation, one force-balance result must remain for each moving atom.
+
+### Common matrix structures
+
+| Structure | Definition | Example or NumPy construction |
+|---|---|---|
+| Square | Same number of rows and columns | The stiffness matrix $K$ |
+| Identity, $I$ | Ones on the diagonal, zeros elsewhere | `np.eye(3)`; $I\mathbf{x}=\mathbf{x}$ |
+| Diagonal | All off-diagonal entries are zero | `np.diag([2.0, 3.0, 4.0])` |
+| Upper triangular | Entries below the diagonal are zero | `np.triu(A)` for a square array |
+| Lower triangular | Entries above the diagonal are zero | `np.tril(A)` for a square array |
+| Symmetric | $A^T=A$ | Our stiffness matrix: $K_{12}=K_{21}=-k_2$ |
+
+The identity matrix plays the role of 1 in multiplication: $AI=A$ and $IA=A$ when the dimensions match. A diagonal matrix scales each component independently. The off-diagonal entries in a stiffness matrix are therefore significant: they represent the coupling that makes the atom displacements depend on one another.
+
+Triangular matrices are important because their equations can be solved in sequence. Consider the upper-triangular system
+
+$$
+\begin{bmatrix}2&1\\0&3\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\end{bmatrix}
+=\begin{bmatrix}5\\6\end{bmatrix}.
+$$
+
+The bottom row gives $3x_2=6$, hence $x_2=2$. Substituting into the top row gives $2x_1+2=5$, hence $x_1=1.5$. This is **back substitution**. A lower-triangular system is solved from the top row downward by forward substitution. General linear solvers often transform a system into triangular form so that this sequential calculation becomes possible.
+
+### NumPy practice: shapes and operations
+
+Before running each cell, predict the result and its shape. Compare `a.T` with the transpose of an explicit column, then compare entrywise and matrix products.
+
+::: {.quarto-wasm-local notebook="l11_matrix_basics.edit.py" view="edit" title="Scalars, vector shapes, inner products, and matrix multiplication" height="1000" loading="lazy" fullscreen="true"}
+For `a = np.array([1.0, 2.0, 3.0])`, both `a` and `a.T` have shape `(3,)`. `a.reshape(-1, 1)` has shape `(3, 1)`. With `b = np.array([4.0, 5.0, 6.0])`, `a * b` gives `[4, 10, 18]`, `a @ b` gives `32`, and `np.linalg.norm(a)` gives $\sqrt{14}$. The matrix products above have shapes `(2,)` and `(2, 2)` respectively.
+:::
+
+## Solving $A\mathbf{x}=\mathbf{b}$
+
+### The inverse matrix
+
+For an invertible square matrix, the **inverse** $A^{-1}$ satisfies $A^{-1}A=AA^{-1}=I$. Multiplying both sides of our equation by the inverse gives
+
+$$
+A^{-1}A\mathbf{x}=A^{-1}\mathbf{b}
+\quad\Longrightarrow\quad
+I\mathbf{x}=A^{-1}\mathbf{b}
+\quad\Longrightarrow\quad
+\boxed{\mathbf{x}=A^{-1}\mathbf{b}.}
+$$
+
+This generalizes dividing by a nonzero coefficient in a scalar equation. Not every square matrix has an inverse: if its equations are dependent, the matrix is **singular**. Such a system can have no solution or infinitely many solutions, depending on the right-hand side.
+
+NumPy provides `np.linalg.inv(A)`. The expression `A**-1` instead takes the reciprocal of each entry of a floating-point array. It does not form the inverse matrix.
+
+### Independent equations and an inverse
+
+Consider two equations whose left sides are multiples of each other:
+
+$$
+x_1+2x_2=3,\qquad 2x_1+4x_2=6.
+$$
+
+The second equation adds no new information. Choosing $x_2$ determines $x_1=3-2x_2$, leaving infinitely many solutions. If the second right-hand side were 7 instead of 6, the equations would contradict each other and there would be no solution. In both cases, the coefficient matrix is singular. This is why counting equations alone cannot establish uniqueness.
+
+For a $2\times2$ matrix, the inverse can be written explicitly:
+
+$$
+A=\begin{bmatrix}a&b\\c&d\end{bmatrix},\qquad
+A^{-1}=\frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix},
+\qquad ad-bc\ne0.
+$$
+
+The denominator $ad-bc$ is the **determinant** of this matrix. Multiplying the two matrices shows where it comes from: the diagonal entries of the unscaled product are $ad-bc$, and the off-diagonal entries cancel. For the dependent equations above, $ad-bc=1(4)-2(2)=0$, so the formula cannot produce an inverse.
+
+For our two-moving-atom chain, the determinant is $(k_1+k_2)k_2-k_2^2=k_1k_2$. Positive spring constants therefore give an invertible matrix. Setting either spring constant to zero disconnects at least one moving atom from the fixed boundary, and the determinant becomes zero. The algebra and the physical constraint tell the same story.
+
+### Inversion and a direct solve in NumPy
+
+For the two-moving-atom chain, $k_1=k_2=5$ eV/Å² gives
+
+$$
+K=\begin{bmatrix}10&-5\\-5&5\end{bmatrix},
+\qquad
+K^{-1}=\begin{bmatrix}0.2&0.2\\0.2&0.4\end{bmatrix},
+\qquad
+\mathbf{F}=\begin{bmatrix}0\\0.5\end{bmatrix}.
+$$
+
+Multiplying $K^{-1}\mathbf{F}$ gives $\mathbf{u}=(0.1,0.2)^T$ Å. The inverse has units of Å²/eV, so multiplying by force in eV/Å gives displacement in Å.
+
+For routine calculations, `np.linalg.solve(K, F)` computes the unknown vector without constructing the inverse. The notebook shows both calculations so you can connect the algebra to the library call. Edit the applied force and inspect the force-balance residual, `K @ u - F`.
+
+::: {.quarto-wasm-local notebook="l11_linear_solve.edit.py" view="edit" title="Compare matrix inversion with a direct linear solve" height="850" loading="lazy" fullscreen="true"}
+Both `np.linalg.inv(K) @ F` and `np.linalg.solve(K, F)` give displacements $(0.1,0.2)$ Å for the matrices above. `K_inverse @ K` is the identity to floating-point precision, and `K @ u - F` is close to zero. In contrast, the entrywise reciprocal `K**-1` is $\begin{bmatrix}0.1&-0.2\\-0.2&0.2\end{bmatrix}$.
+:::
+
+### Interpreting the solution
+
+We can also calculate the displacements directly from the two force balances. The last atom requires $k_2(u_2-u_1)=F_{\mathrm{ext}}$, so the second spring carries the applied load. Substituting this into the first balance gives $k_1u_1=F_{\mathrm{ext}}$. Therefore
+
+$$
+u_1=\frac{F_{\mathrm{ext}}}{k_1},\qquad
+u_2=\frac{F_{\mathrm{ext}}}{k_1}+\frac{F_{\mathrm{ext}}}{k_2}.
+$$
+
+This gives a physical check on the matrix result. Softening the first spring increases both displacements. Softening only the second spring increases $u_2$ while leaving $u_1$ unchanged under this end load. Changing the sign of the force reverses both displacements. These predictions can be compared with the spring demo without repeating the matrix inversion by hand.
+
+The residual has one component for each force-balance equation. A positive or negative value indicates the remaining mismatch in that equation, in force units. For this small system it should be close to zero compared with the applied load. A small residual establishes that we solved the harmonic equations accurately. To assess whether those equations describe the material, we would compare with the original pair potential or physical data.
+
+## From two moving atoms to $N$
+
+Each added moving atom adds one displacement unknown and one force-balance equation. For a nearest-neighbor chain, the diagonal of $K$ contains the sum of the stiffnesses attached to each moving atom. The neighboring entries are the negative connecting stiffnesses. All other entries are zero, giving a **tridiagonal** matrix.
+
+The fixed atom supplies an essential constraint. If the entire chain were free, shifting every atom by the same amount would leave the spring extensions unchanged. The matrix could not determine that rigid translation and would be singular. Fixing atom 0 removes this freedom as long as every moving atom remains connected to it by springs.
+
+1. Write $K$ for three moving atoms and compare it with the spring demo.
+2. What are the shapes of $K$, $\mathbf{u}$, and $\mathbf{F}$ for $N$ moving atoms?
+3. Which entries change when a spring between two neighboring atoms becomes stiffer?
+4. Why does a small `K @ u - F` confirm force balance without establishing the accuracy of the harmonic approximation?

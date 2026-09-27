@@ -8,6 +8,10 @@ body-classes: lecture-page
 AGENT-ONLY SCAFFOLD. Adapt this outline to a student-facing lecture note in
 units/NN/Lxx/index.qmd. Replace every placeholder and remove authoring notes.
 Keep this scaffold in `templates/`. Do not render it or export it as PDF.
+Preserve the instructor's draft sequence and scope, including fuller autosave
+copies when present. Calibrate depth against existing lectures: typically
+14–19 minutes by Quarto's reading-time estimate, with a median of 17 minutes
+for L01–L10. Use worked explanations to support the scope, not word-count padding.
 -->
 
 ::: {.callout-note}

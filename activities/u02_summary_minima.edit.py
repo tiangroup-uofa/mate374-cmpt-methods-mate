@@ -18,7 +18,6 @@ def _():
 
 @app.cell
 def _():
-    # Dimensionless quadratic: predict its minimum and the root in [2, 4].
     def f(x):
         return (x - 2.0)**2 - 1.0
 
@@ -29,24 +28,6 @@ def _():
         return 2.0
 
     return d2f, df, f
-
-
-@app.cell
-def _(df, f, root_scalar):
-    # Find where f(x) reaches a chosen target P.
-    P = 0.0
-
-    def F(x):
-        return f(x) - P
-
-    bracketed = root_scalar(F, bracket=(2.0, 4.0), method="bisect")
-    newton = root_scalar(F, x0=3.5, fprime=df, method="newton")
-    secant = root_scalar(F, x0=3.5, x1=4.0, method="secant")
-
-    for name, solution in [("Bisection", bracketed), ("Newton", newton), ("Secant", secant)]:
-        print(f"{name}: x = {solution.root:.8f}, converged = {solution.converged}")
-        print(f"  Residual: {F(solution.root):.2e}")
-    return
 
 
 @app.cell
