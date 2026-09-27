@@ -77,63 +77,25 @@ Practise using the lecture's conversion table to linearize relationships such as
 
 ## Python reference
 
-The examples below show call patterns. Supply the functions, data, bounds, and starting guesses appropriate to the problem.
+Edit and run the examples below to compare methods on the same function or data. Each notebook supplies the inputs so you can inspect the results before adapting the calculation.
 
 ### Roots and minima
 
-```{python}
-#| eval: false
-import numpy as np
-from scipy.optimize import root_scalar, minimize_scalar, minimize, curve_fit
+For the dimensionless function $f(x)=(x-2)^2-1$, predict the root in $[2,4]$ and the minimum in $[0,4]$. Change the target value `P` to see how the residual $F(x)=f(x)-P$ changes the root-finding problem.
 
-bracketed = root_scalar(F, bracket=(a, b), method="bisect")
-newton = root_scalar(F, x0=x0, fprime=dF, method="newton")
-secant = root_scalar(F, x0=x0, x1=x1, method="secant")
-root = bracketed.root
-converged = bracketed.converged
-
-x_grid = np.linspace(a, b, 1001)
-x_grid_min = x_grid[np.argmin(f(x_grid))]
-minimum = minimize_scalar(f, bounds=(a, b), method="bounded")
-x_min = minimum.x
-
-# A stationary point: classify it before calling it a minimum.
-stationary = root_scalar(df, x0=x0, fprime=d2f, method="newton")
-
-# A general optimizer expects an array of unknowns.
-local_minimum = minimize(lambda x: f(x[0]), x0=[x0], method="BFGS")
-```
+::: {.quarto-wasm-local notebook="u02_summary_roots_minima.edit.py" view="edit" title="Compare root finding and minimization on a quadratic" height="900" loading="lazy" fullscreen="true"}
+With `P = 0`, bisection, Newton, and secant find the root $x=3$ from the supplied bracket or starting guesses. The minimum is at $x=2$, where $f=-1$ and $f''=2>0$. `root_scalar` returns `.root` and `.converged`, while the minimizers return `.x` and `.success`. The grid estimate uses `x_grid[np.argmin(f(x_grid))]`.
+:::
 
 A grid minimum is a useful first estimate whose resolution depends on the spacing. `minimize_scalar` provides scalar methods, including bounded and unbounded searches. `minimize` handles an array of unknowns and is useful for general optimization problems. Check the solver's convergence or success information and evaluate the result in the original problem.
 
 ### Interpolation and fitting
 
-```{python}
-#| eval: false
-from numpy.polynomial import Polynomial
-from scipy.interpolate import lagrange, CubicSpline, PchipInterpolator
+The notebook compares interpolation and fitting on five synthetic, dimensionless data points. Change one measured value or the location `x_query`, and inspect which curves still pass through every point.
 
-# One global polynomial through n distinct inputs (subject to round-off).
-p = Polynomial.fit(x_data, y_data, deg=len(x_data) - 1)
-p_lagrange = lagrange(x_data, y_data)
-
-# Piecewise interpolation; x_data must be in increasing order.
-y_linear = np.interp(x_query, x_data, y_data)
-cubic = CubicSpline(x_data, y_data)
-shape_preserving = PchipInterpolator(x_data, y_data)
-y_cubic = cubic(x_query)
-
-# Polynomial least squares and general nonlinear least squares.
-line = Polynomial.fit(x_data, y_data, deg=1)
-parameters, covariance = curve_fit(model, x_data, y_data, p0=initial_parameters)
-
-# Alternatively, minimize an explicitly defined sum of squared residuals.
-def objective(parameters):
-    residuals = model(x_data, *parameters) - y_data
-    return np.sum(residuals**2)
-
-fit = minimize(objective, x0=initial_parameters)
-```
+::: {.quarto-wasm-local notebook="u02_summary_interpolation_fitting.edit.py" view="edit" title="Compare NumPy and SciPy interpolation with least-squares fitting" height="1100" loading="lazy" fullscreen="true"}
+`Polynomial.fit(x_data, y_data, deg=4)` and `lagrange(x_data, y_data)` construct the global interpolating polynomial for these five distinct inputs. `np.interp`, `CubicSpline`, and `PchipInterpolator` provide piecewise alternatives. `Polynomial.fit(..., deg=1)` fits a straight line by least squares. `curve_fit` and `minimize` fit $y=a\exp(bx)$ by minimizing the sum of squared residuals. The interpolants pass through the data, while the fitted curves generally leave nonzero residuals.
+:::
 
 `PchipInterpolator` preserves monotonicity in monotone data and has a continuous first derivative. `CubicSpline` has continuous first and second derivatives, but may overshoot between points. Choose according to the shape and smoothness needed.
 

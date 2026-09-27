@@ -64,29 +64,21 @@ Recognize four acceleration approaches: NumPy vectorization, just-in-time compil
 
 ### Integer conversion and precision
 
-```{python}
-#| eval: false
-import numpy as np
+Edit the integer and binary string below, then compare the stored values of `0.1` in the two precisions.
 
-bin(13)                 # '0b1101'
-int("1101", 2)           # 13
-x_single = np.float32(0.1)
-x_double = np.float64(0.1)
-```
+::: {.quarto-wasm-local notebook="u01_summary_numbers.edit.py" view="edit" title="Practise integer conversion and NumPy floating-point precision" height="560" loading="lazy" fullscreen="true"}
+`bin(13)` returns `'0b1101'`, and `int("1101", 2)` returns `13`. `np.float32(0.1)` and `np.float64(0.1)` store different binary approximations to the same decimal fraction. Displaying twenty decimal places reveals their difference.
+:::
 
 NumPy supports several numeric types. An array made from ordinary Python floating-point values normally uses `float64`, while an array made from integers normally has an integer type. Specify `dtype` when precision matters.
 
 ### Elapsed time
 
-```{python}
-#| eval: false
-import time
+Change the array size `N` and rerun the calculation. The elapsed time includes creating the array and summing its squared values.
 
-start = time.perf_counter()
-result = your_function()
-end = time.perf_counter()
-elapsed = end - start      # seconds
-```
+::: {.quarto-wasm-local notebook="u01_summary_timing.edit.py" view="edit" title="Measure a NumPy calculation with perf_counter" height="600" loading="lazy" fullscreen="true"}
+Record `start = time.perf_counter()` before the calculation and `end = time.perf_counter()` after it. Their difference, `elapsed = end - start`, is the elapsed time in seconds. Repeat the measurement to see how timing varies.
+:::
 
 ## Preparation questions
 

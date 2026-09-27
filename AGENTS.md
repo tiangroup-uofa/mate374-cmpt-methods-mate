@@ -19,7 +19,7 @@ Read the template, copy the relevant scaffold to its destination, replace placeh
 Before adding content, read its matching template and the relevant existing landing page; follow their structure and style. For every new page, update the appropriate landing-page links and site navigation in the root `_quarto.yml` (`website.sidebar` for unit and lecture entries, `website.navbar` for top-level categories), and confirm `project.render` includes it.
 
 - **New lecture:** add it in sequence to its unit landing page.
-- **Unit summary:** keep it as a separate preparation page, linked from its unit landing page, `units/index.qmd`, and the unit's sidebar section.
+- **Unit summary:** keep it as a separate preparation page, linked from its unit landing page, `units/index.qmd`, and the unit's sidebar section. All Python/NumPy/SciPy examples must be inline, editable marimo embeds with runnable inputs, not static code blocks. Keep the notebook sources under `activities/` and include a prose static/PDF fallback.
 - **New unit and its lectures:** create the unit landing page and lecture pages from their templates; add the unit and lecture links to `units/index.qmd` and a matching section in the sidebar. Follow the existing unit landing-page style.
 - **New assignment:** add the corresponding student-facing marimo activity notebook source(s) under `activities/`, link or describe them in the assignment, and add the assignment to its landing page. Never ask students to use or run a plain Python script.
 
