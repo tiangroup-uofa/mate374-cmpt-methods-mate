@@ -17,32 +17,32 @@ def _():
 
 @app.cell
 def _(np):
-    # Two moving atoms connected to fixed atom 0 by springs of 5 eV/Å².
-    K = np.array([[10.0, -5.0],
-                  [-5.0,  5.0]])       # eV/Å²
-    # Double or reverse the end load and predict the displacements.
-    F = np.array([0.0, 0.5])            # eV/Å
-    return F, K
-
-
-@app.cell
-def _(F, K, np):
-    K_inverse = np.linalg.inv(K)         # Å²/eV
-    u_inverse = K_inverse @ F            # Å
-    print("Inverse:\n", K_inverse)
-    print("K_inverse @ K:\n", K_inverse @ K)
-    print("Displacements from the inverse (Å):", u_inverse)
-    print("Entrywise reciprocals K**-1:\n", K**-1)
+    # --- 3 atoms (2 moving), k = 5 eV/Å², F_ext = 10 eV/Å ---
+    K2 = np.array([[10.0, -5.0],
+                   [-5.0,  5.0]])
+    F2 = np.array([0.0, 10.0])
+    K2_inv = np.linalg.inv(K2)
+    u2 = K2_inv @ F2
+    print("K (2×2):\n", K2)
+    print("K inverse:\n", K2_inv)
+    print("Displacements (Å):", u2)
+    print("Check K @ u - F:", K2 @ u2 - F2)
     return
 
 
 @app.cell
-def _(F, K, np):
-    u = np.linalg.solve(K, F)            # Å
-    residual = K @ u - F                 # eV/Å
-    print("Displacements from solve (Å):", u)
-    print("Force-balance residual (eV/Å):", residual)
-    print("Maximum absolute residual (eV/Å):", np.max(np.abs(residual)))
+def _(np):
+    # --- 4 atoms (3 moving), k = 5 eV/Å², F_ext = 10 eV/Å ---
+    K3 = np.array([[10.0, -5.0,  0.0],
+                   [-5.0, 10.0, -5.0],
+                   [ 0.0, -5.0,  5.0]])
+    F3 = np.array([0.0, 0.0, 10.0])
+    K3_inv = np.linalg.inv(K3)
+    u3 = K3_inv @ F3
+    print("K (3×3):\n", K3)
+    print("K inverse:\n", K3_inv)
+    print("Displacements (Å):", u3)
+    print("Check K @ u - F:", K3 @ u3 - F3)
     return
 
 

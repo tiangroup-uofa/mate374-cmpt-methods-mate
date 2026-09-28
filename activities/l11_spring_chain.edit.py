@@ -20,29 +20,8 @@ def imports():
 
 
 @app.cell(hide_code=True)
-def introduction(mo):
-    mo.md(r"""
-    ## How does a row of atoms respond to an applied force?
-
-    Atom 0 is fixed. The other atoms move along the chain and interact through
-    harmonic springs. We calculate static equilibrium, where acceleration is
-    zero and the masses drop out of the force balance.
-
-    **Predict:** if every spring becomes twice as stiff, what happens to the
-    displacements at the same applied load?
-
-    The input matrix lists bond stiffnesses between atom pairs. Its diagonal
-    is zero because an atom has no spring to itself. The force-balance matrix
-    $K$ adds the connected stiffnesses on its diagonal and uses negative bond
-    stiffnesses off the diagonal. With $u_0=0$, the moving atoms satisfy
-    $K\mathbf{u}=\mathbf{F}$. Change one bond and follow its entries in $K$.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
 def atom_count(mo):
-    n_atoms = mo.ui.slider(1, 4, value=2, step=1, label="Moving atoms", show_value=True)
+    n_atoms = mo.ui.number(1, 4, value=2, step=1, label="Moving atoms", debounce=True)
     return (n_atoms,)
 
 
@@ -61,6 +40,7 @@ def inputs(mo, n_atoms):
         step=0.5,
         precision=1,
         symmetric=True,
+        debounce=True,
         disabled=[[_i == _j for _j in range(_n + 1)] for _i in range(_n + 1)],
         row_labels=_labels,
         column_labels=_labels,
@@ -74,6 +54,7 @@ def inputs(mo, n_atoms):
         precision=1,
         row_labels=[f"F{_i + 1}" for _i in range(_n)],
         label="F (eV/Å)",
+        debounce=True,
     )
     return K_MAX, force, springs
 
@@ -87,7 +68,12 @@ def solve(force, np, springs):
     # Atom 0 has u0 = 0, so removing its row and column leaves the system for atoms 1..n.
     K = (np.diag(S.sum(axis=1)) - S)[1:, 1:]
     solvable = np.linalg.matrix_rank(K) == len(F)
-    u = np.linalg.solve(K, F) if solvable else None
+    u = None
+    if solvable:
+        try:
+            u = np.linalg.solve(K, F)
+        except np.linalg.LinAlgError:
+            solvable = False
     spring_list = [
         [_i, _j, float(S[_i, _j])]
         for _i in range(len(S))
@@ -259,61 +245,27 @@ def layout(F, K, K_MAX, SpringChain, force, mo, n_atoms, solvable, spring_list, 
         SpringChain(springs=spring_list, f=F.tolist(), u=u.tolist() if solvable else [], k_max=K_MAX)
     )
     _K_view = mo.ui.matrix(K.tolist(), disabled=True, precision=1, label="K (eV/Å²)")
-    _u_view = mo.ui.matrix(
-        u.tolist() if solvable else [0.0] * len(F), disabled=True, precision=3,
-        row_labels=[f"u{_i + 1}" for _i in range(len(F))],
-        label="u (Å)" if solvable else "u (Å): no unique solution",
+    _u_view = (
+        mo.ui.matrix(
+            u.tolist(), disabled=True, precision=3,
+            row_labels=[f"u{_i + 1}" for _i in range(len(F))],
+            label="u (Å)",
+        )
+        if solvable
+        else mo.Html('<span role="status">Singular K: no unique displacement solution.</span>')
     )
     mo.vstack(
         [
+            mo.Html("<p>Drag the entries of the spring-constant matrix (springs between atoms) and the external-force vector to change their values.</p>"),
             mo.hstack([n_atoms, springs], justify="start", gap=2, align="center"),
             _view,
             mo.hstack(
-                [_K_view, mo.md("## ×"), _u_view, mo.md("## ="), force],
+                [_K_view, mo.Html("<span>×</span>"), _u_view, mo.Html("<span>=</span>"), force],
                 justify="center", align="center", gap=1,
             ),
         ],
         gap=1,
     )
-    return
-
-
-@app.cell(hide_code=True)
-def interpretation(F, K, mo, np, solvable, u):
-    if solvable:
-        balance_error = np.max(np.abs(K @ u - F))
-        equilibrium_report = mo.md(
-            f"**Force-balance residual:** max |Ku − F| = {balance_error:.2e} eV/Å. "
-            "The displacement labels are in Å and the green arrows show applied "
-            "forces in eV/Å. Dashed circles mark reference positions. "
-            "Displacements are magnified adaptively; use the numerical labels "
-            "and scale bar when comparing configurations."
-        )
-    else:
-        equilibrium_report = mo.md(
-            "**No unique equilibrium displacement.** A group of atoms has lost "
-            "its spring connection to fixed atom 0. That group can translate "
-            "without stretching a spring. If its net applied force is nonzero, "
-            "static equilibrium is impossible. Reconnect it to atom 0 to solve. "
-            "The zero placeholders in the displacement display are not a solution."
-        )
-    mo.vstack([
-        equilibrium_report,
-        mo.md(r"""
-        **Default case:** two springs of 5 eV/Å² carry an end load of
-        0.5 eV/Å. Each stretches by 0.1 Å, giving displacements
-        $(0.1, 0.2)$ Å. Check this by multiplying the displayed matrix
-        and displacement vector.
-
-        **Explore:** soften one bond, reverse the end force, or add a spring
-        between non-neighboring atoms. Which entries of $K$ change? How does
-        the load reach the fixed atom?
-
-        A small residual checks the force-balance calculation. The harmonic
-        model assumes small changes in bond length around a stable reference
-        configuration. Large displacements require revisiting that assumption.
-        """),
-    ])
     return
 
 

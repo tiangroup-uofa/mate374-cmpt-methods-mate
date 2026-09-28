@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 160" width="680" height="160" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <!-- A: m × n -->
+  <rect x="20" y="20" width="120" height="100" rx="4" fill="#e8e8f0" stroke="#333" stroke-width="1.5"/>
+  <text x="80" y="75" text-anchor="middle" font-size="22" font-weight="bold" fill="#333">A</text>
+  <!-- m label on left -->
+  <text x="8" y="75" text-anchor="middle" font-size="16" font-style="italic" fill="#555">m</text>
+  <!-- n label on bottom, dark red -->
+  <text x="80" y="138" text-anchor="middle" font-size="16" font-style="italic" font-weight="bold" fill="#b22222">n</text>
+  <!-- left brace for m -->
+  <line x1="14" y1="22" x2="14" y2="118" stroke="#555" stroke-width="1.2"/>
+  <line x1="14" y1="22" x2="18" y2="22" stroke="#555" stroke-width="1.2"/>
+  <line x1="14" y1="118" x2="18" y2="118" stroke="#555" stroke-width="1.2"/>
+  <!-- bottom brace for n -->
+  <line x1="22" y1="124" x2="138" y2="124" stroke="#b22222" stroke-width="1.5"/>
+  <line x1="22" y1="124" x2="22" y2="120" stroke="#b22222" stroke-width="1.5"/>
+  <line x1="138" y1="124" x2="138" y2="120" stroke="#b22222" stroke-width="1.5"/>
+
+  <!-- × sign -->
+  <text x="170" y="78" text-anchor="middle" font-size="26" fill="#333">×</text>
+
+  <!-- B: n × p -->
+  <rect x="200" y="20" width="100" height="100" rx="4" fill="#e8f0e8" stroke="#333" stroke-width="1.5"/>
+  <text x="250" y="75" text-anchor="middle" font-size="22" font-weight="bold" fill="#333">B</text>
+  <!-- n label on left, dark red -->
+  <text x="188" y="75" text-anchor="middle" font-size="16" font-style="italic" font-weight="bold" fill="#b22222">n</text>
+  <!-- p label on bottom -->
+  <text x="250" y="138" text-anchor="middle" font-size="16" font-style="italic" fill="#555">p</text>
+  <!-- left brace for n -->
+  <line x1="194" y1="22" x2="194" y2="118" stroke="#b22222" stroke-width="1.5"/>
+  <line x1="194" y1="22" x2="198" y2="22" stroke="#b22222" stroke-width="1.5"/>
+  <line x1="194" y1="118" x2="198" y2="118" stroke="#b22222" stroke-width="1.5"/>
+  <!-- bottom brace for p -->
+  <line x1="202" y1="124" x2="298" y2="124" stroke="#555" stroke-width="1.2"/>
+  <line x1="202" y1="124" x2="202" y2="120" stroke="#555" stroke-width="1.2"/>
+  <line x1="298" y1="124" x2="298" y2="120" stroke="#555" stroke-width="1.2"/>
+
+  <!-- = sign -->
+  <text x="340" y="78" text-anchor="middle" font-size="26" fill="#333">=</text>
+
+  <!-- AB: m × p -->
+  <rect x="380" y="20" width="100" height="100" rx="4" fill="#f0e8d8" stroke="#333" stroke-width="1.5"/>
+  <text x="430" y="75" text-anchor="middle" font-size="22" font-weight="bold" fill="#333">AB</text>
+  <!-- m label on left -->
+  <text x="368" y="75" text-anchor="middle" font-size="16" font-style="italic" fill="#555">m</text>
+  <!-- p label on bottom -->
+  <text x="430" y="138" text-anchor="middle" font-size="16" font-style="italic" fill="#555">p</text>
+  <!-- left brace for m -->
+  <line x1="374" y1="22" x2="374" y2="118" stroke="#555" stroke-width="1.2"/>
+  <line x1="374" y1="22" x2="378" y2="22" stroke="#555" stroke-width="1.2"/>
+  <line x1="374" y1="118" x2="378" y2="118" stroke="#555" stroke-width="1.2"/>
+  <!-- bottom brace for p -->
+  <line x1="382" y1="124" x2="478" y2="124" stroke="#555" stroke-width="1.2"/>
+  <line x1="382" y1="124" x2="382" y2="120" stroke="#555" stroke-width="1.2"/>
+  <line x1="478" y1="124" x2="478" y2="120" stroke="#555" stroke-width="1.2"/>
+
+  <!-- annotation: must match -->
+  <path d="M 130 148 C 140 155, 190 155, 210 148" fill="none" stroke="#b22222" stroke-width="1.5"/>
+  <text x="170" y="157" text-anchor="middle" font-size="12" fill="#b22222">must match</text>
+</svg>
