@@ -3,4 +3,5 @@ title: "Assignments"
 ---
 
 - [A1 · Error, floating-point precision, convergence, and pair interactions](A1/index.qmd) — due Wednesday, September 23, 2026, at 12:00 pm (noon) via Canvas.
+- [A1 answers](A1/answers.qmd)
 - [A2 · Working with functions: root-finding, optimization, and curve fitting](A2/index.qmd) — due Wednesday, October 7, 2026, at 12:00 pm (noon) via Canvas.
