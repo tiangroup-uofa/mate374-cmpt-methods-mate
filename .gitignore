@@ -22,3 +22,4 @@ __pycache__/
 
 # Obsolete exploratory DFT work; final A2 records live under assignments/A2/calculations/.
 /calculations/
+authoring-notes.txt

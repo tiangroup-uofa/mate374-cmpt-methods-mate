@@ -7,7 +7,7 @@ body-classes: lecture-page
 ::: {.callout-note}
 ## Central question
 
-Why does $A\mathbf{x}=\mathbf{b}$ keep appearing in numerical methods, and what does it represent in materials systems?
+Why does $\mathbf{A}\mathbf{x}=\mathbf{b}$ keep appearing in numerical methods, and what does it represent in materials systems?
 :::
 
 ## Learning outcomes
@@ -86,9 +86,18 @@ $$
 \end{aligned}
 $$
 
-That is a system of $3N$ coupled equations. Moving one atom changes its interactions with others, so these derivatives depend on several atomic coordinates. Vanishing derivatives identify stationary configurations, and an energy minimum also requires stability against small changes in the free coordinates. We will study numerical methods for nonlinear systems in Lecture 14, where matrix operations appear again.
+What can we do with such big system of equations? We will show later in Lecture 14 that coupled with a powseer minimization solver, we can indeed use them to obtain the atomic structures with lowest energy, or in other words **relax** the structures. Below shows an animated example of  20-atom Cu cluster using a simple energy formula (EMT potential). In each frame, the information about the partial derivatives of the energies are solved to get the structure to a more stable position.
 
-Now imagine pressing an indenter into a metal or applying a shear load. How do the atoms move to balance the external forces? At static equilibrium, the internal and external force components on each freely moving atom must sum to zero:
+::: {.content-visible when-format="html"}
+![A 20-atom copper cluster relaxing under an EMT potential; the frame labels show its excess energy and largest absolute coordinate derivative.](../../../assets/L11-Cu-cluster-relaxation.gif){#fig-cu-cluster-relaxation fig-alt="Animation of a 20-atom copper cluster relaxing, with energy above the final minimum and largest absolute coordinate derivative shown in each frame." width="55%"}
+:::
+
+::: {.content-visible when-format="pdf"}
+![The final configuration of a 20-atom copper cluster, with its energy and largest absolute coordinate derivative.](../../../assets/L11-Cu-cluster-relaxation.png){fig-alt="Final relaxed 20-atom copper cluster, with zero excess energy and the largest absolute coordinate derivative shown above it." width="55%"}
+:::
+
+
+The partial derivatives of atomic energies are connected to their interatomic forces. Now imagine pressing an indenter into a metal or applying a shear load. How do the atoms move to balance the external forces? At static equilibrium, the internal and external force components on each freely moving atom must sum to zero:
 
 $$
 \begin{aligned}
@@ -99,7 +108,7 @@ $$
 \end{aligned}
 $$
 
-The unknowns are the new atomic positions. Prescribed positions, such as atoms held at a boundary, replace the corresponding unknowns with known values. To see how these force balances become a linear system, we will restrict motion to one direction and approximate each bond by a spring.
+The unknowns are the new atomic positions. We will use a simple trick below to make the non-linear system of energy equations into a linear system of forces, we will restrict motion to one direction and approximate each bond by a spring.
 
 ### Linearized model for atomic forces
 
@@ -184,19 +193,19 @@ $$
 There are **two equations** for **two unknowns**. We can collect their coefficients into a **matrix** and their unknowns into a **vector**:
 
 $$
-\underbrace{\begin{bmatrix}k_{01}+k_{12}&-k_{12}\\-k_{12}&k_{12}\end{bmatrix}}_{K}
+\underbrace{\begin{bmatrix}k_{01}+k_{12}&-k_{12}\\-k_{12}&k_{12}\end{bmatrix}}_{\mathbf{K}}
 \underbrace{\begin{bmatrix}u_1\\u_2\end{bmatrix}}_{\mathbf{u}}
 =
-\underbrace{\begin{bmatrix}0\\F_{\mathrm{ext}}\end{bmatrix}}_{\mathbf{F}}.
+\underbrace{\begin{bmatrix}0\\F_{\mathrm{ext}}\end{bmatrix}}_{\mathbf{f}}.
 $$
 
-Here $K$ is the **stiffness matrix**, $\mathbf{u}$ is the displacement **vector**, and $\mathbf{F}$ is the applied-force **vector**. The two force balances become
+Here $\mathbf{K}$ is the **stiffness matrix**, $\mathbf{u}$ is the displacement **vector**, and $\mathbf{f}$ is the applied-force **vector**. The two force balances become
 
 $$
-\boxed{K\mathbf{u}=\mathbf{F}.}
+\boxed{\mathbf{K}\mathbf{u}=\mathbf{f}.}
 $$
 
-This is a physical example of $A\mathbf{x}=\mathbf{b}$. With Hooke's law for each bond, the force balances form a **system of linear equations** for the unknown displacements.
+This is a physical example of $\mathbf{A}\mathbf{x}=\mathbf{b}$. With Hooke's law for each bond, the force balances form a **system of linear equations** for the unknown displacements.
 
 ::: {.callout-note collapse="true"}
 ## What makes the force-balance equations linear?
@@ -205,12 +214,14 @@ Each unknown displacement is multiplied by a known coefficient, and these contri
 
 Linearity is always judged with respect to the unknowns. For example, fitting $y=a+bx+cx^2$ at known input values leads to equations linear in the unknown coefficients $a$, $b$, and $c$, even though the fitted curve is quadratic in $x$. At $x=2$, the equation is $a+2b+4c=y$. The corresponding matrix row is $[1,2,4]$. This is the same coefficient-collection step we used for the springs.
 
-For a linear system with fixed, invertible $K$, doubling the applied forces doubles the solution displacements. Likewise, adding two applied-force vectors adds their corresponding displacement solutions. This property, called **superposition**, follows from the matrix multiplication rules below.
+For a linear system with fixed, invertible $\mathbf{K}$, doubling the applied forces doubles the solution displacements. Likewise, adding two applied-force vectors adds their corresponding displacement solutions. This property, called **superposition**, follows from the matrix multiplication rules below.
 :::
 
 ## Matrices, vectors, and linear systems
 
 You may remember solving small systems with [Cramer's rule](https://en.wikipedia.org/wiki/Cramer%27s_rule), which expresses each unknown as a ratio of determinants. NumPy and SciPy provide functions for solving these systems. We will first review scalars, vectors, matrices, and their operations. For a fuller review, see Jaan Kiusalaas, [*Numerical Methods in Engineering with Python 3*, Chapter 2: Systems of Linear Algebraic Equations](../../02/references.qmd#ref-kiusalaas2013).
+
+Throughout this lecture, vectors use bold lowercase symbols such as $\mathbf{u}$, while matrices use bold uppercase symbols such as $\mathbf{K}$. Their individual components and entries remain unbolded.
 
 ### Scalars
 
@@ -276,7 +287,7 @@ For the vectors above, `a + b` gives `[5, 7, 9]` and `2 * a` gives `[2, 4, 6]`. 
 A **matrix** is a rectangular array of numbers. A matrix with $m$ rows and $n$ columns has shape $m\times n$:
 
 $$
-A=\underbrace{\begin{bmatrix}
+\mathbf{A}=\underbrace{\begin{bmatrix}
 a_{11}&a_{12}&\cdots&a_{1n}\\
 a_{21}&a_{22}&\cdots&a_{2n}\\
 \vdots&\vdots&\ddots&\vdots\\
@@ -284,7 +295,7 @@ a_{m1}&a_{m2}&\cdots&a_{mn}
 \end{bmatrix}}_{n\text{ columns; }m\text{ rows}}.
 $$
 
-The entry $a_{ij}$ is in row $i$, column $j$. In a system $A\mathbf{x}=\mathbf{b}$, the $m$ rows represent equations and the $n$ columns correspond to unknowns. In NumPy, write one list for each row, as in the example below.
+The entry $a_{ij}$ is in row $i$, column $j$. In a system $\mathbf{A}\mathbf{x}=\mathbf{b}$, the $m$ rows represent equations and the $n$ columns correspond to unknowns. In NumPy, write one list for each row, as in the example below.
 
 ::: {.callout-important}
 ## Row before column
@@ -301,32 +312,32 @@ The matrix with rows $[1,2,3]$, $[4,5,6]$, and $[7,8,9]$ has shape `(3, 3)` and 
 Matrices of the same shape can be added entry by entry. Multiplying by a scalar scales every entry. For example, let
 
 $$
-A=\begin{bmatrix}1&2\\3&4\end{bmatrix},\qquad
-B=\begin{bmatrix}5&6\\7&8\end{bmatrix}.
+\mathbf{A}=\begin{bmatrix}1&2\\3&4\end{bmatrix},\qquad
+\mathbf{B}=\begin{bmatrix}5&6\\7&8\end{bmatrix}.
 $$
 
 Then
 
 $$
-A+B=\begin{bmatrix}6&8\\10&12\end{bmatrix},\qquad
-2A=\begin{bmatrix}2&4\\6&8\end{bmatrix}.
+\mathbf{A}+\mathbf{B}=\begin{bmatrix}6&8\\10&12\end{bmatrix},\qquad
+2\mathbf{A}=\begin{bmatrix}2&4\\6&8\end{bmatrix}.
 $$
 
-A transpose exchanges row and column positions, so $(A^T)_{ij}=A_{ji}$:
+The transpose of $\mathbf{A}$ exchanges row and column positions, so $(\mathbf{A}^T)_{ij}=a_{ji}$:
 
 $$
-A^T=\begin{bmatrix}1&3\\2&4\end{bmatrix}.
+\mathbf{A}^T=\begin{bmatrix}1&3\\2&4\end{bmatrix}.
 $$
 
 In general, transposing an $m\times n$ matrix gives an $n\times m$ matrix. Transposing twice returns the original matrix.
 
 ::: {.quarto-wasm-local notebook="l11_matrix_operations.edit.py" view="edit" title="Add, scale, and transpose matrices" height="550" loading="lazy" fullscreen="true"}
-For the matrices above, `A + B` adds corresponding entries, `2 * A` doubles each entry, and `A.T` exchanges rows and columns. The first row of $A^T$ is $[1,3]$.
+For the matrices above, `A + B` adds corresponding entries, `2 * A` doubles each entry, and `A.T` exchanges rows and columns. The first row of $\mathbf{A}^T$ is $[1,3]$.
 :::
 
 #### Matrix–vector multiplication
 
-Scalar multiplication, such as $2A$, multiplies every entry. Multiplication by a vector instead takes the inner product of each matrix row with that vector. For example,
+Scalar multiplication, such as $2\mathbf{A}$, multiplies every entry. Multiplication by a vector instead takes the inner product of each matrix row with that vector. For example,
 
 $$
 \begin{bmatrix}1&2&3\\4&5&6\end{bmatrix}
@@ -358,22 +369,22 @@ $$
 +x_3\begin{bmatrix}3\\6\end{bmatrix}.
 $$
 
-Each component of $\mathbf{x}$ multiplies one column of $A$, and the resulting vectors are added. For $\mathbf{x}=(1,0,-1)^T$, the result is the first column minus the third: $(1,4)^T-(3,6)^T=(-2,-2)^T$.
+Each component of $\mathbf{x}$ multiplies one column of $\mathbf{A}$, and the resulting vectors are added. For $\mathbf{x}=(1,0,-1)^T$, the result is the first column minus the third: $(1,4)^T-(3,6)^T=(-2,-2)^T$.
 
 For the small matrix above, try the input vectors $(1,0,0)^T$, $(0,1,0)^T$, and $(0,0,1)^T$. Each selects one column. These **basis vectors** isolate the action of the matrix on one input component at a time. They also explain why the identity matrix has unit columns and leaves any vector unchanged.
 ::::
 
 #### Matrix–matrix multiplication
 
-Each entry in a matrix product is the inner product of a row from the first matrix and a column from the second. **The number of columns in $A$ must equal the number of rows in $B$.** The product keeps the number of rows from $A$ and the number of columns from $B$:
+Each entry in a matrix product is the inner product of a row from the first matrix and a column from the second. **The number of columns in $\mathbf{A}$ must equal the number of rows in $\mathbf{B}$.** The product keeps the number of rows from $\mathbf{A}$ and the number of columns from $\mathbf{B}$:
 
 $$
-\underbrace{A}_{m\times n}\;
-\underbrace{B}_{n\times p}
-=\underbrace{AB}_{m\times p}.
+\underbrace{\mathbf{A}}_{m\times n}\;
+\underbrace{\mathbf{B}}_{n\times p}
+=\underbrace{\mathbf{A}\mathbf{B}}_{m\times p}.
 $$
 
-![With $m=3$, $n=5$, and $p=4$, the product has shape $3\times4$. The highlighted first row and first column each contain five entries and give the first entry of $AB$.](matrix-multiplication-dimensions.png){#fig-matmul-dimensions width=95% fig-alt="Gridded matrices A with 3 rows and 5 columns, B with 5 rows and 4 columns, and AB with 3 rows and 4 columns. The first row of A is blue, the first column of B is orange, and the resulting top-left entry of AB is purple."}
+![With $m=3$, $n=5$, and $p=4$, the product has shape $3\times4$. The highlighted first row and first column each contain five entries and give the first entry of $\mathbf{A}\mathbf{B}$.](matrix-multiplication-dimensions.png){#fig-matmul-dimensions width=95% fig-alt="Gridded matrices A and B and their product C = AB. Matrix A has 3 rows and 5 columns, matrix B has 5 rows and 4 columns, and the product has 3 rows and 4 columns. The first row of A is blue, the first column of B is orange, and the resulting top-left entry of C is purple."}
 
 For example,
 
@@ -390,7 +401,7 @@ The first entry is $1(1)+2(0)+3(1)=4$. The other entries follow the same row–c
 `A @ B` gives the $2\times2$ matrix with rows $[4,5]$ and $[10,11]$.
 :::
 
-Matrix multiplication generally depends on order: $AB$ and $BA$ can have different shapes and values, and one may be undefined. For example, a $2\times3$ matrix can multiply a $3\times4$ matrix, giving a $2\times4$ result. Reversing the order would require the dimensions 4 and 2 to match, so that product is undefined.
+Matrix multiplication generally depends on order: $\mathbf{A}\mathbf{B}$ and $\mathbf{B}\mathbf{A}$ can have different shapes and values, and one may be undefined. For example, a $2\times3$ matrix can multiply a $3\times4$ matrix, giving a $2\times4$ result. Reversing the order would require the dimensions 4 and 2 to match, so that product is undefined.
 
 The same dimension rule applies when a row or column vector is stored as a two-dimensional array:
 
@@ -428,61 +439,61 @@ The nonzero entries are shown in **bold**.
 **Square:** the same number of rows and columns.
 
 $$
-A=\begin{bmatrix}\mathbf{1}&\mathbf{2}\\\mathbf{3}&\mathbf{4}\end{bmatrix}.
+\mathbf{A}=\begin{bmatrix}\mathbf{1}&\mathbf{2}\\\mathbf{3}&\mathbf{4}\end{bmatrix}.
 $$
 
-**Identity:** ones on the diagonal and zeros elsewhere. It leaves a vector unchanged: $I\mathbf{x}=\mathbf{x}$.
+**Identity:** ones on the diagonal and zeros elsewhere. It leaves a vector unchanged: $\mathbf{I}\mathbf{x}=\mathbf{x}$.
 
 $$
-I=\begin{bmatrix}\mathbf{1}&0&0\\0&\mathbf{1}&0\\0&0&\mathbf{1}\end{bmatrix}.
+\mathbf{I}=\begin{bmatrix}\mathbf{1}&0&0\\0&\mathbf{1}&0\\0&0&\mathbf{1}\end{bmatrix}.
 $$
 
 **Diagonal:** all entries off the diagonal are zero. This example multiplies the three vector components by 2, 3, and 4, respectively.
 
 $$
-D=\begin{bmatrix}\mathbf{2}&0&0\\0&\mathbf{3}&0\\0&0&\mathbf{4}\end{bmatrix}.
+\mathbf{D}=\begin{bmatrix}\mathbf{2}&0&0\\0&\mathbf{3}&0\\0&0&\mathbf{4}\end{bmatrix}.
 $$
 
 **Upper triangular:** entries below the diagonal are zero.
 
 $$
-U=\begin{bmatrix}\mathbf{1}&\mathbf{2}&\mathbf{3}\\0&\mathbf{5}&\mathbf{6}\\0&0&\mathbf{9}\end{bmatrix}.
+\mathbf{U}=\begin{bmatrix}\mathbf{1}&\mathbf{2}&\mathbf{3}\\0&\mathbf{5}&\mathbf{6}\\0&0&\mathbf{9}\end{bmatrix}.
 $$
 
 **Lower triangular:** entries above the diagonal are zero.
 
 $$
-L=\begin{bmatrix}\mathbf{1}&0&0\\\mathbf{4}&\mathbf{5}&0\\\mathbf{7}&\mathbf{8}&\mathbf{9}\end{bmatrix}.
+\mathbf{L}=\begin{bmatrix}\mathbf{1}&0&0\\\mathbf{4}&\mathbf{5}&0\\\mathbf{7}&\mathbf{8}&\mathbf{9}\end{bmatrix}.
 $$
 
-**Symmetric:** entries on opposite sides of the diagonal match, so $A^T=A$.
+**Symmetric:** entries on opposite sides of the diagonal match, so $\mathbf{A}^T=\mathbf{A}$.
 
 $$
-A=\begin{bmatrix}\mathbf{2}&\mathbf{1}&0\\\mathbf{1}&\mathbf{3}&\mathbf{4}\\0&\mathbf{4}&\mathbf{5}\end{bmatrix}.
+\mathbf{A}=\begin{bmatrix}\mathbf{2}&\mathbf{1}&0\\\mathbf{1}&\mathbf{3}&\mathbf{4}\\0&\mathbf{4}&\mathbf{5}\end{bmatrix}.
 $$
 
 | To create | NumPy |
 |---|---|
 | Identity | `np.eye(3)` |
 | Diagonal | `np.diag([2, 3, 4])` |
-| Upper triangular part of $A$ | `np.triu(A)` |
-| Lower triangular part of $A$ | `np.tril(A)` |
+| Upper triangular part of $\mathbf{A}$ | `np.triu(A)` |
+| Lower triangular part of $\mathbf{A}$ | `np.tril(A)` |
 
 ::: {.quarto-wasm-local notebook="l11_matrix_structures.edit.py" view="edit" title="Create identity, diagonal, triangular, and symmetric matrices" height="760" loading="lazy" fullscreen="true"}
-`np.eye(3)` makes the identity matrix above. `np.diag([2, 3, 4])` makes $D$. Taking the upper and lower triangular parts of the matrix with rows $[1,2,3]$, $[4,5,6]$, and $[7,8,9]$ gives $U$ and $L$ above.
+`np.eye(3)` makes the identity matrix above. `np.diag([2, 3, 4])` makes $\mathbf{D}$. Taking the upper and lower triangular parts of the matrix with rows $[1,2,3]$, $[4,5,6]$, and $[7,8,9]$ gives $\mathbf{U}$ and $\mathbf{L}$ above.
 :::
 ::::
 
-## Solving $A\mathbf{x}=\mathbf{b}$ by inversion
+## Solving $\mathbf{A}\mathbf{x}=\mathbf{b}$ by inversion
 
-For an invertible square matrix, the **inverse** $A^{-1}$ satisfies $A^{-1}A=AA^{-1}=I$. Multiplying both sides of $A\mathbf{x}=\mathbf{b}$ by the inverse gives
+For an invertible square matrix, the **inverse** $\mathbf{A}^{-1}$ satisfies $\mathbf{A}^{-1}\mathbf{A}=\mathbf{A}\mathbf{A}^{-1}=\mathbf{I}$. Multiplying both sides of $\mathbf{A}\mathbf{x}=\mathbf{b}$ by the inverse gives
 
 $$
-A^{-1}A\mathbf{x}=A^{-1}\mathbf{b}
+\mathbf{A}^{-1}\mathbf{A}\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}
 \quad\Longrightarrow\quad
-I\mathbf{x}=A^{-1}\mathbf{b}
+\mathbf{I}\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}
 \quad\Longrightarrow\quad
-\boxed{\mathbf{x}=A^{-1}\mathbf{b}.}
+\boxed{\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}.}
 $$
 
 This generalizes dividing by a nonzero coefficient in a scalar equation.
@@ -490,8 +501,8 @@ This generalizes dividing by a nonzero coefficient in a scalar equation.
 For a $2\times2$ matrix, the inverse can be written explicitly:
 
 $$
-A=\begin{bmatrix}a&b\\c&d\end{bmatrix},\qquad
-A^{-1}=\frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix},
+\mathbf{A}=\begin{bmatrix}a&b\\c&d\end{bmatrix},\qquad
+\mathbf{A}^{-1}=\frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix},
 \qquad ad-bc\ne0.
 $$
 
@@ -502,22 +513,22 @@ In NumPy, `np.linalg.inv(A)` computes the matrix inverse, so the solution is `np
 **Exercise: 3 atoms (2 moving).** Set every spring constant to $k=5$ eV/Å² and apply $F_{\mathrm{ext}}=10$ eV/Å to the last atom. The stiffness matrix is
 
 $$
-K=\begin{bmatrix}10&-5\\-5&5\end{bmatrix},
+\mathbf{K}=\begin{bmatrix}10&-5\\-5&5\end{bmatrix},
 \qquad
-\mathbf{F}=\begin{bmatrix}0\\10\end{bmatrix}.
+\mathbf{f}=\begin{bmatrix}0\\10\end{bmatrix}.
 $$
 
-Compute $K^{-1}$ and multiply $K^{-1}\mathbf{F}$ to find the displacements. Check by substituting back: does $K\mathbf{u}=\mathbf{F}$?
+Compute $\mathbf{K}^{-1}$ and multiply $\mathbf{K}^{-1}\mathbf{f}$ to find the displacements. Check by substituting back: does $\mathbf{K}\mathbf{u}=\mathbf{f}$?
 
-**Exercise: 4 atoms (3 moving).** Add one more atom with the same spring constant. Now $K$ is $3\times3$:
+**Exercise: 4 atoms (3 moving).** Add one more atom with the same spring constant. Now $\mathbf{K}$ is $3\times3$:
 
 $$
-K=\begin{bmatrix}10&-5&0\\-5&10&-5\\0&-5&5\end{bmatrix},
+\mathbf{K}=\begin{bmatrix}10&-5&0\\-5&10&-5\\0&-5&5\end{bmatrix},
 \qquad
-\mathbf{F}=\begin{bmatrix}0\\0\\10\end{bmatrix}.
+\mathbf{f}=\begin{bmatrix}0\\0\\10\end{bmatrix}.
 $$
 
-Compute $K^{-1}\mathbf{F}$ and verify the result. What pattern do the displacements follow?
+Compute $\mathbf{K}^{-1}\mathbf{f}$ and verify the result. What pattern do the displacements follow?
 
 The function `solve_by_inversion(K, F)` below accepts a stiffness matrix and a force vector and returns the displacements. Edit the inputs to solve another chain using the same function.
 
@@ -527,12 +538,12 @@ For 3 atoms with $k=5$ and $F_{\mathrm{ext}}=10$, the displacements are $(2,4)$ 
 
 ## Explore the spring chain
 
-The interactive demo below solves $K\mathbf{u}=\mathbf{F}$ for the equilibrium displacements. The editable **pair spring-constant matrix** lists the stiffness of each spring between two atoms, including fixed atom 0. From these connections, the demo assembles the **system stiffness matrix $K$** shown beside the displacement and force vectors. Watch how the chain's connections determine the size and pattern of $K$.
+The interactive demo below solves $\mathbf{K}\mathbf{u}=\mathbf{f}$ for the equilibrium displacements. The editable **pair spring-constant matrix** lists the stiffness of each spring between two atoms, including fixed atom 0. From these connections, the demo assembles the **system stiffness matrix $\mathbf{K}$** shown beside the displacement and force vectors. Watch how the chain's connections determine the size and pattern of $\mathbf{K}$.
 
 Explore two questions:
 
-- **How do added springs change the solution?** Drag a zero off-diagonal entry in the pair spring-constant matrix above zero to connect two atoms. Keep the applied forces unchanged and compare the displacements and the chain's deformed shape. Which entries of $K$ change?
-- **When does $K$ become singular?** Remove springs by dragging their constants to zero. Can every moving atom still be connected to fixed atom 0 through a path of springs? Compare a removal that leaves a unique solution with one that makes $K$ singular.
+- **How do added springs change the solution?** Drag a zero off-diagonal entry in the pair spring-constant matrix above zero to connect two atoms. Keep the applied forces unchanged and compare the displacements and the chain's deformed shape. Which entries of $\mathbf{K}$ change?
+- **When does $\mathbf{K}$ become singular?** Remove springs by dragging their constants to zero. Can every moving atom still be connected to fixed atom 0 through a path of springs? Compare a removal that leaves a unique solution with one that makes $\mathbf{K}$ singular.
 
 Dashed circles mark unloaded positions, and displacement labels are in Å. The drawing rescales displacements as inputs change, so use the numerical values or scale bar when comparing configurations.
 
@@ -549,6 +560,6 @@ $$
 Both springs extend by $0.1$ Å. The second atom moves $0.2$ Å because its displacement includes both extensions.
 :::
 
-Each added moving atom adds one displacement unknown and one force-balance equation. For a nearest-neighbor chain, the diagonal of $K$ contains the sum of the stiffnesses attached to each moving atom. The neighboring entries are the negative connecting stiffnesses. All other entries are zero, giving a **tridiagonal** matrix.
+Each added moving atom adds one displacement unknown and one force-balance equation. For a nearest-neighbor chain, the diagonal of $\mathbf{K}$ contains the sum of the stiffnesses attached to each moving atom. The neighboring entries are the negative connecting stiffnesses. All other entries are zero, giving a **tridiagonal** matrix.
 
 In a nearest-neighbor chain, a very soft spring allows large relative displacements of the atoms on either side under a small applied load. In the next lecture, we will use the **condition number** to quantify how relative changes in the applied forces can affect the displacement solution.

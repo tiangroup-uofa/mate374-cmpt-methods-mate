@@ -1,5 +1,5 @@
 ---
-title: "Unit 03 · Systems of equations"
+title: "Unit 03 · Systems of equations, matrix operations, working with high-dimensional data"
 toc: false
 ---
 
