@@ -373,7 +373,7 @@ $$
 =\underbrace{AB}_{m\times p}.
 $$
 
-![The two inner dimensions must match. The outer dimensions give the size of the product.](matrix-multiplication-dimensions.png){#fig-matmul-dimensions width=95% fig-alt="A rectangle with m rows and n columns times a rectangle with n rows and p columns gives a rectangle with m rows and p columns. The two n dimensions are highlighted in dark red."}
+![With $m=3$, $n=5$, and $p=4$, the product has shape $3\times4$. The highlighted first row and first column each contain five entries and give the first entry of $AB$.](matrix-multiplication-dimensions.png){#fig-matmul-dimensions width=95% fig-alt="Gridded matrices A with 3 rows and 5 columns, B with 5 rows and 4 columns, and AB with 3 rows and 4 columns. The first row of A is blue, the first column of B is orange, and the resulting top-left entry of AB is purple."}
 
 For example,
 
@@ -485,7 +485,7 @@ I\mathbf{x}=A^{-1}\mathbf{b}
 \boxed{\mathbf{x}=A^{-1}\mathbf{b}.}
 $$
 
-This generalizes dividing by a nonzero coefficient in a scalar equation. Not every square matrix has an inverse: if its rows are linearly dependent, the matrix is **singular**. Such a system can have no solution or infinitely many solutions, depending on the right-hand side.
+This generalizes dividing by a nonzero coefficient in a scalar equation.
 
 For a $2\times2$ matrix, the inverse can be written explicitly:
 
@@ -495,22 +495,9 @@ A^{-1}=\frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix},
 \qquad ad-bc\ne0.
 $$
 
-The denominator $ad-bc$ is the **determinant**. When $ad-bc=0$, the matrix has no inverse and the system does not have a unique solution.
-
-In NumPy, `np.linalg.inv(A)` computes the inverse. For a floating-point array, `A**-1` takes the reciprocal of each entry instead of computing the matrix inverse. Zero entries have no finite reciprocal.
+In NumPy, `np.linalg.inv(A)` computes the matrix inverse, so the solution is `np.linalg.inv(A) @ b`.
 
 ### Solving the spring chain by inversion
-
-For our two-moving-atom chain, each spring contributes to the stiffness matrix:
-
-$$
-K=\begin{bmatrix}k_{01}&0\\0&0\end{bmatrix}
-+\begin{bmatrix}k_{12}&-k_{12}\\-k_{12}&k_{12}\end{bmatrix}.
-$$
-
-The first spring connects atom 1 to fixed atom 0. The second connects the two moving atoms and contributes to both force balances. Adding the matrices gives $k_{01}+k_{12}$ in the first diagonal entry and $-k_{12}$ in both off-diagonal entries. The matrix is symmetric because the same bond enters both equations.
-
-Its determinant is $(k_{01}+k_{12})k_{12}-k_{12}^2=k_{01}k_{12}$. Positive spring constants therefore give an invertible matrix. Setting either spring constant to zero disconnects at least one moving atom from the fixed boundary, and the determinant becomes zero.
 
 **Exercise: 3 atoms (2 moving).** Set every spring constant to $k=5$ eV/Å² and apply $F_{\mathrm{ext}}=10$ eV/Å to the last atom. The stiffness matrix is
 
@@ -532,20 +519,22 @@ $$
 
 Compute $K^{-1}\mathbf{F}$ and verify the result. What pattern do the displacements follow?
 
+The function `solve_by_inversion(K, F)` below accepts a stiffness matrix and a force vector and returns the displacements. Edit the inputs to solve another chain using the same function.
+
 ::: {.quarto-wasm-local notebook="l11_linear_solve.edit.py" view="edit" title="Solve the 3-atom and 4-atom chains by matrix inversion" height="850" loading="lazy" fullscreen="true"}
 For 3 atoms with $k=5$ and $F_{\mathrm{ext}}=10$, the displacements are $(2,4)$ Å. For 4 atoms the displacements are $(2,4,6)$ Å. Each atom moves $2$ Å further than the one before it, because every spring carries the same load and has the same stiffness. Check: `K @ u - F` is zero to floating-point precision in both cases.
 :::
 
 ## Explore the spring chain
 
-The interactive demo below assembles the stiffness matrix $K$ from the spring constants you choose and solves $K\mathbf{u}=\mathbf{F}$ for the equilibrium displacements. The editable matrix lists the spring constants between atom pairs, including fixed atom 0. The displayed $K$ contains the force-balance coefficients for the moving atoms. Dashed circles mark the unloaded positions, and displacement labels are in Å. The drawing rescales displacements as inputs change, so compare the numerical values or scale bar.
+The interactive demo below solves $K\mathbf{u}=\mathbf{F}$ for the equilibrium displacements. The editable **pair spring-constant matrix** lists the stiffness of each spring between two atoms, including fixed atom 0. From these connections, the demo assembles the **system stiffness matrix $K$** shown beside the displacement and force vectors. Watch how the chain's connections determine the size and pattern of $K$.
 
-Start with two moving atoms and compare the displayed matrix with the equations above. Then try the following:
+Explore two questions:
 
-- **Add atoms.** How do the matrix size and the tridiagonal pattern change?
-- **Drag a spring constant to zero.** Which entries of $K$ change? Can the system still be solved?
-- **Add a spring between non-neighboring atoms** (drag a zero off-diagonal entry in the spring-constant matrix above zero). Which entries of $K$ change?
-- **Make one spring much stiffer or much softer than the others.** How do the displacements respond?
+- **How do added springs change the solution?** Drag a zero off-diagonal entry in the pair spring-constant matrix above zero to connect two atoms. Keep the applied forces unchanged and compare the displacements and the chain's deformed shape. Which entries of $K$ change?
+- **When does $K$ become singular?** Remove springs by dragging their constants to zero. Can every moving atom still be connected to fixed atom 0 through a path of springs? Compare a removal that leaves a unique solution with one that makes $K$ singular.
+
+Dashed circles mark unloaded positions, and displacement labels are in Å. The drawing rescales displacements as inputs change, so use the numerical values or scale bar when comparing configurations.
 
 ::: {.quarto-wasm-local notebook="l11_spring_chain.edit.py" view="app" title="Atomic springs and their force-balance matrix" height="1100" loading="lazy" fullscreen="true" marimo-app="true"}
 With two moving atoms, $k_{01}=k_{12}=5$ eV/Å², and $F_{\mathrm{ext}}=0.5$ eV/Å,
@@ -560,6 +549,6 @@ $$
 Both springs extend by $0.1$ Å. The second atom moves $0.2$ Å because its displacement includes both extensions.
 :::
 
-Each added moving atom adds one displacement unknown and one force-balance equation. For a nearest-neighbor chain, the diagonal of $K$ contains the sum of the stiffnesses attached to each moving atom. The neighboring entries are the negative connecting stiffnesses. All other entries are zero, giving a **tridiagonal** matrix. The fixed atom supplies an essential constraint: without it, shifting every atom by the same amount would leave the spring extensions unchanged, and $K$ would be singular.
+Each added moving atom adds one displacement unknown and one force-balance equation. For a nearest-neighbor chain, the diagonal of $K$ contains the sum of the stiffnesses attached to each moving atom. The neighboring entries are the negative connecting stiffnesses. All other entries are zero, giving a **tridiagonal** matrix.
 
 In a nearest-neighbor chain, a very soft spring allows large relative displacements of the atoms on either side under a small applied load. In the next lecture, we will use the **condition number** to quantify how relative changes in the applied forces can affect the displacement solution.

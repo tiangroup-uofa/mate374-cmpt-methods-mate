@@ -44,7 +44,7 @@ def inputs(mo, n_atoms):
         disabled=[[_i == _j for _j in range(_n + 1)] for _i in range(_n + 1)],
         row_labels=_labels,
         column_labels=_labels,
-        label="Spring constants k (eV/Å²)",
+        label="Pair spring constants k (eV/Å²)",
     )
     force = mo.ui.matrix(
         [0.0] * (_n - 1) + [0.5],
@@ -244,7 +244,7 @@ def layout(F, K, K_MAX, SpringChain, force, mo, n_atoms, solvable, spring_list, 
     _view = mo.ui.anywidget(
         SpringChain(springs=spring_list, f=F.tolist(), u=u.tolist() if solvable else [], k_max=K_MAX)
     )
-    _K_view = mo.ui.matrix(K.tolist(), disabled=True, precision=1, label="K (eV/Å²)")
+    _K_view = mo.ui.matrix(K.tolist(), disabled=True, precision=1, label="System stiffness K (eV/Å²)")
     _u_view = (
         mo.ui.matrix(
             u.tolist(), disabled=True, precision=3,
@@ -256,7 +256,7 @@ def layout(F, K, K_MAX, SpringChain, force, mo, n_atoms, solvable, spring_list, 
     )
     mo.vstack(
         [
-            mo.Html("<p>Drag the entries of the spring-constant matrix (springs between atoms) and the external-force vector to change their values.</p>"),
+            mo.Html("<p>Add or remove springs by dragging the pair spring constants above zero or back to zero. How do the displacements and chain shape change? When does the system stiffness matrix K become singular?</p>"),
             mo.hstack([n_atoms, springs], justify="start", gap=2, align="center"),
             _view,
             mo.hstack(
