@@ -213,6 +213,10 @@ def scene_class(anywidget, traitlets):
     .ps canvas { width: 100%; display: block; touch-action: none; cursor: grab;
                  border-radius: 8px; background: rgba(127,127,127,0.07); }
     .ps-hint { font-size: 12px; opacity: 0.65; margin-top: 4px; }
+    .ps-views { margin-top: 6px; font-size: 13px; }
+    .ps-views button { padding: 2px 8px; }
+    .ps button.on { background: rgba(47,109,181,0.18); }
+    .ps-follow { margin-left: 4px; white-space: nowrap; }
     .ps-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
     .ps button { font: inherit; padding: 3px 10px; border-radius: 6px; cursor: pointer;
                  border: 1px solid rgba(127,127,127,0.5); background: rgba(127,127,127,0.08); color: inherit; }
@@ -456,8 +460,46 @@ def scene_class(anywidget, traitlets):
         draw();
       }
 
+      // Smooth camera moves, preset directions, and a slow spin.
+      let camToken = null, spinning = false, onSpinChange = () => {};
+      function setView(az, el, animate = true) {
+        el = Math.max(-1.5, Math.min(1.5, el));
+        while (az - view.az > Math.PI) az -= 2 * Math.PI;
+        while (view.az - az > Math.PI) az += 2 * Math.PI;
+        const token = (camToken = {});
+        if (!animate) { view.az = az; view.el = el; draw(); return; }
+        const a0 = view.az, e0 = view.el, t0 = performance.now();
+        const step = (now) => {
+          if (camToken !== token) return;
+          const t = ease(Math.min(1, (now - t0) / 800));
+          view.az = lerp(a0, az, t); view.el = lerp(e0, el, t);
+          draw();
+          if (t < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }
+      // Look almost straight down a line, tilted slightly so the line stays visible.
+      function lookAlong(d) {
+        d = unit(d);
+        if (d[2] < 0) d = mul(d, -1);
+        setView(Math.atan2(d[1], d[0]) + 0.12, Math.asin(d[2]) + 0.08);
+      }
+      function setSpin(on) {
+        spinning = on; onSpinChange(on);
+        if (!on) return;
+        let last = performance.now();
+        const step = (now) => {
+          if (!spinning) return;
+          view.az -= (now - last) * 0.0005; last = now;
+          draw(); requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }
+      const reset = () => setView(home.az, home.el);
+
       let drag = null;
       canvas.addEventListener("pointerdown", (e) => {
+        camToken = null; if (spinning) setSpin(false);
         drag = { x: e.clientX, y: e.clientY, az: view.az, el: view.el };
         canvas.setPointerCapture(e.pointerId); canvas.style.cursor = "grabbing";
       });
@@ -470,9 +512,25 @@ def scene_class(anywidget, traitlets):
       const end = () => { drag = null; canvas.style.cursor = "grab"; };
       canvas.addEventListener("pointerup", end);
       canvas.addEventListener("pointercancel", end);
-      canvas.addEventListener("dblclick", () => { Object.assign(view, home); draw(); });
+      canvas.addEventListener("dblclick", reset);
       new ResizeObserver(resize).observe(canvas);
-      return { draw, resize };
+      return {
+        draw, resize, setView, lookAlong, setSpin, reset, view,
+        onSpin: (f) => { onSpinChange = f; },
+      };
+    }
+
+    // Buttons under the canvas for common viewing directions.
+    function viewBar(scene, extra = []) {
+      const bar = h("div", "ps-bar ps-views");
+      const mk = (text, title, fn) => { const b = h("button", "", text); b.title = title; b.onclick = fn; bar.append(b); return b; };
+      mk("Default", "Return to the starting view", () => { scene.setSpin(false); scene.reset(); });
+      for (const [text, title, fn] of extra) mk(text, title, () => { scene.setSpin(false); fn(); });
+      mk("Along x", "Look along the x axis", () => { scene.setSpin(false); scene.lookAlong([1, 0, 0]); });
+      mk("From above", "Look down the z axis", () => { scene.setSpin(false); scene.setView(scene.view.az, 1.45); });
+      const spin = mk("⟳ Spin", "Turn the scene slowly", () => scene.setSpin(!spin.classList.contains("on")));
+      scene.onSpin((on) => { spin.classList.toggle("on", on); spin.textContent = on ? "■ Stop spin" : "⟳ Spin"; });
+      return bar;
     }
 
     function matrixTable(rows, opts = {}) {
@@ -519,6 +577,23 @@ def scene_class(anywidget, traitlets):
         };
       };
       const scene = makeScene(canvas, state);
+
+      // The pivot line of the upcoming swing, or of the swing just made.
+      const pivotDir = () => {
+        const next = stages[cur + 1];
+        const S = next && next.lines.length ? next : stages[cur];
+        if (!S.lines.length) return null;
+        const [a, b] = S.lines[0];
+        return cross(stages[cur].M[a].slice(0, 3), stages[cur].M[b].slice(0, 3));
+      };
+      let follow = false;
+      const views = viewBar(scene, [["Along pivot line", "Look down the line the next plane swings about",
+        () => { const d = pivotDir(); if (d) scene.lookAlong(d); }]]);
+      const fl = h("label", "ps-follow"); const fcb = h("input"); fcb.type = "checkbox";
+      fcb.onchange = () => { follow = fcb.checked; if (follow) { scene.setSpin(false); const d = pivotDir(); if (d) scene.lookAlong(d); } };
+      fl.append(fcb, " Follow each pivot line");
+      views.append(fl);
+      left.append(views);
 
       const bar = h("div", "ps-bar");
       const bFirst = h("button", "", "⏮"), bPrev = h("button", "", "◀ Back"),
@@ -573,6 +648,10 @@ def scene_class(anywidget, traitlets):
         };
         const changed = [0, 1, 2].filter((i) => A0[i].some((v, j) => Math.abs(v - A1[i][j]) > 1e-12));
         if (!(animate && step && changed.length)) { finish(); return; }
+        if (follow && active.lines.length) {
+          const [a, c] = active.lines[0];
+          scene.lookAlong(cross(from.M[a].slice(0, 3), from.M[c].slice(0, 3)));
+        }
         anim = { target: active.target, lines: active.lines };
         panel();
         const t0 = performance.now(), dur = 1600;
@@ -624,6 +703,7 @@ def scene_class(anywidget, traitlets):
         return { C, H, view: model.get("view"), point: x, ghost: C, lines: [], planes };
       };
       const scene = makeScene(canvas, state);
+      left.append(viewBar(scene));
 
       const sliders = h("div", "ps-sliders");
       const inputs = b.map((v, i) => {
@@ -677,7 +757,7 @@ def scene_class(anywidget, traitlets):
       const style = h("style"); style.textContent = CSS;
       const wrap = h("div", "ps-wrap"), left = h("div", "ps-left"), right = h("div", "ps-right");
       const canvas = h("canvas");
-      left.append(canvas, h("div", "ps-hint", "Drag to rotate · double-click to reset the view"));
+      left.append(canvas, h("div", "ps-hint", "Drag to rotate, or use the view buttons · double-click to reset"));
       wrap.append(left, right);
       el.append(style, wrap);
       if (model.get("mode") === "resolve") renderResolve(model, left, right, canvas);
