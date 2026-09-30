@@ -1,24 +1,24 @@
 ---
 title: "L13 · Inside a numerical matrix solver"
-subtitle: "Direct elimination, LU factorization, pivoting, and iterative Jacobi updates"
+subtitle: "Gaussian elimination, pivoting, round-off limits, and choosing a practical solver"
 body-classes: lecture-page
 ---
 
 ::: {.callout-note}
 ## Central question
 
-How is a linear system $\mathbf{A}\mathbf{x}=\mathbf{b}$ actually solved inside NumPy, and when would a different kind of solver be the better choice?
+How is a linear system $\mathbf{A}\mathbf{x}=\mathbf{b}$ actually solved inside NumPy, and how do we choose the right solver call for a given matrix?
 :::
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to:
 
-1. **Solve** a small system by Gaussian elimination, forward substitution, and back substitution, and explain what each stage produces.
-2. **Construct** the LU factorization of a small matrix from its elimination multipliers and reuse it for several right-hand sides.
-3. **Explain** why a solver interchanges rows during elimination, using a matrix with a small pivot.
-4. **Carry out** Jacobi iterations and interpret how their residual decreases.
-5. **Compare** direct and iterative solvers in terms of work, storage, accuracy, and convergence.
+1. **Solve** a small system by Gaussian elimination and back substitution, and explain what each stage produces.
+2. **Explain** why a solver interchanges rows during elimination, using a matrix with a small pivot.
+3. **Estimate** the accuracy that double-precision arithmetic allows, using machine precision and the condition number.
+4. **Describe** how LU factorization records elimination so that it can be reused.
+5. **Choose** between `solve`, LU, Cholesky, and banded solvers from the structure of a matrix.
 
 ## From `solve` to the algorithm behind it
 
@@ -27,11 +27,11 @@ In L12, we found that computing $\mathbf{A}^{-1}\mathbf{b}$ is rarely the best w
 Numerical methods for linear systems fall into two families, which are designed for somewhat different situations.
 
 - **Direct methods** transform the equations by a fixed sequence of arithmetic operations and reach the solution after a finite number of steps that can be counted in advance. Gaussian elimination, which we used in L12 for the spring chain, is the classic example. In exact arithmetic, a direct method returns the exact solution. In floating-point arithmetic, every operation is rounded, so the order and choice of operations affect the accuracy.
-- **Iterative methods** start from a guess $\mathbf{x}^{(0)}$ and repeatedly improve it, much like the fixed-point and Newton iterations from L06. Each step typically needs only a product of the matrix with a vector, so these methods are attractive for very large, **sparse** matrices in which most entries are zero. Like any iteration, they raise questions about convergence and about when to stop.
+- **Iterative methods** start from a guess and repeatedly improve it, much like the fixed-point and Newton iterations from L06. They are designed for very large **sparse** matrices, in which most entries are zero, and they raise questions about convergence and about when to stop.
 
-We start with the direct family, because it explains what `np.linalg.solve` does.
+The solvers we call in this course are direct methods, so they are the focus of this lecture. Iterative methods appear briefly at the end.
 
-## Revisiting Gaussian elimination
+## Gaussian elimination: how it works
 
 At each step of Gaussian elimination, we add a multiple of one equation to another. For example, in the spring chain of L12 we used $R_2\leftarrow R_2+\tfrac12R_1$. Adding a multiple of a true equation to another true equation produces a true equation, and the operation can be undone by subtracting the same multiple. The rows change, but their common solution does not.
 
@@ -43,7 +43,7 @@ $$
 
 where $\mathbf{U}$ is an **upper-triangular matrix** and $\mathbf{c}$ is the correspondingly modified right-hand side. From there, we use **back substitution**: solve the last row for $x_n$, substitute it into the row above to find $x_{n-1}$, and continue upward to $x_1$.
 
-@fig-elimination-steps shows how the work is organized for a $5\times5$ matrix. The first row is used as the **pivot row** to create zeros below $a_{11}$. Every remaining entry in the rows below it changes, so the orange block of $4\times4=16$ entries is updated. The next pivot, $u_{22}$, clears column 2 and updates a $3\times3$ block, and so on until only $\mathbf{U}$ remains.
+@fig-elimination-steps shows how the work is organized for a $5\times5$ matrix. The diagonal entry used to clear a column is called the **pivot**, and its row is the **pivot row**. The first pivot row creates zeros below $a_{11}$, and every remaining entry in the rows below it changes, so the orange block of $4\times4=16$ entries is updated. The next pivot, $u_{22}$, clears column 2 and updates a $3\times3$ block, and so on until only $\mathbf{U}$ remains.
 
 ![Gaussian elimination on a $5\times5$ matrix. Each column step fixes one more row of $\mathbf{U}$ (green), creates zeros below the pivot, and updates the smaller trailing block (orange). The black outline marks the pivot that the next step divides by.](../../../assets/L13-elimination-steps.png){#fig-elimination-steps fig-alt="Five gridded matrices. The first is all grey. In each later panel, one more row is green, the entries below earlier pivots are white, and a shrinking square block in the lower right is orange: 16, 9, 4, and then 1 entry. The final panel is upper triangular." width=100%}
 
@@ -55,7 +55,7 @@ $$
 
 floating-point operations. Back substitution touches each entry of $\mathbf{U}$ about once, which costs about $n^2$ operations. This is the origin of the cubic scaling measured in the L12 dense benchmark: nearly all the effort goes into eliminating, and very little into substituting.
 
-## Three direct methods and their target forms
+### Three direct methods and their target forms
 
 Gaussian elimination is one way to reshape $\mathbf{A}\mathbf{x}=\mathbf{b}$. Two other popular direct methods stop at different target forms:
 
@@ -109,9 +109,9 @@ $$
 x_i=\frac{1}{U_{ii}}\left(c_i-\sum_{j=i+1}^{n}U_{ij}x_j\right),\qquad i=n,n-1,\ldots,1.
 $$
 
-Both substitutions need about $n^2$ operations and no further elimination. They also require every diagonal entry to be nonzero, which will matter when we discuss pivoting.
+Both substitutions need about $n^2$ operations and no further elimination. They also require every diagonal entry to be nonzero, which will matter in the next section.
 
-## In-class example: a $3\times3$ system by Gaussian elimination
+### In-class example: a $3\times3$ system by Gaussian elimination
 
 Solve the following system by hand before reading the solution:
 
@@ -191,51 +191,9 @@ $$
 The right-hand column is now the solution, and no back substitution is needed. The extra elimination above the diagonal raises the cost to about $n^3$ operations, compared with $\tfrac23n^3$ for Gaussian elimination, which is why solvers usually stop at the triangular form. Gauss–Jordan elimination is still useful for hand calculations, and applying it to $[\mathbf{A}\,|\,\mathbf{I}]$ is a standard way to compute an inverse.
 :::
 
-## LU factorization: recording the elimination
+## Pivoting: why naive elimination is not enough
 
-In the last section, the multipliers $-0.5$, $0.25$, and $-0.5$ were used once and then discarded. Suppose the spring stiffnesses stay the same but we want the displacements under a second load, or under a hundred different loads. Repeating the elimination would recompute exactly the same multipliers each time, because they depend only on $\mathbf{A}$ and never on $\mathbf{b}$.
-
-LU factorization stores them. Place each multiplier $\ell_{ij}$ in row $i$, column $j$ of a unit lower-triangular matrix, and keep the triangular result of elimination as $\mathbf{U}$. For our example,
-
-$$
-\mathbf{L}=\begin{bmatrix}1&0&0\\-0.5&1&0\\0.25&-0.5&1\end{bmatrix},
-\qquad
-\mathbf{U}=\begin{bmatrix}4&-2&1\\0&3&-1.5\\0&0&3\end{bmatrix}.
-$$
-
-Multiplying them recovers the original matrix. The second row of $\mathbf{L}\mathbf{U}$, for example, is $-0.5(4,-2,1)+1(0,3,-1.5)=(-2,4,-2)$, which is the second row of $\mathbf{A}$. Each row of $\mathbf{A}$ is therefore its row of $\mathbf{U}$ plus the multiples of earlier pivot rows that elimination subtracted.
-
-With $\mathbf{A}=\mathbf{L}\mathbf{U}$, the system $\mathbf{L}\mathbf{U}\mathbf{x}=\mathbf{b}$ splits into two triangular solves. Define the intermediate vector $\mathbf{y}=\mathbf{U}\mathbf{x}$:
-
-$$
-\begin{aligned}
-\mathbf{L}\mathbf{y}&=\mathbf{b}\qquad\text{(forward substitution)},\\
-\mathbf{U}\mathbf{x}&=\mathbf{y}\qquad\text{(back substitution)}.
-\end{aligned}
-$$
-
-For $\mathbf{b}=(11,-16,17)^{\mathsf T}$, forward substitution gives $y_1=11$, $y_2=-16-(-0.5)(11)=-10.5$, and $y_3=17-0.25(11)-(-0.5)(-10.5)=9$. This $\mathbf{y}$ is exactly the modified right-hand side $\mathbf{c}$ we produced during elimination, and back substitution then returns $(1,-2,3)^{\mathsf T}$ as before. LU factorization performs the same arithmetic as Gaussian elimination, reorganized so that the part depending only on $\mathbf{A}$ is done once.
-
-@fig-lu-reuse compares the work for several load cases on a dense system with $n=1000$ unknowns. Eliminating from scratch for every load multiplies the $\tfrac23n^3$ cost by the number of loads. Factoring once costs $\tfrac23n^3$, then about $2n^2$ per additional load, so a thousand load cases cost only about four times as much as one. Forming $\mathbf{A}^{-1}$ also allows reuse, but the inverse itself costs about $2n^3$, three times the factorization, and it adds the extra rounding discussed in L12.
-
-![Leading-order operation counts for solving a dense $1000\times1000$ system with many right-hand sides. Factoring once and reusing $\mathbf{L}$ and $\mathbf{U}$ is cheapest for any number of loads.](../../../assets/L13-lu-reuse-cost.png){#fig-lu-reuse fig-alt="Log-log plot of floating-point operations against number of right-hand sides from 1 to 1000. Repeated elimination rises linearly from about 7 times 10 to the 8 to 7 times 10 to the 11. Forming the inverse starts at 2 times 10 to the 9 and rises slowly. Factor-once starts at about 7 times 10 to the 8 and stays lowest throughout." width=80%}
-
-SciPy exposes the two stages separately. A short listing shows the pattern for a spring chain under several loads:
-
-```python
-import numpy as np
-from scipy.linalg import lu_factor, lu_solve
-
-lu_piv = lu_factor(K)                  # about (2/3) n^3 work, done once
-for f in load_cases:                   # each loop pass: about 2 n^2 work
-    u = lu_solve(lu_piv, f)
-```
-
-A single call to `np.linalg.solve(K, F)` with a two-dimensional `F`, whose columns are the load cases, performs the same factor-once calculation internally.
-
-## Pivoting: choosing which row to divide by
-
-Elimination divides by each pivot. If a pivot is zero, the method stops immediately, even when the system has a perfectly good solution. The system
+The elimination above always used the diagonal entry of the current row as the pivot. This naive version divides by whatever number happens to sit there. If a pivot is zero, the method stops immediately, even when the system has a perfectly good solution. The system
 
 $$
 \begin{aligned}
@@ -260,7 +218,7 @@ $$
 \left(1-\frac{1}{\varepsilon}\right)x_2=2-\frac{1}{\varepsilon}.
 $$
 
-Take $\varepsilon=10^{-20}$. In double precision, $1-10^{20}$ rounds to $-10^{20}$ and $2-10^{20}$ also rounds to $-10^{20}$, because the 1 and the 2 lie far below the roughly 16 significant digits that the large number can carry. We obtain $x_2=1$, which is accurate. Back substitution then gives
+Take $\varepsilon=10^{-20}$. Both $1-10^{20}$ and $2-10^{20}$ are stored as $-10^{20}$, for a reason we examine in the next section. We obtain $x_2=1$, which is accurate. Back substitution then gives
 
 $$
 x_1=\frac{1-x_2}{\varepsilon}=\frac{1-1}{10^{-20}}=0,
@@ -278,144 +236,134 @@ $$
 
 The multiplier is now $\varepsilon$. The second row becomes $(1-\varepsilon)x_2=1-2\varepsilon$, so $x_2\approx1$, and back substitution gives $x_1=2-x_2\approx1$. Both values are accurate to round-off.
 
-This strategy is called **partial pivoting**. Before eliminating column $k$, the solver searches that column from row $k$ downward, finds the entry of largest magnitude, and swaps its row into the pivot position. Every multiplier then satisfies $|\ell_{ij}|\le1$, which keeps the rounding errors introduced during elimination from being amplified by large multipliers. @fig-pivoting-error shows the effect across many pivot sizes. Without pivoting, the relative error in $x_1$ grows in proportion to $\epsilon_{\mathrm{mach}}/\varepsilon$ until the answer carries no correct digits. With pivoting, it remains at machine precision.
-
-![Relative error in $x_1$ for the $2\times2$ system with pivot $a_{11}=\varepsilon$, computed in double precision. Errors with partial pivoting are zero or a single rounding unit and are drawn at $\epsilon_{\mathrm{mach}}$.](../../../assets/L13-pivoting-error.png){#fig-pivoting-error fig-alt="Log-log plot of relative error against pivot size decreasing from 0.1 to 10 to the minus 19. The no-pivoting curve rises along the machine-epsilon-over-epsilon line from about 10 to the minus 15 to 1 at epsilon near 10 to the minus 16, then stays at 1. The partial-pivoting curve stays at machine precision." width=80%}
-
-This example connects to the note on round-off in L12. The matrix is well-conditioned, so the failure lies in the **algorithm**, not in the problem. Elimination without pivoting is numerically unstable for such matrices, while elimination with partial pivoting is stable in practice. The row interchanges are recorded in a **permutation matrix** $\mathbf{P}$, a rearranged identity matrix, so the factorization computed by the solver is
-
-$$
-\mathbf{P}\mathbf{A}=\mathbf{L}\mathbf{U}.
-$$
-
-The right-hand side must be reordered in the same way before forward substitution, $\mathbf{L}\mathbf{y}=\mathbf{P}\mathbf{b}$.
-
-This is the algorithm behind `np.linalg.solve`. NumPy passes the matrix to `gesv` from [LAPACK](https://www.netlib.org/lapack/), a long-established Fortran linear-algebra library, which computes $\mathbf{P}\mathbf{A}=\mathbf{L}\mathbf{U}$ with partial pivoting and then performs the two triangular solves. SciPy's `lu_factor` calls the same factorization. For a symmetric positive-definite matrix, such as a stiffness matrix with enough supports, `scipy.linalg.solve(K, f, assume_a="pos")` instead uses a **Cholesky factorization** $\mathbf{K}=\mathbf{L}\mathbf{L}^{\mathsf T}$, which needs no pivoting and about half the work of LU. The [SciPy linear-algebra reference](https://docs.scipy.org/doc/scipy/reference/linalg.html) lists these options.
+This strategy is called **partial pivoting**. Before eliminating column $k$, the solver searches that column from row $k$ downward, finds the entry of largest magnitude, and swaps its row into the pivot position. Every multiplier then satisfies $|\ell_{ij}|\le1$, so no row is ever multiplied by a huge factor and added to another. The row interchanges are recorded so that the right-hand side can be reordered in the same way. Because the matrix is well-conditioned, the failure without pivoting comes from the order of the arithmetic. In the language of L12, elimination without pivoting is numerically unstable for such matrices, while elimination with partial pivoting is stable in practice.
 
 ### Direct-solver explorer: elimination, Gauss–Jordan, LU, and pivoting
 
-The notebook animates each row operation of Gaussian elimination, Gauss–Jordan elimination, or LU factorization for a system of order 2 to 6. Compare the three methods on the default random system. Then set $a_{11}$ to $10^{-8}$ or $10^{-16}$, turn partial pivoting off, and compare the final $\mathbf{x}$ with the exact solution. Very large entries saturate the colour scale, which makes growth caused by a small pivot easy to spot.
+The notebook animates each row operation of Gaussian elimination, Gauss–Jordan elimination, or LU factorization for a system of order 2 to 6. Compare the three methods on the default random system. Then turn partial pivoting off, set $a_{11}$ to $10^{-4}$, $10^{-8}$, and $10^{-16}$ in turn, and compare the final $\mathbf{x}$ with the exact solution. Very large entries saturate the colour scale, which makes growth caused by a small pivot easy to spot. Note the value at which the answer breaks down, because the next section explains it.
 
 ::: {.quarto-wasm-local notebook="l13_direct_solvers.py" title="Step-by-step Gaussian elimination, Gauss–Jordan elimination, and LU factorization with optional partial pivoting" height="900" loading="lazy" fullscreen="true"}
-Gaussian elimination reaches $[\mathbf{U}\,|\,\mathbf{c}]$ and back-substitutes, Gauss–Jordan elimination reaches $[\mathbf{I}\,|\,\mathbf{x}]$, and LU factorization stores each multiplier in $\mathbf{L}$ before solving $\mathbf{L}\mathbf{y}=\mathbf{P}\mathbf{b}$ and $\mathbf{U}\mathbf{x}=\mathbf{y}$. A very small $a_{11}$ without pivoting produces large multipliers, and the computed solution departs from the exact one. With partial pivoting, the solution remains accurate.
+Gaussian elimination reaches $[\mathbf{U}\,|\,\mathbf{c}]$ and back-substitutes, Gauss–Jordan elimination reaches $[\mathbf{I}\,|\,\mathbf{x}]$, and LU factorization stores each multiplier in $\mathbf{L}$ before solving $\mathbf{L}\mathbf{y}=\mathbf{P}\mathbf{b}$ and $\mathbf{U}\mathbf{x}=\mathbf{y}$. A very small $a_{11}$ without pivoting produces large multipliers, and the computed solution departs from the exact one, completely so once $a_{11}$ is about $10^{-16}$ of the other entries. With partial pivoting, the solution remains accurate.
 :::
 
-## Iterative methods: the Jacobi update
+## Round-off in double precision: the $10^{-16}$ rule of thumb
 
-A direct solver finishes in a predictable number of steps, but it must store and update the entries of its factors. For a very large sparse system, that becomes the limiting cost. An iterative method takes a different route: it guesses the solution and improves the guess using only products of $\mathbf{A}$ with vectors.
-
-The simplest iterative method is the **Jacobi method**. Solve each equation for its own diagonal unknown. For our $3\times3$ example,
+Why did $1-10^{20}$ lose the 1? In L03, we saw that a 64-bit floating-point number stores 53 significant binary digits, roughly 16 decimal digits. The gap between 1 and the next larger stored number is the **machine precision**,
 
 $$
-\begin{aligned}
-x_1&=\frac{11+2x_2-x_3}{4},\\
-x_2&=\frac{-16+2x_1+2x_3}{4},\\
-x_3&=\frac{17-x_1+2x_2}{4}.
-\end{aligned}
+\epsilon_{\mathrm{mach}}=2^{-52}\approx2.2\times10^{-16}.
 $$
 
-These equations rearrange the original system. They become an iteration when we insert the current guess on the right-hand side and call the result the next guess. Starting from $\mathbf{x}^{(0)}=(0,0,0)^{\mathsf T}$, the first sweep gives
+When two numbers are added, the result is rounded to the nearest stored value, and any part of the smaller number lying more than about 16 digits below the larger one is lost. In Python, `1.0 + 1e-17 == 1.0` returns `True`, and so does `1e20 - 1.0 == 1e20`. This gives a practical rule of thumb for `float64`:
 
 $$
-\mathbf{x}^{(1)}=\left(\frac{11}{4},\frac{-16}{4},\frac{17}{4}\right)^{\mathsf T}=(2.75,-4,4.25)^{\mathsf T}.
+\boxed{\text{A contribution smaller than about }10^{-16}\text{ times the largest term in a sum is lost.}}
 $$
 
-Inserting $\mathbf{x}^{(1)}$ into the right-hand sides gives the second sweep:
+Round-off enters a matrix solve in two ways that this rule helps us predict.
+
+**Through the algorithm.** Without pivoting, the second row of the $\varepsilon$ system computes $1-1/\varepsilon$. The 1 carries the information from the original equation, and relative to $1/\varepsilon$ it has size $\varepsilon$. For $\varepsilon=10^{-10}$, the 1 survives with only about six of its digits intact, so $x_1$ comes out with a relative error of about $10^{-16}/10^{-10}=10^{-6}$. Once $\varepsilon$ falls to about $10^{-16}$, the 1 disappears entirely and $x_1$ has no correct digits. @fig-pivoting-error confirms this pattern over nearly twenty orders of magnitude. The error without pivoting follows $\epsilon_{\mathrm{mach}}/\varepsilon$ and reaches 100% near $\varepsilon=10^{-16}$, while partial pivoting keeps it at machine precision throughout.
+
+![Relative error in $x_1$ for the $2\times2$ system with pivot $a_{11}=\varepsilon$, computed in double precision. Errors with partial pivoting are zero or a single rounding unit and are drawn at $\epsilon_{\mathrm{mach}}$.](../../../assets/L13-pivoting-error.png){#fig-pivoting-error fig-alt="Log-log plot of relative error against pivot size decreasing from 0.1 to 10 to the minus 19. The no-pivoting curve rises along the machine-epsilon-over-epsilon line from about 10 to the minus 15 to 1 at epsilon near 10 to the minus 16, then stays at 1. The partial-pivoting curve stays at machine precision." width=80%}
+
+**Through the problem.** Pivoting removes the algorithmic error, but it cannot recover information that the problem itself amplifies. The L12 bound says that a relative change in the data can be magnified by up to the condition number $\kappa$ in the solution. Storing $\mathbf{A}$ and $\mathbf{b}$ already introduces relative changes of about $10^{-16}$, and each arithmetic step adds more of the same size. A good solver therefore delivers
 
 $$
-\begin{aligned}
-x_1^{(2)}&=\frac{11+2(-4)-4.25}{4}=-0.3125,\\
-x_2^{(2)}&=\frac{-16+2(2.75)+2(4.25)}{4}=-0.5,\\
-x_3^{(2)}&=\frac{17-2.75+2(-4)}{4}=1.5625.
-\end{aligned}
+\frac{\|\mathbf{x}_{\mathrm{computed}}-\mathbf{x}\|}{\|\mathbf{x}\|}\lesssim\kappa(\mathbf{A})\times10^{-16}.
 $$
 
-The iterates overshoot and swing back around the true solution $(1,-2,3)$. After 10 sweeps they are $(0.66,-1.60,2.66)$, and after 30 sweeps $(0.989,-1.987,2.989)$. For a general $n\times n$ system, the Jacobi update for component $i$ is
+Equivalently, we lose about $\log_{10}\kappa$ of our 16 significant digits. The weakly anchored spring pair in L12, with $\kappa\approx2\times10^4$, loses about four digits and still gives about twelve correct ones. A matrix with $\kappa\approx10^{12}$ leaves about four. Once $\kappa$ reaches about $10^{16}$, nothing is left, and the matrix is **numerically singular** even if its exact determinant is nonzero. @fig-conditioning-error tests this rule with `np.linalg.solve` on random $6\times6$ matrices whose condition numbers range from 3 to $3\times10^{18}$.
+
+![Relative error of `np.linalg.solve` for random $6\times6$ matrices with prescribed condition numbers, eight matrices per value. The dotted line is the rule of thumb $\kappa\times\epsilon_{\mathrm{mach}}$. Beyond $\kappa\approx10^{16}$ (shaded), the computed solution has no correct digits.](../../../assets/L13-conditioning-error.png){#fig-conditioning-error fig-alt="Log-log scatter of relative error against condition number from 1 to 10 to the 19. The points rise in a band just below a dotted line through 10 to the minus 16 at kappa equal to 1, reaching errors near 1 at kappa near 10 to the 16 and scattering around 1 beyond it, in a shaded region labelled no correct digits left." width=80%}
+
+Both routes lead to the same practical check. A pivot or a condition number that differs by a factor of about $10^{16}$ from the other scales in the problem means that double precision can no longer represent the answer. Before trusting a solution, compute `np.linalg.cond(A)` and the residual, and compare $\kappa\times10^{-16}$ with the accuracy the engineering question requires.
+
+## LU factorization: elimination recorded for reuse
+
+In the $3\times3$ example, the multipliers $-0.5$, $0.25$, and $-0.5$ were used once and then discarded. Suppose the spring stiffnesses stay the same but we want the displacements under a second load, or under a hundred different loads. Repeating the elimination would recompute exactly the same multipliers each time, because they depend only on $\mathbf{A}$ and never on $\mathbf{b}$.
+
+LU factorization stores them. Place each multiplier $\ell_{ij}$ in row $i$, column $j$ of a unit lower-triangular matrix, and keep the triangular result of elimination as $\mathbf{U}$. For our example,
 
 $$
-x_i^{(k+1)}=\frac{1}{a_{ii}}\left(b_i-\sum_{j\ne i}a_{ij}x_j^{(k)}\right),\qquad i=1,2,\ldots,n.
+\mathbf{L}=\begin{bmatrix}1&0&0\\-0.5&1&0\\0.25&-0.5&1\end{bmatrix},
+\qquad
+\mathbf{U}=\begin{bmatrix}4&-2&1\\0&3&-1.5\\0&0&3\end{bmatrix}.
 $$
 
-Every component of the new guess uses only the old guess, so all $n$ updates in one sweep are independent of each other and can be computed at once. Each sweep costs roughly one multiplication and one addition for every nonzero entry of $\mathbf{A}$, and the method never changes or adds entries in the matrix.
-
-### When to stop: the residual
-
-An iterative solver must decide when its guess is good enough. We cannot measure the error $\mathbf{x}^{(k)}-\mathbf{x}$ directly because $\mathbf{x}$ is unknown, but we can always compute the **residual**,
+Multiplying them recovers the original matrix. The second row of $\mathbf{L}\mathbf{U}$, for example, is $-0.5(4,-2,1)+1(0,3,-1.5)=(-2,4,-2)$, which is the second row of $\mathbf{A}$. With $\mathbf{A}=\mathbf{L}\mathbf{U}$, the system splits into two triangular solves through the intermediate vector $\mathbf{y}=\mathbf{U}\mathbf{x}$:
 
 $$
-\mathbf{r}^{(k)}=\mathbf{b}-\mathbf{A}\mathbf{x}^{(k)}.
+\mathbf{L}\mathbf{y}=\mathbf{b}\quad\text{(forward substitution)},\qquad
+\mathbf{U}\mathbf{x}=\mathbf{y}\quad\text{(back substitution)}.
 $$
 
-A common stopping criterion requires the relative residual $\|\mathbf{r}^{(k)}\|_2/\|\mathbf{b}\|_2$ to fall below a chosen tolerance, such as $10^{-6}$. The Jacobi update can be written with the residual:
+For $\mathbf{b}=(11,-16,17)^{\mathsf T}$, forward substitution gives $y_1=11$, $y_2=-16-(-0.5)(11)=-10.5$, and $y_3=17-0.25(11)-(-0.5)(-10.5)=9$. This is exactly the modified right-hand side $\mathbf{c}$ from elimination, and back substitution returns $(1,-2,3)^{\mathsf T}$ as before. LU factorization performs the same arithmetic as Gaussian elimination, reorganized so that the part depending only on $\mathbf{A}$ is done once. With partial pivoting, the row interchanges are recorded in a **permutation matrix** $\mathbf{P}$, a rearranged identity matrix, and the factorization becomes $\mathbf{P}\mathbf{A}=\mathbf{L}\mathbf{U}$, with $\mathbf{L}\mathbf{y}=\mathbf{P}\mathbf{b}$.
 
-$$
-\mathbf{x}^{(k+1)}=\mathbf{x}^{(k)}+\omega\,\mathbf{D}^{-1}\mathbf{r}^{(k)},
-$$
+This is the algorithm behind `np.linalg.solve`. NumPy passes the matrix to `gesv` from [LAPACK](https://www.netlib.org/lapack/), a long-established Fortran linear-algebra library, which computes $\mathbf{P}\mathbf{A}=\mathbf{L}\mathbf{U}$ and then performs the two triangular solves. @fig-lu-reuse shows why keeping the factors pays off for several load cases on a dense system with $n=1000$ unknowns. Factoring once costs $\tfrac23n^3$, then about $2n^2$ per load, so a thousand loads cost only about four times as much as one. Forming $\mathbf{A}^{-1}$ also allows reuse, but the inverse itself costs about $2n^3$, three times the factorization.
 
-where $\mathbf{D}$ is the diagonal part of $\mathbf{A}$, so $\mathbf{D}^{-1}\mathbf{r}^{(k)}$ divides each residual component by its diagonal entry. With $\omega=1$, this is exactly the plain Jacobi update above. The **relaxation factor** $0<\omega<1$ takes a shorter step, which can damp the overshooting we saw in the $3\times3$ example. Recall from L12 that a small residual does not guarantee a small error when the matrix is ill-conditioned.
+![Leading-order operation counts for solving a dense $1000\times1000$ system with many right-hand sides. Factoring once and reusing $\mathbf{L}$ and $\mathbf{U}$ is cheapest for any number of loads.](../../../assets/L13-lu-reuse-cost.png){#fig-lu-reuse fig-alt="Log-log plot of floating-point operations against number of right-hand sides from 1 to 1000. Repeated elimination rises linearly from about 7 times 10 to the 8 to 7 times 10 to the 11. Forming the inverse starts at 2 times 10 to the 9 and rises slowly. Factor-once starts at about 7 times 10 to the 8 and stays lowest throughout." width=80%}
 
-### Does Jacobi always converge?
+## Choosing a solver in practice
 
-It does not. Jacobi converges for any starting guess when $\mathbf{A}$ is **strictly diagonally dominant**, meaning that in every row the diagonal entry is larger in magnitude than the sum of the other entries:
+We rarely write elimination ourselves. The practical skill is recognizing which library call matches the matrix. Every factorization above costs a multiple of $n^3$ for a dense matrix, and each step below either reduces that multiple or removes the cubic term altogether. Work through the questions in order.
 
-$$
-|a_{ii}|>\sum_{j\ne i}|a_{ij}|\qquad\text{for every row } i.
-$$
+1. **Start with `np.linalg.solve(A, b)`.** It performs LU with partial pivoting and is the right default for a square, nonsingular matrix. If all the load cases are known at once, pass them as the columns of a two-dimensional `b`, and the factorization is computed only once.
+2. **If the same matrix meets new right-hand sides one at a time, keep the LU factors.** This happens when each load depends on a previous result, as in time stepping or in the nonlinear iterations of L14. Call `lu_factor` once and `lu_solve` for each new vector.
+3. **If the matrix is symmetric positive definite, use Cholesky.** A symmetric matrix $\mathbf{K}$ is **positive definite** when $\mathbf{u}^{\mathsf T}\mathbf{K}\mathbf{u}>0$ for every nonzero $\mathbf{u}$. For a spring network, $\tfrac12\mathbf{u}^{\mathsf T}\mathbf{K}\mathbf{u}$ is the elastic energy stored by the displacements $\mathbf{u}$. A network with enough supports stores positive energy under any displacement, so its stiffness matrix is positive definite. The L12 chain without its anchor spring is not, because a rigid translation stores no energy. For a positive-definite matrix, the **Cholesky factorization** $\mathbf{K}=\mathbf{L}\mathbf{L}^{\mathsf T}$ uses the symmetry to compute a single triangular factor. It needs about $\tfrac13n^3$ operations, half those of LU, stores half as many entries, and needs no pivoting.
+4. **If the nonzeros lie in a narrow band, use a banded solver.** A matrix with $p$ nonzero diagonals on each side of the main diagonal needs only about $np^2$ operations with `solve_banded`, or with `solveh_banded` when it is also symmetric positive definite. For the tridiagonal chain of L12, $p=1$, and the cost falls from cubic to linear in $n$.
 
-This condition is sufficient but not necessary. Our $3\times3$ matrix satisfies it strictly in rows 1 and 3, with $4>3$, and only with equality in row 2, with $4=2+2$. The iteration still converges, as the calculation above shows. Stiffness matrices of spring networks behave in a similar way: the diagonal entry of an atom equals the sum of its spring constants, so it matches the off-diagonal sum exactly for every atom except those attached to a fixed support.
+@fig-solver-cheat-sheet collects these steps with the corresponding calls and their leading cost.
 
-How quickly Jacobi converges depends on the physics of the problem. @fig-jacobi-chain applies it to the spring chain from L12, with 20 moving atoms, $k=5$ eV/Å², and a force of 1 eV/Å on the free end. The exact displacements form the straight line $u_i=iF/k$.
+![Solver cheat sheet for a square linear system. Each row that applies replaces the call above it. The last row lists the checks that apply to every solution.](../../../assets/L13-solver-cheat-sheet.png){#fig-solver-cheat-sheet fig-alt="A table with five rows. Start here: np.linalg.solve, LU with partial pivoting, two-thirds n cubed. Same A with loads arriving one at a time: lu_factor and lu_solve, two-thirds n cubed once and 2 n squared per right-hand side. Symmetric positive definite, such as a supported stiffness matrix: cho_factor and cho_solve, Cholesky, one-third n cubed and half the storage. Nonzeros only near the diagonal, such as a nearest-neighbour chain: solve_banded or solveh_banded, about n p squared and n for tridiagonal. Always check: residual and np.linalg.cond, relative error at most about kappa times 10 to the minus 16." width=100%}
 
-![Left: Jacobi iterates for a spring chain with 20 moving atoms, starting from zero displacement. The load information spreads inward from the loaded end one atom per sweep. Right: relative residual against sweep number for the $3\times3$ example and for chains of 5, 20, and 80 moving atoms.](../../../assets/L13-jacobi-spring-chain.png){#fig-jacobi-chain fig-alt="Left panel: displacement against atom index, with a dashed straight exact line from 0 to 4 angstroms. After 1 sweep only the last atom has moved; after 10 and 50 sweeps displacements are concentrated near the loaded end; after 200 sweeps the profile is curved and below the line; after 1000 sweeps it is close to the line. Right panel: semilog residual curves. The 3 by 3 example and the 5-atom chain fall below 10 to the minus 12 within about 150 and 550 sweeps; the 20-atom chain reaches about 10 to the minus 4.5 after 3000 sweeps; the 80-atom chain remains near 10 to the minus 1." width=100%}
+For the spring chain, the four options look like this. Each returns the same displacements, and the choice changes the work and memory:
 
-After one sweep, only the loaded atom has moved, because the update of atom $i$ uses only the old displacements of its neighbours. Each further sweep carries the effect of the load one atom farther. Force balance requires the whole chain to stretch, so the profile creeps toward the straight line. The right panel shows the consequence. The 5-atom chain reaches a residual of $10^{-6}$ within a few hundred sweeps, the 20-atom chain needs more than 3000, and the 80-atom chain has barely improved after 3000. A direct solve of the same tridiagonal chain would finish in a few operations per atom.
+```python
+import numpy as np
+from scipy.linalg import lu_factor, lu_solve, cho_factor, cho_solve, solveh_banded
 
-Faster iterative methods address exactly this weakness. The **conjugate-gradient method**, for symmetric positive-definite matrices, chooses each update direction using information from all previous steps. **Multigrid methods** correct the long-wavelength part of the error on coarser copies of the lattice, where information crosses the structure in a few steps. Both keep the ingredients of Jacobi: a guess, a residual, and updates built from matrix–vector products. SciPy provides conjugate gradients and related methods in [`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html).
+u = np.linalg.solve(K, f)             # default: LU with partial pivoting
 
-## Why iterative methods matter: fill-in
+lu = lu_factor(K)                     # reuse: factor once ...
+u = lu_solve(lu, f)                   # ... then about 2 n^2 per load
 
-If a banded direct solver handles the chain so well, why use iterative methods at all? The answer appears when the atoms are connected in more than one direction. @fig-fill-in shows a square lattice of $12\times12$ moving atoms, each connected by springs to its four nearest neighbours, with the atoms around the edge held fixed. Numbering the atoms row by row gives a $144\times144$ stiffness matrix with only five nonzero diagonals: the atom itself, its left and right neighbours, and its neighbours in the rows above and below, which lie 12 positions away in the numbering.
+c = cho_factor(K)                     # symmetric positive definite: Cholesky
+u = cho_solve(c, f)
+
+ab = np.vstack([np.r_[0, np.diag(K, 1)], np.diag(K)])  # upper band, then diagonal
+u = solveh_banded(ab, f)              # banded and positive definite: about n work
+```
+
+The final row of the cheat sheet applies to whichever call we choose. Compute the residual $\mathbf{r}=\mathbf{b}-\mathbf{A}\mathbf{x}$ and the condition number, and use $\kappa\times10^{-16}$ to judge how many digits of the answer can be trusted.
+
+## Nice to know: iterative solvers for very large sparse systems
+
+Direct solvers have one weakness that the cheat sheet does not show. When atoms are connected in more than one direction, elimination creates new nonzero entries between the bands, a process called **fill-in**. @fig-fill-in shows a square lattice of $12\times12$ moving atoms, each connected by springs to its four neighbours. Its stiffness matrix has only five nonzero diagonals, but its Cholesky factors fill the whole band between them and contain about five times as many nonzero entries. For three-dimensional finite-element models with millions of unknowns, the memory needed for the factors can exceed what a computer has.
 
 ![A square lattice with $12\times12$ moving atoms (left), the nonzero pattern of its stiffness matrix (centre), and the nonzero pattern of its Cholesky factors (right). Elimination fills in the entire band between the outer diagonals.](../../../assets/L13-fill-in.png){#fig-fill-in fig-alt="Left: a 14 by 14 grid of points with black fixed atoms on the boundary and green moving atoms inside. Centre: a 144 by 144 sparsity plot with five thin diagonals, labelled 672 nonzero entries. Right: the factor sparsity plot, a solid orange band about 12 entries wide on each side of the diagonal, labelled 3334 nonzero entries." width=100%}
 
-Elimination destroys most of this sparsity. When a pivot row is subtracted from a row below it, zeros between the diagonals become nonzero, a process called **fill-in**. The factors in @fig-fill-in contain about five times as many nonzero entries as the stiffness matrix. For an $m\times m$ lattice with $n=m^2$ atoms, the band has half-width about $m=\sqrt{n}$, so a banded factorization stores about $n^{3/2}$ entries and needs about $n^2$ operations, and a three-dimensional lattice is worse again. A Jacobi or conjugate-gradient sweep stores only the original five diagonals and costs about $5n$ operations. For finite-element models with millions of unknowns, this difference in storage often decides the choice of solver. Sparse direct solvers reduce fill-in by renumbering the unknowns and remain competitive for many two-dimensional problems.
+Iterative solvers avoid fill-in. They start from a guess, compute the residual, and improve the guess using only products of the original sparse matrix with vectors, stopping when the residual falls below a chosen tolerance. The simplest is the **Jacobi method**, which updates each unknown from its own equation. Much faster methods, such as the **conjugate-gradient method** for symmetric positive-definite matrices and **GMRES** for general matrices, are available in [`scipy.sparse.linalg`](https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html). How quickly they converge depends on the matrix, and they are usually reserved for large two- and three-dimensional models.
 
-### Demo: direct elimination beside Jacobi
-
-The next notebook runs Gaussian elimination and relaxed Jacobi side by side on a banded system with three nonzero diagonals on each side of the main diagonal. Press **Play**, then change the matrix dimension and $\omega$. Compare the number of row operations on the left with the number of sweeps needed on the right to reach a relative residual of $10^{-4}$.
+The optional notebook below runs Gaussian elimination and a relaxed Jacobi iteration side by side on the same banded system, so you can compare a finite sequence of eliminations with a residual that shrinks sweep by sweep.
 
 ::: {.quarto-wasm-local notebook="l13_direct_vs_iterative.py" title="Gaussian elimination beside relaxed Jacobi for a banded system" height="880" loading="lazy" fullscreen="true"}
-Gaussian elimination needs one row operation for each nonzero entry below the diagonal, 12 for $n=6$ and 66 for $n=24$, before back substitution. Relaxed Jacobi with $\omega=0.8$ reaches a relative residual of $10^{-4}$ in 23 sweeps for $n=6$ and 66 sweeps for $n=24$, while the generated $n=10$ matrix needs more than 100 sweeps. The sweep count depends on the particular matrix and on $\omega$, whereas the direct operation count depends only on the size and band structure.
+Gaussian elimination needs one row operation for each nonzero entry below the diagonal, 12 for $n=6$ and 66 for $n=24$, before back substitution. Relaxed Jacobi with $\omega=0.8$ reaches a relative residual of $10^{-4}$ in 23 sweeps for $n=6$ and 66 sweeps for $n=24$, while the generated $n=10$ matrix needs more than 100 sweeps. The sweep count depends on the particular matrix, whereas the direct operation count depends only on the size and band structure.
 :::
-
-## Choosing between direct and iterative solvers
-
-| | Direct (LU, Cholesky) | Iterative (Jacobi, conjugate gradients) |
-|---|---|---|
-| Result | Solution after a fixed number of steps, accurate to round-off for a well-conditioned system | Approximate solution, improved until the residual meets a tolerance |
-| Dense work | About $\tfrac23n^3$ for LU | About $2n^2$ per sweep, multiplied by the number of sweeps |
-| Sparse storage | Grows with fill-in | Only the nonzero entries of $\mathbf{A}$ and a few vectors |
-| Several right-hand sides | Factor once, reuse $\mathbf{L}$ and $\mathbf{U}$ cheaply | Iterate again for each right-hand side |
-| Main risk | Small pivots without pivoting, and memory for large sparse systems | Slow convergence or divergence, depending on the matrix |
-
-: Direct and iterative solvers compared. {#tbl-direct-iterative}
-
-For dense matrices of moderate size, `np.linalg.solve` is the right default, and `scipy.linalg.solve_banded` exploits a narrow band. For very large sparse systems from two- and three-dimensional models, iterative methods from `scipy.sparse.linalg` are often the only practical option.
 
 ## Take-home message
 
-- Direct solvers reshape $\mathbf{A}\mathbf{x}=\mathbf{b}$ into triangular or diagonal systems that can be solved by forward and back substitution. Gaussian elimination costs about $\tfrac23n^3$ operations, and each substitution costs about $n^2$.
-- LU factorization records the elimination multipliers in $\mathbf{L}$. Factoring once and reusing $\mathbf{L}$ and $\mathbf{U}$ is the efficient way to handle many load cases with the same stiffness matrix.
-- Partial pivoting interchanges rows so that each pivot is the largest available entry in its column. It prevents the growth of rounding errors caused by small pivots. `np.linalg.solve` uses LU factorization with partial pivoting through LAPACK.
-- Iterative methods such as Jacobi improve a guess until the residual meets a tolerance. Each sweep costs only about as much as a matrix–vector product and stores no fill-in, but the number of sweeps depends on the matrix and can be very large for a long chain.
+- Gaussian elimination reshapes $\mathbf{A}\mathbf{x}=\mathbf{b}$ into $\mathbf{U}\mathbf{x}=\mathbf{c}$ in about $\tfrac23n^3$ operations, and back substitution then solves it in about $n^2$.
+- Naive elimination fails on zero or small pivots. Partial pivoting swaps the largest available entry into each pivot position and keeps every multiplier at most 1 in magnitude.
+- In `float64`, contributions below about $10^{-16}$ of the largest term are lost. A pivot that small without pivoting, or a condition number of about $10^{16}$, leaves no correct digits. In general, expect a relative error of about $\kappa\times10^{-16}$.
+- LU factorization records elimination as $\mathbf{P}\mathbf{A}=\mathbf{L}\mathbf{U}$. In practice, start with `np.linalg.solve`, keep LU factors for repeated solves, use Cholesky for symmetric positive-definite matrices, and use a banded solver when the nonzeros lie near the diagonal.
 
 ## Check your understanding
 
-1. Carry out Gaussian elimination and back substitution for the spring chain of L12 with three moving atoms, then write the resulting multipliers as the $\mathbf{L}$ factor. Which multipliers would you reuse if the load moved from atom 3 to atom 2?
-2. For $\varepsilon=10^{-20}$, explain in one or two sentences why elimination without pivoting gives an accurate $x_2$ but an inaccurate $x_1$.
-3. Perform two Jacobi sweeps by hand for the system $4x_1-x_2=3$ and $-x_1+4x_2=3$, starting from $(0,0)$. Is the matrix strictly diagonally dominant? Compare your iterates with the exact solution.
-4. In @fig-jacobi-chain, why does the 80-atom chain converge so much more slowly than the 5-atom chain, even though every row of its stiffness matrix has the same entries?
-5. A finite-element model of a turbine blade has two million unknowns and about 30 nonzero entries per row. Estimate the storage for the matrix itself in double precision. Which family of solver would you try first, and what would you check about its result?
+1. Carry out Gaussian elimination and back substitution for the spring chain of L12 with three moving atoms, then write the resulting multipliers as the $\mathbf{L}$ factor. Which calculations would you reuse if the load moved from atom 3 to atom 2?
+2. For $\varepsilon=10^{-20}$, explain why elimination without pivoting gives an accurate $x_2$ but an inaccurate $x_1$. Roughly how many correct digits would $x_1$ have for $\varepsilon=10^{-8}$?
+3. A stiffness matrix has $\kappa\approx10^{9}$. How many significant digits of the displacements can you expect from `np.linalg.solve`? Would switching to Cholesky improve this?
+4. Use the cheat sheet to choose a solver for each case: (a) a $2000\times2000$ dense nonsymmetric matrix with one right-hand side; (b) the stiffness matrix of a supported spring network, solved for 500 load cases that arrive one after another; (c) a nearest-neighbour chain of a million atoms.
+5. Why is the stiffness matrix of an unanchored spring chain not positive definite? What happens when you pass it to `cho_factor`, and how does that connect to the singular matrices of L12?
 
 ## Next
 

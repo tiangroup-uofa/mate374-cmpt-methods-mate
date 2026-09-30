@@ -28,4 +28,4 @@ toc: false
 
 11. [L11 · Recap of linear algebra](03/L11/index.qmd) — harmonic bonds, coupled force balances, stiffness matrices, and equilibrium displacements.
 12. [L12 · Practical matrix solutions](03/L12/index.qmd) — singularity, conditioning, dense and banded solves, and Gaussian elimination.
-13. [L13 · Inside a numerical matrix solver](03/L13/index.qmd) — Gaussian elimination, LU factorization, partial pivoting, Jacobi iteration, and when to choose direct or iterative solvers.
+13. [L13 · Inside a numerical matrix solver](03/L13/index.qmd) — Gaussian elimination, partial pivoting, the 10⁻¹⁶ round-off limit, LU reuse, and a cheat sheet for choosing a solver.

@@ -176,58 +176,90 @@ def pivoting_error():
     plt.close(fig)
 
 
-def chain_matrix(n, k=5.0):
-    K = k * (2 * np.eye(n) - np.eye(n, k=1) - np.eye(n, k=-1))
-    K[-1, -1] = k
-    return K
+def conditioning_error():
+    """Relative error of np.linalg.solve against a prescribed condition number."""
+    rng = np.random.default_rng(374)
+    n = 6
+    kappas, errors = [], []
+    for kappa in np.logspace(0.5, 18.5, 37):
+        for _ in range(8):
+            # A = Q1 diag(s) Q2^T has singular values from 1 down to 1/kappa.
+            Q1, _r = np.linalg.qr(rng.standard_normal((n, n)))
+            Q2, _r = np.linalg.qr(rng.standard_normal((n, n)))
+            A = Q1 @ np.diag(np.logspace(0, -np.log10(kappa), n)) @ Q2.T
+            x_true = rng.standard_normal(n)
+            try:
+                x = np.linalg.solve(A, A @ x_true)
+            except np.linalg.LinAlgError:
+                continue
+            kappas.append(kappa)
+            errors.append(np.linalg.norm(x - x_true) / np.linalg.norm(x_true))
+    eps = np.finfo(float).eps
+    fig, ax = plt.subplots(figsize=(7.2, 4.3), layout="constrained")
+    ax.axvspan(1 / eps, 1e19, color=RED, alpha=0.08)
+    ax.loglog(kappas, np.maximum(errors, 1e-17), "o", ms=3.5, color=GREEN, alpha=0.7,
+              label="np.linalg.solve, random 6×6 matrices")
+    k = np.logspace(0, 19, 50)
+    ax.loglog(k, eps * k, color="black", ls=":", lw=2,
+              label=r"rule of thumb: $\kappa\times\epsilon_{\mathrm{mach}}\approx\kappa\times10^{-16}$")
+    ax.axhline(1, color=GREY, lw=1)
+    ax.text(3e17, 1e-6, "no correct\ndigits left", color=RED, ha="center", fontsize=10)
+    ax.set(xlabel=r"Condition number $\kappa_2(\mathbf{A})$",
+           ylabel="Relative error in x", xlim=(1, 1e19), ylim=(1e-17, 1e3))
+    ax.grid(True, which="major", alpha=0.3)
+    ax.legend(frameon=False, loc="upper left", fontsize=10)
+    fig.savefig(ASSETS / "L13-conditioning-error.png", dpi=DPI)
+    plt.close(fig)
 
 
-def jacobi_history(A, b, sweeps):
-    x = np.zeros_like(b)
-    d = np.diag(A)
-    xs, res = [x.copy()], [1.0]
-    for _ in range(sweeps):
-        x = x + (b - A @ x) / d
-        xs.append(x.copy())
-        res.append(np.linalg.norm(b - A @ x) / np.linalg.norm(b))
-    return np.array(xs), np.array(res)
-
-
-def jacobi_spring_chain():
-    n, k, F = 20, 5.0, 1.0
-    K = chain_matrix(n, k)
-    f = np.zeros(n)
-    f[-1] = F
-    xs, _ = jacobi_history(K, f, 2000)
-    atoms = np.arange(n + 1)
-    fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4.3), layout="constrained")
-    left.plot(atoms, atoms * F / k, color="black", lw=2, ls="--", label="exact  $u_i = iF/k$")
-    shades = plt.cm.YlGn(np.linspace(0.35, 0.95, 5))
-    for color, sweep in zip(shades, (1, 10, 50, 200, 1000)):
-        left.plot(atoms, np.r_[0.0, xs[sweep]], "o-", ms=3.5, color=color, lw=1.6,
-                  label=f"after {sweep} sweep{'' if sweep == 1 else 's'}")
-    left.set(xlabel="Atom index i (atom 0 fixed, load on atom 20)",
-             ylabel="Displacement $u_i$ (Å)", title="Jacobi iterates, 20 moving atoms")
-    left.legend(frameon=False, fontsize=9)
-    left.grid(alpha=0.3)
-
-    A3 = np.array([[4, -2, 1], [-2, 4, -2], [1, -2, 4.0]])
-    b3 = np.array([11, -16, 17.0])
-    _, r3 = jacobi_history(A3, b3, 3000)
-    right.semilogy(r3, color=ORANGE, lw=2, label="3×3 worked example")
-    for nn, color in [(5, BLUE), (20, GREEN), (80, GREY)]:
-        Kn = chain_matrix(nn, k)
-        fn = np.zeros(nn)
-        fn[-1] = F
-        _, rn = jacobi_history(Kn, fn, 3000)
-        right.semilogy(rn, color=color, lw=2, label=f"spring chain, {nn} atoms")
-    right.axhline(1e-6, color="black", ls=":", lw=1.2)
-    right.text(3000, 2e-6, "tolerance $10^{-6}$", ha="right", fontsize=9)
-    right.set(xlabel="Jacobi sweep", ylabel="Relative residual  $\\|b-Ax\\|/\\|b\\|$",
-              ylim=(1e-12, 3), xlim=(0, 3000), title="Convergence depends on the matrix")
-    right.legend(frameon=False, fontsize=9, loc="lower left")
-    right.grid(alpha=0.3)
-    fig.savefig(ASSETS / "L13-jacobi-spring-chain.png", dpi=DPI)
+def solver_cheat_sheet():
+    rows = [
+        ("Start here", "Square, nonsingular A", "np.linalg.solve(A, b)",
+         "LU with partial pivoting", r"$\frac{2}{3}n^3$"),
+        ("Same A, loads arrive\none at a time?", "e.g. many load cases,\nrepeated steps",
+         "lu = lu_factor(A)\nx = lu_solve(lu, b)", "factor once, reuse L, U",
+         r"$\frac{2}{3}n^3$ once, $2n^2$ per b"),
+        ("Symmetric positive\ndefinite?", "e.g. supported\nstiffness matrix K",
+         "c = cho_factor(K)\nx = cho_solve(c, f)", r"Cholesky $\mathbf{K}=\mathbf{L}\mathbf{L}^{\mathsf{T}}$",
+         r"$\frac{1}{3}n^3$, half the storage"),
+        ("Nonzeros only near\nthe diagonal?", "e.g. nearest-neighbour\nchain",
+         "solve_banded((p, p), ab, b)\nsolveh_banded(ab, b)  # SPD", "banded LU / Cholesky",
+         r"about $np^2$; $n$ for tridiagonal"),
+        ("Always check", "", "r = b - A @ x\nnp.linalg.cond(A)", "residual, conditioning",
+         r"rel. error $\lesssim\kappa\times10^{-16}$"),
+    ]
+    heads = ["Question", "Typical case", "NumPy / SciPy call", "Method", "Leading work"]
+    widths = [2.3, 2.1, 3.4, 2.4, 2.4]
+    fills = ["#eef1f4", "#fdf3e6", "#e6f2ec", "#e6f2ec", "#f6f6f6"]
+    fig, ax = plt.subplots(figsize=(12.6, 5.6), layout="constrained")
+    ax.set_axis_off()
+    x_edges = np.concatenate([[0], np.cumsum(widths)])
+    h, head_h = 1.0, 0.55
+    for j, text in enumerate(heads):
+        ax.add_patch(Rectangle((x_edges[j], 0), widths[j], head_h, facecolor=GREEN,
+                               edgecolor="white", lw=2))
+        ax.text(x_edges[j] + widths[j] / 2, head_h / 2, text, ha="center", va="center",
+                color="white", weight="bold", fontsize=11)
+    for i, row in enumerate(rows):
+        y = -(i + 1) * h
+        for j, text in enumerate(row):
+            face = fills[i] if j == 0 else ("#fbfbfb" if i % 2 else "white")
+            ax.add_patch(Rectangle((x_edges[j], y), widths[j], h, facecolor=face,
+                                   edgecolor="#c9ced3", lw=1))
+            ax.text(x_edges[j] + 0.12 if j == 2 else x_edges[j] + widths[j] / 2, y + h / 2, text,
+                    ha="left" if j == 2 else "center", va="center", fontsize=10.5,
+                    family="monospace" if j == 2 else None,
+                    weight="bold" if j == 0 else None)
+        if 0 < i < len(rows) - 1:
+            ax.annotate("", xy=(0.25, y + h - 0.02), xytext=(0.25, y + h + 0.3),
+                        arrowprops=dict(arrowstyle="-|>", color=ORANGE, lw=1.6))
+    ax.text(0, -(len(rows) + 1) * h + 0.55,
+            "Read top to bottom: each yes replaces the call above it. "
+            "n = number of unknowns, p = number of nonzero diagonals on each side.",
+            fontsize=10, color="#444444")
+    ax.set_xlim(-0.05, x_edges[-1] + 0.05)
+    ax.set_ylim(-(len(rows) + 1) * h + 0.3, head_h + 0.05)
+    fig.savefig(ASSETS / "L13-solver-cheat-sheet.png", dpi=DPI)
     plt.close(fig)
 
 
@@ -268,7 +300,8 @@ def main():
     elimination_steps()
     lu_reuse_cost()
     pivoting_error()
-    jacobi_spring_chain()
+    conditioning_error()
+    solver_cheat_sheet()
     lattice_fill_in()
 
 
