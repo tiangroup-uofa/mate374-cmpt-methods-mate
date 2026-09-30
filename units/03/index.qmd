@@ -14,3 +14,4 @@ We will ask the following questions:
 We begin with an atomic chain so that each matrix entry has a physical meaning, then use Python to calculate its equilibrium displacements.
 
 - [L11 · Recap of linear algebra](L11/index.qmd)
+- [L12 · Practical matrix solutions](L12/index.qmd)

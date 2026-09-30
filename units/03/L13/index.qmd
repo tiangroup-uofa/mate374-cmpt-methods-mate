@@ -1,0 +1,40 @@
+L13: inside a numerical matrix solver
+
+central question: how are linear equation Ax = b actually solved in numpy?
+
+Im lecture 12 we showed that using A-1b to solve it not a very efficient way, np.linalg.solve (and tricks to use the special shap matrix) will usually much faster. What essentially happens in these matrices are basically trying to reshape the system of equations from one form to another. In the realm of numerical methods for matrix solvers, there are basically categorized into two main methods
+
+- the direct method
+- iterative method
+
+They are intended fto handle slightly distinct situations. Direct method is guarenteed to find the solution of Ax=b given finite number of steps, but the tradeoff may be subject to the round-off error; the iterative method can be handling much sparse matrices (i.e. many are zero), but like any iterative method, could have convergence issue.
+
+
+
+Let's revisit what we did in Gauss elimination
+
+Each step we are going to move the rows add to another. Because perforing multiplication and addition DO NOT change the actual system of eqns, we are actually moving 
+the matrix from form Ax = b, into a form that Ux = c, where U is a upper diagonal matrix. 
+
+From that point on, we use the back-substitute to solve Ux = c, such that last row x_n first, then backwards ....
+
+This is one type of so-called direct methods to solve the matrix problem. other typically used popular forms are also used as follows:
+
+<
+Method Initial form Final form  Gauss elimination Ax = b Ux = c LU decomposition Ax = b LUx = b Gauss-Jordan elimination Ax = b Ix = c  Table 2.1. Three Popular Direct Methods
+>
+
+where U, L and I are ..., ..., and ... written in these.
+
+Why would we need a lower / upper triangular matrix? For example, consider the equations Lx = c, or  L11x1 = c1 L21x1 + L22x2 = c2 L31x1 + L32x2 + L33x3 = c3  If we solve the equations forward, starting with the first equation, the computations are very easy, because each equation contains only one unknown at a time. <these sentences are from kiusalaas book, repraphs plesase>
+
+where we would just arrive at solutions like x1 = c1/L11 x2 = (c2 − L21x1)/L22 x3 = (c3 − L31x1 − L32x2)/L33
+
+this is called forward substituteion. compare this with the back-substitution from gauss-elimination.., which you have already seen before.
+
+<In class example: solving a 3x3 matrix by the gauss elimination>
+
+
+ 
+
+

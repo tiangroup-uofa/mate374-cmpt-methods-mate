@@ -27,3 +27,4 @@ toc: false
 ## [03 · Systems of equations](03/index.qmd)
 
 11. [L11 · Recap of linear algebra](03/L11/index.qmd) — harmonic bonds, coupled force balances, stiffness matrices, and equilibrium displacements.
+12. [L12 · Practical matrix solutions](03/L12/index.qmd) — singularity, conditioning, dense and banded solves, and Gaussian elimination.

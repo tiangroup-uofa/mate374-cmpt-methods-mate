@@ -106,6 +106,12 @@ website:
             contents:
               - href: units/03/L11/index.qmd
                 text: "Lecture 11"
+              - href: units/03/L12/index.qmd
+                text: "Lecture 12"
+              - href: units/03/L13/index.qmd
+                text: "Lecture 13"
+              - href: units/03/L14/index.qmd
+                text: "Lecture 14"
       - href: seminars/index.qmd
         text: "Seminar materials"
         contents:

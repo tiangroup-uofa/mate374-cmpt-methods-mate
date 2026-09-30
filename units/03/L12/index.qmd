@@ -1,0 +1,469 @@
+---
+title: "L12 · Practical matrix solutions"
+subtitle: "Singular matrices, conditioning, and solving spring systems efficiently"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Central question
+
+What pitfalls can we encounter when solving $\mathbf{A}\mathbf{x}=\mathbf{b}$, and how can we choose a practical numerical solution?
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Diagnose** singularity and sensitivity in a spring system using its constraints and condition number.
+2. **Calculate** equilibrium displacements with NumPy or SciPy and assess them by substitution and comparison with a known solution.
+3. **Compare** the work and storage required by dense and banded representations of a spring chain.
+4. **Solve** a three-unknown spring system by Gaussian elimination and generalize its displacement pattern.
+
+## From force balance to a computed displacement
+
+In L11, we converted a spring model of atomic interactions into a system of linear equations,
+
+$$
+\mathbf{K}\mathbf{u}=\mathbf{f},
+$$
+
+where the stiffness matrix $\mathbf{K}$ contains the spring constants, $\mathbf{u}$ contains the unknown displacements, and $\mathbf{f}$ contains the applied forces. If $\mathbf{K}$ has an inverse, we can write
+
+$$
+\mathbf{u}=\mathbf{K}^{-1}\mathbf{f}.
+$$
+
+Our first Python calculation followed this expression directly: `np.linalg.inv(K) @ f`. That calculation gave us a way to explore the model before studying the solution algorithm. Now we can ask what happens when a spring disappears, when one spring becomes extremely weak, or when the chain contains a million moving atoms. These changes raise three different questions: does a unique solution exist, how sensitive is it, and how much computation does it require?
+
+Throughout the lecture, atom 0 is fixed and positive displacement points along the chain away from that fixed end. We use spring stiffnesses in eV/Å², forces in eV/Å, and displacements in Å, as in L11.
+
+## Singular matrices: when the constraints are insufficient
+
+For a $2\times2$ matrix, the inverse has a familiar explicit form:
+
+$$
+\mathbf{A}=\begin{bmatrix}a&b\\c&d\end{bmatrix},
+\qquad
+\mathbf{A}^{-1}=\frac{1}{ad-bc}
+\begin{bmatrix}d&-b\\-c&a\end{bmatrix}.
+$$
+
+The denominator $ad-bc$ is the **determinant**, written $\det(\mathbf{A})$. If it equals zero, the inverse does not exist and the square matrix is **singular**. The equations then have either infinitely many solutions or no solution, depending on their right-hand side.
+
+For our two-moving-atom chain, removing the spring to the fixed atom leaves only the bond between atoms 1 and 2. With $k_{12}=5$, the stiffness matrix becomes
+
+$$
+\mathbf{K}=\begin{bmatrix}5&-5\\-5&5\end{bmatrix},
+\qquad
+\det(\mathbf{K})=5(5)-(-5)(-5)=0.
+$$
+
+Consider equal and opposite applied forces:
+
+$$
+\begin{aligned}
+5u_1-5u_2&=-10,\\
+-5u_1+5u_2&=10.
+\end{aligned}
+$$
+
+The second equation repeats the first with its sign reversed. Both specify $u_2-u_1=2$ Å, so $(u_1,u_2)=(0,2)$, $(1,3)$, and $(-2,0)$ all satisfy the system. The force balance determines the spring extension but leaves the pair's overall translation unconstrained. Adding the same displacement to both atoms changes neither the spring length nor its force.
+
+Now change the applied forces to $\mathbf{f}=(0,10)^{\mathsf T}$:
+
+$$
+5u_1-5u_2=0,
+\qquad
+-5u_1+5u_2=10.
+$$
+
+Adding the equations gives $0=10$. There is no static equilibrium because the pair has a net external force and no connection to a fixed support that can balance it. In a dynamical model, the pair would accelerate.
+
+This physical interpretation is especially useful when assembling larger systems. In a one-dimensional network of positive-stiffness springs, a connected group of moving atoms that has no path to a fixed atom can translate freely. The missing constraint appears algebraically as a singular stiffness matrix. The entries alone may look reasonable, so inspecting the boundary conditions is part of understanding a solver failure.
+
+NumPy provides `np.linalg.det` for calculating a determinant. For this small, exact example it exposes the problem immediately. For floating-point calculations, determinant size needs more care: it changes with matrix size and overall scaling, and a small value alone does not measure sensitivity.
+
+## Ill-conditioning: a weak anchor
+
+Instead of removing the anchor spring entirely, let it become very weak:
+
+$$
+k_{01}=0.001,\qquad k_{12}=5,
+\qquad
+\mathbf{K}=\begin{bmatrix}5.001&-5\\-5&5\end{bmatrix}.
+$$
+
+This matrix is nonsingular. Under an end force $\mathbf{f}=(0,1)^{\mathsf T}$, both springs carry a force of 1 eV/Å. Their extensions are therefore
+
+$$
+u_1=\frac{1}{0.001}=1000\ \text{Å},
+\qquad
+u_2-u_1=\frac{1}{5}=0.2\ \text{Å}.
+$$
+
+The solution is $\mathbf{u}=(1000,1000.2)^{\mathsf T}$ Å. Looking only at the stiffness of the bond between the moving atoms would have suggested a displacement scale of $0.2$ Å. The large shared translation comes from the weak connection to the support. In a real atomic system, such a large bond extension would take us far outside the harmonic approximation. Here it reveals what the linear equations predict as the anchor approaches zero stiffness.
+
+For comparison, setting both spring constants to 5 gives
+
+$$
+\mathbf{K}=\begin{bmatrix}10&-5\\-5&5\end{bmatrix},
+\qquad
+\mathbf{u}=\begin{bmatrix}0.2\\0.4\end{bmatrix}\ \text{Å}.
+$$
+
+Doubling the end load doubles every displacement in either system, because the equations are linear. Thus, a large displacement by itself does not establish ill-conditioning. To measure sensitivity, we compare a **relative change in the inputs** with the resulting **relative change in the solution**.
+
+### A small force change with a large relative effect
+
+Keep the weak anchor, but start with balanced forces $\mathbf{f}=(-1,1)^{\mathsf T}$. Adding the two force-balance equations gives $0.001u_1=0$, so the solution is $\mathbf{u}=(0,0.2)^{\mathsf T}$ Å. Now increase only the force on atom 2 by $0.001$ eV/Å:
+
+$$
+\mathbf{f}+\delta\mathbf{f}
+=\begin{bmatrix}-1\\1.001\end{bmatrix}.
+$$
+
+The net force is now $0.001$ eV/Å. The anchor must extend by 1 Å to balance it, while the second spring extends by $1.001/5=0.2002$ Å. The new displacements are $(1,1.2002)^{\mathsf T}$ Å. Using vector lengths to compare the changes,
+
+$$
+\frac{\|\delta\mathbf{f}\|_2}{\|\mathbf{f}\|_2}
+=\frac{0.001}{\sqrt{2}}\approx0.000707,
+\qquad
+\frac{\|\delta\mathbf{u}\|_2}{\|\mathbf{u}\|_2}
+=\frac{\sqrt{1^2+1.0002^2}}{0.2}\approx7.07.
+$$
+
+A force perturbation of about $0.071\%$ produces a displacement change of about $707\%$. The small net load excites the pair's weakly restrained translation. With the stronger anchor, the same perturbation changes the displacements from $(0,0.2)$ to $(0.0002,0.2004)$ Å, a relative change of about $0.224\%$.
+
+- **Well-conditioned problem:** small relative changes in the supplied data cause comparably small relative changes in the solution. The equally stiff two-spring system is our example.
+- **Ill-conditioned problem:** some small relative changes in the supplied data can cause much larger relative changes in the solution. The weakly anchored pair has such a sensitive direction of motion.
+
+Sensitivity also matters when the data are rounded. A solver receives finite-precision spring constants and forces, then performs arithmetic with further rounding. An ill-conditioned problem can amplify those small changes even when the algorithm is implemented correctly.
+
+::: {.callout-note}
+## Round-off during a matrix solve
+
+Round-off occurs in arithmetic for well-conditioned and ill-conditioned systems alike. Conditioning describes the problem's sensitivity, while numerical stability describes how the algorithm handles rounding. In L13, we will see how elimination and pivot selection affect the calculation.
+:::
+
+## Measuring sensitivity with the condition number
+
+We need a numerical measure that lets us compare the two stiffness matrices. First, we need a way to measure the size of a vector or matrix. For a real vector, the **Euclidean norm**, or **2-norm**, is its length:
+
+$$
+\|\mathbf{x}\|_2=\sqrt{x_1^2+x_2^2+\cdots+x_n^2}
+=\sqrt{\sum_{i=1}^{n}x_i^2}.
+$$
+
+The corresponding **matrix 2-norm** measures the largest factor by which the matrix can stretch a vector:
+
+$$
+\|\mathbf{A}\|_2
+=\max_{\mathbf{x}\ne\mathbf{0}}
+\frac{\|\mathbf{A}\mathbf{x}\|_2}{\|\mathbf{x}\|_2}.
+$$
+
+The definition gives an upper bound for the length of any transformed vector:
+
+$$
+\|\mathbf{A}\mathbf{x}\|_2\le\|\mathbf{A}\|_2\|\mathbf{x}\|_2.
+$$
+
+We can use this inequality to bound the change in a solution. Suppose $\mathbf{A}$ is fixed and nonsingular, and only $\mathbf{b}$ changes:
+
+$$
+\mathbf{A}\mathbf{x}=\mathbf{b},
+\qquad
+\mathbf{A}(\mathbf{x}+\delta\mathbf{x})
+=\mathbf{b}+\delta\mathbf{b}.
+$$
+
+Subtract the original equation from the perturbed equation:
+
+$$
+\mathbf{A}\delta\mathbf{x}=\delta\mathbf{b},
+\qquad
+\delta\mathbf{x}=\mathbf{A}^{-1}\delta\mathbf{b}.
+$$
+
+Taking norms gives
+
+$$
+\|\delta\mathbf{x}\|_2
+\le\|\mathbf{A}^{-1}\|_2\|\delta\mathbf{b}\|_2.
+$$
+
+To turn this absolute-change bound into a relative-change bound, also use
+
+$$
+\|\mathbf{b}\|_2=\|\mathbf{A}\mathbf{x}\|_2
+\le\|\mathbf{A}\|_2\|\mathbf{x}\|_2.
+$$
+
+For a nonzero right-hand side, dividing and combining these inequalities gives
+
+$$
+\boxed{
+\frac{\|\delta\mathbf{x}\|_2}{\|\mathbf{x}\|_2}
+\le
+\underbrace{\|\mathbf{A}\|_2\|\mathbf{A}^{-1}\|_2}_{\kappa_2(\mathbf{A})}
+\frac{\|\delta\mathbf{b}\|_2}{\|\mathbf{b}\|_2}.
+}
+$$
+
+The factor $\kappa_2(\mathbf{A})$ is the **2-norm condition number**. It bounds the possible amplification of relative input changes. The direction of the perturbation matters, so every small input change need not reach this bound.
+
+$$
+\boxed{\kappa_2(\mathbf{A})=\|\mathbf{A}\|_2\|\mathbf{A}^{-1}\|_2.}
+$$
+
+A value close to 1 indicates a well-conditioned matrix. A value much larger than 1 indicates potentially strong amplification, with its practical importance depending on the precision of the data and the accuracy we need. A singular matrix has infinite condition number by convention. For a general matrix, sensitivity to changes in its entries also depends on conditioning, although the bound above specifically assumes that $\mathbf{A}$ stays fixed.
+
+NumPy's `np.linalg.cond(K)` computes the 2-norm condition number by default. It does not require us to form the inverse. For our examples,
+
+$$
+\kappa_2\!\left(\begin{bmatrix}10&-5\\-5&5\end{bmatrix}\right)
+\approx6.854,
+\qquad
+\kappa_2\!\left(\begin{bmatrix}5.001&-5\\-5&5\end{bmatrix}\right)
+\approx20002.
+$$
+
+The weak anchor has increased the potential sensitivity by several orders of magnitude. Our force-perturbation example produced an amplification of about $10001$, consistent with the bound of $20002$.
+
+::: {.callout-note collapse="true"}
+## Vector 2-norm, matrix 2-norm, and Frobenius norm
+
+Another common matrix norm is the **Frobenius norm**. For a real $2\times2$ matrix, it is
+
+$$
+\|\mathbf{A}\|_{\mathrm F}
+=\sqrt{a_{11}^2+a_{12}^2+a_{21}^2+a_{22}^2}.
+$$
+
+For a larger matrix, we similarly sum the squares of all its entries: $\|\mathbf{A}\|_{\mathrm F}=\sqrt{\sum_i\sum_j a_{ij}^2}$. This is a convenient magnitude measure, but it differs from the matrix 2-norm, which measures the largest stretch of a vector.
+
+With default arguments, `np.linalg.norm(x)` gives the Euclidean norm of a vector, while `np.linalg.norm(A)` gives the Frobenius norm of a two-dimensional array. Use `np.linalg.norm(A, ord=2)` for the matrix 2-norm. The default `np.linalg.cond(A)` uses the matrix 2-norm, so retain that norm when interpreting the bound above. See the NumPy references for [norm](https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html) and [condition number](https://numpy.org/doc/stable/reference/generated/numpy.linalg.cond.html).
+:::
+
+### NumPy experiment: anchor stiffness and force sensitivity
+
+Use the editable calculation below to compare the two spring systems. Predict the effect of changing $k_{01}$ before running it. Then set $k_{01}=0$ and compare the solver's response with the physical argument about free translation.
+
+::: {.quarto-wasm-local notebook="l12_conditioning.edit.py" view="edit" title="Spring stiffness, singularity, and relative sensitivity" height="850" loading="lazy" fullscreen="true"}
+For $k_{01}=0.001$, $k_{12}=5$, and an end load of 1 eV/Å, the displacements are $(1000,1000.2)$ Å and the condition number is approximately $20002$. Setting $k_{01}=5$ gives $(0.2,0.4)$ Å and a condition number of approximately $6.854$. With the weak anchor and balanced initial forces $(-1,1)$, a perturbation $(0,0.001)$ changes the displacements from $(0,0.2)$ to $(1,1.2002)$ Å.
+:::
+
+### In-class comparison
+
+Which of these matrices is more sensitive? First look at whether their rows nearly repeat the same equation, then calculate their condition numbers in the notebook.
+
+$$
+\mathbf{A}=\begin{bmatrix}1&1\\1&1.001\end{bmatrix},
+\qquad
+\mathbf{B}=\begin{bmatrix}0.003&3\\1&1\end{bmatrix}.
+$$
+
+These are general linear-system examples. A spring stiffness matrix assembled from reciprocal springs is symmetric, whereas $\mathbf{B}$ is not. The sensitivity calculation applies to both kinds of systems.
+
+::: {.callout-tip collapse="true"}
+## Condition numbers for the in-class matrices
+
+The results are $\kappa_2(\mathbf{A})\approx4002$ and $\kappa_2(\mathbf{B})\approx3.374$. The nearly repeated rows of $\mathbf{A}$ make it much more sensitive. A single small entry, such as $0.003$ in $\mathbf{B}$, is insufficient to diagnose ill-conditioning.
+
+For the identity matrix, $\kappa_2(\mathbf{I})=1$. Scaling it gives another useful comparison: $\det(10^{-8}\mathbf{I})=10^{-16}$ for a $2\times2$ matrix, yet $\kappa_2(10^{-8}\mathbf{I})=1$. This is why a tiny determinant alone is not a reliable sensitivity test.
+:::
+
+## Computational effort: solving without forming an inverse
+
+A nonsingular system can still be expensive to solve. The mathematical expression for the inverse of a general matrix is
+
+$$
+\mathbf{A}^{-1}=\frac{\operatorname{adj}(\mathbf{A})}{\det(\mathbf{A})},
+$$
+
+where the adjugate is the transpose of the cofactor matrix. Each cofactor contains a determinant of a smaller matrix. Recursive expansion by minors quickly becomes impractical, with factorial growth in work for a naive implementation. Numerical libraries instead use matrix factorizations. In particular, `np.linalg.inv` does not recursively construct cofactors.
+
+Even with an efficient library, explicitly forming an inverse computes $N^2$ output entries when our immediate goal may be just $N$ displacements. For a square, nonsingular system, NumPy provides `np.linalg.solve(K, f)`. SciPy also provides `scipy.linalg.solve(K, f)`, with additional options for matrix structure. Both return the unknown vector directly.
+
+For a general dense matrix, factorization has leading-order work proportional to $N^3$. After that factorization, solving for one right-hand side requires work proportional to $N^2$. Computing the entire inverse requires additional work and storage. Dense inversion and a dense solve therefore both have cubic leading-order cost, but a direct solve avoids constructing an unnecessary matrix and is generally the preferred numerical route.
+
+The difference matters even when both answers look identical. Multiplying a computed inverse by the right-hand side adds another rounded operation, and an explicit inverse offers no remedy for ill-conditioning. A direct solver is also affected by conditioning, so we still need to interpret the result and check the residual,
+
+$$
+\mathbf{r}=\mathbf{K}\mathbf{u}_{\mathrm{computed}}-\mathbf{f}.
+$$
+
+A small residual shows that the computed vector nearly satisfies the supplied equations. If the system is ill-conditioned, it can coexist with appreciable displacement error. For our simple chain, we can additionally compare with the exact displacement pattern derived near the end of this lecture.
+
+### Timing the dense calculation
+
+Press **Run dense benchmark** in the next notebook to compare inversion with `solve` for 512, 1,024, and 2,048 moving atoms. The benchmark runs only when requested and limits the matrix size to 2,048. It excludes matrix assembly from the timings, warms up both methods, and reports the median of three measurements.
+
+We fit a power law $t\approx cN^p$ to each timing series. Taking logarithms gives $\log t\approx\log c+p\log N$, so `np.polyfit` with degree one in log–log coordinates estimates the exponent $p$. The notebook then extrapolates both fits to **one million unknowns**, reporting the estimated time in seconds, days, and years without allocating that matrix.
+
+Compare both the fitted exponents and the elapsed times. Both methods perform a dense factorization with cubic leading-order work. A direct solve then computes one displacement vector, whereas inversion computes all columns of the inverse. That extra work increases the time without changing the leading exponent. The move to banded storage in the next section will change the scaling itself.
+
+Extrapolating from 2,048 to a million unknowns goes far beyond the measured range. Browser overhead and optimized-library behavior affect the fitted slope, and the dense matrix alone would require 8 TB of memory. These estimates illustrate the consequences of the fitted growth law, while the measured timings show the actual comparison on your device.
+
+::: {.quarto-wasm-local notebook="l12_dense_solve.edit.py" view="edit" title="Dense spring-chain timing: inverse versus solve" height="850" loading="lazy" fullscreen="true"}
+For $N$ moving atoms with identical nearest-neighbor springs, one fixed end, and end force $F$, the reference displacements are $u_i=iF/k$. The benchmark measures 512, 1,024, and 2,048 unknowns and checks both the relative residual and the error against this reference. A degree-one fit to log(time) versus log(size) gives $t\approx cN^p$, which is extrapolated to $N=10^6$. Under cubic scaling, this is about $(10^6/2048)^3\approx1.16\times10^8$ times the cost at 2,048 unknowns. Inversion and a direct dense solve both have cubic leading-order cost, with inversion doing additional work to produce the entire inverse.
+:::
+
+::: {.callout-note}
+## If you come from MATLAB
+
+In MATLAB, `x = A \ b` asks MATLAB to solve $\mathbf{A}\mathbf{x}=\mathbf{b}$. For a square, nonsingular matrix, the corresponding NumPy operation is `x = np.linalg.solve(A, b)`. Both compute the solution without explicitly forming $\mathbf{A}^{-1}$.
+
+The backslash is compact, but reading it as ordinary division can obscure what the computation does. Although we can write the solution mathematically as $\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}$, that identity does not specify the algorithm used to calculate it. MATLAB's backslash selects a solution method according to the matrix's structure. NumPy's function name `solve` makes the requested operation explicit: find the unknown vector that satisfies the equations.
+
+The correspondence above applies to square, nonsingular systems. MATLAB's backslash also handles rectangular systems, whereas `np.linalg.solve` requires a square matrix. For a least-squares problem in NumPy, use `np.linalg.lstsq`.
+:::
+
+## From dense matrices to banded and sparse systems
+
+Dense solving improves on forming an inverse, but it still stores every matrix entry. With $N=10^6$ unknowns and 8 bytes per double-precision entry, the matrix alone occupies
+
+$$
+8N^2=8\times10^{12}\ \text{bytes}=8\ \text{TB}.
+$$
+
+Factorization can require additional storage. Before attempting such a solve, look at the physical connections represented by the matrix. Our chain couples each moving atom only to its nearest neighbors, so its stiffness matrix is
+
+$$
+\mathbf{K}=k\begin{bmatrix}
+2&-1&0&\cdots&0\\
+-1&2&-1&\ddots&\vdots\\
+0&-1&2&\ddots&0\\
+\vdots&\ddots&\ddots&\ddots&-1\\
+0&\cdots&0&-1&1
+\end{bmatrix}.
+$$
+
+The last diagonal entry is $k$, because the end atom connects to only one spring. Every other moving atom connects to two. Only the main diagonal and the diagonals immediately above and below it contain nonzero entries. Such a matrix is **tridiagonal**, a special case of a **banded matrix**, whose nonzero entries lie within a limited distance of the main diagonal.
+
+Storing three diagonals requires about $3N$ numbers rather than $N^2$. For a million unknowns, that is about 24 MB of double-precision coefficients. Specialized tridiagonal solvers also use work proportional to $N$, so representing the structure changes both the memory requirement and the solve time.
+
+SciPy's `solve_banded` accepts this compact representation. For three moving atoms, the full stiffness matrix and its stored band array are
+
+$$
+\mathbf{K}=\begin{bmatrix}2k&-k&0\\-k&2k&-k\\0&-k&k\end{bmatrix},
+\qquad
+\texttt{ab}=\begin{bmatrix}0&-k&-k\\2k&2k&k\\-k&-k&0\end{bmatrix}.
+$$
+
+The middle row of `ab` holds the main diagonal. The top row holds the upper diagonal, shifted one column to the right, and the bottom row holds the lower diagonal. The two corner zeros are unused padding. The call `solve_banded((1, 1), ab, f)` specifies one lower and one upper diagonal. This layout is documented in [SciPy's banded solver reference](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_banded.html).
+
+A **sparse matrix** more generally has relatively few nonzero entries, which need not form a narrow band. Local interactions in a larger network often give sparse matrices even when the geometry is more complicated than a chain. SciPy's sparse arrays and `scipy.sparse.linalg` provide methods for these systems. Their cost depends on the connection pattern and solver, so the linear scaling of this tridiagonal example should not be assumed for every sparse problem.
+
+### A large chain with compact storage
+
+The notebook starts with 10,000 moving atoms. Increase `N` to a million to measure the banded calculation on your device without creating a dense matrix. Compare the measured time and the reported storage with the dense estimate. The residual is also computed from the three diagonals, so checking the solution does not silently recreate the large dense array.
+
+::: {.quarto-wasm-local notebook="l12_banded_solve.edit.py" view="edit" title="Banded storage and solution of a large spring chain" height="850" loading="lazy" fullscreen="true"}
+At $N=10^6$, a dense float64 stiffness matrix needs 8 TB, while a three-row band array needs 24 MB, excluding right-hand sides and solver workspace. With $k=5$ eV/Å² and $F=10^{-7}$ eV/Å, the analytical end displacement is $u_N=NF/k=0.02$ Å. Actual timings depend on the device. Comparing both the residual and the analytical error helps expose rounding effects as the chain grows.
+:::
+
+## Solving the spring chain by hand: Gaussian elimination
+
+What calculation could produce the displacements without forming an inverse? Return to the four-atom chain from L11: atom 0 is fixed, three atoms can move, and all three springs have stiffness $k$. An external force $F_{\mathrm{ext}}$ acts on atom 3. Dividing the force-balance equations by $k$ gives
+
+$$
+\begin{aligned}
+2u_1-u_2&=0,\\
+-u_1+2u_2-u_3&=0,\\
+-u_2+u_3&=F_{\mathrm{ext}}/k.
+\end{aligned}
+$$
+
+We will eliminate one unknown at a time by adding multiples of one equation to another. These row operations preserve the solution as long as we apply them to both sides. The **augmented matrix** keeps the coefficients and right-hand side together, separated by a vertical line:
+
+$$
+\left[\begin{array}{ccc|c}
+2&-1&0&0\\
+-1&2&-1&0\\
+0&-1&1&F_{\mathrm{ext}}/k
+\end{array}\right].
+$$
+
+### Forward elimination
+
+The first row lets us remove $u_1$ from the second equation. Writing $R_i$ for row $i$, perform $R_2\leftarrow R_2+\tfrac12R_1$:
+
+$$
+\left[\begin{array}{ccc|c}
+2&-1&0&0\\
+0&\tfrac32&-1&0\\
+0&-1&1&F_{\mathrm{ext}}/k
+\end{array}\right].
+$$
+
+Now remove $u_2$ from the third equation using $R_3\leftarrow R_3+\tfrac23R_2$. The last diagonal entry becomes $1+\tfrac23(-1)=\tfrac13$, giving
+
+$$
+\left[\begin{array}{ccc|c}
+2&-1&0&0\\
+0&\tfrac32&-1&0\\
+0&0&\tfrac13&F_{\mathrm{ext}}/k
+\end{array}\right].
+$$
+
+This is an **upper-triangular system**: all coefficients below the diagonal are zero. The last equation now contains only one unknown, so we can solve upward through the rows.
+
+### Back substitution
+
+The third row gives $u_3/3=F_{\mathrm{ext}}/k$. Substituting this result into the second row, and then into the first, gives
+
+$$
+\begin{aligned}
+u_3&=3F_{\mathrm{ext}}/k,\\
+\tfrac32u_2-u_3=0\quad&\Rightarrow\quad u_2=2F_{\mathrm{ext}}/k,\\
+2u_1-u_2=0\quad&\Rightarrow\quad u_1=F_{\mathrm{ext}}/k.
+\end{aligned}
+$$
+
+For the L11 values $k=5$ eV/Å² and $F_{\mathrm{ext}}=10$ eV/Å, we recover $\mathbf{u}=(2,4,6)^{\mathsf T}$ Å. Substitution into the original equations gives $2(2)-4=0$, $-2+2(4)-6=0$, and $-4+6=2=F_{\mathrm{ext}}/k$. These values illustrate the linear spring model. For an atomic bond, the harmonic approximation is physically appropriate only for small changes in bond length.
+
+### Generalizing to $N$ moving atoms
+
+The displacement pattern follows from force balance. Each unloaded interior atom requires the spring force on its left to equal the spring force on its right. The last spring carries $F_{\mathrm{ext}}$, so every spring in this chain carries that same force. With equal stiffnesses, each extension is therefore
+
+$$
+u_1-u_0=u_2-u_1=u_3-u_2=\cdots=u_N-u_{N-1}
+=\frac{F_{\mathrm{ext}}}{k}.
+$$
+
+Starting from the fixed end $u_0=0$, the extensions accumulate:
+
+$$
+\boxed{u_i=i\frac{F_{\mathrm{ext}}}{k},\qquad i=1,2,\ldots,N.}
+$$
+
+Here $N$ counts the moving atoms, and $i$ labels an atom's position along the chain. If the spring stiffnesses differ, each spring still carries the same end load, but its extension is $F_{\mathrm{ext}}/k_{j-1,j}$. For example,
+
+$$
+u_3=\frac{F_{\mathrm{ext}}}{k_{01}}
++\frac{F_{\mathrm{ext}}}{k_{12}}
++\frac{F_{\mathrm{ext}}}{k_{23}},
+\qquad
+u_i=\sum_{j=1}^{i}\frac{F_{\mathrm{ext}}}{k_{j-1,j}}.
+$$
+
+This expression assumes a nearest-neighbor chain with positive spring stiffnesses, one fixed end, and a load only at the free end. Additional connections or forces change the equations, but Gaussian elimination still provides a systematic route to their solution when the resulting matrix is nonsingular. NumPy's dense `solve` uses LU factorization with partial pivoting, a method built on elimination that can interchange rows to choose suitable pivots. We will examine those choices in L13.
+
+## Take-home message
+
+- For a square, nonsingular system, use `np.linalg.solve` to compute the unknown vector directly. Form an inverse when the inverse itself is the required quantity.
+- Missing constraints can make a stiffness matrix singular. A very weak constraint can produce strong sensitivity, which the condition number helps quantify.
+- Check the residual and interpret the displacements physically. For an ill-conditioned system, a small residual alone does not guarantee a small solution error.
+- Use matrix structure when it is available. A nearest-neighbor chain can be stored and solved as a tridiagonal system with linear memory and work.
+
+## Check your understanding
+
+1. Remove the anchor spring from the two-moving-atom system. Why do balanced forces permit infinitely many displacements, while a nonzero net force permits no static equilibrium?
+2. Why does doubling the end force fail to distinguish the well-conditioned and ill-conditioned examples? What did the small perturbation of the balanced force pair reveal instead?
+3. If $\kappa_2(\mathbf{A})=10^4$ and the relative change in $\mathbf{b}$ is $10^{-6}$, what upper bound follows for the relative solution change when $\mathbf{A}$ is fixed?
+4. Repeat the elimination for three moving atoms with $F_{\mathrm{ext}}/k=0.1$ Å. Which row operations stay the same, and which values change?
+
+## Before next class
+
+In the manual elimination, the row multipliers depended on the spring stiffnesses. If we keep the same chain but change the applied force vector $\mathbf{f}$, which calculations can we reuse? L13 will examine how a solver organizes elimination into a factorization, and how that factorization can serve more than one right-hand side.
