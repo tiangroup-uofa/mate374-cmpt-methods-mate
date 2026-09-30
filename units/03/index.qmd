@@ -15,3 +15,4 @@ We begin with an atomic chain so that each matrix entry has a physical meaning, 
 
 - [L11 · Recap of linear algebra](L11/index.qmd)
 - [L12 · Practical matrix solutions](L12/index.qmd)
+- [L13 · Inside a numerical matrix solver](L13/index.qmd)
