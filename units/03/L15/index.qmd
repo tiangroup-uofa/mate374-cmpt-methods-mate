@@ -1,407 +1,351 @@
-L15: How can we know minimization really work?
+---
+title: "L15 · How do we know minimization really worked?"
+subtitle: "The Hessian matrix, the eigenvalue problem, and stable and unstable atomic structures"
+body-classes: lecture-page
+---
 
-Hassian matrix, eigenvalue porblem, stable and unstable atomic systems
+::: {.callout-note}
+## Central question
 
-Throughpout this unit we have learned the important of solving system of equations and using the spring-atom system to illustrate many topics (plus, we can really simulate using python!)
+**An optimizer reports that it has converged. How can we tell whether the structure it found is really a minimum of the energy?**
+:::
 
-in last lecture L14, we solved getting a minimum of the atom energy E(x) using optimization algorithms. But the problem is, how can we make sure it is really the minimum?
+## Learning outcomes
 
-Consider in 1D nonlinear equation, we need
+By the end of this lecture, you should be able to:
 
-1st derivative = 0; second derivative > 0 --> minimum; <0 maximum
+1. **Explain** why a zero gradient identifies a stationary point but does not distinguish a minimum from a saddle point.
+2. **Construct** the Hessian of a small spring system, analytically and by finite differences of the gradient.
+3. **Explain** why the diagonal entries of a Hessian cannot decide stability when the matrix is not diagonal.
+4. **Solve** the eigenvalue problem $\mathbf H\mathbf v=\lambda\mathbf v$ for a $2\times2$ matrix by hand, and for larger matrices with `np.linalg.eigh`.
+5. **Classify** a relaxed atomic structure from the signs of its Hessian eigenvalues, accounting for rigid translations and rotations.
 
-How about working on multi dimensions?
+## Did the minimizer find a minimum?
 
-it may be intuitive to think that if all nabla^2 E > 0, it is the minimum, but what about the other systems?
+Throughout this unit, we have used systems of equations and matrix operations to describe coupled physical systems, and spring–atom models have been our running example because they are easy to picture and easy to simulate in Python. In L14, we minimized an atomic energy $E(\mathbf x)$ with numerical optimizers. Each of them stopped when the gradient was small.
 
-Let's still use the spring-atom system to illustrate this. 
-
-assume there are 3 atoms, L and R are fixed, the middle atom (m). the L and R dist are at \pm a. howd the middle atom move (Delta x), the natural bond length between any 2 atoms is l_0. (a < l_0, so they are initially compressed). If the atom is moved in x-direction, one spring is further compressed, one is stretched, it will drag the position back to zero. in y-direction, however, because boeh springs are compressed, the force further pushed to farther away positions. They will stop at distance y = \sqrt{l_0^2 - a^2}. That clearly distinguished 2 directions as different, x-direction is stable, y-direction is not stable. That position is called the metastable (or saddle point)
-
-physically, we would use the spring model to derive the actual hessian matrix. For this system that moves in 2D direction (x, y), energy is
-
-E = .......
-
-or, can we get the hassian matrix H?
-
-H = ... ...
-
-this hessian matrix will have 2 non-zero direction coefficients, one plus as l_0 > a, one <0. Could even be easier to visualize the energy on the x, y coordinate; the saddle point on the 0,0 will be exactly seen.
-
-Once we got the actual measure of the saddle point, one question is how could we know, if the saddle H is not diagonal?
-
-
-modified Absolutely — here is a cleaned draft that keeps your conversational lecture style and stops right at the point where the rotated system creates the eigenvalue problem.
-
-# L15: How do we know minimization really worked?
-
-Throughout this unit, we have learned how to solve systems of equations and how matrix operations help us describe coupled physical systems. We have repeatedly used spring–atom systems as simple examples, because they are easy to visualize and, importantly, we can actually simulate them with Python.
-
-In the previous lecture, L14, we considered the minimization of an atomic energy,
-
-\[
-E(\mathbf{x}),
-\]
-
-using numerical optimization algorithms.
-
-Suppose an optimizer gives us a structure \(\mathbf{x}^*\) and reports that it has converged.
-
-A natural question is:
+Suppose an optimizer gives us a structure $\mathbf x^*$ and reports that it has converged. A natural question is:
 
 > **How do we know that the structure we found is really a minimum?**
 
+L14 already warned us. Started near the origin of the middle-atom landscape, Newton's method converged to a point where both springs are compressed and the atom is balanced but not stable. The gradient there is exactly zero, so any stopping test based on the gradient is satisfied. We need a test that looks beyond the gradient.
+
 ## From one dimension to many dimensions
 
-In one dimension, we already know the answer.
+In one dimension, we already know the answer. At a stationary point,
 
-At a stationary point,
+$$
+\frac{dE}{dx}=0,
+$$
 
-\[
-\frac{dE}{dx}=0.
-\]
+and the second derivative decides what kind of point it is:
 
-We can then examine the second derivative:
+$$
+\frac{d^2E}{dx^2}>0\ \Rightarrow\ \text{local minimum},
+\qquad
+\frac{d^2E}{dx^2}<0\ \Rightarrow\ \text{local maximum}.
+$$
 
-\[
-\frac{d^2E}{dx^2}>0
-\qquad\Rightarrow\qquad
-\text{local minimum},
-\]
+The second derivative tells us whether the energy curves upward or downward near the stationary point. We used exactly this test in L07 to separate the liquid and gas minima of the van der Waals free energy from the maximum between them.
 
-while
+Atomic structures, however, have many coordinates. Even a single atom moving in a plane has
 
-\[
-\frac{d^2E}{dx^2}<0
-\qquad\Rightarrow\qquad
-\text{local maximum}.
-\]
+$$
+\mathbf x=
+\begin{bmatrix}x\\ y\end{bmatrix},
+$$
 
-The second derivative tells us whether the energy curves upward or downward near the stationary point.
+and it can move in the $x$-direction, in the $y$-direction, or along any combination of the two. A stationary point can curve upward in some directions and downward in others. What should replace the second derivative?
 
-But atomic structures usually have many coordinates.
+## A compressed spring system
 
-For example, even a single atom moving in two dimensions has coordinates
+Consider the spring–atom system from L14. Two atoms, $L$ and $R$, are fixed at
 
-\[
-\mathbf{x}=
-\begin{bmatrix}
-x\\
-y
-\end{bmatrix}.
-\]
+$$
+L=(-a,0)\qquad\text{and}\qquad R=(a,0),
+$$
 
-Now there is not just one direction in which the atom can move.
+and the middle atom $M=(x,y)$ is free to move in two dimensions. Each spring has stiffness $k$ and natural length $l_0$. We choose
 
-It can move in the \(x\)-direction, the \(y\)-direction, or along any combination of the two.
-
-So what should replace the second derivative?
-
----
-
-# A compressed spring system
-
-Consider a simple spring–atom system.
-
-Two atoms, \(L\) and \(R\), are fixed at
-
-\[
-(-a,0)
-\qquad\text{and}\qquad
-(a,0),
-\]
-
-while the middle atom \(M\) is free to move in two dimensions:
-
-\[
-M=(x,y).
-\]
-
-Each spring has spring constant \(k\) and natural length \(l_0\).
-
-We choose
-
-\[
+$$
 l_0>a,
-\]
+$$
 
-so when the middle atom is initially located at
+so that when the middle atom sits at $(x,y)=(0,0)$, both springs are compressed. The spring lengths are
 
-\[
-(x,y)=(0,0),
-\]
-
-both springs are compressed.
-
-The spring lengths are
-
-\[
+$$
 r_L=\sqrt{(x+a)^2+y^2},
-\]
+\qquad
+r_R=\sqrt{(x-a)^2+y^2},
+$$
 
-and
+and the total elastic energy is
 
-\[
-r_R=\sqrt{(x-a)^2+y^2}.
-\]
+$$
+E(x,y)=\frac k2\left(r_L-l_0\right)^2+\frac k2\left(r_R-l_0\right)^2 .
+$$
 
-The total elastic energy is therefore
+At the symmetric position $(0,0)$, the two springs push on $M$ with equal and opposite forces, so
 
-\[
-E(x,y)
-=
-\frac{k}{2}(r_L-l_0)^2
-+
-\frac{k}{2}(r_R-l_0)^2.
-\]
+$$
+\nabla E(0,0)=\mathbf 0 .
+$$
 
-At the symmetric position
+The origin is therefore a **stationary point**. But is it a minimum?
 
-\[
-(x,y)=(0,0),
-\]
+### Moving in the $x$-direction
 
-the forces from the two springs cancel, so
+Suppose we move the middle atom slightly to the right. The right spring becomes more compressed and the left spring less compressed. The net force pushes the atom back toward $x=0$, so the $x$-direction is stable, and near the origin
 
-\[
-\nabla E(0,0)=0.
-\]
+$$
+\frac{\partial^2E}{\partial x^2}>0 .
+$$
 
-Therefore, the origin is a **stationary point**.
+### Moving in the $y$-direction
 
-But is it a minimum?
+Now suppose instead that the middle atom moves slightly upward. Both springs become slightly longer. Because they were compressed, a longer spring is closer to its natural length, so the energy **decreases**. The vertical components of the two spring forces add and push the atom farther from the origin:
 
-## Moving in the \(x\)-direction
+$$
+\frac{\partial^2E}{\partial y^2}<0 .
+$$
 
-Suppose we move the middle atom slightly to the right.
+The atom keeps moving until both springs reach their natural length, $\sqrt{a^2+y^2}=l_0$. This gives two stable positions,
 
-One spring becomes more compressed, while the other becomes less compressed.
+$$
+y=\pm\sqrt{l_0^2-a^2},
+$$
 
-The resulting forces tend to push the atom back toward
+which are the two minima that the optimizers found in L14. The structure at $(0,0)$ is not a minimum. It is a **saddle point**: the energy curves upward in one direction and downward in another.
 
-\[
-x=0.
-\]
+## The Hessian matrix
 
-Therefore the \(x\)-direction is stable.
+In many dimensions, the second derivative becomes a matrix. For two coordinates, the **Hessian** is
 
-Near the origin,
-
-\[
-\frac{\partial^2E}{\partial x^2}>0.
-\]
-
-## Moving in the \(y\)-direction
-
-Now suppose instead that the middle atom moves slightly upward.
-
-Both springs become slightly longer.
-
-Because they were initially compressed, increasing their lengths moves both springs closer to their natural length.
-
-Therefore the energy decreases.
-
-The vertical components of the two spring forces reinforce each other and push the atom even farther away from the origin.
-
-Thus,
-
-\[
-\frac{\partial^2E}{\partial y^2}<0.
-\]
-
-The atom continues moving away until the springs can reach their natural length,
-
-\[
-\sqrt{a^2+y^2}=l_0.
-\]
-
-This gives two stable positions,
-
-\[
-y=\pm\sqrt{l_0^2-a^2}.
-\]
-
-So the structure at
-
-\[
-(x,y)=(0,0)
-\]
-
-is not a minimum.
-
-It is a **saddle point**.
-
-The energy curves upward in one direction and downward in another.
-
----
-
-# The Hessian matrix
-
-In multiple dimensions, the second derivative becomes a matrix.
-
-For two coordinates,
-
-\[
-\mathbf{x}=
+$$
+\mathbf H=
 \begin{bmatrix}
-x\\
-y
-\end{bmatrix},
-\]
-
-the Hessian is
-
-\[
-H=
-\begin{bmatrix}
-\dfrac{\partial^2E}{\partial x^2}
-&
-\dfrac{\partial^2E}{\partial x\partial y}
-\\[6pt]
-\dfrac{\partial^2E}{\partial y\partial x}
-&
-\dfrac{\partial^2E}{\partial y^2}
+\dfrac{\partial^2E}{\partial x^2} & \dfrac{\partial^2E}{\partial x\,\partial y}\\[8pt]
+\dfrac{\partial^2E}{\partial y\,\partial x} & \dfrac{\partial^2E}{\partial y^2}
 \end{bmatrix}.
-\]
+$$
 
-For the symmetric spring system at the origin,
+The mixed derivatives are equal for any smooth energy, so $\mathbf H$ is **symmetric**. For a structure of $N$ atoms, it has one row and one column for each of the $3N$ coordinates.
 
-\[
-H=
+For the compressed spring system at the origin,
+
+$$
+\mathbf H=
 \begin{bmatrix}
 2k & 0\\[4pt]
 0 & 2k\left(1-\dfrac{l_0}{a}\right)
 \end{bmatrix}.
-\]
+$$
 
-Because
+::: {.callout-tip collapse="true"}
+## Derivation: The Hessian of one spring and of the two-spring system
 
-\[
-l_0>a,
-\]
+For one spring from a fixed atom to $M$, let $\mathbf d$ be the vector from the fixed atom to $M$, $r=\lvert\mathbf d\rvert$, and $\hat{\mathbf u}=\mathbf d/r$. The energy $\tfrac k2(r-l_0)^2$ has gradient $k(r-l_0)\,\hat{\mathbf u}$. Differentiating once more, using $\partial r/\partial\mathbf d=\hat{\mathbf u}$ and $\partial\hat{\mathbf u}/\partial\mathbf d=(\mathbf I-\hat{\mathbf u}\hat{\mathbf u}^{\mathsf T})/r$, gives
 
-we have
+$$
+\mathbf H_{\text{spring}}=k\left[\hat{\mathbf u}\hat{\mathbf u}^{\mathsf T}+\left(1-\frac{l_0}{r}\right)\left(\mathbf I-\hat{\mathbf u}\hat{\mathbf u}^{\mathsf T}\right)\right].
+$$
 
-\[
-2k>0,
-\]
+The first term is the stiffness along the spring. The second acts perpendicular to it and is negative when the spring is compressed, $r<l_0$. At the origin, both springs have $r=a$ and $\hat{\mathbf u}=(\pm1,0)$, so $\hat{\mathbf u}\hat{\mathbf u}^{\mathsf T}=\begin{bmatrix}1&0\\0&0\end{bmatrix}$ and each spring contributes $k\begin{bmatrix}1&0\\0&1-l_0/a\end{bmatrix}$. Adding the two springs gives the matrix above.
+:::
 
-but
+Because $l_0>a$, we have $2k>0$ but $2k\left(1-l_0/a\right)<0$. In this example the saddle point is easy to identify: the matrix is diagonal, and we can read one positive and one negative curvature directly from it.
 
-\[
-2k\left(1-\frac{l_0}{a}\right)<0.
-\]
+This simplicity, however, comes from our choice of coordinates. The $x$-axis happens to point exactly along the stable direction, and the $y$-axis exactly along the unstable direction. What if our coordinate axes do not line up with these special directions?
 
-So in this example the saddle point is very easy to identify.
+## Rotate the spring system
 
-The matrix is diagonal, and we can immediately see one positive curvature and one negative curvature.
+Now rotate the whole physical system by an angle $\theta$, keeping our $x$- and $y$-axes unchanged. Let
 
-But this simplicity comes from how we chose our coordinate system.
+$$
+\mathbf n=\begin{bmatrix}\cos\theta\\ \sin\theta\end{bmatrix}
+$$
 
-The \(x\)-axis happens to point exactly along the stable direction, while the \(y\)-axis happens to point exactly along the unstable direction.
+be the direction of the line joining the two fixed atoms, which now sit at $-a\mathbf n$ and $+a\mathbf n$. Nothing physical has changed. The middle atom is still stable when displaced along the spring axis and unstable when displaced perpendicular to it. These directions are simply no longer the $x$- and $y$-directions. At the origin, the Hessian becomes
 
-What if our coordinate axes do not line up with these special directions?
-
----
-
-# Rotate the spring system
-
-Now rotate the entire physical system by an angle \(\theta\), while keeping our \(x\)- and \(y\)-coordinate axes unchanged.
-
-Let
-
-\[
-\mathbf{n}
-=
+$$
+\mathbf H=2k
 \begin{bmatrix}
-\cos\theta\\
-\sin\theta
-\end{bmatrix}
-\]
-
-be the direction connecting the two fixed atoms.
-
-The fixed atoms are now located at
-
-\[
--a\mathbf{n}
-\qquad\text{and}\qquad
-+a\mathbf{n}.
-\]
-
-Nothing physical has changed.
-
-The middle atom is still stable when displaced along the spring axis and unstable when displaced perpendicular to it.
-
-However, these directions are no longer the \(x\)- and \(y\)-directions.
-
-At the origin, the Hessian becomes
-
-\[
-H=
-2k
-\begin{bmatrix}
-1-\dfrac{l_0}{a}\sin^2\theta
-&
-\dfrac{l_0}{a}\sin\theta\cos\theta
-\\[7pt]
-\dfrac{l_0}{a}\sin\theta\cos\theta
-&
-1-\dfrac{l_0}{a}\cos^2\theta
+1-\dfrac{l_0}{a}\sin^2\theta & \dfrac{l_0}{a}\sin\theta\cos\theta\\[8pt]
+\dfrac{l_0}{a}\sin\theta\cos\theta & 1-\dfrac{l_0}{a}\cos^2\theta
 \end{bmatrix}.
-\]
+$$
 
-The off-diagonal terms are now nonzero.
+The off-diagonal terms are now nonzero. Motion in $x$ and motion in $y$ are **coupled**: moving the atom in $x$ changes the force in $y$.
 
-This means that motion in \(x\) and motion in \(y\) are coupled.
+A particularly interesting case is $\theta=45^\circ$ with $l_0=1.2a$. Then
 
-A particularly interesting case occurs when
+$$
+\mathbf H=k\begin{bmatrix}0.8 & 1.2\\ 1.2 & 0.8\end{bmatrix}.
+$$
 
-\[
-\theta=45^\circ.
-\]
+Look only at the diagonal terms:
 
-Take, for example,
-
-\[
-l_0=1.2a.
-\]
-
-Then
-
-\[
-H
-=
-k
-\begin{bmatrix}
-0.8 & 1.2\\
-1.2 & 0.8
-\end{bmatrix}.
-\]
-
-Now look only at the two diagonal terms:
-
-\[
+$$
 \frac{\partial^2E}{\partial x^2}=0.8k>0,
-\]
+\qquad
+\frac{\partial^2E}{\partial y^2}=0.8k>0 .
+$$
 
-and
-
-\[
-\frac{\partial^2E}{\partial y^2}=0.8k>0.
-\]
-
-If we only checked the curvature along the \(x\)- and \(y\)-axes, we might conclude that the point is a minimum.
-
-But we already know physically that this is still exactly the same compressed spring system.
-
-There must still be a direction in which the energy decreases.
-
-So the important question becomes:
+If we checked only the curvature along the $x$- and $y$-axes, we would conclude that the point is a minimum. But this is still the same compressed spring system, so there must still be a direction in which the energy decreases. The important question is therefore:
 
 > **If the Hessian is not diagonal, how do we find the directions in which the energy surface naturally curves upward or downward?**
 
-That is the problem that leads us to the **eigenvalue problem**.
+That question leads us to the **eigenvalue problem**.
 
-This is a strong place to stop the first section: the eigenvalue problem now appears because the students need it, rather than because the syllabus says they need to learn eigenvalues.
+## The eigenvalue problem
 
+### Curvature along any direction
+
+Near a stationary point $\mathbf x^*$, the gradient term of the Taylor expansion from L14 vanishes, and a small displacement $\delta\mathbf x$ changes the energy by
+
+$$
+E(\mathbf x^*+\delta\mathbf x)-E(\mathbf x^*)\approx\tfrac12\,\delta\mathbf x^{\mathsf T}\mathbf H\,\delta\mathbf x .
+$$
+
+For a unit direction $\mathbf d$, the curvature along that direction is $\mathbf d^{\mathsf T}\mathbf H\mathbf d$. Choosing $\mathbf d=(1,0)$ picks out $H_{xx}$, and $\mathbf d=(0,1)$ picks out $H_{yy}$. For the rotated spring, the direction $\mathbf d=(1,-1)/\sqrt2$ gives
+
+$$
+\mathbf d^{\mathsf T}\mathbf H\mathbf d=\tfrac12\,k\,(0.8-1.2-1.2+0.8)=-0.4k<0,
+$$
+
+which reveals the downhill direction that the diagonal entries hide. A stationary point is a minimum only if the curvature is positive in **every** direction, not only along the coordinate axes. We need a systematic way to find the directions of largest and smallest curvature.
+
+### Eigenvectors and eigenvalues
+
+An **eigenvector** $\mathbf v$ of $\mathbf H$ is a direction that $\mathbf H$ only stretches, without turning it:
+
+$$
+\boxed{\mathbf H\mathbf v=\lambda\mathbf v .}
+$$
+
+The stretch factor $\lambda$ is the **eigenvalue**. For a unit eigenvector, the curvature along it is $\mathbf v^{\mathsf T}\mathbf H\mathbf v=\lambda\,\mathbf v^{\mathsf T}\mathbf v=\lambda$. Each eigenvalue is therefore the curvature of the energy along its own eigenvector.
+
+Rewriting the equation as $(\mathbf H-\lambda\mathbf I)\mathbf v=\mathbf 0$ shows how to find them. A nonzero $\mathbf v$ can satisfy this only if $\mathbf H-\lambda\mathbf I$ is singular, the condition we met in L12, so
+
+$$
+\det(\mathbf H-\lambda\mathbf I)=0 .
+$$
+
+::: {.callout-tip collapse="true"}
+## Worked example: Eigenvalues and eigenvectors of the rotated spring Hessian
+
+With $\mathbf H=k\begin{bmatrix}0.8&1.2\\1.2&0.8\end{bmatrix}$ and $\lambda$ measured in units of $k$,
+
+$$
+\det\begin{bmatrix}0.8-\lambda & 1.2\\ 1.2 & 0.8-\lambda\end{bmatrix}
+=(0.8-\lambda)^2-1.2^2=0
+\quad\Rightarrow\quad
+\lambda=0.8\pm1.2 .
+$$
+
+The eigenvalues are $\lambda_1=-0.4k$ and $\lambda_2=2.0k$, the same as for the unrotated system. For $\lambda_1$, the first row of $(\mathbf H-\lambda_1\mathbf I)\mathbf v=\mathbf 0$ reads $1.2v_x+1.2v_y=0$, so $\mathbf v_1=(-1,1)/\sqrt2$. For $\lambda_2$, it reads $-1.2v_x+1.2v_y=0$, so $\mathbf v_2=(1,1)/\sqrt2$. The stable direction $\mathbf v_2$ lies along the spring axis $\mathbf n=(1,1)/\sqrt2$, and the unstable direction $\mathbf v_1$ is perpendicular to it.
+:::
+
+The eigenvalues did not change when we rotated the system. Only the eigenvectors turned with it. The eigenvalues describe the physics, while the matrix entries also depend on our choice of axes.
+
+### Why the eigenvectors answer the question
+
+For a symmetric matrix, three results make the eigenvectors the natural coordinates for stability:
+
+- The eigenvalues are real numbers.
+- The eigenvectors of different eigenvalues are perpendicular, so they form a new set of axes.
+- In those axes the Hessian is diagonal. Collecting the unit eigenvectors as the columns of $\mathbf V$ and the eigenvalues on the diagonal of $\boldsymbol\Lambda$ gives $\mathbf H=\mathbf V\boldsymbol\Lambda\mathbf V^{\mathsf T}$.
+
+Writing a displacement in the new axes, $\mathbf q=\mathbf V^{\mathsf T}\delta\mathbf x$, the energy change becomes a sum of independent terms:
+
+$$
+\tfrac12\,\delta\mathbf x^{\mathsf T}\mathbf H\,\delta\mathbf x=\tfrac12\left(\lambda_1q_1^2+\lambda_2q_2^2+\cdots+\lambda_nq_n^2\right).
+$$
+
+This is the diagonal case we could read at a glance, recovered for any Hessian. The rule for classifying a stationary point follows directly:
+
+| Eigenvalues of $\mathbf H$ | Energy near the point | Stationary point |
+|---|---|---|
+| All positive | Rises in every direction | Local minimum |
+| Some positive, some negative | Rises in some directions and falls in others | Saddle point |
+| All negative | Falls in every direction | Local maximum |
+
+A matrix whose eigenvalues are all positive is called **positive definite**. In L13, Cholesky factorization required exactly this property, so `cho_factor` gives a quick practical test. For the spring system it fails at the origin and succeeds at either minimum.
+
+![The compressed spring system with $l_0=1.2a$, unrotated (left) and rotated by $45^\circ$ (right). Arrows show the Hessian eigenvectors at the origin: red for $\lambda=-0.4k$, blue for $\lambda=2.0k$. The matrix entries change with rotation, but the eigenvalues do not.](../../../assets/L15-compressed-spring.png){#fig-compressed-spring fig-alt="Two contour plots of the middle-atom energy. Left, fixed atoms on the x-axis, minima above and below the origin, a red arrow pointing up and a blue arrow pointing right. Right, the same landscape rotated by 45 degrees, with fixed atoms on the diagonal, minima on the other diagonal, and the arrows rotated with them." width="90%"}
+
+### Computing eigenvalues in practice
+
+For a $2\times2$ matrix, $\det(\mathbf H-\lambda\mathbf I)=0$ is a quadratic equation. For an $n\times n$ matrix, it is a polynomial of degree $n$, and there is no general formula for the roots of polynomials of degree five or higher. Numerical libraries therefore use iterative algorithms. The simplest idea, **power iteration**, multiplies a starting vector by $\mathbf H$ again and again: the component along the eigenvector with the largest $\lvert\lambda\rvert$ grows fastest and soon dominates. Library routines refine such ideas and find all eigenpairs of a dense symmetric matrix at a cost that grows as $n^3$, like the LU factorization of L13.
+
+::: {.callout-note}
+## Syntax: Eigenvalues of a symmetric matrix with `np.linalg.eigh`
+
+```python
+values, vectors = np.linalg.eigh(H)   # H must be symmetric
+values           # eigenvalues in ascending order
+vectors[:, 0]    # unit eigenvector for values[0]: the eigenvectors are COLUMNS
+```
+
+[`np.linalg.eigh`](https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigh.html) is designed for symmetric (Hermitian) matrices and guarantees real eigenvalues and perpendicular eigenvectors. The general `np.linalg.eig` also works for nonsymmetric matrices, but it does not sort its output and may return complex numbers.
+:::
+
+When the Hessian comes from finite differences of the gradient, as in the first notebook, rounding makes it very slightly asymmetric. Averaging it with its transpose, $\tfrac12(\mathbf H+\mathbf H^{\mathsf T})$, restores the symmetry before calling `eigh`.
+
+::: {.quarto-wasm-local notebook="l15_saddle_eigen.edit.py" view="edit" title="Hessian, eigenvectors, and a Cholesky test for the compressed spring" height="1000" loading="lazy" fullscreen="true"}
+The notebook builds the $2\times2$ Hessian of the compressed spring system by central differences, compares it with the analytical matrix, and diagonalizes it with `np.linalg.eigh`. At $\theta=45^\circ$ and $l_0=1.2a$, it gives $\mathbf H=k\begin{bmatrix}0.8&1.2\\1.2&0.8\end{bmatrix}$ with eigenvalues $-0.4k$ and $2.0k$, and eigenvectors perpendicular and parallel to the spring axis. Energy profiles along the $x$- and $y$-axes rise in both directions, while the profile along the first eigenvector falls. Cholesky factorization fails at the origin and succeeds at the minimum.
+:::
+
+## From one atom to a cluster
+
+For a cluster of $N$ atoms, the Hessian is $3N\times3N$, and the same rule applies with one adjustment. If we translate the whole cluster or rotate it rigidly, no distance between atoms changes, and neither does the energy. An isolated cluster therefore always has three translational and three rotational directions with zero curvature, so six eigenvalues are zero. (A linear molecule has only two distinct rotations, and therefore five.) In the spring system, the fixed atoms removed these motions, which is why every eigenvalue there was nonzero.
+
+A relaxed cluster is a local minimum when, apart from the six zero eigenvalues, all $3N-6$ remaining eigenvalues are positive. In floating-point arithmetic the "zero" eigenvalues come out as small numbers such as $10^{-6}$, so in practice we count any eigenvalue with $\lvert\lambda\rvert$ below a small tolerance as zero.
+
+### The four-atom square from A1
+
+In Assignment 1, the tetrahedron was the lowest of three four-atom argon shapes. What happens if we hand a perfect square to a minimizer? Using LJ reduced units, with energies in $\varepsilon$ and lengths in $\sigma$, BFGS stops after five iterations at $E=-4.480620\,\varepsilon$, with a gradient below $10^{-8}$ and `success = True`. The structure is still a flat square. By symmetry, every force lies in the plane of the square, so nothing pushes any atom out of it, and the minimizer only adjusts the side length.
+
+The $12\times12$ Hessian tells a different story:
+
+![Hessian eigenvalues of the relaxed four-atom square in LJ reduced units: two negative (red), six zero (grey), and four positive (blue).](../../../assets/L15-square-eigenvalues.png){#fig-square-eigenvalues fig-alt="Bar chart of twelve eigenvalues in ascending order: two negative bars near minus 7.9 and minus 2.2, six bars at zero, and four positive bars between 130 and 138." width="70%"}
+
+Two eigenvalues are negative, $\lambda_1=-7.86$ and $\lambda_2=-2.22\,\varepsilon/\sigma^2$, so the square is a saddle point with two independent downhill directions. Their eigenvectors show what they are:
+
+- **Mode 1** keeps the atoms in the plane and shears the square into a rhombus.
+- **Mode 2** moves the atoms perpendicular to the plane: two opposite corners rise while the other two sink, folding the square.
+
+Displacing the atoms a short distance along an eigenvector and relaxing again follows that downhill path:
+
+| Path | Energies along the path ($\varepsilon$) | Structures |
+|---|---|---|
+| Follow mode 1 | $-4.4806\ \rightarrow\ -5.0734\ \rightarrow\ -6.0000$ | Square → flat rhombus (a saddle with one negative eigenvalue) → tetrahedron |
+| Follow mode 2 | $-4.4806\ \rightarrow\ -6.0000$ | Square → tetrahedron |
+
+Both paths end at the tetrahedron, with all six pair distances equal to $2^{1/6}\sigma$ and a Hessian with six zero and six positive eigenvalues. The flat rhombus on the first path is a reminder that following one downhill direction can lead to another saddle, so the eigenvalue test must be repeated after every relaxation.
+
+::: {.quarto-wasm-local notebook="l15_cluster_check.edit.py" view="edit" title="Checking a relaxed four-atom cluster with Hessian eigenvalues" height="1000" loading="lazy" fullscreen="true"}
+The notebook relaxes a perfect four-atom square with BFGS, which stops at $-4.480620\,\varepsilon$ with `success = True`. Its $12\times12$ finite-difference Hessian has two negative, six zero, and four positive eigenvalues. Following the in-plane mode passes through a flat rhombus at $-5.073421\,\varepsilon$, which still has one negative eigenvalue, and reaches the tetrahedron at $-6\,\varepsilon$. Following the out-of-plane mode reaches the tetrahedron directly.
+:::
+
+The positive eigenvalues carry more information than their signs. Each one measures the stiffness of the structure along its mode, and in L16 we will turn them into vibrational frequencies and into the entropy that decides which structure is favoured at finite temperature.
+
+## What to keep
+
+1. A converged optimizer guarantees only a small gradient, which identifies a stationary point: a minimum, a saddle point, or a maximum.
+2. The Hessian is the symmetric matrix of second derivatives. Its diagonal entries give the curvature along the coordinate axes only, so they cannot decide stability when the matrix has off-diagonal coupling.
+3. The eigenvectors of $\mathbf H$ are the directions in which the energy curves without coupling, and each eigenvalue is the curvature along its eigenvector. Rotating the system changes the matrix entries but not the eigenvalues.
+4. All eigenvalues positive means a minimum (a positive definite Hessian, which Cholesky can test). Mixed signs mean a saddle point, and the eigenvector of a negative eigenvalue points downhill.
+5. For an isolated cluster, six eigenvalues are zero because of rigid translation and rotation. The structure is a minimum when the other $3N-6$ are positive.
+
+## Check your understanding
+
+1. For the unrotated spring system, explain physically why $\partial^2E/\partial x^2=2k$ does not depend on $l_0$, while $\partial^2E/\partial y^2$ does.
+2. Find the eigenvalues of $\mathbf H$ for $\theta=30^\circ$ and $l_0=1.2a$ without calculating the matrix entries. Then use the notebook to check your answer and the directions of the eigenvectors.
+3. What happens to the eigenvalues at the origin when $l_0<a$, so that both springs are stretched? Is the origin still a saddle point?
+4. A relaxed cluster of 20 atoms has a Hessian with 6 eigenvalues of magnitude below $10^{-5}$, one eigenvalue of $-0.02$, and 53 positive eigenvalues. What would you report, and what would you do next?
+5. Why does `cho_factor` fail for the Hessian of an isolated cluster even at a true minimum? How could you remove the problem?
+
+## Next
+
+We can now find a relaxed structure (L14) and confirm that it is a minimum (L15). L16 brings these steps together for a cluster of 38 argon atoms, where many different minima compete. There, the minimizer finds the structures, the Hessian confirms them, and its eigenvalues give the vibrational frequencies and entropies that decide which structure the cluster adopts at finite temperature.

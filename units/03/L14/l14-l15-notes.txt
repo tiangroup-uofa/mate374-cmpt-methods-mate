@@ -1,0 +1,43 @@
+L14 and L15 · authoring notes for the instructor
+================================================
+
+Source drafts
+-------------
+- Both pages were written from the rough notes committed in 4b08399 ("rough L14 and L15
+  notes"). Recover them with: git show 4b08399:units/03/L14/index.qmd (and L15).
+- L14 follows the draft order: (1) spring model -> one linear solve, (2) Newton as the
+  bridge, (3) what scipy.optimize.minimize needs + method-family table + paths on one
+  landscape, (4) BFGS/L-BFGS one level deeper, (5) the ASE structure -> calculator ->
+  optimizer workflow. The ChatGPT share link in the draft was not carried over.
+- L15 keeps the draft text for 1D -> many dimensions -> compressed spring (x and y moves)
+  -> Hessian -> rotated system (theta = 45°, l0 = 1.2a), then continues into the
+  eigenvalue problem, classification, eigh, the Cholesky link to L13, and clusters.
+
+Shared example
+--------------
+- The middle atom between two fixed atoms (a = 1, k = 1, l0 = 1.2a) is the L14 minimizer
+  landscape and the L15 saddle example. From (0.3, 0.1), pure Newton converges to the
+  saddle at the origin in 4 steps (from (1.5, 0.05) it converges to (l0, 0)); GD, NM, CG,
+  BFGS and L-BFGS-B reach the minimum (0, 0.6633). This motivates L15 from L14.
+
+Notebooks and checks
+--------------------
+- activities/l14_minimizer_paths.edit.py, activities/l14_ase_relax.edit.py
+- activities/l15_saddle_eigen.edit.py, activities/l15_cluster_check.edit.py
+- All "Live step" cells are completed; blank them for an in-class scaffold as in L10.
+- scripts/l14_figures.py and scripts/l15_figures.py assert the quoted numbers and write
+  the 300-dpi figures (registered in scripts/render_figures.py).
+
+Numbers quoted in the pages
+---------------------------
+- ASE, Ar13 displaced by up to 0.3 Å (seed 374), fmax = 1e-3 eV/Å: BFGS 58, LBFGS 58
+  (identical path: default memory exceeds the run), FIRE 63 steps; E = -0.45657 eV.
+- A1 square (LJ reduced units): BFGS stops at -4.480620 after 5 iterations; eigenvalues
+  -7.863 (in-plane shear), -2.218 (out-of-plane fold), six zeros, 130.3-138.2.
+  Mode 1 -> rhombus -5.073421 (1 negative) -> tetrahedron -6; mode 2 -> tetrahedron.
+
+Things to confirm
+-----------------
+- Bitzek et al. (2006) FIRE reference: PRL 97, 170201, linked by DOI.
+- ASE in the browser: the A1 notebook already uses ase + weas-widget in WASM, so the
+  L14 ASE notebook should load the same way, but it has not been tested in Pyodide here.
