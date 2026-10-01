@@ -17,12 +17,12 @@ By the end of this lecture, you should be able to:
 1. **Explain** why minimizing a quadratic energy reduces to one linear solve, $\mathbf K\mathbf x=\mathbf b$, and why a general interatomic energy does not.
 2. **Derive** the multidimensional Newton step $\mathbf H\,\Delta\mathbf x=-\nabla E$ from the one-dimensional Newton method, and state its costs and risks.
 3. **Use** `scipy.optimize.minimize` with an energy, a gradient, and a starting point, and compare how different method families choose their steps.
-4. **Describe** how BFGS and L-BFGS approximate curvature from previous gradients, extending the secant idea of L06.
+4. **Describe** how BFGS and L-BFGS approximate the curvature from previous gradients.
 5. **Relax** a cluster with an atomistic package by combining a structure, a calculator, and an optimizer.
 
 ## From springs to stable structures
 
-In L11–L13, we built a consistent set of tools for a simple model of atoms: each atom joined to its neighbours by a spring. Collecting the force balances gave a linear system, and L12 and L13 showed how a numerical solver finds its solution. The same question appeared in Assignment 1, where we compared shapes of a four-atom argon cluster:
+In L11–L13, we modelled atoms joined by springs, collected the force balances into a linear system, and looked at how a numerical solver finds its solution. Assignment 1 asked a related question about four argon atoms:
 
 > Given the interatomic energies or forces, can we obtain the structure with the lowest energy?
 
@@ -34,7 +34,7 @@ $$
 \nabla E(\mathbf x)=\mathbf 0 .
 $$
 
-Finding the structure by minimizing its energy is called **relaxation**. The copper cluster animation in L11 was one example. This lecture explains how such a relaxation is computed.
+Finding the structure by minimizing its energy is called **relaxation**, as in the copper cluster animation of L11.
 
 ## 1 · A quadratic energy needs one linear solve
 
@@ -56,7 +56,7 @@ $$
 \nabla E(\mathbf x)=\mathbf K\mathbf x-\mathbf b .
 $$
 
-Setting the gradient to zero gives back exactly the system of L11:
+Setting the gradient to zero gives back the system of L11:
 
 $$
 \boxed{\mathbf K\mathbf x=\mathbf b}
@@ -110,30 +110,17 @@ $$
 \qquad \mathbf x_{n+1}=\mathbf x_n+\Delta\mathbf x .}
 $$
 
-Each iteration is a linear system of exactly the kind we solved in L12 and L13. For the quadratic spring energy, $\mathbf H=\mathbf K$ everywhere, and one Newton step from any starting point lands on $\mathbf K\mathbf x=\mathbf b$. For a general energy, Newton repeats the linear solve with a new Hessian at every step, and near a minimum it converges quadratically, as in one dimension.
+Each iteration is a linear solve of the kind studied in L13. For the quadratic spring energy, $\mathbf H=\mathbf K$ everywhere, and one Newton step from any starting point lands on $\mathbf K\mathbf x=\mathbf b$. For a general energy, Newton repeats the linear solve with a new Hessian at every step, and near a minimum it converges quadratically, as in one dimension.
 
 ### Two problems with Newton's method
 
-**Cost.** A structure of $N$ atoms has $3N$ coordinates, so its Hessian is a $3N\times3N$ matrix. For 1000 atoms, that is $3000\times3000=9\times10^6$ second derivatives, or 72 MB of memory, to be recalculated at every step. Solving the system costs about $\tfrac23(3000)^3\approx2\times10^{10}$ floating-point operations per step (L13). For an energy from a quantum mechanical calculation, each second derivative can itself be expensive.
+**Cost.** A structure of $N$ atoms has $3N$ coordinates, so its Hessian is a $3N\times3N$ matrix. For 1000 atoms, that is about $9\times10^6$ second derivatives to recalculate, followed by a $3000\times3000$ linear solve, at every step.
 
-**It finds stationary points, not minima.** Newton's method solves $\nabla E=\mathbf 0$, and every stationary point satisfies that equation. The middle-atom example shows what can go wrong. With $l_0=1.2a$ and a start at $(0.3a,\,0.1a)$, Newton's method converges in four steps to the origin, where both springs are compressed and the atom is balanced but not stable. Started at $(1.5a,\,0.05a)$, it converges to $(l_0,0)$, another stationary point on the axis. In L15, we will see how the Hessian tells these points apart.
-
-$$
-\boxed{\text{Newton gives us the idea, but in practice we usually avoid computing the full Hessian.}}
-$$
+**It finds stationary points, not minima.** Newton's method solves $\nabla E=\mathbf 0$, and every stationary point satisfies that equation. The middle-atom example shows what can go wrong. With $l_0=1.2a$ and a start at $(0.3a,\,0.1a)$, Newton's method converges in four steps to the origin, where both springs are compressed and the atom is balanced but not stable. In L15, we will see how the Hessian tells such points apart. Newton's method gives us the idea of using curvature, but in practice we usually avoid computing the full Hessian.
 
 ## 3 · What does `scipy.optimize.minimize` need?
 
-A practical minimizer needs three things from us: a starting structure, a function that returns the energy, and, for most methods, a function that returns the gradient. It then decides where to try next:
-
-$$
-\boxed{\text{initial coordinates}}
-\;\rightarrow\;
-\boxed{\text{energy and gradient}}
-\;\rightarrow\;
-\boxed{\text{new coordinates}}
-\;\rightarrow\;\cdots
-$$
+A practical minimizer needs three things from us: a starting structure, a function that returns the energy, and, for most methods, a function that returns the gradient. From the energy and gradient at the current coordinates, it decides where to try next.
 
 ::: {.callout-note}
 ## Syntax: `minimize` with an energy and its gradient
@@ -184,34 +171,13 @@ The methods available differ mainly in how much information they use to choose t
 | L-BFGS | Keeps only the last few steps of that history | Gradient and a short history |
 | FIRE | Moves the atoms like a damped dynamics simulation | Forces (negative gradient) |
 
-The table follows a spectrum of information:
-
-$$
-\text{energies only}
-\;\rightarrow\;
-\nabla E
-\;\rightarrow\;
-\nabla E+\text{approximate curvature}
-\;\rightarrow\;
-\text{full Hessian}.
-$$
-
 ### The same landscape, six paths
 
 The first notebook runs gradient descent and Newton's method written by hand, and four SciPy methods, from the same starting point on the middle-atom landscape. The figure shows their paths for $l_0=1.2a$ starting from $(0.3a,\,0.1a)$.
 
 ![Paths of six methods on the middle-atom energy landscape, $l_0=1.2a$, starting at $(0.3a,\,0.1a)$. Shading shows $\log_{10}E$. Five methods reach the minimum at $(0,\,0.663a)$. Newton's method converges to the saddle point at the origin.](../../../assets/L14-minimizer-paths.png){#fig-minimizer-paths fig-alt="Contour plot of the energy of a middle atom between two fixed atoms, with minima above and below the origin. Six coloured paths start at the same point to the right of the origin. Newton's path ends at the origin. The others end at the upper minimum, with gradient descent and Nelder-Mead taking many small steps." width="85%"}
 
-| Method | Iterations | SciPy energy evaluations | Ends at |
-|---|---:|---:|---|
-| Gradient descent ($\alpha=0.4$) | 56 | — | Minimum $(0,\,0.663a)$ |
-| Newton | 4 | — | Saddle point $(0,0)$ |
-| Nelder–Mead | 61 | 119 | Minimum |
-| Conjugate gradient | 9 | 16 | Minimum |
-| BFGS | 7 | 13 | Minimum |
-| L-BFGS-B | 9 | 14 | Minimum |
-
-Gradient descent and Nelder–Mead reach the minimum but need many small steps. The methods that use curvature, exact or approximate, need fewer than ten. Making $l_0$ closer to $a$ in the notebook makes the valley narrower: gradient descent then needs well over a hundred steps, because a fixed step that is safe across the steep direction is far too small along the gentle one.
+Gradient descent (56 steps) and Nelder–Mead (61) reach the minimum with many small steps. CG, BFGS, and L-BFGS-B, which use curvature information, need 7 to 9. Making $l_0$ closer to $a$ in the notebook makes the valley narrower: gradient descent then needs well over a hundred steps, because a fixed step that is safe across the steep direction is far too small along the gentle one.
 
 ::: {.quarto-wasm-local notebook="l14_minimizer_paths.edit.py" view="edit" title="Minimizer paths on the middle-atom energy landscape" height="1000" loading="lazy" fullscreen="true"}
 The notebook defines the energy and gradient of the middle atom, writes gradient descent and Newton's method by hand, and records the paths of SciPy's Nelder–Mead, CG, BFGS, and L-BFGS-B methods with a callback. For $l_0=1.2a$ and a start at $(0.3a,\,0.1a)$, Newton's method converges to the saddle point at the origin in four steps, while the other methods reach the minimum at $(0,\,0.663a)$ in 7 to 61 iterations.
@@ -219,15 +185,7 @@ The notebook defines the energy and gradient of the middle atom, writes gradient
 
 ## 4 · BFGS: learning the curvature from the gradients
 
-The BFGS method, named after Broyden, Fletcher, Goldfarb, and Shanno, keeps Newton's step but replaces the exact Hessian with an approximation $\mathbf B$:
-
-$$
-\mathbf B_n\,\Delta\mathbf x=-\nabla E(\mathbf x_n).
-$$
-
-The question it answers is: **can we gradually learn enough about $\mathbf H$ from the positions and gradients we have already evaluated, without calculating any second derivatives?**
-
-In one dimension, L06 already gave an answer. The secant method replaced the derivative with the slope between the last two points. Applied to minimization, the second derivative becomes
+The BFGS method, named after Broyden, Fletcher, Goldfarb, and Shanno, keeps Newton's step $\mathbf B_n\,\Delta\mathbf x=-\nabla E(\mathbf x_n)$ but replaces the exact Hessian with an approximation $\mathbf B$ learned from the positions and gradients already evaluated. In one dimension, the secant method of L06 did the same with a slope between the last two points:
 
 $$
 E''\approx\frac{E'(x_{n+1})-E'(x_n)}{x_{n+1}-x_n}.
@@ -239,11 +197,9 @@ $$
 \mathbf B_{n+1}\,\mathbf s_n=\mathbf y_n .
 $$
 
-One step only tells us how the gradient changes along one direction, so this condition does not determine $\mathbf B$ completely. BFGS makes the smallest correction to the previous $\mathbf B_n$ that satisfies it and keeps the matrix symmetric and positive definite. Each step adds information about one more direction, and after enough steps $\mathbf B$ resembles the true Hessian near the minimum.
+Each step tells BFGS how the gradient changes along one more direction, so $\mathbf B$ gradually approaches the true Hessian. BFGS also accepts a step only if the energy goes down, which is why, in the figure above, it reaches the minimum from the same start where Newton's method stopped at the saddle point.
 
-Keeping $\mathbf B$ positive definite also solves Newton's second problem. A positive definite $\mathbf B$ makes the step point downhill, and BFGS combines it with a **line search** that only accepts a step if the energy decreases enough. BFGS therefore moves away from the saddle point that trapped Newton's method in the middle-atom example.
-
-**L-BFGS**, the "limited-memory" version, goes one step further. Instead of storing the $3N\times3N$ matrix $\mathbf B$, it stores only the last $m$ pairs $(\mathbf s_n,\mathbf y_n)$, typically 5 to 20, and reconstructs the step from them. The memory grows as $2m\times3N$ numbers rather than $(3N)^2$. For a million atoms, that is the difference between a few hundred megabytes and tens of terabytes. This is why L-BFGS is the standard choice for large structures, and why L16 uses it for a 38-atom cluster.
+**L-BFGS**, the "limited-memory" version, goes one step further. Instead of storing the $3N\times3N$ matrix $\mathbf B$, it stores only the last $m$ pairs $(\mathbf s_n,\mathbf y_n)$, typically 5 to 20, and reconstructs the step from them. For a million atoms, that is a few hundred megabytes instead of tens of terabytes, which makes L-BFGS the standard choice for large structures.
 
 ## 5 · Relaxing structures with an atomistic package
 
@@ -261,7 +217,7 @@ BFGS(atoms).run(fmax=0.001)                                # optimizer, in eV/Å
 
 The optimizer stops when the largest force component on any atom is below `fmax`, a criterion with direct physical meaning. Besides BFGS and L-BFGS, ASE offers **FIRE**, the fast inertial relaxation engine of [Bitzek et al. (2006)](https://doi.org/10.1103/PhysRevLett.97.170201). FIRE lets the atoms move like a damped molecular dynamics simulation, speeding up while the forces keep pointing the same way and stopping when they reverse. It uses only forces, which makes it robust for large or awkward structures.
 
-The second notebook relaxes the same randomly displaced 13-atom cluster with all three optimizers. For argon with the Lennard-Jones calculator, each run reaches the icosahedron at $-0.45657$ eV, which is $-44.327\,\varepsilon$, in 58 to 63 steps. For 13 atoms, L-BFGS stores more past steps than the run takes, so its path is identical to BFGS. Switching to copper with the EMT calculator from the L11 animation changes only one line of the program.
+The second notebook relaxes the same randomly displaced 13-atom cluster with all three optimizers. For argon with the Lennard-Jones calculator, each run reaches the icosahedron at $-0.45657$ eV, which is $-44.327\,\varepsilon$, in 58 to 63 steps. For 13 atoms, L-BFGS remembers every step of the run, so its path is identical to BFGS. Switching to copper with the EMT calculator changes one line of the program.
 
 ![Relaxation of a displaced 13-atom argon cluster with ASE's BFGS, LBFGS, and FIRE optimizers. Left: energy above the final value. Right: the largest force component, with the stopping tolerance $f_{\max}=10^{-3}$ eV/Å.](../../../assets/L14-ase-relaxation.png){#fig-ase-relaxation fig-alt="Two semilog plots against optimizer step. The energy and largest force of BFGS and LBFGS overlap and fall to the tolerance in 58 steps. FIRE falls more smoothly and reaches the tolerance in 63 steps." width="100%"}
 
@@ -272,13 +228,13 @@ The notebook builds a displaced cluster from the centre of an icosahedron, attac
 The workflow to remember is
 
 $$
-\boxed{\text{structure}}
+\text{structure}
 \;\rightarrow\;
-\boxed{\text{calculator: }E,\ \mathbf F}
+\text{calculator }(E,\ \mathbf F)
 \;\rightarrow\;
-\boxed{\text{optimizer}}
+\text{optimizer}
 \;\rightarrow\;
-\boxed{\text{relaxed structure}}.
+\text{relaxed structure}.
 $$
 
 The calculator could be a Lennard-Jones potential today, a Morse potential tomorrow, and eventually density functional theory or a machine-learned potential. The optimization machinery does not depend on where the energy and forces come from.
@@ -301,4 +257,4 @@ The calculator could be a Lennard-Jones potential today, a Morse potential tomor
 
 ## Next
 
-Every method in this lecture stops when the gradient is small. A small gradient, however, only tells us that we reached a stationary point. Newton's method found a saddle point in our two-dimensional example, and a perfectly symmetric structure can trap any minimizer at one. In L15, we ask how to confirm that a relaxed structure is really a minimum, which leads us to the Hessian and its eigenvalues.
+Every method in this lecture stops when the gradient is small, which only tells us that we reached a stationary point. Newton's method stopped at a saddle point in our example, and a perfectly symmetric structure can trap any minimizer at one. L15 asks how to confirm that a relaxed structure is really a minimum.

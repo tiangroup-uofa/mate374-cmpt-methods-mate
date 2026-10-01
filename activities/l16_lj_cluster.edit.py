@@ -273,10 +273,7 @@ def step_three_text(mo):
     The minimizer works with one flat vector $\mathbf x=(x_1,y_1,z_1,\ldots,z_N)$
     of length $3N$, so the objective reshapes it to $N\times3$ before calling our
     functions and flattens the gradient again. L-BFGS-B uses the gradient to build
-    an approximate Hessian from recent steps. It stops when the largest gradient
-    entry falls below `gtol` or when the relative energy change per step falls
-    below `ftol`. The default `ftol` stops some random starts while the largest
-    gradient entry is still about $10^{-2}$, so we tighten it.
+    an approximate Hessian from recent steps and stops when the gradient is small.
 
     ```python
     result = minimize(fun, x0, jac=grad, method="L-BFGS-B",
@@ -649,16 +646,7 @@ def live_free_energy(np):
 
 
 @app.cell(hide_code=True)
-def symmetry_control(mo):
-    count_symmetry = mo.ui.checkbox(
-        value=False,
-        label="Count permutational isomers (point-group orders 48 for the truncated octahedron, 10 for the icosahedral minimum)")
-    count_symmetry
-    return (count_symmetry,)
-
-
-@app.cell(hide_code=True)
-def compare_minima(EPS_EV, X_icosahedral, classify, count_symmetry, draw_clusters, fcc_cluster, harmonic_free_energy, lj_energy, mo, normal_modes, np, plt, relax):
+def compare_minima(EPS_EV, X_icosahedral, classify, draw_clusters, fcc_cluster, harmonic_free_energy, lj_energy, mo, normal_modes, np, plt, relax):
     KB_EV = 8.617333262e-5
     T_UNIT_K = EPS_EV/KB_EV                    # 1 reduced temperature unit in K for argon
     X_TO, _ = relax(fcc_cluster(38, centre="hole"))
@@ -666,22 +654,16 @@ def compare_minima(EPS_EV, X_icosahedral, classify, count_symmetry, draw_cluster
     lam_TO, lam_ico = normal_modes(X_TO)[0], normal_modes(X_ico)[0]
     E_TO, E_ico = lj_energy(X_TO), lj_energy(X_ico)
     delta_E = E_ico - E_TO
-    delta_S_vib = 0.5*(np.sum(np.log(lam_TO[6:])) - np.sum(np.log(lam_ico[6:])))
-    # A minimum of point-group order h has 2N!/h permutational copies; only ln(h) differs here.
-    delta_S_sym = np.log(48/10) if count_symmetry.value else 0.0
-    delta_S = delta_S_vib + delta_S_sym
+    delta_S = 0.5*(np.sum(np.log(lam_TO[6:])) - np.sum(np.log(lam_ico[6:])))
     T_cross = delta_E/delta_S
 
     def plot_free_energy():
         T = np.linspace(0.005, 0.5, 300)
-        sym = 1.0 if count_symmetry.value else 0.0
-        dF = (harmonic_free_energy(T, E_ico, lam_ico) - harmonic_free_energy(T, E_TO, lam_TO)
-              - sym*T*np.log(48/10))
+        dF = harmonic_free_energy(T, E_ico, lam_ico) - harmonic_free_energy(T, E_TO, lam_TO)
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.5, 3.8))
         ax1.plot(T, dF, color="black", lw=2)
         ax1.axhline(0, color="gray", lw=0.8)
         ax1.axvline(T_cross, color="tab:red", ls="--", label=f"Harmonic crossover T* = {T_cross:.3f} ε/k_B")
-        ax1.axvline(0.12, color="tab:green", ls=":", lw=2, label="Full-landscape estimate ≈ 0.12 ε/k_B")
         ax1.text(0.02, 0.2*delta_E, "Truncated octahedron\nfavoured", fontsize=8)
         ax1.text(0.33, -0.5*delta_E, "Icosahedral\nfavoured", fontsize=8)
         ax1.set(xlabel="Temperature (ε/k_B)", ylabel="F_ico − F_TO (ε)")
@@ -710,14 +692,12 @@ def compare_minima(EPS_EV, X_icosahedral, classify, count_symmetry, draw_cluster
     | Stationary point | {_checks[0]} | {_checks[1]} |
     | Σ ln λ over 108 modes | {np.sum(np.log(lam_TO[6:])):.3f} | {np.sum(np.log(lam_ico[6:])):.3f} |
 
-    ΔE = **{delta_E:.3f} ε**, ΔS<sub>vib</sub> = **{delta_S_vib:.2f} k<sub>B</sub>**{f", ΔS<sub>sym</sub> = ln(48/10) = {delta_S_sym:.2f} k<sub>B</sub>" if count_symmetry.value else ""}.
-    The free energies cross at T* = ΔE/ΔS = **{T_cross:.3f} ε/k<sub>B</sub> ≈ {T_cross*T_UNIT_K:.0f} K** for argon.
-    The full-landscape estimate of about 0.12 ε/k<sub>B</sub> (Doye, Wales and Miller, *J. Chem. Phys.* **109**, 8143, 1998)
-    also counts the many other icosahedral minima, which add further entropy.
+    ΔE = **{delta_E:.3f} ε** and ΔS = **{delta_S:.2f} k<sub>B</sub>**, so the free energies cross at
+    T* = ΔE/ΔS = **{T_cross:.3f} ε/k<sub>B</sub> ≈ {T_cross*T_UNIT_K:.0f} K** for argon.
     """),
         draw_clusters([X_TO, X_ico], ["Truncated octahedron (O_h)", "Lowest icosahedral minimum (C_5v)"]),
     ])
-    return T_cross, delta_E, delta_S, delta_S_vib, free_energy_figure
+    return T_cross, delta_E, delta_S, free_energy_figure
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ L16 · LJ cluster wrap-up: authoring notes for the instructor
 
 Status
 ------
-- Lecture page: units/03/L16/index.qmd (full draft, ~4,100 words of source including equations and code).
+- Lecture page: units/03/L16/index.qmd (trimmed after review; ~3,300 words of source).
 - Notebook: activities/l16_lj_cluster.edit.py. Every "Live step" cell is COMPLETED.
   To make a student scaffold in the L10 style, copy the file and replace the bodies of
   the five live cells with None placeholders:
@@ -24,12 +24,12 @@ Free-energy extension (step 6)
   in the notebook as 38x3 reduced coordinates (relaxes back to the same energy).
 - Classical harmonic results: dE = 0.676 eps, dS_vib = 2.14 kB (sum ln lambda:
   TO 538.669, ico 534.392), T* = 0.316 eps/kB = 38 K for argon.
-  With permutational isomers ln(48/10) = 1.57 kB: T* = 0.182 eps/kB.
-  Point-group orders 48 and 10 were checked numerically.
-- Literature value ~0.12 eps/kB (Doye, Wales and Miller, JCP 109, 8143, 1998) is cited
-  without a DOI link. Please confirm the citation before class.
+- Trimmed from the page and notebook (kept here for reference): permutational isomers
+  add ln(48/10) = 1.57 kB (T* = 0.182 eps/kB, point-group orders checked numerically);
+  a full-landscape value of ~0.12 eps/kB is usually attributed to Doye, Wales and
+  Miller (JCP 109, 8143, 1998), not verified here.
 - Quantum zero-point energy (hbar* = 0.0297 for argon): dZPE = -0.29 eps for ico vs TO.
-  Mentioned only as a model limitation.
+  Not mentioned on the page.
 - The interfunnel barrier height is described only qualitatively (no number given).
 
 Assumptions to confirm

@@ -22,13 +22,13 @@ By the end of this lecture, you should be able to:
 
 ## Did the minimizer find a minimum?
 
-Throughout this unit, we have used systems of equations and matrix operations to describe coupled physical systems, and spring–atom models have been our running example because they are easy to picture and easy to simulate in Python. In L14, we minimized an atomic energy $E(\mathbf x)$ with numerical optimizers. Each of them stopped when the gradient was small.
+Throughout this unit, spring–atom models have been our running example of coupled physical systems, because they are easy to picture and easy to simulate in Python. In L14, we minimized an atomic energy $E(\mathbf x)$ with numerical optimizers, and each of them stopped when the gradient was small.
 
 Suppose an optimizer gives us a structure $\mathbf x^*$ and reports that it has converged. A natural question is:
 
 > **How do we know that the structure we found is really a minimum?**
 
-L14 already warned us. Started near the origin of the middle-atom landscape, Newton's method converged to a point where both springs are compressed and the atom is balanced but not stable. The gradient there is exactly zero, so any stopping test based on the gradient is satisfied. We need a test that looks beyond the gradient.
+In L14, Newton's method converged to a point where the middle atom is balanced but not stable. The gradient there is exactly zero, so any stopping test based on the gradient is satisfied, and we need a test that looks beyond it.
 
 ## From one dimension to many dimensions
 
@@ -46,7 +46,7 @@ $$
 \frac{d^2E}{dx^2}<0\ \Rightarrow\ \text{local maximum}.
 $$
 
-The second derivative tells us whether the energy curves upward or downward near the stationary point. We used exactly this test in L07 to separate the liquid and gas minima of the van der Waals free energy from the maximum between them.
+The second derivative tells us whether the energy curves upward or downward near the stationary point, the test we used in L07 for the van der Waals free energy.
 
 Atomic structures, however, have many coordinates. Even a single atom moving in a plane has
 
@@ -59,30 +59,11 @@ and it can move in the $x$-direction, in the $y$-direction, or along any combina
 
 ## A compressed spring system
 
-Consider the spring–atom system from L14. Two atoms, $L$ and $R$, are fixed at
+Return to the middle atom from L14. Two atoms are fixed at $L=(-a,0)$ and $R=(a,0)$, and the middle atom $M=(x,y)$ is joined to each by a spring of stiffness $k$ and natural length $l_0>a$, so both springs are compressed when $M$ sits at the origin. The energy is
 
 $$
-L=(-a,0)\qquad\text{and}\qquad R=(a,0),
-$$
-
-and the middle atom $M=(x,y)$ is free to move in two dimensions. Each spring has stiffness $k$ and natural length $l_0$. We choose
-
-$$
-l_0>a,
-$$
-
-so that when the middle atom sits at $(x,y)=(0,0)$, both springs are compressed. The spring lengths are
-
-$$
-r_L=\sqrt{(x+a)^2+y^2},
-\qquad
-r_R=\sqrt{(x-a)^2+y^2},
-$$
-
-and the total elastic energy is
-
-$$
-E(x,y)=\frac k2\left(r_L-l_0\right)^2+\frac k2\left(r_R-l_0\right)^2 .
+E(x,y)=\frac k2\left(r_L-l_0\right)^2+\frac k2\left(r_R-l_0\right)^2,
+\qquad r_L=\sqrt{(x+a)^2+y^2},\quad r_R=\sqrt{(x-a)^2+y^2}.
 $$
 
 At the symmetric position $(0,0)$, the two springs push on $M$ with equal and opposite forces, so
@@ -165,7 +146,7 @@ $$
 \mathbf n=\begin{bmatrix}\cos\theta\\ \sin\theta\end{bmatrix}
 $$
 
-be the direction of the line joining the two fixed atoms, which now sit at $-a\mathbf n$ and $+a\mathbf n$. Nothing physical has changed. The middle atom is still stable when displaced along the spring axis and unstable when displaced perpendicular to it. These directions are simply no longer the $x$- and $y$-directions. At the origin, the Hessian becomes
+be the direction of the line joining the two fixed atoms, which now sit at $-a\mathbf n$ and $+a\mathbf n$. Physically nothing has changed: the middle atom is still stable along the spring axis and unstable perpendicular to it, but these directions are no longer the $x$- and $y$-directions. At the origin, the Hessian becomes
 
 $$
 \mathbf H=2k
@@ -250,13 +231,7 @@ The eigenvalues did not change when we rotated the system. Only the eigenvectors
 
 ### Why the eigenvectors answer the question
 
-For a symmetric matrix, three results make the eigenvectors the natural coordinates for stability:
-
-- The eigenvalues are real numbers.
-- The eigenvectors of different eigenvalues are perpendicular, so they form a new set of axes.
-- In those axes the Hessian is diagonal. Collecting the unit eigenvectors as the columns of $\mathbf V$ and the eigenvalues on the diagonal of $\boldsymbol\Lambda$ gives $\mathbf H=\mathbf V\boldsymbol\Lambda\mathbf V^{\mathsf T}$.
-
-Writing a displacement in the new axes, $\mathbf q=\mathbf V^{\mathsf T}\delta\mathbf x$, the energy change becomes a sum of independent terms:
+For a symmetric matrix such as $\mathbf H$, the eigenvalues are real and the eigenvectors are perpendicular, so they form a new set of axes. Measured along those axes, with coordinates $q_1,q_2,\ldots$, the coupling disappears and the energy change becomes a sum of independent terms:
 
 $$
 \tfrac12\,\delta\mathbf x^{\mathsf T}\mathbf H\,\delta\mathbf x=\tfrac12\left(\lambda_1q_1^2+\lambda_2q_2^2+\cdots+\lambda_nq_n^2\right).
@@ -270,13 +245,13 @@ This is the diagonal case we could read at a glance, recovered for any Hessian. 
 | Some positive, some negative | Rises in some directions and falls in others | Saddle point |
 | All negative | Falls in every direction | Local maximum |
 
-A matrix whose eigenvalues are all positive is called **positive definite**. In L13, Cholesky factorization required exactly this property, so `cho_factor` gives a quick practical test. For the spring system it fails at the origin and succeeds at either minimum.
+A matrix whose eigenvalues are all positive is called **positive definite**, the property that Cholesky factorization required in L13. For the spring system, `cho_factor` fails at the origin and succeeds at either minimum.
 
 ![The compressed spring system with $l_0=1.2a$, unrotated (left) and rotated by $45^\circ$ (right). Arrows show the Hessian eigenvectors at the origin: red for $\lambda=-0.4k$, blue for $\lambda=2.0k$. The matrix entries change with rotation, but the eigenvalues do not.](../../../assets/L15-compressed-spring.png){#fig-compressed-spring fig-alt="Two contour plots of the middle-atom energy. Left, fixed atoms on the x-axis, minima above and below the origin, a red arrow pointing up and a blue arrow pointing right. Right, the same landscape rotated by 45 degrees, with fixed atoms on the diagonal, minima on the other diagonal, and the arrows rotated with them." width="90%"}
 
 ### Computing eigenvalues in practice
 
-For a $2\times2$ matrix, $\det(\mathbf H-\lambda\mathbf I)=0$ is a quadratic equation. For an $n\times n$ matrix, it is a polynomial of degree $n$, and there is no general formula for the roots of polynomials of degree five or higher. Numerical libraries therefore use iterative algorithms. The simplest idea, **power iteration**, multiplies a starting vector by $\mathbf H$ again and again: the component along the eigenvector with the largest $\lvert\lambda\rvert$ grows fastest and soon dominates. Library routines refine such ideas and find all eigenpairs of a dense symmetric matrix at a cost that grows as $n^3$, like the LU factorization of L13.
+For a $2\times2$ matrix, $\det(\mathbf H-\lambda\mathbf I)=0$ is a quadratic equation that we can solve by hand. For the $3N\times3N$ Hessian of a cluster, we use a library routine.
 
 ::: {.callout-note}
 ## Syntax: Eigenvalues of a symmetric matrix with `np.linalg.eigh`
@@ -322,7 +297,7 @@ Displacing the atoms a short distance along an eigenvector and relaxing again fo
 | Follow mode 1 | $-4.4806\ \rightarrow\ -5.0734\ \rightarrow\ -6.0000$ | Square → flat rhombus (a saddle with one negative eigenvalue) → tetrahedron |
 | Follow mode 2 | $-4.4806\ \rightarrow\ -6.0000$ | Square → tetrahedron |
 
-Both paths end at the tetrahedron, with all six pair distances equal to $2^{1/6}\sigma$ and a Hessian with six zero and six positive eigenvalues. The flat rhombus on the first path is a reminder that following one downhill direction can lead to another saddle, so the eigenvalue test must be repeated after every relaxation.
+Both paths end at the tetrahedron, with all six pair distances equal to $2^{1/6}\sigma$ and a Hessian with six zero and six positive eigenvalues. On the first path, the flat rhombus is another saddle, so we repeat the eigenvalue test after every relaxation.
 
 ::: {.quarto-wasm-local notebook="l15_cluster_check.edit.py" view="edit" title="Checking a relaxed four-atom cluster with Hessian eigenvalues" height="1000" loading="lazy" fullscreen="true"}
 The notebook relaxes a perfect four-atom square with BFGS, which stops at $-4.480620\,\varepsilon$ with `success = True`. Its $12\times12$ finite-difference Hessian has two negative, six zero, and four positive eigenvalues. Following the in-plane mode passes through a flat rhombus at $-5.073421\,\varepsilon$, which still has one negative eigenvalue, and reaches the tetrahedron at $-6\,\varepsilon$. Following the out-of-plane mode reaches the tetrahedron directly.
@@ -344,7 +319,6 @@ The positive eigenvalues carry more information than their signs. Each one measu
 2. Find the eigenvalues of $\mathbf H$ for $\theta=30^\circ$ and $l_0=1.2a$ without calculating the matrix entries. Then use the notebook to check your answer and the directions of the eigenvectors.
 3. What happens to the eigenvalues at the origin when $l_0<a$, so that both springs are stretched? Is the origin still a saddle point?
 4. A relaxed cluster of 20 atoms has a Hessian with 6 eigenvalues of magnitude below $10^{-5}$, one eigenvalue of $-0.02$, and 53 positive eigenvalues. What would you report, and what would you do next?
-5. Why does `cho_factor` fail for the Hessian of an isolated cluster even at a true minimum? How could you remove the problem?
 
 ## Next
 
