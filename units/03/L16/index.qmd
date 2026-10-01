@@ -1,0 +1,366 @@
+---
+title: "L16 · Finding the stable shape of an atomic cluster"
+subtitle: "Wrapping up Unit 3: Matrices, minimization, and eigenvalues for a 38-atom argon cluster"
+body-classes: lecture-page
+---
+
+::: {.callout-note}
+## Central question
+
+**What is the most stable arrangement of 38 argon atoms, and how can we show that a computed structure is a stable minimum of the energy?**
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Represent** an atomic cluster as an $N\times3$ coordinate matrix and a flat vector of $3N$ unknowns.
+2. **Calculate** the Lennard-Jones energy and its gradient for all atom pairs with NumPy broadcasting, without Python loops over pairs.
+3. **Relax** a cluster with a gradient-based multidimensional minimizer and judge convergence from the gradient.
+4. **Classify** a stationary point from the eigenvalues of its Hessian, and convert positive eigenvalues to vibrational frequencies.
+5. **Distinguish** a local minimum from the global minimum, using repeated relaxations from different starting structures.
+
+## Wrapping up Unit 3
+
+Unit 3 began with a chain of atoms joined by harmonic springs. In L11, each spring contributed entries to a stiffness matrix, and the equilibrium displacements solved $\mathbf{K}\mathbf{u}=\mathbf{f}$. L12 and L13 looked inside that solve: when a matrix is singular or ill-conditioned, and how elimination and LU factorization produce the answer. We then left the harmonic approximation behind. With the full pair potential, the forces depend nonlinearly on the positions, so finding a structure becomes a minimization over many coordinates, and the curvature at the minimum is described by a matrix whose eigenvalues carry physical meaning.
+
+This lecture brings these pieces together in **one program**, the same way L10 closed Unit 2:
+
+- **Matrix representation:** store the positions of $N$ atoms in an $N\times3$ array and compute all pair distances at once.
+- **Multidimensional minimization:** move all $3N$ coordinates downhill until the forces vanish.
+- **Eigenvalue problem:** diagonalize the $3N\times3N$ matrix of second derivatives to test stability and obtain vibrational frequencies.
+
+## The materials question
+
+Small clusters of atoms sit between a molecule and a crystal. Metal nanoparticles a few nanometres across act as catalysts, and their activity depends on which facets and edge sites their shape exposes. Noble-gas clusters are a cleaner model system. When argon or xenon expands through a nozzle into vacuum, it cools and condenses into clusters of many sizes. Mass spectra of xenon clusters show unusually abundant sizes, or **magic numbers**, at $N=13$, 55, and 147 ([Echt, Sattler and Recknagel, 1981](https://doi.org/10.1103/PhysRevLett.47.1121)). These are the sizes at which atoms can complete concentric icosahedral shells. Bulk argon and xenon, by contrast, crystallize in the face-centred cubic (fcc) structure. A small cluster can therefore prefer a structure that its bulk crystal never adopts, because a large fraction of its atoms lie at the surface.
+
+The interaction between two argon atoms is described well by the Lennard-Jones (LJ) potential from Assignments 1 and 2:
+
+$$
+V(r)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^{6}\right],
+\qquad \varepsilon=0.0103\ \mathrm{eV},\quad \sigma=3.40\ \text{Å}.
+$$
+
+The pair energy is lowest, $V=-\varepsilon$, at $r_m=2^{1/6}\sigma\approx3.82$ Å. In A1, we compared a line, a square, and a tetrahedron of four atoms and found that the tetrahedron wins because all six of its pair distances can equal $r_m$ at once. For larger clusters, not every pair can sit at $r_m$, and the best compromise is no longer obvious. Today's question is the 38-atom cluster, LJ$_{38}$.
+
+### Reduced units
+
+The program works in **LJ reduced units**: energies in $\varepsilon$, lengths in $\sigma$, and masses in the atomic mass $m$. The pair energy becomes
+
+$$
+V(r)=4\left(r^{-12}-r^{-6}\right),
+$$
+
+and every LJ cluster, whether argon, krypton, or xenon, has the same structures and the same energies in these units. We convert to argon only when reporting results: multiply energies by $\varepsilon=0.0103$ eV and lengths by $\sigma=3.40$ Å. Published lowest energies, such as those in the [Cambridge Cluster Database](https://doye.chem.ox.ac.uk/jon/structures/LJ.html), are given in units of $\varepsilon$, so we can compare our results with them directly.
+
+### Components of the program
+
+#### Part 1: The coordinate matrix
+
+The positions of $N$ atoms form a matrix with one row per atom:
+
+$$
+\mathbf{X}=
+\begin{bmatrix}
+x_1 & y_1 & z_1\\
+x_2 & y_2 & z_2\\
+\vdots & \vdots & \vdots\\
+x_N & y_N & z_N
+\end{bmatrix}.
+$$
+
+A minimizer, however, expects one vector of unknowns. Reading $\mathbf X$ row by row gives the flat vector
+
+$$
+\mathbf{x}=(x_1,y_1,z_1,\;x_2,y_2,z_2,\;\ldots,\;x_N,y_N,z_N)
+$$
+
+of length $3N$. For LJ$_{38}$, the energy is a function of 114 variables. In NumPy, `X.ravel()` produces $\mathbf x$ and `x.reshape(N, 3)` recovers $\mathbf X$, so we can write the physics in terms of atoms and hand the minimizer a vector.
+
+**Sanity check:** How many pairs of atoms does LJ$_{38}$ have? How many entries does the matrix of second derivatives have?
+
+::: {.callout-tip collapse="true"}
+## Answer: Pair count and Hessian size for 38 atoms
+
+Each pair is counted once, so there are $N(N-1)/2=38\times37/2=703$ pairs. The matrix of second derivatives is $3N\times3N=114\times114$, with 12,996 entries.
+:::
+
+#### Part 2: Energy and gradient
+
+The total energy adds one LJ term for every pair,
+
+$$
+E(\mathbf x)=\sum_{i<j}V(r_{ij}),\qquad r_{ij}=\lvert\mathbf x_i-\mathbf x_j\rvert,
+$$
+
+where $\mathbf x_i$ is row $i$ of $\mathbf X$. For three atoms, the sum is $V(r_{12})+V(r_{13})+V(r_{23})$. The condition $i<j$ counts each pair once and skips $i=j$.
+
+The minimizer also needs the gradient, the vector of $3N$ partial derivatives $\partial E/\partial x_k$. Moving atom $i$ changes only the distances $r_{ij}$ that involve atom $i$. By the chain rule, with the separation vector $\mathbf d_{ij}=\mathbf x_i-\mathbf x_j$,
+
+$$
+\frac{\partial E}{\partial\mathbf x_i}
+=\sum_{j\neq i}V'(r_{ij})\,\frac{\partial r_{ij}}{\partial\mathbf x_i}
+=\sum_{j\neq i}\frac{V'(r_{ij})}{r_{ij}}\,\mathbf d_{ij},
+\qquad V'(r)=-\frac{48}{r^{13}}+\frac{24}{r^{7}}.
+$$
+
+Each term points along the line joining the two atoms. The **force** on atom $i$ is $\mathbf F_i=-\partial E/\partial\mathbf x_i$: when $r_{ij}>r_m$, $V'>0$ and the force pulls atom $i$ toward atom $j$.
+
+#### Part 3: Minimization
+
+A stable structure is a minimum of $E(\mathbf x)$. At any minimum, the gradient is zero, so all forces vanish. In L07, we minimized a function of one variable, the molar volume. Here the same idea applies to 114 coordinates. A gradient-based minimizer uses $\nabla E$ to choose a downhill direction, takes a step, and repeats until the gradient is small.
+
+#### Part 4: The Hessian and its eigenvalues
+
+A zero gradient identifies a **stationary point**, which could be a minimum, a maximum, or a saddle. To decide which, we need the curvature of the energy in every direction. The **Hessian** collects all second derivatives into a symmetric $3N\times3N$ matrix,
+
+$$
+H_{kl}=\frac{\partial^2E}{\partial x_k\,\partial x_l}.
+$$
+
+Its eigenvalues answer the stability question, and, as we will see, they also give the vibrational frequencies of the cluster.
+
+#### Part 5: Local and global minima
+
+A minimizer only goes downhill, so it stops at the first minimum it reaches from its starting point. A cluster has many such local minima. The most stable structure is the **global minimum**, the lowest of all of them. To find it, we need good starting structures, many attempts, or both.
+
+## The live notebook
+
+We build the program in the editable notebook below and pause after each step to look at the structure and the numbers. The notebook's controls let you change the number of atoms and the starting structure. Use **Open in marimo.app** to work in a separate browser session where you can download your edited notebook.
+
+::: {.quarto-wasm-local notebook="l16_lj_cluster.edit.py" view="edit" title="Live demo: relax an LJ cluster, test its stability, and search for the global minimum" height="1100" loading="lazy" fullscreen="true" marimo-app="true"}
+The notebook builds an LJ cluster as an $N\times3$ coordinate matrix, evaluates its energy and gradient with NumPy broadcasting, relaxes it with L-BFGS-B, and diagonalizes a finite-difference Hessian. For 38 atoms cut from an fcc crystal around an octahedral hole, one relaxation gives the truncated octahedron at $-173.928427\,\varepsilon$, a local minimum with six zero and 108 positive Hessian eigenvalues. Its harmonic vibrations span 7.8 to 56.2 cm⁻¹ in argon units. Sixty relaxations from random positions all end at higher energies, with the best at $-169.39\,\varepsilon$.
+:::
+
+## Step 1 · Building a starting structure
+
+Every minimization needs a starting point. A natural guess for argon is a piece of its own crystal. In the fcc lattice with cube edge $a$, the atoms sit at the points $\tfrac a2(i,j,k)$ for integers $i,j,k$ with an even sum $i+j+k$. The nearest-neighbour distance is then $a/\sqrt2$, and setting it equal to $r_m$ gives $a=\sqrt2\,r_m$.
+
+To cut a cluster, we generate a block of lattice points, compute the distance of each one from a chosen centre, and keep the $N$ closest. Every step is an array operation: `np.meshgrid` produces the integer triples, a Boolean mask keeps those with an even sum, and `np.argsort` orders the points by distance. The choice of centre matters:
+
+- **Centred on an atom:** the atom and its 12 nearest neighbours form a 13-atom **cuboctahedron**. Adding the next shells gives a 55-atom cuboctahedron.
+- **Centred on an octahedral hole**, the empty site at $(a/2,0,0)$: the nearest shells hold 6, 8, and 24 lattice points, so $N=6+8+24=38$ atoms form a complete **truncated octahedron**, with square and hexagonal faces.
+
+For comparison, the notebook also generates **random** starting positions inside a sphere, with no two atoms closer than $0.9\sigma$.
+
+## Step 2 · Energy and gradient with broadcasting
+
+In A1, we evaluated the cluster energy with two nested loops over atoms. For $N$ atoms, the loop body runs $N(N-1)/2$ times, and each pass carries the overhead of the Python interpreter that we measured in L04. Broadcasting moves those loops into compiled NumPy code. The expression
+
+```python
+d = X[:, None, :] - X[None, :, :]     # shape (N, N, 3)
+```
+
+inserts a new axis into two views of `X`. The first has shape $(N,1,3)$ and the second $(1,N,3)$. NumPy stretches both to $(N,N,3)$, so entry `d[i, j]` is the separation vector $\mathbf x_i-\mathbf x_j$ for every pair at once. Taking the norm along the last axis gives the $N\times N$ distance matrix:
+
+$$
+\mathbf r=
+\begin{bmatrix}
+0 & r_{12} & r_{13} & \cdots\\
+r_{12} & 0 & r_{23} & \cdots\\
+r_{13} & r_{23} & 0 & \cdots\\
+\vdots & & & \ddots
+\end{bmatrix}.
+$$
+
+This matrix is symmetric with zeros on the diagonal. Each pair appears twice and every atom appears once paired with itself. For the energy, we keep only the entries above the diagonal, whose row and column indices `np.triu_indices(N, k=1)` returns. For the gradient, we keep every pair, because atom $i$ feels a force from every partner, and set the diagonal to infinity so that the self-interaction term contributes zero.
+
+::: {.callout-tip collapse="true"}
+## Example code: Vectorized LJ energy and gradient in reduced units
+
+```python
+def pair_separations(X):
+    d = X[:, None, :] - X[None, :, :]        # (N, N, 3) separation vectors
+    r = np.linalg.norm(d, axis=-1)           # (N, N) distance matrix
+    return d, r
+
+def lj_energy(X):
+    d, r = pair_separations(X)
+    i, j = np.triu_indices(len(X), k=1)      # each pair once
+    inv6 = r[i, j]**-6
+    return np.sum(4*(inv6*inv6 - inv6))
+
+def lj_gradient(X):
+    d, r = pair_separations(X)
+    np.fill_diagonal(r, np.inf)              # no self-interaction
+    inv6 = r**-6
+    dV_dr = (-48*inv6*inv6 + 24*inv6)/r
+    return np.sum((dV_dr/r)[:, :, None]*d, axis=1)   # (N, 3)
+```
+
+In the gradient, `(dV_dr/r)[:, :, None]` has shape $(N,N,1)$ and multiplies the three components of each separation vector. Summing over axis 1 adds the contributions of all partners $j$.
+:::
+
+The analytical gradient is easy to get wrong by a sign or a factor of $r$. Before trusting it, compare a few of its entries with central differences of the energy, as in L06:
+
+$$
+\frac{\partial E}{\partial x_k}\approx\frac{E(\mathbf x+h\,\mathbf e_k)-E(\mathbf x-h\,\mathbf e_k)}{2h},
+$$
+
+where $\mathbf e_k$ is the unit vector that changes only coordinate $k$. With $h=10^{-6}$, the two should agree to about $10^{-8}$. The notebook performs this check automatically.
+
+## Step 3 · Relaxing all coordinates with `minimize`
+
+[`scipy.optimize.minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) is the multidimensional counterpart of the `minimize_scalar` function from L07 and L10. We use the **L-BFGS-B** method. Like Newton's method, it chooses each step from the gradient and an estimate of the curvature. Instead of computing the full Hessian, it builds an approximation from the gradients of the last few steps, which keeps each iteration cheap when there are many coordinates.
+
+::: {.callout-note}
+## Syntax: `minimize` with an analytical gradient
+
+```python
+result = minimize(fun, x0, jac=grad, method="L-BFGS-B",
+                  options={"gtol": 1e-6, "ftol": 1e-12, "maxiter": 5000})
+result.x, result.fun, result.nit, result.success
+# fun(x) returns the energy, grad(x) returns a vector of the same length as x
+```
+
+The method stops when the largest gradient entry falls below `gtol`, or when the relative energy change per step falls below `ftol`. With the default `ftol`, some random starts stop while the largest gradient entry is still about $10^{-2}$, so we tighten it.
+:::
+
+::: {.callout-tip collapse="true"}
+## Example code: Relaxing a cluster from its coordinate matrix
+
+```python
+def relax(X0):
+    N = len(X0)
+    result = minimize(lambda x: lj_energy(x.reshape(N, 3)), X0.ravel(),
+                      jac=lambda x: lj_gradient(x.reshape(N, 3)).ravel(),
+                      method="L-BFGS-B",
+                      options={"gtol": 1e-6, "ftol": 1e-12, "maxiter": 5000})
+    return result.x.reshape(N, 3), result
+```
+
+The two `lambda` functions translate between the flat vector that the minimizer works with and the $N\times3$ matrix that our energy functions expect.
+:::
+
+Starting from the 38 atoms around an octahedral hole, the relaxation converges in a handful of iterations to
+
+$$
+E=-173.928427\,\varepsilon=-1.791\ \mathrm{eV}\quad(-47.1\ \text{meV per atom}).
+$$
+
+This equals the lowest energy known for LJ$_{38}$. The fcc start was already close to the final structure, and relaxation only adjusted the bond lengths slightly. **Sanity check:** after relaxation, print the largest gradient entry. For the truncated octahedron it is about $10^{-7}$. A reported `success = True` only means that a stopping criterion was met. It tells us that we reached a point where the gradient is small, but not what kind of point it is.
+
+## Step 4 · Testing stability with the Hessian
+
+### Building the Hessian column by column
+
+Column $l$ of the Hessian describes how the whole gradient changes when coordinate $l$ moves. A central difference of our analytical gradient therefore builds one column at a time:
+
+$$
+\mathbf H_{:,l}\approx\frac{\nabla E(\mathbf x+h\,\mathbf e_l)-\nabla E(\mathbf x-h\,\mathbf e_l)}{2h}.
+$$
+
+For LJ$_{38}$, this requires $2\times114=228$ gradient evaluations. Rounding makes the result very slightly asymmetric, so we average it with its transpose, $\tfrac12(\mathbf H+\mathbf H^{\mathsf T})$. An analytical Hessian is also possible, built from $3\times3$ blocks for each pair, but the finite-difference version reuses code we have already checked.
+
+### What the eigenvalues mean
+
+Because $\mathbf H$ is symmetric, its eigenvalues $\lambda_k$ are real, and its eigenvectors $\mathbf v_k$ are perpendicular to one another. Near a stationary point $\mathbf x^*$, a small displacement $\delta\mathbf x$ changes the energy by
+
+$$
+E(\mathbf x^*+\delta\mathbf x)\approx E(\mathbf x^*)+\tfrac12\,\delta\mathbf x^{\mathsf T}\mathbf H\,\delta\mathbf x .
+$$
+
+If we displace along an eigenvector, $\delta\mathbf x=s\,\mathbf v_k$ with $\lvert\mathbf v_k\rvert=1$, the change is $\tfrac12\lambda_k s^2$. Each eigenvalue is therefore the curvature of the energy along its own direction, or **mode**:
+
+- **$\lambda_k>0$:** the energy rises in both directions along the mode. The structure is stable against that displacement.
+- **$\lambda_k=0$:** the energy does not change. For an isolated cluster, three rigid **translations** and three rigid **rotations** leave every pair distance unchanged, so six eigenvalues are zero. A linear molecule, such as the dimer, has only two distinct rotations and therefore five zero eigenvalues.
+- **$\lambda_k<0$:** the energy decreases along the mode. The structure is a **saddle point**, and the eigenvector points downhill.
+
+A stationary point of a cluster is a local minimum when, apart from the six zero eigenvalues, all $3N-6$ eigenvalues are positive. We compute them with [`np.linalg.eigh`](https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigh.html), which is designed for symmetric matrices and returns the eigenvalues in ascending order with the eigenvectors as columns. In floating-point arithmetic the six "zero" eigenvalues come out near $10^{-6}$, so we count any $\lvert\lambda\rvert<10^{-3}$ as zero.
+
+For the LJ$_{38}$ truncated octahedron, the notebook finds 0 negative, 6 near-zero, and 108 positive eigenvalues. It is a local minimum.
+
+### A saddle point revealed by the Hessian
+
+The cuboctahedron, cut from fcc around an atom, shows why this test matters. By symmetry, every force in the perfect cuboctahedron points along a radius, so the minimizer only shrinks or expands the shell. It stops at $E=-40.884494\,\varepsilon$ with a gradient below $10^{-6}$ and `success = True`. The Hessian, however, has one negative eigenvalue, $\lambda_0=-10.99\,\varepsilon/\sigma^2$. Pushing all atoms $0.1\sigma$ along its eigenvector and minimizing again leads to the **icosahedron** at $-44.326801\,\varepsilon$, the lowest known LJ$_{13}$ structure and the first of the magic numbers.
+
+![The cuboctahedron cut from the fcc crystal is a stationary point of the LJ$_{13}$ energy, but one Hessian eigenvalue is negative. Following that mode leads to the icosahedron, whose $3N-6=33$ vibrational eigenvalues are all positive.](../../../assets/L16-lj13-hessian.png){#fig-lj13-hessian fig-alt="Left, a 13-atom cuboctahedron. Centre, a 13-atom icosahedron. Right, the 39 Hessian eigenvalues of each in ascending order: the cuboctahedron has one negative value, six near zero, and the rest positive. The icosahedron has six near zero and the rest positive." width="100%"}
+
+This collective motion, in which the square faces of the cuboctahedron fold into pairs of triangles, is known as the Mackay transformation. The same procedure takes the 55-atom cuboctahedron, through one more saddle, to the 55-atom Mackay icosahedron at $-279.248470\,\varepsilon$.
+
+### From eigenvalues to vibrational frequencies
+
+Near a minimum, Newton's second law for small displacements gives $m\,\ddot{\delta\mathbf x}=-\mathbf H\,\delta\mathbf x$. Each eigenvector oscillates independently as a **normal mode** with angular frequency
+
+$$
+\omega_k=\sqrt{\frac{\lambda_k}{m}}.
+$$
+
+In reduced units, $m=1$ and $\omega_k=\sqrt{\lambda_k}$ in units of $\sqrt{\varepsilon/(m\sigma^2)}$. For argon, this unit is $4.6\times10^{11}$ rad/s, which corresponds to a wavenumber of $2.46$ cm⁻¹. Spectroscopists usually report vibrations as wavenumbers, $\tilde\nu=\omega/(2\pi c)$.
+
+::: {.callout-tip collapse="true"}
+## Worked example: The argon dimer frequency from its Hessian
+
+For two atoms at separation $r_m$, the curvature of the pair potential is
+
+$$
+V''(r_m)=\frac{624}{r_m^{14}}-\frac{168}{r_m^{8}}=\frac{57.1\,\varepsilon}{\sigma^2}.
+$$
+
+The dimer Hessian is $6\times6$. Five eigenvalues are zero (three translations and two rotations), and the stretching mode, in which the two atoms move in opposite directions, has $\lambda=2V''(r_m)=114.3\,\varepsilon/\sigma^2$. The factor 2 comes from both atoms moving. It is equivalent to using the reduced mass $m/2$. Then $\omega=\sqrt{114.3}=10.7$ reduced units, or $10.7\times2.46\approx26$ cm⁻¹ for argon.
+:::
+
+For the LJ$_{38}$ truncated octahedron, the 108 vibrational wavenumbers range from 7.8 to 56.2 cm⁻¹, or 0.23 to 1.68 THz. These are far-infrared (terahertz) frequencies. Weak van der Waals bonds and heavy atoms give vibrations about a hundred times slower than the bond stretches of organic molecules.
+
+## Step 5 · Local and global minima
+
+The fcc start gave us the lowest known LJ$_{38}$ energy in one relaxation. That result relied on a good guess. To see what happens without it, we relax many random starting structures and look at the distribution of final energies.
+
+::: {.callout-tip collapse="true"}
+## Example code: Relaxing many random starts
+
+```python
+def multistart(N, n_starts):
+    energies, structures = [], []
+    for seed in range(n_starts):
+        X, result = relax(random_cluster(N, seed=seed))
+        energies.append(result.fun)
+        structures.append(X)
+    return energies, structures
+```
+:::
+
+![Final energies after relaxing 60 random starting structures. For LJ$_{13}$, 11 of the 60 starts reach the icosahedron. For LJ$_{38}$, none reaches the lowest known minimum or even the lowest icosahedral minimum.](../../../assets/L16-multistart.png){#fig-multistart fig-alt="Two histograms of final energies. For 13 atoms, one group lies at the lowest known energy near minus 44.3 and the rest between minus 42 and minus 38. For 38 atoms, all final energies lie between about minus 169.4 and minus 162, well above the lowest known minimum at minus 173.9 and the lowest icosahedral minimum at minus 173.3." width="100%"}
+
+For 13 atoms, about one start in six reaches the icosahedron. The other starts end in a few distinct higher minima. For 38 atoms, the 60 relaxations spread over many different local minima between $-169.4\,\varepsilon$ and $-162\,\varepsilon$, and none comes within $4\,\varepsilon$ of the truncated octahedron. Every one of these relaxations stopped with a small gradient and positive Hessian eigenvalues. Each one is a genuine local minimum, so the minimizer has done its job. It just has no way of knowing that lower minima exist elsewhere.
+
+![LJ$_{38}$: the truncated octahedron reached by one relaxation from the fcc start, and the lowest structure from 60 random starts.](../../../assets/L16-lj38-structures.png){#fig-lj38-structures fig-alt="Two 38-atom clusters. Left, an ordered truncated octahedron with straight rows of atoms and square and hexagonal faces. Right, a disordered compact cluster." width="85%"}
+
+### The double-funnel landscape of LJ$_{38}$
+
+Why is LJ$_{38}$ so hard? The number of local minima grows roughly exponentially with $N$, but LJ$_{38}$ has an additional feature. Its low-energy structures fall into two families, or **funnels**: the fcc truncated octahedron and a large group of icosahedral-like structures. The lowest icosahedral structure, at $-173.252378\,\varepsilon$, lies only $0.68\,\varepsilon$ above the global minimum, but the two families are separated by a high energy barrier, and the icosahedral funnel contains far more minima. Random starts and disordered structures almost always fall into the icosahedral funnel ([Doye, Miller and Wales, 1999](https://doi.org/10.1063/1.477902)). Because the right answer is known but hard to reach, LJ$_{38}$ is a standard test for **global optimization** methods. One widely used example is **basin hopping** ([Wales and Doye, 1997](https://doi.org/10.1021/jp970984n)), which repeatedly perturbs the current minimum, relaxes it, and accepts or rejects the new minimum according to its energy. SciPy provides an implementation as [`scipy.optimize.basinhopping`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.basinhopping.html).
+
+## Answering the materials question
+
+Within the LJ model, the most stable arrangement of 38 argon atoms is the truncated octahedron, a fragment of the fcc crystal, with $E=-173.928\,\varepsilon=-1.791$ eV. We support this answer with four checks:
+
+| Check | What it establishes | Result for LJ$_{38}$ |
+|---|---|---|
+| Gradient against central differences | The forces are coded correctly | Agreement to about $10^{-9}$ |
+| Largest gradient entry after relaxation | The structure is a stationary point | Below $10^{-6}$ |
+| Hessian eigenvalues | The stationary point is a local minimum | 6 zero, 108 positive |
+| Comparison with the Cambridge Cluster Database | No lower structure is known | Matches $-173.928427\,\varepsilon$ |
+
+The first three checks test the **numerical calculation**, and any local minimum can pass them. Only the comparison with a database of extensive global searches tells us that this minimum is the lowest one known. Our own random multistart search would have reported a structure more than $4\,\varepsilon$ too high.
+
+The **physical model** deserves the same scrutiny as in L10. In A2, the LJ parameters fitted to small clusters underestimated the energies of larger ones. The structures found here also neglect zero-point vibration and temperature. Near its melting point, a cluster spends time in many minima, and the vibrational frequencies from Step 4 become the starting point for estimating which family is favoured by entropy.
+
+## What to keep
+
+1. A cluster of $N$ atoms is an $N\times3$ matrix for the physics and a vector of $3N$ unknowns for the minimizer. `ravel` and `reshape` translate between them.
+2. Broadcasting computes all $N^2$ separations and distances at once. The energy uses each pair once, while the gradient sums the contributions of every partner of each atom.
+3. A zero gradient identifies a stationary point. The eigenvalues of the Hessian classify it: six zeros for rigid motion, all others positive at a minimum, and at least one negative at a saddle.
+4. Positive Hessian eigenvalues give the harmonic vibrational frequencies, $\omega_k=\sqrt{\lambda_k/m}$.
+5. A minimizer finds the local minimum downhill from its start. Finding the global minimum depends on the starting structures and on a wider search.
+
+## Check your understanding
+
+1. The cuboctahedron relaxation reports `success = True` and a gradient below $10^{-6}$. What additional calculation shows that it is not a stable structure, and what does the result tell you about how to lower the energy?
+2. For $N$ atoms, how many entries does the separation array `d` hold? Estimate its memory in MB for $N=38$ and $N=1000$ with 8-byte floats. At what point would you stop storing all pairs?
+3. A planar structure of four atoms, such as the square from A1, is a stationary point. Without calculating, predict how many zero eigenvalues its Hessian has and whether any eigenvalue could be negative. Check your prediction in the notebook by modifying the starting structure.
+4. A classmate relaxes 20 random starts of LJ$_{38}$ and reports the lowest energy as the most stable structure. What would you ask them to check, and how could the fcc result change their conclusion?
+5. The minimizer needs the forces on every atom, and so does Newton's second law. What would we need in addition to compute how the atoms of a cluster move in time?
+
+## Next
+
+The forces we coded today are exactly what a molecular dynamics simulation needs. Instead of sending the atoms downhill until the forces vanish, we can let them move according to $m\,\ddot{\mathbf x}_i=\mathbf F_i$ and follow the cluster as it vibrates, rearranges, or melts. Unit 4 turns to these questions of how materials change with time, which lead us to ordinary differential equations and the numerical methods that integrate them.

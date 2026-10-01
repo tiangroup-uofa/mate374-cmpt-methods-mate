@@ -29,3 +29,7 @@ toc: false
 11. [L11 · Recap of linear algebra](03/L11/index.qmd) — harmonic bonds, coupled force balances, stiffness matrices, and equilibrium displacements.
 12. [L12 · Practical matrix solutions](03/L12/index.qmd) — singularity, conditioning, dense and banded solves, and Gaussian elimination.
 13. [L13 · Inside a numerical matrix solver](03/L13/index.qmd) — Gaussian elimination, partial pivoting, the 10⁻¹⁶ round-off limit, LU reuse, and a cheat sheet for choosing a solver.
+
+<!-- Separate list so L16 keeps its number. -->
+
+16. [L16 · Finding the stable shape of an atomic cluster](03/L16/index.qmd) — vectorized LJ energies, multidimensional minimization, Hessian eigenvalues, and local versus global minima for LJ₃₈.
