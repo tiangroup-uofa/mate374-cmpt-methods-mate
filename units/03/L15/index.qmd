@@ -1,0 +1,407 @@
+L15: How can we know minimization really work?
+
+Hassian matrix, eigenvalue porblem, stable and unstable atomic systems
+
+Throughpout this unit we have learned the important of solving system of equations and using the spring-atom system to illustrate many topics (plus, we can really simulate using python!)
+
+in last lecture L14, we solved getting a minimum of the atom energy E(x) using optimization algorithms. But the problem is, how can we make sure it is really the minimum?
+
+Consider in 1D nonlinear equation, we need
+
+1st derivative = 0; second derivative > 0 --> minimum; <0 maximum
+
+How about working on multi dimensions?
+
+it may be intuitive to think that if all nabla^2 E > 0, it is the minimum, but what about the other systems?
+
+Let's still use the spring-atom system to illustrate this. 
+
+assume there are 3 atoms, L and R are fixed, the middle atom (m). the L and R dist are at \pm a. howd the middle atom move (Delta x), the natural bond length between any 2 atoms is l_0. (a < l_0, so they are initially compressed). If the atom is moved in x-direction, one spring is further compressed, one is stretched, it will drag the position back to zero. in y-direction, however, because boeh springs are compressed, the force further pushed to farther away positions. They will stop at distance y = \sqrt{l_0^2 - a^2}. That clearly distinguished 2 directions as different, x-direction is stable, y-direction is not stable. That position is called the metastable (or saddle point)
+
+physically, we would use the spring model to derive the actual hessian matrix. For this system that moves in 2D direction (x, y), energy is
+
+E = .......
+
+or, can we get the hassian matrix H?
+
+H = ... ...
+
+this hessian matrix will have 2 non-zero direction coefficients, one plus as l_0 > a, one <0. Could even be easier to visualize the energy on the x, y coordinate; the saddle point on the 0,0 will be exactly seen.
+
+Once we got the actual measure of the saddle point, one question is how could we know, if the saddle H is not diagonal?
+
+
+modified Absolutely — here is a cleaned draft that keeps your conversational lecture style and stops right at the point where the rotated system creates the eigenvalue problem.
+
+# L15: How do we know minimization really worked?
+
+Throughout this unit, we have learned how to solve systems of equations and how matrix operations help us describe coupled physical systems. We have repeatedly used spring–atom systems as simple examples, because they are easy to visualize and, importantly, we can actually simulate them with Python.
+
+In the previous lecture, L14, we considered the minimization of an atomic energy,
+
+\[
+E(\mathbf{x}),
+\]
+
+using numerical optimization algorithms.
+
+Suppose an optimizer gives us a structure \(\mathbf{x}^*\) and reports that it has converged.
+
+A natural question is:
+
+> **How do we know that the structure we found is really a minimum?**
+
+## From one dimension to many dimensions
+
+In one dimension, we already know the answer.
+
+At a stationary point,
+
+\[
+\frac{dE}{dx}=0.
+\]
+
+We can then examine the second derivative:
+
+\[
+\frac{d^2E}{dx^2}>0
+\qquad\Rightarrow\qquad
+\text{local minimum},
+\]
+
+while
+
+\[
+\frac{d^2E}{dx^2}<0
+\qquad\Rightarrow\qquad
+\text{local maximum}.
+\]
+
+The second derivative tells us whether the energy curves upward or downward near the stationary point.
+
+But atomic structures usually have many coordinates.
+
+For example, even a single atom moving in two dimensions has coordinates
+
+\[
+\mathbf{x}=
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}.
+\]
+
+Now there is not just one direction in which the atom can move.
+
+It can move in the \(x\)-direction, the \(y\)-direction, or along any combination of the two.
+
+So what should replace the second derivative?
+
+---
+
+# A compressed spring system
+
+Consider a simple spring–atom system.
+
+Two atoms, \(L\) and \(R\), are fixed at
+
+\[
+(-a,0)
+\qquad\text{and}\qquad
+(a,0),
+\]
+
+while the middle atom \(M\) is free to move in two dimensions:
+
+\[
+M=(x,y).
+\]
+
+Each spring has spring constant \(k\) and natural length \(l_0\).
+
+We choose
+
+\[
+l_0>a,
+\]
+
+so when the middle atom is initially located at
+
+\[
+(x,y)=(0,0),
+\]
+
+both springs are compressed.
+
+The spring lengths are
+
+\[
+r_L=\sqrt{(x+a)^2+y^2},
+\]
+
+and
+
+\[
+r_R=\sqrt{(x-a)^2+y^2}.
+\]
+
+The total elastic energy is therefore
+
+\[
+E(x,y)
+=
+\frac{k}{2}(r_L-l_0)^2
++
+\frac{k}{2}(r_R-l_0)^2.
+\]
+
+At the symmetric position
+
+\[
+(x,y)=(0,0),
+\]
+
+the forces from the two springs cancel, so
+
+\[
+\nabla E(0,0)=0.
+\]
+
+Therefore, the origin is a **stationary point**.
+
+But is it a minimum?
+
+## Moving in the \(x\)-direction
+
+Suppose we move the middle atom slightly to the right.
+
+One spring becomes more compressed, while the other becomes less compressed.
+
+The resulting forces tend to push the atom back toward
+
+\[
+x=0.
+\]
+
+Therefore the \(x\)-direction is stable.
+
+Near the origin,
+
+\[
+\frac{\partial^2E}{\partial x^2}>0.
+\]
+
+## Moving in the \(y\)-direction
+
+Now suppose instead that the middle atom moves slightly upward.
+
+Both springs become slightly longer.
+
+Because they were initially compressed, increasing their lengths moves both springs closer to their natural length.
+
+Therefore the energy decreases.
+
+The vertical components of the two spring forces reinforce each other and push the atom even farther away from the origin.
+
+Thus,
+
+\[
+\frac{\partial^2E}{\partial y^2}<0.
+\]
+
+The atom continues moving away until the springs can reach their natural length,
+
+\[
+\sqrt{a^2+y^2}=l_0.
+\]
+
+This gives two stable positions,
+
+\[
+y=\pm\sqrt{l_0^2-a^2}.
+\]
+
+So the structure at
+
+\[
+(x,y)=(0,0)
+\]
+
+is not a minimum.
+
+It is a **saddle point**.
+
+The energy curves upward in one direction and downward in another.
+
+---
+
+# The Hessian matrix
+
+In multiple dimensions, the second derivative becomes a matrix.
+
+For two coordinates,
+
+\[
+\mathbf{x}=
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix},
+\]
+
+the Hessian is
+
+\[
+H=
+\begin{bmatrix}
+\dfrac{\partial^2E}{\partial x^2}
+&
+\dfrac{\partial^2E}{\partial x\partial y}
+\\[6pt]
+\dfrac{\partial^2E}{\partial y\partial x}
+&
+\dfrac{\partial^2E}{\partial y^2}
+\end{bmatrix}.
+\]
+
+For the symmetric spring system at the origin,
+
+\[
+H=
+\begin{bmatrix}
+2k & 0\\[4pt]
+0 & 2k\left(1-\dfrac{l_0}{a}\right)
+\end{bmatrix}.
+\]
+
+Because
+
+\[
+l_0>a,
+\]
+
+we have
+
+\[
+2k>0,
+\]
+
+but
+
+\[
+2k\left(1-\frac{l_0}{a}\right)<0.
+\]
+
+So in this example the saddle point is very easy to identify.
+
+The matrix is diagonal, and we can immediately see one positive curvature and one negative curvature.
+
+But this simplicity comes from how we chose our coordinate system.
+
+The \(x\)-axis happens to point exactly along the stable direction, while the \(y\)-axis happens to point exactly along the unstable direction.
+
+What if our coordinate axes do not line up with these special directions?
+
+---
+
+# Rotate the spring system
+
+Now rotate the entire physical system by an angle \(\theta\), while keeping our \(x\)- and \(y\)-coordinate axes unchanged.
+
+Let
+
+\[
+\mathbf{n}
+=
+\begin{bmatrix}
+\cos\theta\\
+\sin\theta
+\end{bmatrix}
+\]
+
+be the direction connecting the two fixed atoms.
+
+The fixed atoms are now located at
+
+\[
+-a\mathbf{n}
+\qquad\text{and}\qquad
++a\mathbf{n}.
+\]
+
+Nothing physical has changed.
+
+The middle atom is still stable when displaced along the spring axis and unstable when displaced perpendicular to it.
+
+However, these directions are no longer the \(x\)- and \(y\)-directions.
+
+At the origin, the Hessian becomes
+
+\[
+H=
+2k
+\begin{bmatrix}
+1-\dfrac{l_0}{a}\sin^2\theta
+&
+\dfrac{l_0}{a}\sin\theta\cos\theta
+\\[7pt]
+\dfrac{l_0}{a}\sin\theta\cos\theta
+&
+1-\dfrac{l_0}{a}\cos^2\theta
+\end{bmatrix}.
+\]
+
+The off-diagonal terms are now nonzero.
+
+This means that motion in \(x\) and motion in \(y\) are coupled.
+
+A particularly interesting case occurs when
+
+\[
+\theta=45^\circ.
+\]
+
+Take, for example,
+
+\[
+l_0=1.2a.
+\]
+
+Then
+
+\[
+H
+=
+k
+\begin{bmatrix}
+0.8 & 1.2\\
+1.2 & 0.8
+\end{bmatrix}.
+\]
+
+Now look only at the two diagonal terms:
+
+\[
+\frac{\partial^2E}{\partial x^2}=0.8k>0,
+\]
+
+and
+
+\[
+\frac{\partial^2E}{\partial y^2}=0.8k>0.
+\]
+
+If we only checked the curvature along the \(x\)- and \(y\)-axes, we might conclude that the point is a minimum.
+
+But we already know physically that this is still exactly the same compressed spring system.
+
+There must still be a direction in which the energy decreases.
+
+So the important question becomes:
+
+> **If the Hessian is not diagonal, how do we find the directions in which the energy surface naturally curves upward or downward?**
+
+That is the problem that leads us to the **eigenvalue problem**.
+
+This is a strong place to stop the first section: the eigenvalue problem now appears because the students need it, rather than because the syllabus says they need to learn eigenvalues.
+
