@@ -70,7 +70,6 @@ def main():
     check(spring, cluster)
     if not args.check_only:
         figures = [(spring_figure(spring), "L15-compressed-spring.png"),
-                   (spring["landscape_figure"], "L15-energy-cuts.png"),
                    (cluster["square_figure"], "L15-square-eigenvalues.png")]
         for fig, name in figures:
             fig.savefig(ASSETS / name, dpi=DPI, bbox_inches="tight", facecolor="white")
