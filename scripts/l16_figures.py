@@ -58,6 +58,14 @@ def check(d):
         assert abs(energy(X_final) - ref[N]) < 1e-5
         results[N] = (X, values, X_final, modes(X_final)[0])
 
+    # Step 6: harmonic free energies of the two LJ38 funnels.
+    assert abs(d["delta_E"] - 0.676048) < 1e-5
+    assert abs(d["delta_S_vib"] - 2.1385) < 1e-3
+    assert abs(d["T_cross"] - 0.3161) < 1e-3
+    print(f"LJ38 ico - TO: dE = {d['delta_E']:.4f} eps, dS_vib = {d['delta_S_vib']:.3f} kB, "
+          f"T* = {d['T_cross']:.3f} eps/kB; with ln(48/10): "
+          f"{d['delta_E']/(d['delta_S_vib'] + np.log(4.8)):.3f} eps/kB")
+
     vib = d["CM1_PER_UNIT"]*np.sqrt(d["eigenvalues"][6:])
     print(f"LJ38 truncated octahedron: E = {d['E_min']:.6f} eps, "
           f"wavenumbers {vib.min():.1f}-{vib.max():.1f} cm^-1")
@@ -134,7 +142,9 @@ def figures(d, results, n_starts=60):
     ax.grid(alpha=0.2)
     fig.tight_layout()
     fig.savefig(ASSETS / "L16-lj13-hessian.png", dpi=DPI, bbox_inches="tight", facecolor="white")
-    for name in ("L16-lj38-structures.png", "L16-multistart.png", "L16-lj13-hessian.png"):
+    d["free_energy_figure"].savefig(ASSETS / "L16-free-energy.png", dpi=DPI, bbox_inches="tight",
+                                    facecolor="white")
+    for name in ("L16-free-energy.png", "L16-lj38-structures.png", "L16-multistart.png", "L16-lj13-hessian.png"):
         print(f"Saved assets/{name}")
 
 

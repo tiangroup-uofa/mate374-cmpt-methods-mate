@@ -31,8 +31,10 @@ def introduction(mo):
     the program: build a cluster as an $N\times3$ matrix, evaluate its energy
     and gradient with NumPy broadcasting, relax it with a multidimensional
     minimizer, and diagonalize its Hessian to test stability and obtain
-    vibrational frequencies. The last step repeats the relaxation from many
-    random starts to compare local and global minima.
+    vibrational frequencies. Step 5 repeats the relaxation from many random
+    starts to compare local and global minima, and step 6 uses the Hessian
+    eigenvalues of two competing minima to compare their free energies
+    $F=E-TS$ at finite temperature.
 
     **Units.** The calculation uses Lennard-Jones (LJ) reduced units, in which
     energy is measured in $\varepsilon$, length in $\sigma$, and mass in the
@@ -540,21 +542,182 @@ def show_multistart(E_min, E_reference, N, X_min, draw_clusters, mo, multistart,
 
 
 @app.cell(hide_code=True)
-def closing(mo):
+def landscape_text(mo):
     mo.md(r"""
     ### What the 38-atom cluster shows
 
     From the octahedral-hole start, a single relaxation reaches the truncated
     octahedron at $-173.928427\,\varepsilon$, the lowest known LJ$_{38}$ energy. It
     is a small piece of the fcc crystal. Random starts usually end in disordered or
-    icosahedral-like minima, even with many attempts. The lowest of the
-    icosahedral-like structures lies only $0.68\,\varepsilon$ above the global minimum,
-    yet a large barrier separates the two families. This **double-funnel**
-    landscape (Doye, Miller and Wales, *J. Chem. Phys.* **110**, 6896, 1999) makes
-    LJ$_{38}$ a standard test for global optimization methods such as basin
-    hopping (Wales and Doye, *J. Phys. Chem. A* **101**, 5111, 1997).
+    icosahedral-like minima. The lowest icosahedral structure lies only
+    $0.676\,\varepsilon$ higher, but a large barrier separates the two families.
+    This **double-funnel** landscape (Doye, Miller and Wales, *J. Chem. Phys.*
+    **110**, 6896, 1999) makes LJ$_{38}$ a standard test for global optimization.
     """)
     return
+
+
+@app.cell(hide_code=True)
+def step_six_text(mo):
+    mo.md(r"""
+    ### Live step 6 · Which structure wins at finite temperature?
+
+    At temperature $T$, the cluster vibrates inside its basin. In the harmonic
+    approximation, each of the $3N-6$ modes is an independent oscillator, and a
+    classical oscillator of angular frequency $\omega$ contributes
+    $k_BT\ln(\hbar\omega/k_BT)$ to the free energy. For one minimum,
+
+    $$
+    F(T)=E_{\min}+k_BT\sum_{k=7}^{3N}\ln\frac{\hbar\omega_k}{k_BT},
+    \qquad \omega_k=\sqrt{\lambda_k/m}.
+    $$
+
+    The sum skips the six zero modes. In reduced units ($k_B=1$, $T$ in
+    $\varepsilon/k_B$), argon has $\hbar=0.0297$. Comparing two minima,
+    $\Delta F=\Delta E-T\Delta S$, and $\hbar$ cancels: the entropy difference
+    depends only on the ratio of the frequencies,
+
+    $$
+    \Delta S_{\text{ico}-\text{TO}}=k_B\sum_k\ln\frac{\omega_k^{\text{TO}}}{\omega_k^{\text{ico}}}
+    =\frac{k_B}{2}\left(\sum_k\ln\lambda_k^{\text{TO}}-\sum_k\ln\lambda_k^{\text{ico}}\right).
+    $$
+
+    A softer basin (smaller eigenvalues) is wider, so it holds more entropy.
+    The notebook supplies the lowest icosahedral LJ$_{38}$ structure.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def supplied_icosahedral(np):
+    # Lowest icosahedral-funnel LJ38 minimum (C5v, E = -173.252378 eps), reduced units,
+    # located by basin hopping and rotated to its principal axes.
+    X_icosahedral = np.array([
+        [0.094671, -0.532485, 0.762604],
+        [-0.470745, 0.000000, 0.000000],
+        [-0.433987, 1.478510, 0.449897],
+        [0.509096, 0.541338, -1.767214],
+        [-0.437484, -1.089122, 1.559798],
+        [0.094671, -0.017458, -0.929946],
+        [-0.433987, -1.460582, 0.505072],
+        [-0.437484, 1.797945, -0.621733],
+        [-0.433987, 0.029008, 1.545172],
+        [0.631628, -0.000000, -0.000000],
+        [-1.008361, 0.899082, -0.310904],
+        [-0.437484, -1.820013, -0.553813],
+        [0.094671, 0.879036, -0.303973],
+        [1.051607, 0.562952, -0.806238],
+        [-0.437484, 1.146899, 1.517821],
+        [0.509096, -0.534763, 1.769215],
+        [0.509096, -1.476694, 1.111515],
+        [0.094671, -0.889826, -0.270766],
+        [0.094671, 0.560732, 0.742081],
+        [0.509096, 1.848003, -0.031256],
+        [0.509096, -1.847874, 0.038127],
+        [1.051607, 0.018457, 0.983155],
+        [-0.433987, 0.884762, -1.267121],
+        [-0.437484, -0.035708, -1.902073],
+        [0.509096, -0.607286, -1.745651],
+        [1.051607, -0.592816, -0.784541],
+        [-1.008361, -0.910117, -0.276940],
+        [-0.433987, -0.931697, -1.233021],
+        [-1.008361, -0.544627, 0.779994],
+        [1.051607, 0.940740, 0.286258],
+        [0.509096, -1.513438, -1.060943],
+        [0.509096, 1.517372, 1.055308],
+        [-1.008361, -0.017856, -0.951152],
+        [0.509096, 1.472551, -1.116999],
+        [-1.008361, 0.573519, 0.759003],
+        [1.051607, -0.929333, 0.321365],
+        [0.509096, 0.600790, 1.747897],
+        [-1.584074, 0.000000, 0.000000],
+    ])
+    return (X_icosahedral,)
+
+
+@app.cell
+def live_free_energy(np):
+    # Live step 6: classical harmonic free energy of one minimum, for scalar or array T.
+    HBAR_ARGON = 0.0297   # hbar in LJ reduced units for argon
+
+    def harmonic_free_energy(T, E, eigenvalues, hbar=HBAR_ARGON):
+        omega = np.sqrt(eigenvalues[6:])                 # skip the six zero modes
+        T = np.asarray(T, dtype=float)
+        return E + T*(np.sum(np.log(hbar*omega)) - len(omega)*np.log(T))
+
+    return (harmonic_free_energy,)
+
+
+@app.cell(hide_code=True)
+def symmetry_control(mo):
+    count_symmetry = mo.ui.checkbox(
+        value=False,
+        label="Count permutational isomers (point-group orders 48 for the truncated octahedron, 10 for the icosahedral minimum)")
+    count_symmetry
+    return (count_symmetry,)
+
+
+@app.cell(hide_code=True)
+def compare_minima(EPS_EV, X_icosahedral, classify, count_symmetry, draw_clusters, fcc_cluster, harmonic_free_energy, lj_energy, mo, normal_modes, np, plt, relax):
+    KB_EV = 8.617333262e-5
+    T_UNIT_K = EPS_EV/KB_EV                    # 1 reduced temperature unit in K for argon
+    X_TO, _ = relax(fcc_cluster(38, centre="hole"))
+    X_ico, _ = relax(X_icosahedral)
+    lam_TO, lam_ico = normal_modes(X_TO)[0], normal_modes(X_ico)[0]
+    E_TO, E_ico = lj_energy(X_TO), lj_energy(X_ico)
+    delta_E = E_ico - E_TO
+    delta_S_vib = 0.5*(np.sum(np.log(lam_TO[6:])) - np.sum(np.log(lam_ico[6:])))
+    # A minimum of point-group order h has 2N!/h permutational copies; only ln(h) differs here.
+    delta_S_sym = np.log(48/10) if count_symmetry.value else 0.0
+    delta_S = delta_S_vib + delta_S_sym
+    T_cross = delta_E/delta_S
+
+    def plot_free_energy():
+        T = np.linspace(0.005, 0.5, 300)
+        sym = 1.0 if count_symmetry.value else 0.0
+        dF = (harmonic_free_energy(T, E_ico, lam_ico) - harmonic_free_energy(T, E_TO, lam_TO)
+              - sym*T*np.log(48/10))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.5, 3.8))
+        ax1.plot(T, dF, color="black", lw=2)
+        ax1.axhline(0, color="gray", lw=0.8)
+        ax1.axvline(T_cross, color="tab:red", ls="--", label=f"Harmonic crossover T* = {T_cross:.3f} ε/k_B")
+        ax1.axvline(0.12, color="tab:green", ls=":", lw=2, label="Full-landscape estimate ≈ 0.12 ε/k_B")
+        ax1.text(0.02, 0.2*delta_E, "Truncated octahedron\nfavoured", fontsize=8)
+        ax1.text(0.33, -0.5*delta_E, "Icosahedral\nfavoured", fontsize=8)
+        ax1.set(xlabel="Temperature (ε/k_B)", ylabel="F_ico − F_TO (ε)")
+        top = ax1.secondary_xaxis("top", functions=(lambda t: t*T_UNIT_K, lambda k: k/T_UNIT_K))
+        top.set_xlabel("Argon temperature (K)")
+        ax1.legend(fontsize=7, loc="lower left")
+        k = np.arange(1, len(lam_TO) - 5)
+        ax2.plot(k, np.sqrt(lam_TO[6:]), color="tab:blue", label="Truncated octahedron")
+        ax2.plot(k, np.sqrt(lam_ico[6:]), color="tab:orange", label="Icosahedral minimum")
+        ax2.set(xlabel="Vibrational mode (ascending)", ylabel="ω (reduced units)",
+                title="Sorted vibrational frequencies")
+        ax2.legend(fontsize=8)
+        for ax in (ax1, ax2):
+            ax.grid(alpha=0.2)
+        fig.tight_layout()
+        return fig
+
+    free_energy_figure = plot_free_energy()
+    _checks = [classify(lam_TO)[3], classify(lam_ico)[3]]
+    mo.vstack([
+        free_energy_figure,
+        mo.md(f"""
+    | | Truncated octahedron | Icosahedral minimum |
+    |---|---:|---:|
+    | Energy (ε) | {E_TO:.6f} | {E_ico:.6f} |
+    | Stationary point | {_checks[0]} | {_checks[1]} |
+    | Σ ln λ over 108 modes | {np.sum(np.log(lam_TO[6:])):.3f} | {np.sum(np.log(lam_ico[6:])):.3f} |
+
+    ΔE = **{delta_E:.3f} ε**, ΔS<sub>vib</sub> = **{delta_S_vib:.2f} k<sub>B</sub>**{f", ΔS<sub>sym</sub> = ln(48/10) = {delta_S_sym:.2f} k<sub>B</sub>" if count_symmetry.value else ""}.
+    The free energies cross at T* = ΔE/ΔS = **{T_cross:.3f} ε/k<sub>B</sub> ≈ {T_cross*T_UNIT_K:.0f} K** for argon.
+    The full-landscape estimate of about 0.12 ε/k<sub>B</sub> (Doye, Wales and Miller, *J. Chem. Phys.* **109**, 8143, 1998)
+    also counts the many other icosahedral minima, which add further entropy.
+    """),
+        draw_clusters([X_TO, X_ico], ["Truncated octahedron (O_h)", "Lowest icosahedral minimum (C_5v)"]),
+    ])
+    return T_cross, delta_E, delta_S, delta_S_vib, free_energy_figure
 
 
 if __name__ == "__main__":
