@@ -1,0 +1,73 @@
+L16 · LJ cluster wrap-up: authoring notes for the instructor
+============================================================
+
+Status
+------
+- Lecture page: units/03/L16/index.qmd (trimmed after review; ~3,300 words of source).
+- Notebook: activities/l16_lj_cluster.edit.py. Every "Live step" cell is COMPLETED.
+  To make a student scaffold in the L10 style, copy the file and replace the bodies of
+  the five live cells with None placeholders:
+    live_build       -> fcc_cluster
+    live_energy      -> lj_energy, lj_gradient (and pair_separations)
+    live_relax       -> relax
+    live_hessian     -> normal_modes (hessian)
+    live_multistart  -> multistart
+    live_free_energy -> harmonic_free_energy
+  Downstream cells would then need mo.stop(... is None, ...) guards like L10.
+- Checks and figures: scripts/l16_figures.py (added to scripts/render_figures.py).
+  It asserts LJ38 TO = -173.928427, LJ13 cuboctahedron -> icosahedron -44.326801,
+  LJ55 cuboctahedron -> Mackay icosahedron -279.248470, and writes three 300-dpi PNGs.
+
+Free-energy extension (step 6)
+------------------------------
+- Lowest icosahedral LJ38 minimum (C5v, -173.252378) found by basin hopping and stored
+  in the notebook as 38x3 reduced coordinates (relaxes back to the same energy).
+- Classical harmonic results: dE = 0.676 eps, dS_vib = 2.14 kB (sum ln lambda:
+  TO 538.669, ico 534.392), T* = 0.316 eps/kB = 38 K for argon.
+- Trimmed from the page and notebook (kept here for reference): permutational isomers
+  add ln(48/10) = 1.57 kB (T* = 0.182 eps/kB, point-group orders checked numerically);
+  a full-landscape value of ~0.12 eps/kB is usually attributed to Doye, Wales and
+  Miller (JCP 109, 8143, 1998), not verified here.
+- Quantum zero-point energy (hbar* = 0.0297 for argon): dZPE = -0.29 eps for ico vs TO.
+  Not mentioned on the page.
+- The interfunnel barrier height is described only qualitatively (no number given).
+
+Assumptions to confirm
+----------------------
+- L16 links L14 and L15 as the minimization and Hessian/eigenvalue lectures, following
+  the rough drafts. Navigation titles for L14/L15 were taken from those drafts.
+- Argon parameters follow A1 (eps = 0.0103 eV, sigma = 3.40 Å, m = 39.948 u).
+- Reference energies in the notebook are from the Cambridge Cluster Database. The stored
+  values (N = 2-20, 26, 38, 55) were re-found here by basin hopping or by construction.
+  (N = 30, 34, 35, 37 were not re-found in a short run, so they were left out.)
+
+Varying the number of atoms in the browser (WASM)
+-------------------------------------------------
+Native timings (single-threaded OpenBLAS, this container):
+    N    one relaxation (random start)    FD Hessian + eigh
+    13   ~9 ms                             ~2 ms
+    26   ~20 ms                            ~9 ms
+    38   ~45 ms                            ~25 ms
+    55   ~90 ms                            ~60 ms
+    100  ~300 ms                           ~130 ms (analytical)
+Pyodide NumPy/SciPy are single-threaded and typically 2-5x slower for this kind of
+small-array code, so N = 38 gives ~0.1-0.25 s per relaxation in the browser and a
+10-start search takes a few seconds. Cost per relaxation grows roughly as N^2 per energy
+call times a growing iteration count (~N^2.5 overall). Memory is negligible: the
+(N, N, 3) separation array is 35 kB at N = 38 and 0.2 MB at N = 100.
+Design choices that follow:
+- Slider capped at N = 60 (one relaxation + Hessian well under a second in WASM).
+- Multistart search sits behind a run button, so moving the N slider never triggers it.
+- Every expensive cell prints its own wall time, so the in-browser speed is visible.
+  Could not benchmark Pyodide directly here (CDN blocked), please confirm in class.
+- Note: with multi-threaded OpenBLAS on a multi-core machine, small L-BFGS-B problems
+  can be ~100x slower natively from thread overhead. The figure script sets
+  OPENBLAS_NUM_THREADS=1. This does not affect the browser.
+
+Possible extensions (not in the page)
+-------------------------------------
+- scipy.optimize.basinhopping on LJ38 starting from a random structure (usually needs
+  thousands of steps to reach the TO, so better as a homework/project idea than a demo).
+- Analytical Hessian from 3x3 pair blocks, compared with the finite-difference Hessian.
+- Harmonic vibrational free energy of TO vs icosahedral minimum (entropy favours the
+  icosahedral funnel at higher T; the solid-solid transition of LJ38).
