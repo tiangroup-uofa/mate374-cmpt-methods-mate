@@ -8,11 +8,10 @@ body-classes: lecture-page seminar-page
 
 By the end of this seminar, you should be able to:
 
-1. **Calculate** vector lengths and interatomic distances with `np.linalg.norm`.
-2. **Calculate** matrix–vector products with NumPy, using array shapes to explain a dimension error.
-3. **Solve** a square linear system with `np.linalg.inv` and `np.linalg.solve`, and check the result with its residual.
-4. **Diagnose** a singular matrix from its condition number, its computed inverse, and the residuals of candidate solutions.
-5. **Explain** why some entries of a singular matrix can change without removing the singularity.
+1. **Calculate** matrix–vector products with NumPy, using array shapes to explain a dimension error.
+2. **Solve** a square linear system with `np.linalg.inv` and `np.linalg.solve`, and check the result with its residual.
+3. **Diagnose** a singular matrix from its condition number, its computed inverse, and the residuals of candidate solutions.
+4. **Explain** why some entries of a singular matrix can change without removing the singularity.
 
 ## Today's calculations
 
@@ -34,7 +33,6 @@ Linear-algebra operations live in the **submodule** `np.linalg`, a collection of
 
 | Calculation | NumPy | Result |
 |---|---|---|
-| Length (norm) $\lVert\mathbf{v}\rVert$ | `np.linalg.norm(v)` | scalar |
 | Matrix–vector product $\mathbf{A}\mathbf{v}$ | `A @ v` | vector |
 | Inverse $\mathbf{A}^{-1}$ | `np.linalg.inv(A)` | matrix |
 | Determinant $\det(\mathbf{A})$ | `np.linalg.det(A)` | scalar |
@@ -42,33 +40,6 @@ Linear-algebra operations live in the **submodule** `np.linalg`, a collection of
 | Solution of $\mathbf{A}\mathbf{x}=\mathbf{b}$ | `np.linalg.solve(A, b)` | vector |
 
 Recall from L12 how to read the condition number. When $\kappa_2\approx1$, small relative changes in $\mathbf{A}$ or $\mathbf{b}$ produce comparably small relative changes in $\mathbf{x}$. When $\kappa_2\gg1$, some small changes can be amplified strongly. A singular matrix has an infinite condition number. NumPy rarely reports infinity, however, because round-off keeps the computed value finite. Since a `float64` number carries about 16 significant digits, a computed $\kappa_2$ of about $10^{16}$ or larger means the matrix is singular as far as double precision can tell.
-
-## Vector length and the distance between two atoms
-
-The length of a vector $\mathbf{v}=(v_1,v_2,v_3)$ is its **Euclidean norm**,
-
-$$
-\lVert\mathbf{v}\rVert=\sqrt{v_1^2+v_2^2+v_3^2},
-$$
-
-which NumPy calculates with `np.linalg.norm(v)`. The same function gives the distance between two atoms. If atom A sits at $(x_1,y_1,z_1)$ and atom B at $(x_2,y_2,z_2)$, the vector from A to B is their difference, and the distance is the length of that difference:
-
-$$
-d_{AB}=\lVert\mathbf{r}_B-\mathbf{r}_A\rVert=\sqrt{(x_2-x_1)^2+(y_2-y_1)^2+(z_2-z_1)^2}.
-$$
-
-In NumPy this is `np.linalg.norm(coord_b - coord_a)`, where each coordinate is a three-component array. The first cell of the notebook below calculates the length of $(3,4,12)$. The second places one copper atom at a cube corner of the fcc unit cell, with lattice parameter $a=3.61$ Å, and a second atom at the centre of the neighbouring face.
-
-::: {.quarto-wasm-local notebook="s05_vector_norm.edit.py" view="edit" title="Vector length and the Cu–Cu nearest-neighbour distance" height="460" loading="lazy" fullscreen="true"}
-`np.linalg.norm([3, 4, 12])` gives $\sqrt{9+16+144}=13$. The atoms at $(0,0,0)$ and $(1.805,1.805,0)$ Å are $a/\sqrt2\approx2.553$ Å apart, the Cu–Cu nearest-neighbour distance.
-:::
-
-**Your turn:** in the empty cell, place a third atom at the face centre $(1.805,\,0,\,1.805)$ Å and calculate its distance from atom B. Then calculate the distance from the origin to the next cube corner, $(3.61,\,0,\,0)$ Å. Which of the two is a nearest neighbour?
-
-::: {.callout-note collapse="true"}
-## Face-centre and cube-corner distances in fcc copper
-The distance from $(1.805,1.805,0)$ to $(1.805,0,1.805)$ is $\sqrt{0+1.805^2+1.805^2}\approx2.553$ Å, the same nearest-neighbour distance as before. The neighbouring cube corner is a full lattice parameter away, 3.61 Å, so it is a second-nearest neighbour.
-:::
 
 ## Matrix–vector products and the shape rule
 
@@ -187,20 +158,7 @@ NumPy returned two vectors without complaint in the browser, so the warning sign
 You can confirm the diagnosis with `np.linalg.matrix_rank(M)`, which returns 4: only four of the five equations are independent.
 :::
 
-### Repeating the calculation in single precision
-
-Recall from [L03](../../units/01/L03/index.qmd) that a `float32` number carries about 7 significant digits, while a `float64` number carries about 16. If the vector from `inv(M) @ b` were a genuine result, it should not change much when we repeat the calculation with fewer digits. The notebook below converts $\mathbf{M}$ and $\mathbf{b}$ to `float32` with `.astype(np.float32)` and repeats `inv(M) @ b`. Run it and compare the result with the `float64` vector $(-2,\,0,\,2,\,0,\,4)$.
-
-::: {.quarto-wasm-local notebook="s05_singular_float32.edit.py" view="edit" title="Inverting the singular matrix in float32" height="560" loading="lazy" fullscreen="true"}
-In the browser notebook, the `float32` calculation of `inv(M) @ b` returns the zero vector, and its residual is $-\mathbf{b}=(2,\,-6,\,-4,\,-2,\,-6)$. The largest entry of the computed inverse is about $7\times10^{15}$ in both precisions. Near $7\times10^{15}$, adjacent `float64` numbers are 1 apart, while adjacent `float32` numbers are about $5\times10^{8}$ apart.
-:::
-
-::: {.callout-note collapse="true"}
-## Why `float32` turns $(-2,\,0,\,2,\,0,\,4)$ into zero
-Each component of `inv(M) @ b` is a sum of five products of the form (entry of order $10^{15}$) × (entry of $\mathbf{b}$). The large parts of these products cancel, and the answer is whatever is left over after rounding. Rounding at this magnitude happens in steps set by the spacing between adjacent floating-point numbers, which `np.spacing` reports. For `float64` near $7\times10^{15}$ the step is 1, so the leftovers are small integers such as $-2$, 2, and 4. For `float32` the step is about $5\times10^{8}$, so the products round to multiples of that step that cancel exactly to zero.
-
-Neither vector carries information about $\mathbf{x}$. Both are rounding leftovers, and a result that changes completely when the precision changes is a warning that the matrix is singular, or so ill-conditioned that its condition number exceeds the precision. Here $\kappa_2\approx2\times10^{17}$ is beyond both $10^{7}$ and $10^{16}$.
-:::
+**Your turn:** a genuine solution should barely change when we repeat the calculation with fewer digits. In the empty cell, convert the matrix and right-hand side to single precision with `M32 = M.astype(np.float32)` and `b32 = b.astype(np.float32)`, then repeat `np.linalg.inv(M32) @ b32` and `np.linalg.solve(M32, b32)`. Recall from [L03](../../units/01/L03/index.qmd) that `float32` carries about 7 significant digits. Compare the results with the `float64` vectors. What does the change tell you about the vector from `inv`?
 
 ### Which vectors solve $\mathbf{M}\mathbf{x}=\mathbf{b}$?
 
@@ -260,9 +218,8 @@ Engineering models often contain such a protected dependency. In the L12 spring 
 
 Keep your notebook cells and write down:
 
-- the Cu–Cu nearest-neighbour distance and the distance to the next cube corner;
 - the shape of `B.T @ v` and of `B @ w`;
 - the solution, residual, and condition number of Example 1;
-- for Example 2, the residuals of the two computed vectors, $\kappa_2(\mathbf{M})$, the `float32` result of `inv(M) @ b`, and the null vector $\mathbf{n}$.
+- for Example 2, the residuals of the two computed vectors, $\kappa_2(\mathbf{M})$, the `float32` results, and the null vector $\mathbf{n}$.
 
 Finally, explain in one or two sentences why a vector returned by `np.linalg.solve` with a tiny residual still does not prove that it is *the* solution. If $\mathbf{M}$ were the stiffness matrix of a spring network, what physical motion would $\mathbf{n}$ describe?
