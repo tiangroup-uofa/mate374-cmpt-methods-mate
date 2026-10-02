@@ -41,35 +41,35 @@ def _():
 
 @app.cell
 def _(F, N, k, np, perf_counter, solve_banded):
-    # ab[0, 1:] is the upper diagonal; ab[2, :-1] is the lower.
-    ab = np.zeros((3, N))
-    ab[0, 1:] = -k
-    ab[1, :] = 2 * k
-    ab[1, -1] = k
-    ab[2, :-1] = -k
+    # Row 0 holds the upper diagonal, row 1 the main diagonal, row 2 the lower.
+    K_band = np.zeros((3, N))
+    K_band[0, 1:] = -k
+    K_band[1, :] = 2 * k
+    K_band[1, -1] = k
+    K_band[2, :-1] = -k
     f = np.zeros(N)
     f[-1] = F
     start = perf_counter()
-    u = solve_banded((1, 1), ab, f)
+    u = solve_banded((1, 1), K_band, f)
     elapsed = perf_counter() - start
     print(f"Solve time (excluding assembly): {elapsed:.4g} s")
     print(f"Dense matrix alone: {8 * N**2 / 1e9:.4g} GB")
-    print(f"Banded array alone: {ab.nbytes / 1e6:.4g} MB")
+    print(f"Banded array alone: {K_band.nbytes / 1e6:.4g} MB")
     print(f"End displacement: {u[-1]:.8g}")
-    return ab, f, u
+    return K_band, f, u
 
 
 @app.cell
-def _(F, N, ab, f, k, np, u):
+def _(F, N, K_band, f, k, np, u):
     reference = np.arange(1, N + 1) * F / k
     # Apply K without creating a dense N-by-N array.
-    residual = ab[1] * u - f
-    residual[:-1] += ab[0, 1:] * u[1:]
-    residual[1:] += ab[2, :-1] * u[:-1]
+    residual = K_band[1] * u - f
+    residual[:-1] += K_band[0, 1:] * u[1:]
+    residual[1:] += K_band[2, :-1] * u[:-1]
     print("Relative solution error:", np.linalg.norm(u - reference) / np.linalg.norm(reference))
     print("Relative residual:", np.linalg.norm(residual) / np.linalg.norm(f))
     if N <= 100:
-        dense_K = np.diag(ab[1]) + np.diag(ab[0, 1:], 1) + np.diag(ab[2, :-1], -1)
+        dense_K = np.diag(K_band[1]) + np.diag(K_band[0, 1:], 1) + np.diag(K_band[2, :-1], -1)
         print("Dense/banded agreement:", np.allclose(u, np.linalg.solve(dense_K, f)))
     return (reference,)
 
