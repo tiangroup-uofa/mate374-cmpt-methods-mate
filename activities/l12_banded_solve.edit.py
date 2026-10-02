@@ -22,18 +22,17 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""
-    ## Can we store just the three nonzero diagonals?
-    The chain has one fixed end and an end load. **Predict:** compare
-    $8N^2$ bytes for a dense float64 matrix with $24N$ bytes for three
-    stored diagonals. Edit `N` from 10,000 to 1,000,000 to measure a
-    larger solve on your device. The reference solution is $u_i=iF/k$.
+    ## One million atoms with three stored diagonals
+    The chain has one fixed end and an end load. A dense float64 matrix
+    would need $8N^2$ bytes, while the three stored diagonals need only
+    $24N$ bytes. The reference solution is $u_i=iF/k$.
     """)
     return
 
 
 @app.cell
 def _():
-    N = 10_000
+    N = 1_000_000
     k = 5.0
     F = 1e-7  # small end load keeps extensions small
     return F, N, k
@@ -92,9 +91,7 @@ def _(mo):
     mo.md("""
     Banded storage preserves the chain's local connections. It changes
     memory and computational cost, while the force-balance equations
-    stay the same. Longer chains also become more sensitive: compare
-    the analytical error as well as the residual when increasing `N`.
-    For a direct dense comparison, set `N = 10`.
+    stay the same.
     """)
     return
 
