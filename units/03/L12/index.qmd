@@ -45,7 +45,7 @@ We will use the bead-and-spring chain to explore three toy systems, each raising
 
 | Scenario | Change to the chain | Question we ask | Diagnostic |
 |---|---|---|---|
-| 1 | One spring disappears | Does a unique solution exist? | Determinant, singular matrix |
+| 1 | One spring disappears | Does a unique solution exist? | Determinant, rank, singular matrix |
 | 2 | One spring becomes much weaker than the others | How sensitive is the solution to the matrix and forces? | Condition number |
 | 3 | The chain grows to millions of moving atoms | How much computation and storage does the solution require? | Operation count, banded storage |
 
@@ -107,20 +107,20 @@ $$
 -5u_1+5u_2=10.
 $$
 
-Adding the equations gives $0=10$, a **contradiction**! Changing only the right-hand side, $\mathbf{f}$ in this spring model, has changed the outcome from infinitely many solutions to none. The pair now has a net external force and no connection to a support that can balance it, so it would accelerate rather than remain in equilibrium.
+Adding the equations gives $0=10$, a **contradiction**! Changing only the right-hand side $\mathbf{f}$ has turned infinitely many solutions into none. The pair now has a net external force and no connection to a support that can balance it, so it would accelerate rather than remain in equilibrium.
 
 ### Missing bonds in a larger network
 
 Defects in an atomic structure can remove bonds. How can we tell whether the remaining bonds still constrain every atom? @fig-2d-network shows a network arranged in two dimensions inside a fixed wall. We retain one scalar displacement per atom, with each bond resisting the difference between its endpoint displacements. A bond to the wall connects to a displacement fixed at zero.
 
-In (a), several bonds are missing, but every atom still has a path of springs to the wall. The stiffness matrix is nonsingular. In (b), removing the remaining bonds around the centre atom leaves it free to move. The row and column belonging to that atom are zero, so the matrix is singular.
+In (a), several bonds are missing, but every atom still has a path of springs to the wall. The stiffness matrix is nonsingular. In (b), removing the remaining bonds around the centre atom leaves it free to move. The row and column belonging to that atom are zero, so the matrix is singular. In (c), atoms 5 and 8 keep the bond between them but lose every other bond, so the pair together has no path to the wall.
 
-![A two-dimensional spring network inside a fixed wall. (a) Some bonds are missing, but every moving atom is connected to the wall through springs. (b) Removing the bonds around the centre atom leaves it unconstrained, and the stiffness matrix becomes singular.](../../../assets/L12-2d-network.png){#fig-2d-network width=90% fig-alt="Two square frames drawn as hatched fixed walls, each enclosing a 3 by 3 grid of moving atoms. In panel a, the atoms are joined to each other and to the wall by springs, with some bonds missing, and the matrix is nonsingular. In panel b, the springs around the centre atom are replaced by dashed lines, the centre atom is isolated, and the determinant is zero."}
+![A two-dimensional spring network inside a fixed wall, with atoms numbered 1 to 9. (a) Some bonds are missing, but every moving atom is connected to the wall through springs. (b) Removing the bonds around atom 5 leaves it unconstrained. (c) Atoms 5 and 8 remain bonded to each other but have no path to the wall. Both (b) and (c) give a singular stiffness matrix.](../../../assets/L12-2d-network.png){#fig-2d-network width=100% fig-alt="Three square frames drawn as hatched fixed walls, each enclosing a 3 by 3 grid of moving atoms numbered 1 to 9. In panel a, the atoms are joined to each other and to the wall by springs, with some bonds missing, and the determinant is nonzero. In panel b, the bonds around atom 5 are dashed and atom 5 is blue and isolated, with zero determinant. In panel c, atoms 5 and 8 are blue and joined only to each other, with their other bonds dashed, and the determinant is zero."}
 
 Number the atoms from left to right across each row, starting with 1 at the top left and ending with 9 at the bottom right. The centre atom is 5. For unit spring stiffness, each diagonal entry counts the bonds attached to that atom, including bonds to the wall. An off-diagonal entry is $-1$ when two moving atoms share a bond and zero otherwise. These rules give the following matrices.
 
 ::: {.callout-note collapse="true"}
-## Complete stiffness matrices for the two networks
+## Complete stiffness matrices for the three networks
 
 For panel (a),
 
@@ -154,10 +154,26 @@ $$
 \end{bmatrix}.
 $$
 
-These matrices give $\det(\mathbf{K}_a)=5397$ and $\det(\mathbf{K}_b)=0$. The fifth row and column of $\mathbf{K}_b$ vanish. An applied force on atom 5 gives the impossible equation $0=f_5$ when $f_5\ne0$. When $f_5=0$, its displacement is arbitrary.
+For panel (c), start again from $\mathbf{K}_a$ and remove bonds $2$–$5$, $4$–$5$, $7$–$8$, and $8$–$9$. Only bond $5$–$8$ remains on atoms 5 and 8:
+
+$$
+\mathbf{K}_c=\begin{bmatrix}
+3&0&0&-1&0&0&0&0&0\\
+0&2&-1&0&0&0&0&0&0\\
+0&-1&3&0&0&-1&0&0&0\\
+-1&0&0&2&0&0&0&0&0\\
+0&0&0&0&1&0&0&-1&0\\
+0&0&-1&0&0&3&0&0&-1\\
+0&0&0&0&0&0&2&0&0\\
+0&0&0&0&-1&0&0&1&0\\
+0&0&0&0&0&-1&0&0&2
+\end{bmatrix}.
+$$
+
+These matrices give $\det(\mathbf{K}_a)=5397$ and $\det(\mathbf{K}_b)=\det(\mathbf{K}_c)=0$. The fifth row and column of $\mathbf{K}_b$ vanish. An applied force on atom 5 gives the impossible equation $0=f_5$ when $f_5\ne0$. When $f_5=0$, its displacement is arbitrary. No row or column of $\mathbf{K}_c$ is zero, but rows 5 and 8 add to zero.
 :::
 
-**Can a network be singular without a zero row or column?** Yes. Imagine two atoms that remain bonded to each other but lose every connection to the rest of the network and the wall. Their part of the stiffness matrix is
+**Can a network be singular without a zero row or column?** Yes. In @fig-2d-network (c), atoms 5 and 8 remain bonded to each other but lose every connection to the rest of the network and the wall. With stiffness $k$ for their shared bond, their rows and columns of the stiffness matrix form the block
 
 $$
 \mathbf{K}_{\mathrm{pair}}=\begin{bmatrix}k&-k\\-k&k\end{bmatrix},
@@ -167,6 +183,22 @@ $$
 $$
 
 Neither row nor column is zero, yet translating both atoms equally produces no restoring force. This unconstrained motion makes the whole network singular. In this scalar spring model with positive stiffnesses, every connected group of moving atoms needs a path to a fixed support.
+
+The argument also works in reverse. If a stiffness matrix turns out to be singular, some group of atoms can move together without stretching any spring, so the network has lost the springs that would hold that group in place. A singular $\mathbf{K}$ is therefore a signal to look for missing bonds or missing supports in the model.
+
+::: {.callout-tip collapse="true"}
+## How many independent equations? The rank of a matrix
+
+The **rank** of a matrix is the number of independent rows, which always equals the number of independent columns. An $N\times N$ matrix is nonsingular exactly when its rank is $N$. NumPy computes it with `np.linalg.matrix_rank`:
+
+```python
+np.linalg.matrix_rank(K_a)   # 9: all nine equations are independent
+np.linalg.matrix_rank(K_b)   # 8: row 5 is zero
+np.linalg.matrix_rank(K_c)   # 8: rows 5 and 8 add to zero
+```
+
+The difference $N-\text{rank}$ counts the independent free motions. Both singular networks have one: atom 5 alone in (b), and atoms 5 and 8 moving together in (c). For the two-atom chain without its anchor spring, the rank is 1, and the free motion is the shared translation of the pair. `matrix_rank` uses a small tolerance to decide when a value counts as zero in floating-point arithmetic.
+:::
 
 ### Why a small determinant needs care
 
@@ -219,7 +251,7 @@ $$
 =\begin{bmatrix}-1\\1.001\end{bmatrix}.
 $$
 
-The net force is now $0.001$. The anchor must extend by 1 to balance it, while the second spring extends by $1.001/5=0.2002$. The new displacements are $(1,1.2002)^{\mathsf T}$. Using vector lengths to compare the changes,
+The net force is now $0.001$. The anchor must extend by 1 to balance it, while the second spring extends by $1.001/5=0.2002$. The new displacements are $(1,1.2002)^{\mathsf T}$. Using vector lengths, the 2-norm $\|\cdot\|_2$ defined in the next section, to compare the changes,
 
 $$
 \frac{\|\delta\mathbf{f}\|_2}{\|\mathbf{f}\|_2}
