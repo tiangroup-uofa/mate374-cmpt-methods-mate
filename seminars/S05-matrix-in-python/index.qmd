@@ -1,0 +1,223 @@
+---
+title: "S05 · Matrices in Python"
+subtitle: "Vector lengths, matrix products, and two linear systems: one solvable, one singular"
+body-classes: lecture-page seminar-page
+---
+
+## Learning outcomes
+
+By the end of this seminar, you should be able to:
+
+1. **Calculate** matrix–vector products with NumPy, using array shapes to explain a dimension error.
+2. **Solve** a square linear system with `np.linalg.inv` and `np.linalg.solve`, and check the result with its residual.
+3. **Diagnose** a singular matrix from its condition number, its computed inverse, and the residuals of candidate solutions.
+4. **Explain** why some entries of a singular matrix can change without removing the singularity.
+
+## Today's calculations
+
+In [L11](../../units/03/L11/index.qmd), we wrote force balances as $\mathbf{A}\mathbf{x}=\mathbf{b}$ and reviewed vectors, matrices, and the `@` operator. [L12](../../units/03/L12/index.qmd) showed how a missing constraint makes a matrix singular and how the condition number measures sensitivity. Today you will type these operations yourself. The first linear system behaves well. The second returns numbers that look like a solution even though the system has infinitely many solutions.
+
+## NumPy arrays and the `np.linalg` functions we will use
+
+Every calculation today starts with `import numpy as np`. A **vector** is a one-dimensional array, written as a list of numbers. A **matrix** is a list of rows: commas separate the entries within a row and also separate the rows, and line breaks inside the brackets are allowed and make the rows easier to read.
+
+```python
+v = np.array([1.0, 2.0, 3.0])          # shape (3,): no row or column orientation
+
+A = np.array([[1.0, 2.0, 3.0],
+              [4.0, 5.0, 6.0],
+              [7.0, 8.0, 10.0]])         # shape (3, 3)
+```
+
+Linear-algebra operations live in the **submodule** `np.linalg`, a collection of functions grouped inside NumPy and called as `np.linalg.function_name(...)`. SciPy provides a similar collection, `scipy.linalg`, with some additional solvers. For today's matrices, the two give the same results.
+
+| Calculation | NumPy | Result |
+|---|---|---|
+| Matrix–vector product $\mathbf{A}\mathbf{v}$ | `A @ v` | vector |
+| Inverse $\mathbf{A}^{-1}$ | `np.linalg.inv(A)` | matrix |
+| Determinant $\det(\mathbf{A})$ | `np.linalg.det(A)` | scalar |
+| Condition number $\kappa_2(\mathbf{A})$ | `np.linalg.cond(A)` | scalar |
+| Solution of $\mathbf{A}\mathbf{x}=\mathbf{b}$ | `np.linalg.solve(A, b)` | vector |
+
+Recall from L12 how to read the condition number. When $\kappa_2\approx1$, small relative changes in $\mathbf{A}$ or $\mathbf{b}$ produce comparably small relative changes in $\mathbf{x}$. When $\kappa_2\gg1$, some small changes can be amplified strongly. A singular matrix has an infinite condition number. NumPy rarely reports infinity, however, because round-off keeps the computed value finite. Since a `float64` number carries about 16 significant digits, a computed $\kappa_2$ of about $10^{16}$ or larger means the matrix is singular as far as double precision can tell.
+
+## Matrix–vector products and the shape rule
+
+The `@` operator multiplies a matrix by a vector. In the notebook below, the first cell multiplies a $3\times3$ matrix by a three-component vector. The second cell tries to multiply a $3\times2$ matrix `B` by the same vector and stops with an error. Read the last line of that error message. Which two dimensions does it compare?
+
+::: {.quarto-wasm-local notebook="s05_matrix_vector.edit.py" view="edit" title="A square product that works and a rectangular product with a shape error" height="560" loading="lazy" fullscreen="true"}
+`A @ v` gives `[4, 10, 14]`. `B @ v` raises `ValueError` because `B` has two columns while `v` has three components. `B.T @ v` multiplies the $2\times3$ transpose by `v` and gives `[22, 28]`.
+:::
+
+**Your turn:** use the empty cell to write a product of `B` with a vector that is defined. Is there more than one way? What shape does each result have?
+
+::: {.callout-note collapse="true"}
+## Why `B @ v` fails and two products that work
+
+An $m\times n$ matrix needs an $n$-component vector. `B` is $3\times2$, so each row of `B` has two entries, and the row-by-vector inner product with a three-component `v` is undefined.
+
+Two products are defined, and they answer different questions:
+
+- `B @ w` with a two-component vector, such as `w = np.array([1.0, 1.0])`, gives a three-component result, `[3, 7, 11]`.
+- `B.T @ v` uses the $2\times3$ transpose and gives a two-component result:
+
+$$
+\mathbf{B}^{\mathsf T}\mathbf{v}=
+\begin{bmatrix}1&3&5\\2&4&6\end{bmatrix}
+\begin{bmatrix}1\\2\\3\end{bmatrix}
+=\begin{bmatrix}22\\28\end{bmatrix}.
+$$
+
+Which one is correct depends on the equations you intended to write. Writing out the first row by hand usually settles it.
+:::
+
+## Solving $\mathbf{A}\mathbf{x}=\mathbf{b}$ with `inv` and `solve`
+
+L11 solved the spring chain as $\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}$, and L12 replaced the explicit inverse with `np.linalg.solve`, which computes $\mathbf{x}$ directly. Both are one line in NumPy. A computed vector is only useful once we check it, so we also calculate the **residual** $\mathbf{r}=\mathbf{A}\mathbf{x}-\mathbf{b}$, which should be close to zero, and the condition number:
+
+```python
+x_inv = np.linalg.inv(A) @ b
+x_solve = np.linalg.solve(A, b)
+residual = A @ x_solve - b
+kappa = np.linalg.cond(A)
+```
+
+## Example 1. A well-behaved $3\times3$ system
+
+Solve
+
+$$
+\begin{bmatrix}6&2&3\\4&11&6\\7&8&16\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\\x_3\end{bmatrix}
+=\begin{bmatrix}19\\44\\71\end{bmatrix}.
+$$
+
+**Before calculating:** in each row, the diagonal entry is larger than the sum of the other two entries. Do you expect a condition number near 1, near $10^3$, or near $10^{10}$?
+
+Type `A` and `b` into the notebook, then calculate the solution with both `inv` and `solve`. Do they agree? Finish with the residual and the condition number.
+
+::: {.quarto-wasm-local notebook="s05_solve_3x3.edit.py" view="edit" title="Type and solve a 3 × 3 linear system" height="520" loading="lazy" fullscreen="true"}
+Both `np.linalg.inv(A) @ b` and `np.linalg.solve(A, b)` give $\mathbf{x}=(1,2,3)$. The residual is zero to round-off, and $\kappa_2(\mathbf{A})\approx5.60$.
+:::
+
+::: {.callout-note collapse="true"}
+## Solution, residual, and condition number for Example 1
+
+Both methods return $\mathbf{x}=(1,\,2,\,3)$. Substituting by hand, the first row gives $6(1)+2(2)+3(3)=19$. The residual entries are zero or of order $10^{-15}$.
+
+The condition number is $\kappa_2(\mathbf{A})\approx5.60$ and $\det(\mathbf{A})=589$. A condition number this close to 1 means that small changes in $\mathbf{A}$ or $\mathbf{b}$ cause comparably small changes in $\mathbf{x}$.
+:::
+
+## Example 2. A $5\times5$ system with a hidden dependency
+
+Now take a matrix $\mathbf{M}$ and a known vector $\mathbf{x}_{\text{true}}$. Copy them into the first empty cell:
+
+```python
+M = np.array([[ 1,  3, -9,  6, 4],
+              [ 2, -1,  6,  7, 1],
+              [ 3,  2, -3, 15, 5],
+              [ 8, -1,  1,  4, 2],
+              [11,  1, -2, 18, 7]], dtype=float)
+x_true = np.array([0.0, 1.0, 1.0, 0.0, 1.0])
+```
+
+1. Calculate `b = M @ x_true`.
+2. Now pretend you know only `M` and `b`. Solve $\mathbf{M}\mathbf{x}=\mathbf{b}$ with `inv` and with `solve`. Do you recover `x_true`? Do the two methods agree with each other?
+3. Calculate the residual of each computed vector. Which vectors satisfy the five equations?
+
+::: {.quarto-wasm-local notebook="s05_singular_system.edit.py" view="edit" title="Type and solve a 5 × 5 system with a hidden dependency" height="640" loading="lazy" fullscreen="true"}
+In the browser notebook, `b = [-2, 6, 4, 2, 6]`. `np.linalg.solve(M, b)` returns about $(-1.1536,\,-4.4794,\,0.0824,\,0,\,3.3333)$ with a residual of order $10^{-15}$. `np.linalg.inv(M) @ b` returns $(-2,\,0,\,2,\,0,\,4)$ with residual $(-2,\,6,\,4,\,-8,\,-4)$. The condition number is about $2\times10^{17}$.
+:::
+
+::: {.callout-note collapse="true"}
+## Computed vectors and residuals for Example 2
+
+The right-hand side is $\mathbf{b}=(-2,\,6,\,4,\,2,\,6)$. The two methods return different vectors, and neither equals $\mathbf{x}_{\text{true}}$:
+
+| Method | Computed $\mathbf{x}$ | Residual $\mathbf{M}\mathbf{x}-\mathbf{b}$ |
+|---|---|---|
+| `solve(M, b)` | $(-1.15356,\,-4.47940,\,0.08240,\,4\times10^{-16},\,3.33333)$ | entries $\lesssim4\times10^{-15}$ |
+| `inv(M) @ b` | $(-2,\,0,\,2,\,0,\,4)$ | $(-2,\,6,\,4,\,-8,\,-4)$ |
+
+The vector from `inv` fails the equations badly. The vector from `solve` **does** satisfy all five equations, yet it differs from $\mathbf{x}_{\text{true}}$, which satisfies them too. A square system with two different solutions cannot have a unique solution, so $\mathbf{M}$ must be singular.
+
+Your laptop's NumPy may stop at step 2 with `LinAlgError: Singular matrix`. The browser notebook uses a different linear-algebra library, whose round-off leaves a tiny nonzero number where an exact zero should appear, so it carries on and returns numbers. Neither behaviour tells you the solution is trustworthy, so check the residual and the condition number every time.
+:::
+
+### Diagnosing the singular matrix
+
+NumPy returned two vectors without complaint in the browser, so the warning signs have to come from our own checks. In the last labelled cell, calculate `np.linalg.det(M)`, `np.linalg.cond(M)`, and `np.linalg.inv(M)`. What are the sizes of the entries of the inverse?
+
+::: {.callout-note collapse="true"}
+## Determinant, condition number, and inverse of $\mathbf{M}$
+
+- $\det(\mathbf{M})\approx6\times10^{-14}$. The exact determinant is zero, and the computed value is round-off. A determinant is a poor sensitivity test on its own because it scales with the matrix: $\det(10\mathbf{M})=10^5\det(\mathbf{M})$ for a $5\times5$ matrix, while the condition number is unchanged.
+- $\kappa_2(\mathbf{M})\approx2\times10^{17}$, beyond the roughly 16 digits that `float64` can hold. The matrix is singular as far as double precision can tell, and no computed solution can be trusted.
+- The computed inverse has entries near $10^{15}$. An exactly singular matrix has no inverse, so these entries come from dividing by a round-off-sized number that should have been zero. Multiplying them by $\mathbf{b}$ cancels huge numbers against each other, which is why `inv(M) @ b` lands on an arbitrary vector with a large residual.
+
+You can confirm the diagnosis with `np.linalg.matrix_rank(M)`, which returns 4: only four of the five equations are independent.
+:::
+
+### Which vectors solve $\mathbf{M}\mathbf{x}=\mathbf{b}$?
+
+Since `x_solve` and `x_true` both satisfy the equations, subtract them: $\mathbf{M}(\mathbf{x}_{\text{solve}}-\mathbf{x}_{\text{true}})=\mathbf{b}-\mathbf{b}=\mathbf{0}$. Their difference is a nonzero vector that $\mathbf{M}$ sends to zero. In the empty cell, calculate `d = x_solve - x_true`, divide it by its first entry, and multiply by 44. What do you notice about the entries? Use the result to write down every solution of the system.
+
+::: {.callout-note collapse="true"}
+## The null vector of $\mathbf{M}$ and the full family of solutions
+
+Scaling $\mathbf{d}$ so that its entries become integers gives
+
+$$
+\mathbf{n}=(44,\;209,\;35,\;0,\;-89),\qquad \mathbf{M}\mathbf{n}=\mathbf{0}.
+$$
+
+Check it with `M @ np.array([44, 209, 35, 0, -89])`. Reading a matrix–vector product as a [sum of columns](../../units/03/L11/index.qmd#matrixvector-multiplication) explains what this means. Writing $\mathbf{c}_j$ for column $j$ of $\mathbf{M}$,
+
+$$
+44\,\mathbf{c}_1+209\,\mathbf{c}_2+35\,\mathbf{c}_3+0\,\mathbf{c}_4-89\,\mathbf{c}_5=\mathbf{0}.
+$$
+
+Four of the columns are linearly dependent. Adding any multiple of $\mathbf{n}$ to a solution therefore changes nothing on the right-hand side, and every vector
+
+$$
+\mathbf{x}=\mathbf{x}_{\text{true}}+t\,\mathbf{n}=(44t,\;1+209t,\;1+35t,\;0,\;1-89t)
+$$
+
+solves the system. `solve` happened to return $t\approx-0.0262$. No calculation using only $\mathbf{M}$ and $\mathbf{b}$ can recover $\mathbf{x}_{\text{true}}$, because the equations do not contain enough information. We need one more independent equation, just as the spring chain in L12 needed an anchor.
+
+The same dependency appears in the rows. The fifth equation is
+
+$$
+\text{row}_5=\tfrac12(\text{row}_1+\text{row}_2+\text{row}_3)+\text{row}_4,
+$$
+
+so it repeats information from the first four. Notice also that $x_4=0$ in every solution. This is why `solve` returned $4\times10^{-16}$ for $x_4$, and why the fourth row of the computed inverse, $(0,\,0,\,1,\,1,\,-1)$, contains ordinary numbers while the other rows are near $10^{15}$.
+:::
+
+### Which single entry can change without removing the singularity?
+
+Engineering data are rarely exact. If one entry of $\mathbf{M}$ had been measured slightly differently, would the system still be singular? In the notebook below, click and drag one entry of $\mathbf{M}$ to change it by $\pm1$, and watch the condition number. Return it to its original value before trying another entry. Which entries leave $\kappa_2$ near $10^{16}$–$10^{17}$, and which bring it down to a few hundred? Before reading the explanation, look for a pattern in their positions.
+
+::: {.quarto-wasm-local notebook="s05_singular_explorer.edit.py" view="edit" title="Change one entry of M and watch its condition number" height="560" loading="lazy" fullscreen="true"}
+Changing any entry of the fourth column (6, 7, 15, 4, or 18) by 1 leaves $\kappa_2(\mathbf{M})$ near $10^{16}$–$10^{17}$. Changing any other entry by 1 gives $\kappa_2$ between about 100 and 1100, and the matrix becomes nonsingular.
+:::
+
+::: {.callout-note collapse="true"}
+## Why the fourth column cannot remove the singularity
+
+The column relation found above, $\mathbf{M}\mathbf{n}=\mathbf{0}$ with $\mathbf{n}=(44,209,35,0,-89)$, does not involve column 4 at all, because $n_4=0$. Editing any entry of column 4 leaves the relation true. The edited matrix still sends $\mathbf{n}$ to zero, so it is still exactly singular, and its computed $\kappa_2$ stays at the round-off level of $10^{16}$–$10^{17}$.
+
+Changing entry $(i,j)$ in any other column by $\delta$ adds $\delta\,n_j\neq0$ to component $i$ of $\mathbf{M}\mathbf{n}$. The relation is broken and the matrix becomes nonsingular. A change of 1 in a matrix whose entries are of order 10 makes a modest condition number of a few hundred.
+
+Engineering models often contain such a protected dependency. In the L12 spring chain without an anchor, changing a spring stiffness never removes the free translation of the whole chain, because the translation does not stretch any spring.
+:::
+
+## Before you leave
+
+Keep your notebook cells and write down:
+
+- the shape of `B.T @ v` and of `B @ w`;
+- the solution, residual, and condition number of Example 1;
+- for Example 2, the residuals of the two computed vectors, $\kappa_2(\mathbf{M})$, and the null vector $\mathbf{n}$.
+
+Finally, explain in one or two sentences why a vector returned by `np.linalg.solve` with a tiny residual still does not prove that it is *the* solution. If $\mathbf{M}$ were the stiffness matrix of a spring network, what physical motion would $\mathbf{n}$ describe?

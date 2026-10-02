@@ -127,6 +127,8 @@ website:
             text: "S03 · Fixed-point iteration by hand"
           - href: seminars/S04-interpolation-fitting/index.qmd
             text: "S04 · Interpolation and fitting"
+          - href: seminars/S05-matrix-in-python/index.qmd
+            text: "S05 · Matrices in Python"
       - href: assignments/index.qmd
         text: Assignments
         contents:
