@@ -19,7 +19,7 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""
-    ## How does a weak anchor change the displacement?
+    ## How does a weak spring change the displacement?
     Atom 0 is fixed; springs connect 0–1 and 1–2. Stiffnesses, forces,
     and displacements are numbers in one consistent set of units.
     **Predict:** compare `k01 = 5.0` with `k01 = 0.001`.
@@ -53,7 +53,7 @@ def _(mo):
     ## A small relative force perturbation
     Equal and opposite forces initially stretch only spring 1–2.
     Add a small net force at atom 2. **Predict:** will the pair translate
-    noticeably when its anchor is weak? Compare relative changes below.
+    noticeably when its spring to the wall is weak? Compare relative changes below.
     A small residual checks the equations; sensitivity measures how much
     their solution changes when the supplied forces change.
     """)
