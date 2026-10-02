@@ -35,13 +35,13 @@ $$
 
 In NumPy this is a single line, `np.linalg.inv(K) @ f`, once `K` and `f` are entered as arrays by hand or built by a program. Solving a matrix equation might therefore seem simple, and if it were, the next few lectures would not be needed. What are the pitfalls?
 
-::: {.callout-note}
+::: {.callout-note collapse="true"}
 ## If you come from MATLAB
 
 If you have worked in MATLAB, you may know the syntax `x = A \ b`. It is tempting to read it as "form the inverse $\mathbf{A}^{-1}$ and multiply by $\mathbf{b}$", but MATLAB solves the system directly without forming the inverse. For a square, nonsingular matrix it corresponds to `np.linalg.solve(A, b)`, and for a rectangular least-squares system to `np.linalg.lstsq(A, b)`. This lecture explains why practical solvers avoid the explicit inverse.
 :::
 
-We will use the bead-and-spring chain to explore three changes, each raising a different question. In all three, we leave aside how NumPy's algorithm solves the equations, which is the topic of L13, and focus on what the matrix tells us.
+We will use the bead-and-spring chain to explore three toy systems, each raising a different question. In all three, we leave aside how NumPy's algorithm solves the equations, which is the topic of L13, and focus on what the matrix tells us.
 
 | Scenario | Change to the chain | Question we ask | Diagnostic |
 |---|---|---|---|
@@ -51,7 +51,7 @@ We will use the bead-and-spring chain to explore three changes, each raising a d
 
 ![Three-atom spring chains with atom 0 fixed and an external force on atom 2: (a) a normal system, (b) a singular system with the anchor spring removed (Scenario 1), and (c) an ill-conditioned system with a soft anchor spring (Scenario 2).](../../../assets/L12-spring-scenarios.png){#fig-spring-scenarios width=100% fig-alt="Three panels of atoms 0, 1, and 2 joined by springs, with fixed atom 0 and an external force pulling atom 2. Panel a has springs k01 and k12. In panel b, spring k01 is removed. In panel c, spring k01 is much softer than k12."}
 
-Throughout the lecture, atom 0 is fixed and positive displacement points along the chain away from that fixed end. We use spring stiffnesses in eV/Å², forces in eV/Å, and displacements in Å, as in L11.
+Throughout the lecture, atom 0 is fixed and positive displacement points along the chain away from that fixed end. The matrix properties we investigate are independent of our choice of physical units. We therefore write the spring constants, forces, and displacements as numerical values, with a consistent set of units understood.
 
 ## Scenario 1: Singular matrices -- when the constraints are insufficient
 
@@ -64,15 +64,17 @@ $$
 \begin{bmatrix}d&-b\\-c&a\end{bmatrix}.
 $$
 
-The denominator $ad-bc$ is the **determinant**, written $\det(\mathbf{A})$. If it equals zero, the inverse does not exist and the square matrix is **singular**. The equations then have either infinitely many solutions or no solution, depending on their right-hand side.
+The denominator $ad-bc$ is the **determinant**, written $\det(\mathbf{A})$ (or simply $|\mathbf{A}|$). If $\det(\mathbf{A}) = 0$, the inverse matrix $\mathbf{A}^{-1}$ does not exist and the square matrix is **singular**. The equations then have either **infinitely many solutions** or **no solution**, depending on their right-hand side.
 
-::: {.callout-note}
+::: {.callout-note collapse="true"}
 ## Geometric meaning of the determinant
 
 The determinant is a function that turns an $n\times n$ matrix into a single number. For a $2\times2$ matrix, picture the matrix as a transformation that maps the unit square, spanned by $(1,0)$ and $(0,1)$, to the parallelogram spanned by its columns $(a,c)$ and $(b,d)$. The area of that parallelogram is $|ad-bc|$, so the determinant is the factor by which the transformation stretches areas, and its sign records whether the orientation is flipped. For a $3\times3$ matrix, the determinant is the ratio by which volumes are stretched, and the same idea continues in higher dimensions.
 
 A zero determinant means the transformation squashes space into a lower dimension, such as a plane onto a line. Different vectors then land on the same point, so the transformation cannot be undone and no inverse exists. 3Blue1Brown's video [The determinant](https://www.youtube.com/watch?v=Ip3X9LOh2dk) animates this picture, and [Hannah (1996), "A geometric approach to determinants"](https://doi.org/10.1080/00029890.1996.12004759), *The American Mathematical Monthly* 103, 401–409, develops determinants from this geometric definition.
 :::
+
+### Forming a singular matrix
 
 Consider the three-atom chain from L11, with atom 0 fixed and atoms 1 and 2 free to move. When would $\det(\mathbf{K})=0$? Remove the spring between atoms 0 and 1, as in @fig-spring-scenarios (b). Only the bond between atoms 1 and 2 remains, so the two moving atoms float with no connection to the support. With $k_{12}=5$, the stiffness matrix becomes
 
@@ -81,6 +83,8 @@ $$
 \qquad
 \det(\mathbf{K})=5(5)-(-5)(-5)=0.
 $$
+
+**1. Infinitely many solutions**
 
 Consider equal and opposite applied forces:
 
@@ -91,7 +95,9 @@ $$
 \end{aligned}
 $$
 
-The second equation repeats the first with its sign reversed. Both specify $u_2-u_1=2$ Å, so $(u_1,u_2)=(0,2)$, $(1,3)$, and $(-2,0)$ all satisfy the system. The force balance determines the spring extension but leaves the pair's overall translation unconstrained. Adding the same displacement to both atoms changes neither the spring length nor its force.
+The second equation repeats the first with its sign reversed. Both specify $u_2-u_1=2$, so $(u_1,u_2)=(0,2)$, $(1,3)$, and $(-2,0)$ all satisfy the system. The force balance determines the spring extension but leaves the pair's overall translation unconstrained. Picture the two atoms drifting together: with no bond to the wall, they could be near their original positions or far away, and the spring would still have the same extension. Every pair $(u_1,u_2)=(c,c+2)$ satisfies the equations for any shared displacement $c$.
+
+**2. No solution**
 
 Now change the applied forces to $\mathbf{f}=(0,10)^{\mathsf T}$:
 
@@ -101,19 +107,82 @@ $$
 -5u_1+5u_2=10.
 $$
 
-Adding the equations gives $0=10$. There is no static equilibrium because the pair has a net external force and no connection to a fixed support that can balance it. In a dynamical model, the pair would accelerate.
+Adding the equations gives $0=10$, a **contradiction**! Changing only the right-hand side, $\mathbf{f}$ in this spring model, has changed the outcome from infinitely many solutions to none. The pair now has a net external force and no connection to a support that can balance it, so it would accelerate rather than remain in equilibrium.
 
-This physical interpretation is especially useful when assembling larger systems. @fig-2d-network shows a two-dimensional network surrounded by a fixed wall, with each atom carrying a single displacement as in the chain. A spring attached to the wall acts like a spring attached to a fixed atom. In (a), several bonds are missing, so not every atom is bonded to each of its neighbours. Every moving atom still has a path of springs to the wall, and the stiffness matrix is nonsingular with $\kappa_2\approx6.7$. In (b), the remaining bonds around the centre atom are removed as well. That atom is attached to nothing, its row and column of $\mathbf{K}$ are zero, and $\det(\mathbf{K})=0$.
+### Missing bonds in a larger network
 
-![A two-dimensional spring network inside a fixed wall. (a) Some bonds are missing, but every moving atom is connected to the wall through springs. (b) Removing the bonds around the centre atom leaves it unconstrained, and the stiffness matrix becomes singular.](../../../assets/L12-2d-network.png){#fig-2d-network width=90% fig-alt="Two square frames drawn as hatched fixed walls, each enclosing a 3 by 3 grid of moving atoms. In panel a, the atoms are joined to each other and to the wall by springs, with some bonds missing, and the matrix is nonsingular with condition number about 6.7. In panel b, the springs around the centre atom are replaced by dashed lines, the centre atom is isolated, and the determinant is zero."}
+Defects in an atomic structure can remove bonds. How can we tell whether the remaining bonds still constrain every atom? @fig-2d-network shows a network arranged in two dimensions inside a fixed wall. We retain one scalar displacement per atom, with each bond resisting the difference between its endpoint displacements. A bond to the wall connects to a displacement fixed at zero.
 
-In general, a connected group of moving atoms that has no path to a fixed atom can move freely, and the missing constraint appears algebraically as a singular stiffness matrix. The entries alone may look reasonable, so inspecting the boundary conditions is part of understanding a solver failure.
+In (a), several bonds are missing, but every atom still has a path of springs to the wall. The stiffness matrix is nonsingular. In (b), removing the remaining bonds around the centre atom leaves it free to move. The row and column belonging to that atom are zero, so the matrix is singular.
 
-NumPy provides `np.linalg.det` for calculating a determinant. For this small, exact example it exposes the problem immediately. For floating-point calculations, determinant size needs more care: it changes with matrix size and overall scaling, and a small value alone does not measure sensitivity.
+![A two-dimensional spring network inside a fixed wall. (a) Some bonds are missing, but every moving atom is connected to the wall through springs. (b) Removing the bonds around the centre atom leaves it unconstrained, and the stiffness matrix becomes singular.](../../../assets/L12-2d-network.png){#fig-2d-network width=90% fig-alt="Two square frames drawn as hatched fixed walls, each enclosing a 3 by 3 grid of moving atoms. In panel a, the atoms are joined to each other and to the wall by springs, with some bonds missing, and the matrix is nonsingular. In panel b, the springs around the centre atom are replaced by dashed lines, the centre atom is isolated, and the determinant is zero."}
 
-## Scenario 2: Ill-conditioning -- a weak anchor
+Number the atoms from left to right across each row, starting with 1 at the top left and ending with 9 at the bottom right. The centre atom is 5. For unit spring stiffness, each diagonal entry counts the bonds attached to that atom, including bonds to the wall. An off-diagonal entry is $-1$ when two moving atoms share a bond and zero otherwise. These rules give the following matrices.
 
-Instead of removing the anchor spring entirely, let it become very weak, as in @fig-spring-scenarios (c):
+::: {.callout-note collapse="true"}
+## Complete stiffness matrices for the two networks
+
+For panel (a),
+
+$$
+\mathbf{K}_a=\begin{bmatrix}
+3&0&0&-1&0&0&0&0&0\\
+0&3&-1&0&-1&0&0&0&0\\
+0&-1&3&0&0&-1&0&0&0\\
+-1&0&0&3&-1&0&0&0&0\\
+0&-1&0&-1&3&0&0&-1&0\\
+0&0&-1&0&0&3&0&0&-1\\
+0&0&0&0&0&0&3&-1&0\\
+0&0&0&0&-1&0&-1&3&-1\\
+0&0&0&0&0&-1&0&-1&3
+\end{bmatrix}.
+$$
+
+For panel (b), removing bonds $2$–$5$, $4$–$5$, and $5$–$8$ also reduces the diagonal entries for atoms 2, 4, and 8 by one:
+
+$$
+\mathbf{K}_b=\begin{bmatrix}
+3&0&0&-1&0&0&0&0&0\\
+0&2&-1&0&0&0&0&0&0\\
+0&-1&3&0&0&-1&0&0&0\\
+-1&0&0&2&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0\\
+0&0&-1&0&0&3&0&0&-1\\
+0&0&0&0&0&0&3&-1&0\\
+0&0&0&0&0&0&-1&2&-1\\
+0&0&0&0&0&-1&0&-1&3
+\end{bmatrix}.
+$$
+
+These matrices give $\det(\mathbf{K}_a)=5397$ and $\det(\mathbf{K}_b)=0$. The fifth row and column of $\mathbf{K}_b$ vanish. An applied force on atom 5 gives the impossible equation $0=f_5$ when $f_5\ne0$. When $f_5=0$, its displacement is arbitrary.
+:::
+
+**Can a network be singular without a zero row or column?** Yes. Imagine two atoms that remain bonded to each other but lose every connection to the rest of the network and the wall. Their part of the stiffness matrix is
+
+$$
+\mathbf{K}_{\mathrm{pair}}=\begin{bmatrix}k&-k\\-k&k\end{bmatrix},
+\qquad
+\mathbf{K}_{\mathrm{pair}}\begin{bmatrix}1\\1\end{bmatrix}
+=\begin{bmatrix}0\\0\end{bmatrix}.
+$$
+
+Neither row nor column is zero, yet translating both atoms equally produces no restoring force. This unconstrained motion makes the whole network singular. In this scalar spring model with positive stiffnesses, every connected group of moving atoms needs a path to a fixed support.
+
+### Why a small determinant needs care
+
+NumPy provides `np.linalg.det` for calculating a determinant. For these small, exact examples, a zero determinant identifies the missing constraint. In floating-point calculations, however, the magnitude of a determinant depends strongly on matrix size and overall scaling.
+
+For an $N\times N$ matrix $\mathbf{M}$, multiplying every entry by 10 gives
+
+$$
+\det(10\mathbf{M})=10^N\det(\mathbf{M}).
+$$
+
+Each of the $N$ rows contributes a factor of 10. For example, if $N=16$ and $\det(\mathbf{M})=10^{-16}$, then $\det(10\mathbf{M})=1$. This rescaling leaves all dependencies between rows unchanged. Moreover, multiplying both sides of $\mathbf{M}\mathbf{x}=\mathbf{b}$ by 10 gives exactly the same equations and solution. An exactly zero determinant stays zero, but a small nonzero determinant can become large through scaling alone. Its magnitude therefore cannot, by itself, tell us how sensitive the solution is.
+
+## Scenario 2: Ill-conditioning problems
+
+Instead of removing the anchor spring between atom 1 and the fixed atom 0 entirely, let it become very weak, as in @fig-spring-scenarios (c):
 
 $$
 k_{01}=0.001,\qquad k_{12}=5,
@@ -121,36 +190,36 @@ k_{01}=0.001,\qquad k_{12}=5,
 \mathbf{K}=\begin{bmatrix}5.001&-5\\-5&5\end{bmatrix}.
 $$
 
-This matrix is nonsingular. Under an end force $\mathbf{f}=(0,1)^{\mathsf T}$, both springs carry a force of 1 eV/Å. Their extensions are therefore
+This matrix is **nonsingular**. Under an end force $\mathbf{f}=(0,1)^{\mathsf T}$, both springs carry a force of 1. Their extensions are therefore
 
 $$
-u_1=\frac{1}{0.001}=1000\ \text{Å},
+u_1=\frac{1}{0.001}=1000,
 \qquad
-u_2-u_1=\frac{1}{5}=0.2\ \text{Å}.
+u_2-u_1=\frac{1}{5}=0.2.
 $$
 
-The solution is $\mathbf{u}=(1000,1000.2)^{\mathsf T}$ Å. Looking only at the stiffness of the bond between the moving atoms would have suggested a displacement scale of $0.2$ Å. The large shared translation comes from the weak connection to the support.
+The solution is $\mathbf{u}=(1000,1000.2)^{\mathsf T}$. Looking only at the stiffness of the bond between the moving atoms would have suggested a displacement scale of $0.2$. The large shared translation comes from the weak connection to the support.
 
 For comparison, setting both spring constants to 5 gives
 
 $$
 \mathbf{K}=\begin{bmatrix}10&-5\\-5&5\end{bmatrix},
 \qquad
-\mathbf{u}=\begin{bmatrix}0.2\\0.4\end{bmatrix}\ \text{Å}.
+\mathbf{u}=\begin{bmatrix}0.2\\0.4\end{bmatrix}.
 $$
 
-Doubling the end load doubles every displacement in either system, because the equations are linear, so a large displacement alone does not tell us how sensitive the system is. To measure sensitivity, we compare a **relative change in the inputs** with the resulting **relative change in the solution**.
+The weak anchor allows much larger displacements under the same end load. An even more striking effect appears when we slightly change the forces: a small relative change in the input can produce a large relative change in the solution.
 
 ### A small force change with a large relative effect
 
-Keep the weak anchor, but start with balanced forces $\mathbf{f}=(-1,1)^{\mathsf T}$. Adding the two force-balance equations gives $0.001u_1=0$, so the solution is $\mathbf{u}=(0,0.2)^{\mathsf T}$ Å. Now increase only the force on atom 2 by $0.001$ eV/Å:
+Keep the weak anchor, but start with balanced forces $\mathbf{f}=(-1,1)^{\mathsf T}$. Adding the two force-balance equations gives $0.001u_1=0$, so the solution is $\mathbf{u}=(0,0.2)^{\mathsf T}$. Now increase only the force on atom 2 by $0.001$:
 
 $$
 \mathbf{f}+\delta\mathbf{f}
 =\begin{bmatrix}-1\\1.001\end{bmatrix}.
 $$
 
-The net force is now $0.001$ eV/Å. The anchor must extend by 1 Å to balance it, while the second spring extends by $1.001/5=0.2002$ Å. The new displacements are $(1,1.2002)^{\mathsf T}$ Å. Using vector lengths to compare the changes,
+The net force is now $0.001$. The anchor must extend by 1 to balance it, while the second spring extends by $1.001/5=0.2002$. The new displacements are $(1,1.2002)^{\mathsf T}$. Using vector lengths to compare the changes,
 
 $$
 \frac{\|\delta\mathbf{f}\|_2}{\|\mathbf{f}\|_2}
@@ -160,7 +229,7 @@ $$
 =\frac{\sqrt{1^2+1.0002^2}}{0.2}\approx7.07.
 $$
 
-A force perturbation of about $0.071\%$ produces a displacement change of about $707\%$. The small net load excites the pair's weakly restrained translation. With the stronger anchor, the same perturbation changes the displacements from $(0,0.2)$ to $(0.0002,0.2004)$ Å, a relative change of about $0.224\%$.
+A force perturbation of about $0.071\%$ produces a displacement change of about $707\%$! The small net load excites the pair's weakly restrained translation. With the stronger anchor, the same perturbation changes the displacements from $(0,0.2)$ to $(0.0002,0.2004)$, a relative change of about $0.224\%$.
 
 - **Well-conditioned problem:** small relative changes in the supplied data cause comparably small relative changes in the solution. The equally stiff two-spring system is our example.
 - **Ill-conditioned problem:** some small relative changes in the supplied data can cause much larger relative changes in the solution. The weakly anchored pair has such a sensitive direction of motion.
@@ -170,7 +239,7 @@ Sensitivity also matters when the data are rounded. A solver receives finite-pre
 ::: {.callout-note}
 ## Round-off during a matrix solve
 
-Round-off occurs in arithmetic for well-conditioned and ill-conditioned systems alike. Conditioning describes the problem's sensitivity, while numerical stability describes how the algorithm handles rounding. In L13, we will see how elimination and pivot selection affect the calculation.
+Round-off occurs during a direct solve even for a well-conditioned system. Dividing by a very small intermediate coefficient can magnify errors already present in the numerator, which is one reason the choice of elimination steps matters. An ill-conditioned system introduces a further difficulty: even small relative errors in the supplied coefficients or forces can produce large relative errors in the solution. In L13, we will examine how pivot selection helps control rounding errors during elimination.
 :::
 
 ## Measuring sensitivity with the condition number
