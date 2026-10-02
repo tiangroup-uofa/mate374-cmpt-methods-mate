@@ -29,7 +29,7 @@ def _():
 
 @app.cell
 def _():
-    # residual and condition number
+    # residual, relative residual, and condition number
     return
 
 
