@@ -212,7 +212,7 @@ $$
 
 Each of the $N$ rows contributes a factor of 10. For example, if $N=16$ and $\det(\mathbf{M})=10^{-16}$, then $\det(10\mathbf{M})=1$. This rescaling leaves all dependencies between rows unchanged. Moreover, multiplying both sides of $\mathbf{M}\mathbf{x}=\mathbf{b}$ by 10 gives exactly the same equations and solution. An exactly zero determinant stays zero, but a small nonzero determinant can become large through scaling alone. Its magnitude therefore cannot, by itself, tell us how sensitive the solution is.
 
-## Scenario 2: Ill-conditioning problems
+## Scenario 2: Ill-conditioned problems -- very weak springs
 
 Instead of removing the anchor spring between atom 1 and the fixed atom 0 entirely, let it become very weak, as in @fig-spring-scenarios (c):
 
