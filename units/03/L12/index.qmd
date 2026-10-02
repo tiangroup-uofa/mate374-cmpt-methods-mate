@@ -21,45 +21,37 @@ By the end of this lecture, you should be able to:
 
 ## From force balance to a computed displacement
 
-As first introduced in L11, the focus of this unit is to use atomic models, especially beads-and-spring models, to convey the idea of system of equations and matrix operations. In particular,  we have converted a spring model of atomic interactions into a system of linear equations, to answer the question: how large will each atom displace $\mathbf{u}$, when an external force vector $\mathbf{f}$ is provided:
+As introduced in L11, this unit uses atomic models, especially bead-and-spring models, to develop systems of equations and matrix operations. We converted a spring model of atomic interactions into a system of linear equations that answers one question: when an external force vector $\mathbf{f}$ is applied, how far does each atom move? The displacements $\mathbf{u}$ satisfy
 
 $$
 \mathbf{K}\mathbf{u}=\mathbf{f},
 $$
 
-where the stiffness matrix $\mathbf{K}$ contains the spring constants, $\mathbf{u}$ contains the unknown displacements, and $\mathbf{f}$ contains the applied forces. If $\mathbf{K}$ has an inverse $K^{-1}$, such that K^-1 K = I, the identity matrix, we can write
+where the stiffness matrix $\mathbf{K}$ contains the spring constants, $\mathbf{u}$ contains the unknown displacements, and $\mathbf{f}$ contains the applied forces. If $\mathbf{K}$ has an inverse $\mathbf{K}^{-1}$, defined by $\mathbf{K}^{-1}\mathbf{K}=\mathbf{I}$ with $\mathbf{I}$ the identity matrix, we can write
 
 $$
 \mathbf{u}=\mathbf{K}^{-1}\mathbf{f}.
 $$
 
-In numpy this is easy to write, just `np.linalg.inv(K) @ f` (and manually or programmably input the K and f as `np.array`). So one might think solving the matrix equation is just that simple. (but if so we may not need to have the another few lectures after all). What might be the pitfalls?
+In NumPy this is a single line, `np.linalg.inv(K) @ f`, once `K` and `f` are entered as arrays by hand or built by a program. Solving a matrix equation might therefore seem simple, and if it were, the next few lectures would not be needed. What are the pitfalls?
 
 ::: {.callout-note}
 ## If you come from MATLAB
 
-You might be familiar with MATLAB's `x = A \ b` syntax if ever worked on that programming language. One might also attempt to think this means to take the inverse $A^-1$, but infact the solution is more complex than that, this lecture follows the same reason.
+If you have worked in MATLAB, you may know the syntax `x = A \ b`. It is tempting to read it as "form the inverse $\mathbf{A}^{-1}$ and multiply by $\mathbf{b}$", but MATLAB solves the system directly without forming the inverse. For a square, nonsingular matrix it corresponds to `np.linalg.solve(A, b)`, and for a rectangular least-squares system to `np.linalg.lstsq(A, b)`. This lecture explains why practical solvers avoid the explicit inverse.
 :::
 
+We will use the bead-and-spring chain to explore three changes, each raising a different question. In all three, we leave aside how NumPy's algorithm solves the equations, which is the topic of L13, and focus on what the matrix tells us.
 
-<the section below is nice, but I wonder if having a side-to-side table / quarto columns helps even better for visual>
-There are a few systems we might use the linear bead-and-spring system to explore and to explain potential pitfalls
+| Scenario | Change to the chain | Question we ask | Diagnostic |
+|---|---|---|---|
+| 1 | One spring disappears | Does a unique solution exist? | Determinant, singular matrix |
+| 2 | One spring becomes much weaker than the others | How sensitive is the solution to the matrix and forces? | Condition number |
+| 3 | The chain grows to millions of moving atoms | How much computation and storage does the solution require? | Operation count, banded storage |
 
-1) What if one spring disappears?
-2) What if one or few spring becomes extremely weak compared to others?
-3) What if we need to solve millions of spring systems all together?
+![The three spring-chain scenarios in this lecture. Atom 0 is fixed in each chain.](../../../assets/L12-three-scenarios.png){#fig-three-scenarios width=100% fig-alt="Three bead-and-spring chains. In the first, the spring between fixed atom 0 and atom 1 is removed. In the second, that spring is much weaker than the spring between atoms 1 and 2. In the third, a long chain has N of about one million moving atoms."}
 
-In all of these examples, let's **omit the details** how the python / numpy's algorithm solves the linear equation (or obtain the inverse), but rather ask us the following questions
-
-
-
-1) does a unique solution exist?
-2) how sensitive is our solution to the matrix? 
-3) how much computation does solving a big system require?
-
-The 3 systems can be seen below fig
-
-<need to add>
+Throughout the lecture, atom 0 is fixed and positive displacement points along the chain away from that fixed end. We use spring stiffnesses in eV/Å², forces in eV/Å, and displacements in Å, as in L11.
 
 ## Scenario 1: Singular matrices -- when the constraints are insufficient
 
@@ -74,9 +66,15 @@ $$
 
 The denominator $ad-bc$ is the **determinant**, written $\det(\mathbf{A})$. If it equals zero, the inverse does not exist and the square matrix is **singular**. The equations then have either infinitely many solutions or no solution, depending on their right-hand side.
 
-<call-out note: determinant det can be seen as one function thatconverts a matrix of any dimension nxn into a scalar. For a 2x2 matrix, its determinant has a geometric meaning of area after stretched, and 3x3 matrix is the volume ration stretched, so on. <cite the nice 3b1b video exploration, and one existing scientific paper>>
+::: {.callout-note}
+## Geometric meaning of the determinant
 
-Consider a system with 3 atoms (2 moving), when would det(K) = 0? Removing the spring to the fixed atom leaves only the bond between atoms 1 and 2, So that the 2 moving atoms may look like floaing.  With $k_{12}=5$, the stiffness matrix becomes
+The determinant is a function that turns an $n\times n$ matrix into a single number. For a $2\times2$ matrix, picture the matrix as a transformation that maps the unit square, spanned by $(1,0)$ and $(0,1)$, to the parallelogram spanned by its columns $(a,c)$ and $(b,d)$. The area of that parallelogram is $|ad-bc|$, so the determinant is the factor by which the transformation stretches areas, and its sign records whether the orientation is flipped. For a $3\times3$ matrix, the determinant is the ratio by which volumes are stretched, and the same idea continues in higher dimensions.
+
+A zero determinant means the transformation squashes space into a lower dimension, such as a plane onto a line. Different vectors then land on the same point, so the transformation cannot be undone and no inverse exists. 3Blue1Brown's video [The determinant](https://www.youtube.com/watch?v=Ip3X9LOh2dk) animates this picture, and [Hannah (1996), "A geometric approach to determinants"](https://doi.org/10.1080/00029890.1996.12004759), *The American Mathematical Monthly* 103, 401–409, develops determinants from this geometric definition.
+:::
+
+Consider the three-atom chain from L11, with atom 0 fixed and atoms 1 and 2 free to move. When would $\det(\mathbf{K})=0$? Remove the spring between atoms 0 and 1, as in Scenario 1 of @fig-three-scenarios. Only the bond between atoms 1 and 2 remains, so the two moving atoms float with no connection to the support. With $k_{12}=5$, the stiffness matrix becomes
 
 $$
 \mathbf{K}=\begin{bmatrix}5&-5\\-5&5\end{bmatrix},
@@ -109,7 +107,7 @@ This physical interpretation is especially useful when assembling larger systems
 
 NumPy provides `np.linalg.det` for calculating a determinant. For this small, exact example it exposes the problem immediately. For floating-point calculations, determinant size needs more care: it changes with matrix size and overall scaling, and a small value alone does not measure sensitivity.
 
-## Ill-conditioning: a weak anchor
+## Scenario 2: Ill-conditioning -- a weak anchor
 
 Instead of removing the anchor spring entirely, let it become very weak:
 
@@ -287,7 +285,7 @@ The results are $\kappa_2(\mathbf{A})\approx4002$ and $\kappa_2(\mathbf{B})\appr
 For the identity matrix, $\kappa_2(\mathbf{I})=1$. Scaling it gives another useful comparison: $\det(10^{-8}\mathbf{I})=10^{-16}$ for a $2\times2$ matrix, yet $\kappa_2(10^{-8}\mathbf{I})=1$. This is why a tiny determinant alone is not a reliable sensitivity test.
 :::
 
-## Computational effort: solving without forming an inverse
+## Scenario 3: Computational effort -- solving without forming an inverse
 
 A nonsingular system can still be expensive to solve. The mathematical expression for the inverse of a general matrix is
 
@@ -316,8 +314,6 @@ Press **Run dense benchmark** in the next notebook to time inversion and `solve`
 ::: {.quarto-wasm-local notebook="l12_dense_solve.edit.py" view="edit" title="Dense spring-chain timing: inverse versus solve" height="850" loading="lazy" fullscreen="true"}
 For $N$ moving atoms with identical nearest-neighbor springs, one fixed end, and end force $F$, the reference displacements are $u_i=iF/k$. The benchmark measures 512, 1,024, and 2,048 unknowns and checks both the relative residual and the error against this reference. A degree-one fit to log(time) versus log(size) gives $t\approx cN^p$, which is extrapolated to $N=10^6$. Under cubic scaling, this is about $(10^6/2048)^3\approx1.16\times10^8$ times the cost at 2,048 unknowns. Inversion and a direct dense solve both have cubic leading-order cost, with inversion doing additional work to produce the entire inverse.
 :::
-
-
 
 ## From dense matrices to banded and sparse systems
 
