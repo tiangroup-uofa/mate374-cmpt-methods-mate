@@ -49,7 +49,7 @@ We will use the bead-and-spring chain to explore three changes, each raising a d
 | 2 | One spring becomes much weaker than the others | How sensitive is the solution to the matrix and forces? | Condition number |
 | 3 | The chain grows to millions of moving atoms | How much computation and storage does the solution require? | Operation count, banded storage |
 
-![The three spring-chain scenarios in this lecture. Atom 0 is fixed in each chain.](../../../assets/L12-three-scenarios.png){#fig-three-scenarios width=100% fig-alt="Three bead-and-spring chains. In the first, the spring between fixed atom 0 and atom 1 is removed. In the second, that spring is much weaker than the spring between atoms 1 and 2. In the third, a long chain has N of about one million moving atoms."}
+![Three-atom spring chains with atom 0 fixed and an external force on atom 2: (a) a normal system, (b) a singular system with the anchor spring removed (Scenario 1), and (c) an ill-conditioned system with a soft anchor spring (Scenario 2).](../../../assets/L12-spring-scenarios.png){#fig-spring-scenarios width=100% fig-alt="Three panels of atoms 0, 1, and 2 joined by springs, with fixed atom 0 and an external force pulling atom 2. Panel a has springs k01 and k12. In panel b, spring k01 is removed. In panel c, spring k01 is much softer than k12."}
 
 Throughout the lecture, atom 0 is fixed and positive displacement points along the chain away from that fixed end. We use spring stiffnesses in eV/Å², forces in eV/Å, and displacements in Å, as in L11.
 
@@ -74,7 +74,7 @@ The determinant is a function that turns an $n\times n$ matrix into a single num
 A zero determinant means the transformation squashes space into a lower dimension, such as a plane onto a line. Different vectors then land on the same point, so the transformation cannot be undone and no inverse exists. 3Blue1Brown's video [The determinant](https://www.youtube.com/watch?v=Ip3X9LOh2dk) animates this picture, and [Hannah (1996), "A geometric approach to determinants"](https://doi.org/10.1080/00029890.1996.12004759), *The American Mathematical Monthly* 103, 401–409, develops determinants from this geometric definition.
 :::
 
-Consider the three-atom chain from L11, with atom 0 fixed and atoms 1 and 2 free to move. When would $\det(\mathbf{K})=0$? Remove the spring between atoms 0 and 1, as in Scenario 1 of @fig-three-scenarios. Only the bond between atoms 1 and 2 remains, so the two moving atoms float with no connection to the support. With $k_{12}=5$, the stiffness matrix becomes
+Consider the three-atom chain from L11, with atom 0 fixed and atoms 1 and 2 free to move. When would $\det(\mathbf{K})=0$? Remove the spring between atoms 0 and 1, as in @fig-spring-scenarios (b). Only the bond between atoms 1 and 2 remains, so the two moving atoms float with no connection to the support. With $k_{12}=5$, the stiffness matrix becomes
 
 $$
 \mathbf{K}=\begin{bmatrix}5&-5\\-5&5\end{bmatrix},
@@ -109,7 +109,7 @@ NumPy provides `np.linalg.det` for calculating a determinant. For this small, ex
 
 ## Scenario 2: Ill-conditioning -- a weak anchor
 
-Instead of removing the anchor spring entirely, let it become very weak:
+Instead of removing the anchor spring entirely, let it become very weak, as in @fig-spring-scenarios (c):
 
 $$
 k_{01}=0.001,\qquad k_{12}=5,
