@@ -84,6 +84,8 @@ $$
 $$
 
 Which one is correct depends on the equations you intended to write. Writing out the first row by hand usually settles it.
+
+Completed notebook: [matrix–vector products and the shape rule](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/s05_matrix_vector_completed.html)
 :::
 
 ## Solving $\mathbf{A}\mathbf{x}=\mathbf{b}$ with `inv` and `solve`
@@ -125,6 +127,8 @@ Both methods return $\mathbf{x}=(1,\,2,\,3)$. Substituting by hand, the first ro
 The condition number is $\kappa_2(\mathbf{A})\approx5.60$ and $\det(\mathbf{A})=589$. A condition number this close to 1 means that small changes in $\mathbf{A}$ or $\mathbf{b}$ cause comparably small changes in $\mathbf{x}$.
 
 Look also at the rows of $\mathbf{A}$. In each row, the diagonal entry is larger than the sum of the magnitudes of the other two: $6>2+3$, $11>4+6$, and $16>7+8$. A matrix with this property is called **diagonally dominant**. It is guaranteed to be nonsingular, and this one is also well conditioned.
+
+Completed notebook: [Example 1, the well-conditioned 3 × 3 system](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/s05_solve_3x3_completed.html)
 :::
 
 ## Example 2. A $5\times5$ system with a hidden dependency
@@ -166,6 +170,8 @@ The right-hand side is $\mathbf{b}=(-2,\,6,\,4,\,2,\,6)$. You may get different 
 | `inv(M) @ b` | $(-2,\,0,\,2,\,0,\,4)$ | $(-2,\,6,\,4,\,-8,\,-4)$ |
 
 The vector from `inv` fails the equations badly. The vector from `solve` has a tiny residual, yet it differs from $\mathbf{x}_{\text{true}}$, which satisfies the equations exactly. Now we have to be careful: if two different vectors both satisfy the five equations, does this system have a unique solution, or infinitely many? A square system with two different solutions cannot have a unique solution, so $\mathbf{M}$ must be **singular**.
+
+Completed notebook: [Example 2, including the determinant, condition number, rank, and `float32` comparison](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/s05_singular_system_completed.html)
 :::
 
 ### Diagnosing the singular matrix
