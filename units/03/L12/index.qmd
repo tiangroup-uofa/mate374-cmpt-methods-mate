@@ -305,14 +305,20 @@ $$
 \|\mathbf{x}\|_2=\sqrt{x_1^2+x_2^2+\cdots+x_n^2}.
 $$
 
-A matrix also has a size. There are many different ways to define one, and we write $\|\mathbf{A}\|$ for whichever we choose.
+A matrix also has a size. The simplest measure treats all its entries as one long vector and takes the Euclidean length of that vector:
+
+$$
+\|\mathbf{A}\|_F=\sqrt{\sum_{i}\sum_{j}a_{ij}^2}.
+$$
+
+For a $2\times2$ matrix, this is $\sqrt{a_{11}^2+a_{12}^2+a_{21}^2+a_{22}^2}$. It is called the **Frobenius norm**, and `np.linalg.norm(A)` computes it. There are many other ways to measure the size of a matrix, so below we write $\|\mathbf{A}\|$ for whichever norm we choose.
 
 ::: {.callout-note collapse="true"}
 ## Different ways to measure the size of a vector or a matrix
 
 For a vector, the 2-norm adds the squares of the entries. Two other common choices add the absolute values, $\|\mathbf{x}\|_1=|x_1|+|x_2|+\cdots+|x_n|$, or keep only the largest absolute value, $\|\mathbf{x}\|_\infty=\max_i|x_i|$.
 
-For a matrix, one simple choice treats all entries as one long vector and takes its Euclidean length. This is the **Frobenius norm**. Another choice, the **matrix 2-norm**, is the largest factor by which the matrix can stretch the length of any vector. The norms give different numbers, but a matrix that is large in one norm is also large in the others.
+For a matrix, besides the Frobenius norm, a common choice is the **matrix 2-norm**, the largest factor by which the matrix can stretch the length of any vector. The norms give different numbers, but a matrix that is large in one norm is also large in the others.
 :::
 
 The **condition number** of a square matrix compares the size of the matrix with the size of its inverse:
