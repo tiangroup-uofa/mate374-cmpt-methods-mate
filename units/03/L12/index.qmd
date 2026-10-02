@@ -17,7 +17,7 @@ By the end of this lecture, you should be able to:
 1. **Diagnose** singularity and sensitivity in a spring system using its constraints and condition number.
 2. **Calculate** equilibrium displacements with NumPy or SciPy and assess them by substitution and comparison with a known solution.
 3. **Compare** the work and storage required by dense and banded representations of a spring chain.
-4. **Derive** the displacement pattern of an end-loaded spring chain from force balance and use it to check a numerical solution.
+4. **Explain** the linear displacement pattern of an end-loaded spring chain from force balance and use it to check a numerical solution.
 
 ## From force balance to a computed displacement
 
@@ -420,43 +420,42 @@ For the identity matrix, $\kappa_2(\mathbf{I})=1$. Scaling it gives another usef
 
 ## Scenario 3: Computational effort -- solving without forming an inverse
 
-A nonsingular system can still be expensive to solve. The mathematical expression for the inverse of a general matrix is
+A nonsingular, well-conditioned system can still be expensive to solve when it is large. The textbook formula for the inverse is
 
 $$
-\mathbf{A}^{-1}=\frac{\operatorname{adj}(\mathbf{A})}{\det(\mathbf{A})},
+\mathbf{A}^{-1}=\frac{\operatorname{adj}(\mathbf{A})}{\det(\mathbf{A})}.
 $$
 
-where the adjugate is the transpose of the cofactor matrix. Each cofactor contains a determinant of a smaller matrix. Recursive expansion by minors quickly becomes impractical, with factorial growth in work for a naive implementation. Numerical libraries instead use matrix factorizations. In particular, `np.linalg.inv` does not recursively construct cofactors.
+How much work would this take? Expanding a determinant along its first row turns one $n\times n$ determinant into $n$ determinants of size $n-1$. Each of those becomes $n-1$ determinants of size $n-2$, and so on, so a naive calculation needs about $n!$ multiplications:
 
-Even with an efficient library, explicitly forming an inverse computes $N^2$ output entries when our immediate goal may be just $N$ displacements. For a square, nonsingular system, NumPy provides `np.linalg.solve(K, f)`. SciPy also provides `scipy.linalg.solve(K, f)`, with additional options for matrix structure. Both return the unknown vector directly.
+| $n$ | Multiplications, about $n!$ |
+|---|---|
+| 10 | $3.6\times10^{6}$ |
+| 20 | $2.4\times10^{18}$ |
+| 100 | $9.3\times10^{157}$ |
 
-For a general dense matrix, factorization has leading-order work proportional to $N^3$. After that factorization, solving for one right-hand side requires work proportional to $N^2$. Computing the entire inverse requires additional work and storage. Dense inversion and a dense solve therefore both have cubic leading-order cost, but a direct solve avoids constructing an unnecessary matrix and is generally the preferred numerical route.
+Even a computer performing $10^{18}$ operations per second would need about $10^{140}$ seconds for $n=100$, while the age of the universe is about $4\times10^{17}$ seconds. Numerical libraries use much faster methods, which we open up in L13.
 
-The difference matters even when both answers look identical. Multiplying a computed inverse by the right-hand side adds another rounded operation, and an explicit inverse offers no remedy for ill-conditioning. A direct solver is also affected by conditioning, so we still need to interpret the result and check the residual,
+::: {.callout-important}
+## Use `np.linalg.solve` instead of forming the inverse
 
-$$
-\mathbf{r}=\mathbf{K}\mathbf{u}_{\mathrm{computed}}-\mathbf{f}.
-$$
-
-A small residual shows that the computed vector nearly satisfies the supplied equations. If the system is ill-conditioned, it can coexist with appreciable displacement error. For our simple chain, we can additionally compare with the exact displacement pattern derived near the end of this lecture.
+To find $\mathbf{u}$ from $\mathbf{K}\mathbf{u}=\mathbf{f}$, call `np.linalg.solve(K, f)`. It computes the displacements directly, with less work than `np.linalg.inv(K) @ f`. Use `np.linalg.inv` only when you need the inverse matrix itself.
+:::
 
 ### Timing the dense calculation
 
-Press **Run dense benchmark** in the next notebook to time inversion and `solve` for 512, 1,024, and 2,048 moving atoms. Both times grow roughly as $N^3$, and `solve` is faster because it computes one displacement vector instead of every column of the inverse. Extrapolated to a million atoms, the dense calculation would take years and the matrix alone would need 8 TB. The banded storage in the next section changes the scaling itself.
+In L11, we said that a realistic model may contain millions of atoms. How long would `solve` take for $N=10^6$? We cannot run it, but we can time smaller chains and extrapolate, using the curve fitting from L09. Press **Run dense benchmark** to time 512, 1,024, and 2,048 moving atoms. The notebook fits $t=cN^p$ to the measured times, a straight line on a log-log plot, and reports the fitted exponent $p$ and the extrapolated time.
 
 ::: {.quarto-wasm-local notebook="l12_dense_solve.edit.py" view="edit" title="Dense spring-chain timing: inverse versus solve" height="850" loading="lazy" fullscreen="true"}
-For $N$ moving atoms with identical nearest-neighbor springs, one fixed end, and end force $F$, the reference displacements are $u_i=iF/k$. The benchmark measures 512, 1,024, and 2,048 unknowns and checks both the relative residual and the error against this reference. A degree-one fit to log(time) versus log(size) gives $t\approx cN^p$, which is extrapolated to $N=10^6$. Under cubic scaling, this is about $(10^6/2048)^3\approx1.16\times10^8$ times the cost at 2,048 unknowns. Inversion and a direct dense solve both have cubic leading-order cost, with inversion doing additional work to produce the entire inverse.
+The notebook times `np.linalg.inv(K) @ f` and `np.linalg.solve(K, f)` for 512, 1,024, and 2,048 moving atoms, fits $\log t$ against $\log N$ with a straight line, and extrapolates the fitted power law $t\approx cN^p$ to $N=10^6$.
 :::
+
+- **Time:** on a 4-core test machine, the fitted exponents were about 2.4 for `inv` and 2.5 for `solve`, and the fit predicted about 5 days for one `solve` at $N=10^6$. For large matrices, the work of a dense solve grows as $N^3$. Scaling the 2,048-atom time by $(10^6/2048)^3$ gives about 4 months. Your browser will be slower.
+- **Memory:** the dense matrix alone holds $N^2=10^{12}$ numbers. At 8 bytes each, that is $8\times10^{12}$ bytes, or 8 TB, far beyond the memory of any laptop.
 
 ## From dense matrices to banded and sparse systems
 
-Dense solving improves on forming an inverse, but it still stores every matrix entry. With $N=10^6$ unknowns and 8 bytes per double-precision entry, the matrix alone occupies
-
-$$
-8N^2=8\times10^{12}\ \text{bytes}=8\ \text{TB}.
-$$
-
-Factorization can require additional storage. Before attempting such a solve, look at the physical connections represented by the matrix. Our chain couples each moving atom only to its nearest neighbors, so its stiffness matrix is
+A dense solve at $N=10^6$ is therefore out of reach. Our chain, however, couples each moving atom only to its nearest neighbours, so most entries of its stiffness matrix are zero:
 
 $$
 \mathbf{K}=k\begin{bmatrix}
@@ -472,66 +471,45 @@ The last diagonal entry is $k$, because the end atom connects to only one spring
 
 ![The stiffness matrix of a spring chain with atom 0 fixed. (a) For five moving atoms, column $j$ of $\mathbf{K}$ belongs to atom $j$. Each atom couples only to itself and its two neighbours, so the nonzero entries lie on the main diagonal and the diagonals directly above and below it. (b) For $N$ moving atoms, the same three diagonals hold about $3N$ nonzero entries out of $N^2$.](../../../assets/L12-tridiagonal.png){#fig-tridiagonal width=100% fig-alt="Left, a chain of a fixed atom 0 and moving atoms 1 to 5, each above a column of a 5 by 5 stiffness matrix. The main diagonal holds 2k, ending in k, coloured blue. The upper diagonal holds minus k in green and the lower diagonal holds minus k in red. All other entries are 0. Right, a chain of N atoms above an N by N matrix in which only the three coloured diagonals are filled and the rest is zero."}
 
-Storing three diagonals requires about $3N$ numbers rather than $N^2$. For a million unknowns, that is about 24 MB of double-precision coefficients. Specialized tridiagonal solvers also use work proportional to $N$, so representing the structure changes both the memory requirement and the solve time.
+Storing only the three diagonals requires about $3N$ numbers rather than $N^2$. For a million unknowns, that is about 24 MB instead of 8 TB. A tridiagonal solver also needs work proportional to $N$ instead of $N^3$.
 
-SciPy's `solve_banded` accepts this compact representation. For three moving atoms, the full stiffness matrix and its stored band array are
-
-$$
-\mathbf{K}=\begin{bmatrix}2k&-k&0\\-k&2k&-k\\0&-k&k\end{bmatrix},
-\qquad
-\texttt{ab}=\begin{bmatrix}0&-k&-k\\2k&2k&k\\-k&-k&0\end{bmatrix}.
-$$
-
-The middle row of `ab` holds the main diagonal. The top row holds the upper diagonal, shifted one column to the right, and the bottom row holds the lower diagonal. The two corner zeros are unused padding. The call `solve_banded((1, 1), ab, f)` specifies one lower and one upper diagonal. This layout is documented in [SciPy's banded solver reference](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_banded.html).
+NumPy's `np.linalg` has no banded solver, but SciPy, which builds on NumPy, provides `scipy.linalg.solve_banded`. It takes the three diagonals of $\mathbf{K}$ stored as the rows of a $3\times N$ array, which the notebook below calls `K_band`. The [SciPy reference](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_banded.html) describes the layout.
 
 A **sparse matrix** more generally has relatively few nonzero entries, which need not form a narrow band. Local interactions in a larger network often give sparse matrices even when the geometry is more complicated than a chain. SciPy's sparse arrays and `scipy.sparse.linalg` provide methods for these systems, with a cost that depends on the connection pattern.
 
 ### A large chain with compact storage
 
-The notebook starts with 10,000 moving atoms. Increase `N` to a million to measure the banded calculation on your device without creating a dense matrix. Compare the measured time and the reported storage with the dense estimate. The residual is also computed from the three diagonals, so checking the solution does not silently recreate the large dense array.
+The notebook starts with 10,000 moving atoms, all joined by springs with $k=5$. Increase `N` to a million to measure the banded calculation on your device without creating a dense matrix, and compare the time and storage with the dense estimate.
 
 ::: {.quarto-wasm-local notebook="l12_banded_solve.edit.py" view="edit" title="Banded storage and solution of a large spring chain" height="850" loading="lazy" fullscreen="true"}
-At $N=10^6$, a dense float64 stiffness matrix needs 8 TB, while a three-row band array needs 24 MB, excluding right-hand sides and solver workspace. With $k=5$ and $F=10^{-7}$, the analytical end displacement is $u_N=NF/k=0.02$. Actual timings depend on the device. Comparing both the residual and the analytical error helps expose rounding effects as the chain grows.
+At $N=10^6$, a dense float64 stiffness matrix needs 8 TB, while the three stored diagonals need 24 MB. With $k=5$ and an end force $F=10^{-7}$, the displacements increase linearly along the chain, and the end displacement is $u_N=NF/k=0.02$. Actual timings depend on the device.
 :::
 
-## A check from force balance: the end-loaded chain
+Look at the plot of the displacements. With equal springs, they increase linearly from the fixed end to the loaded end.
 
-How can we check the numbers that `solve` and `solve_banded` return? For the uniform chain, force balance gives the answer directly. Atom 0 is fixed, $N$ atoms can move, every spring has stiffness $k$, and an external force $F_{\mathrm{ext}}$ acts on the last atom. Each unloaded interior atom requires the spring force on its left to equal the spring force on its right. The last spring carries $F_{\mathrm{ext}}$, so every spring in this chain carries that same force. With equal stiffnesses, each extension is therefore
+::: {.callout-note collapse="true"}
+## The physics behind the linear displacements
 
-$$
-u_1-u_0=u_2-u_1=u_3-u_2=\cdots=u_N-u_{N-1}
-=\frac{F_{\mathrm{ext}}}{k}.
-$$
-
-Starting from the fixed end $u_0=0$, the extensions accumulate:
+Each interior atom carries no external force, so the spring on its left and the spring on its right must pull on it equally. The last spring carries the end force $F$, so every spring in the chain carries $F$, and each one stretches by $F/k$. Starting from the fixed end, $u_0=0$, the stretches add up:
 
 $$
-\boxed{u_i=i\frac{F_{\mathrm{ext}}}{k},\qquad i=1,2,\ldots,N.}
+u_i=i\,\frac{F}{k},\qquad i=1,2,\ldots,N.
 $$
 
-Here $N$ counts the moving atoms, and $i$ labels an atom's position along the chain. If the spring stiffnesses differ, each spring still carries the same end load, but its extension is $F_{\mathrm{ext}}/k_{j-1,j}$. For example,
-
-$$
-u_3=\frac{F_{\mathrm{ext}}}{k_{01}}
-+\frac{F_{\mathrm{ext}}}{k_{12}}
-+\frac{F_{\mathrm{ext}}}{k_{23}},
-\qquad
-u_i=\sum_{j=1}^{i}\frac{F_{\mathrm{ext}}}{k_{j-1,j}}.
-$$
-
-For the L11 values $k=5$ and $F_{\mathrm{ext}}=10$ with three moving atoms, $\mathbf{u}=(2,4,6)^{\mathsf T}$. Additional connections or forces change the equations, and then we need a general method. L13 shows the one inside `np.linalg.solve`: Gaussian elimination.
+If the springs differ, each still carries $F$, but spring $j$ stretches by $F/k_{j-1,j}$, so $u_i=\sum_{j=1}^{i}F/k_{j-1,j}$. For the L11 values $k=5$ and $F=10$ with three moving atoms, $\mathbf{u}=(2,4,6)^{\mathsf T}$.
+:::
 
 ## Take-home message
 
-- For a square, nonsingular system, use `np.linalg.solve` to compute the unknown vector directly instead of forming an inverse.
-- Missing constraints can make a stiffness matrix singular. A very weak constraint can produce strong sensitivity, which the condition number helps quantify.
-- Check the residual and interpret the displacements physically. For an ill-conditioned system, a small residual alone does not guarantee a small solution error.
-- Use matrix structure when it is available. A nearest-neighbor chain can be stored and solved as a tridiagonal system with linear memory and work.
+- A missing spring or support makes the stiffness matrix **singular**: $\det(\mathbf{K})=0$, the rank is below $N$, and the equations have no unique solution.
+- A very weak spring makes the matrix **ill-conditioned**: the condition number is large, and small changes in the forces can produce large changes in the displacements. In `float64`, condition numbers up to about $10^2$ to $10^3$ are still tolerable.
+- To solve $\mathbf{K}\mathbf{u}=\mathbf{f}$, just use `np.linalg.solve`.
+- When a dense `solve` becomes too slow or too large, look for other methods that use the shape of the matrix, such as banded or sparse solvers.
 
 ## Check your understanding
 
 1. Remove the spring to atom 0 from the two-moving-atom system. Why do balanced forces permit infinitely many displacements, while a nonzero net force permits no static equilibrium?
-2. Why does doubling the end force fail to distinguish the well-conditioned and ill-conditioned examples? What did the small perturbation of the balanced force pair reveal instead?
+2. In the weak-spring chain, why did adding only 0.001 to the force on atom 2 move both atoms by about 1? How does the condition number predict this?
 3. If $\kappa_2(\mathbf{A})=10^4$ and the relative change in $\mathbf{b}$ is $10^{-6}$, what upper bound follows for the relative solution change when $\mathbf{A}$ is fixed?
 4. For a chain of three moving atoms with stiffnesses $k_{01}=5$, $k_{12}=10$, and $k_{23}=5$ and an end force of 1, predict the displacements from force balance, then check them with `np.linalg.solve`.
 
