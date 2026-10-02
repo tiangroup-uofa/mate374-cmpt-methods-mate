@@ -299,38 +299,59 @@ The entries of the weak-spring inverse are about 1000, while the entries of the 
 
 ## Measuring sensitivity with the condition number
 
-We need a numerical measure that lets us compare the two stiffness matrices. First, we need a way to measure the size of a vector or matrix. For a real vector, the **Euclidean norm**, or **2-norm**, is its length:
+Printing the inverses showed that the inverse of the weak-spring matrix has much larger entries than the inverse of the equal-spring matrix. To say how much larger, we need a common measure of the size, or magnitude, of a vector or a matrix. Such a measure is called a **norm**. For a vector, the most familiar norm is its length, the **Euclidean norm** or **2-norm**:
 
 $$
-\|\mathbf{x}\|_2=\sqrt{x_1^2+x_2^2+\cdots+x_n^2}
-=\sqrt{\sum_{i=1}^{n}x_i^2}.
+\|\mathbf{x}\|_2=\sqrt{x_1^2+x_2^2+\cdots+x_n^2}.
 $$
 
-The corresponding **matrix 2-norm** measures the largest factor by which the matrix can stretch a vector:
+A matrix also has a size. There are many different ways to define one, and we write $\|\mathbf{A}\|$ for whichever we choose.
+
+::: {.callout-note collapse="true"}
+## Different ways to measure the size of a vector or a matrix
+
+For a vector, the 2-norm adds the squares of the entries. Two other common choices add the absolute values, $\|\mathbf{x}\|_1=|x_1|+|x_2|+\cdots+|x_n|$, or keep only the largest absolute value, $\|\mathbf{x}\|_\infty=\max_i|x_i|$.
+
+For a matrix, one simple choice treats all entries as one long vector and takes its Euclidean length. This is the **Frobenius norm**. Another choice, the **matrix 2-norm**, is the largest factor by which the matrix can stretch the length of any vector. The norms give different numbers, but a matrix that is large in one norm is also large in the others.
+:::
+
+The **condition number** of a square matrix compares the size of the matrix with the size of its inverse:
 
 $$
-\|\mathbf{A}\|_2
-=\max_{\mathbf{x}\ne\mathbf{0}}
-\frac{\|\mathbf{A}\mathbf{x}\|_2}{\|\mathbf{x}\|_2}.
+\boxed{\kappa(\mathbf{A})=\|\mathbf{A}\|\,\|\mathbf{A}^{-1}\|.}
 $$
 
-The condition number combines the norms of $\mathbf{A}$ and its inverse:
+For a single number $a$, the inverse $1/a$ has size exactly $1/|a|$, so the product is always 1. For a matrix, the condition number asks whether the size of the inverse is close to $1/\|\mathbf{A}\|$, or much larger:
+
+- **$\kappa$ close to 1:** the inverse has about the size $1/\|\mathbf{A}\|$, and small relative changes in the data cause comparably small relative changes in the solution. The problem is well-conditioned.
+- **$\kappa\gg1$:** the inverse is much larger than $1/\|\mathbf{A}\|$, and some small relative changes in the data are strongly amplified. The problem is ill-conditioned.
+
+A singular matrix has no inverse, and its condition number is infinite by convention. One common measure uses the 2-norm and is written $\kappa_2$. NumPy computes it with `np.linalg.cond(K)`.
+
+::: {.callout-note}
+## How large is too large?
+A `float64` number carries about 16 significant digits, and a condition number of $10^p$ can cost up to about $p$ of them. Values of $10^2$ to $10^3$ are therefore still tolerable for most calculations in double precision, while a condition number near $10^{16}$ leaves no reliable digits.
+:::
+
+The condition number limits how much a relative change in the forces can grow in the displacements. For $\mathbf{K}\mathbf{u}=\mathbf{f}$,
 
 $$
-\boxed{\kappa_2(\mathbf{A})=\|\mathbf{A}\|_2\|\mathbf{A}^{-1}\|_2,
-\qquad
-\frac{\|\delta\mathbf{x}\|_2}{\|\mathbf{x}\|_2}
+\frac{\|\delta\mathbf{u}\|}{\|\mathbf{u}\|}
 \le
-\kappa_2(\mathbf{A})\,
-\frac{\|\delta\mathbf{b}\|_2}{\|\mathbf{b}\|_2}.}
+\kappa(\mathbf{K})\,
+\frac{\|\delta\mathbf{f}\|}{\|\mathbf{f}\|}.
 $$
 
-It bounds how much a relative change in the right-hand side can be amplified in the solution. A value close to 1 indicates a well-conditioned matrix, and a value much larger than 1 indicates potentially strong amplification. A singular matrix has infinite condition number by convention.
+Check this with the force change from the previous section, a relative change of about $0.000707$. For the weak-spring chain, $\kappa_2\approx20002$, so the displacements can change by at most $20002\times0.000707\approx14.1$, or about $1414\%$. The change we found, $707\%$, lies within this limit. For the equal-spring chain, $\kappa_2\approx6.854$ gives a limit of about $0.0048$, or $0.48\%$, and we found $0.224\%$. Try it out yourself in the notebook below.
+
+::: {.quarto-wasm-local notebook="l12_condition_number.edit.py" view="edit" title="Condition numbers and the limit on the displacement change" height="480" loading="lazy" fullscreen="true"}
+`np.linalg.cond` gives $\kappa_2\approx20002$ for the weak-spring matrix and $\kappa_2\approx6.854$ for the equal-spring matrix. With a relative force change of about $0.000707$, the limits on the relative displacement change are about $14.1$ and $0.0048$.
+:::
 
 ::: {.callout-tip collapse="true"}
 ## Derivation: The condition-number bound
 
-The definition of the matrix 2-norm gives $\|\mathbf{A}\mathbf{x}\|_2\le\|\mathbf{A}\|_2\|\mathbf{x}\|_2$ for any vector. Suppose $\mathbf{A}$ is fixed and nonsingular, and only $\mathbf{b}$ changes:
+The matrix norms used for condition numbers, such as the matrix 2-norm, satisfy $\|\mathbf{A}\mathbf{x}\|\le\|\mathbf{A}\|\,\|\mathbf{x}\|$ for every vector $\mathbf{x}$. Suppose $\mathbf{A}$ is fixed and nonsingular, and only $\mathbf{b}$ changes:
 
 $$
 \mathbf{A}\mathbf{x}=\mathbf{b},
@@ -350,54 +371,32 @@ $$
 Taking norms gives
 
 $$
-\|\delta\mathbf{x}\|_2
-\le\|\mathbf{A}^{-1}\|_2\|\delta\mathbf{b}\|_2.
+\|\delta\mathbf{x}\|
+\le\|\mathbf{A}^{-1}\|\,\|\delta\mathbf{b}\|.
 $$
 
 To turn this absolute-change bound into a relative-change bound, also use
 
 $$
-\|\mathbf{b}\|_2=\|\mathbf{A}\mathbf{x}\|_2
-\le\|\mathbf{A}\|_2\|\mathbf{x}\|_2.
+\|\mathbf{b}\|=\|\mathbf{A}\mathbf{x}\|
+\le\|\mathbf{A}\|\,\|\mathbf{x}\|.
 $$
 
 For a nonzero right-hand side, dividing and combining these inequalities gives
 
 $$
-\frac{\|\delta\mathbf{x}\|_2}{\|\mathbf{x}\|_2}
+\frac{\|\delta\mathbf{x}\|}{\|\mathbf{x}\|}
 \le
-\underbrace{\|\mathbf{A}\|_2\|\mathbf{A}^{-1}\|_2}_{\kappa_2(\mathbf{A})}
-\frac{\|\delta\mathbf{b}\|_2}{\|\mathbf{b}\|_2}.
+\underbrace{\|\mathbf{A}\|\,\|\mathbf{A}^{-1}\|}_{\kappa(\mathbf{A})}
+\frac{\|\delta\mathbf{b}\|}{\|\mathbf{b}\|}.
 $$
 
-The factor $\kappa_2(\mathbf{A})$ is the **2-norm condition number**. The bound is reached only for the most sensitive direction of $\delta\mathbf{b}$.
-:::
-
-NumPy's `np.linalg.cond(K)` computes the 2-norm condition number by default. It does not require us to form the inverse. For our examples,
-
-$$
-\kappa_2\!\left(\begin{bmatrix}10&-5\\-5&5\end{bmatrix}\right)
-\approx6.854,
-\qquad
-\kappa_2\!\left(\begin{bmatrix}5.001&-5\\-5&5\end{bmatrix}\right)
-\approx20002.
-$$
-
-The very weak spring has increased the potential sensitivity by several orders of magnitude. Our force-perturbation example produced an amplification of about $10001$, consistent with the bound of $20002$.
-
-With default arguments, `np.linalg.norm(A)` returns a different matrix norm (the Frobenius norm), so use `np.linalg.norm(A, ord=2)` for the matrix 2-norm.
-
-### NumPy experiment: weak-spring stiffness and force sensitivity
-
-Use the editable calculation below to compare the two spring systems. Predict the effect of changing $k_{01}$ before running it. Then set $k_{01}=0$ and compare the solver's response with the physical argument about free translation.
-
-::: {.quarto-wasm-local notebook="l12_conditioning.edit.py" view="edit" title="Spring stiffness, singularity, and relative sensitivity" height="850" loading="lazy" fullscreen="true"}
-For $k_{01}=0.001$, $k_{12}=5$, and an end load of 1, the displacements are $(1000,1000.2)$ and the condition number is approximately $20002$. Setting $k_{01}=5$ gives $(0.2,0.4)$ and a condition number of approximately $6.854$. With the weak spring and balanced initial forces $(-1,1)$, a perturbation $(0,0.001)$ changes the displacements from $(0,0.2)$ to $(1,1.2002)$.
+The bound is reached only for the most sensitive direction of $\delta\mathbf{b}$.
 :::
 
 ### In-class comparison
 
-Which of these matrices is more sensitive? First look at whether their rows nearly repeat the same equation, then calculate their condition numbers in the notebook.
+Which of these matrices is more sensitive? First look at whether their rows nearly repeat the same equation, then calculate their condition numbers in the empty cell of the notebook above.
 
 $$
 \mathbf{A}=\begin{bmatrix}1&1\\1&1.001\end{bmatrix},
