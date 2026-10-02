@@ -285,20 +285,16 @@ Sensitivity also matters when the data are rounded. A solver receives finite-pre
 Round-off occurs during a direct solve even for a well-conditioned system. Dividing by a very small intermediate coefficient can magnify errors already present in the numerator, which is one reason the choice of elimination steps matters. An ill-conditioned system introduces a further difficulty: even small relative errors in the supplied coefficients or forces can produce large relative errors in the solution. In L13, we will examine how pivot selection helps control rounding errors during elimination.
 :::
 
-**Your turn:** in the empty cell of the notebook above, print `np.linalg.inv(K_weak)` and `np.linalg.inv(K_equal)`. Compare the sizes of their entries. Since $\delta\mathbf{u}=\mathbf{K}^{-1}\delta\mathbf{f}$, what does each inverse do to a small change in the force?
+**Your turn:** run the notebook below to print the inverses of both stiffness matrices. How large are the entries of each inverse? What does that mean for a small change in the force?
+
+::: {.quarto-wasm-local notebook="l12_inverse_entries.edit.py" view="edit" title="Inverses of the weak-spring and equal-spring matrices" height="420" loading="lazy" fullscreen="true"}
+`np.linalg.inv(K_weak)` gives $\begin{bmatrix}1000&1000\\1000&1000.2\end{bmatrix}$ and `np.linalg.inv(K_equal)` gives $\begin{bmatrix}0.2&0.2\\0.2&0.4\end{bmatrix}$.
+:::
 
 ::: {.callout-tip collapse="true"}
-## The two inverse matrices and what their entries reveal
+## Why the entries of the weak-spring inverse matter
 
-$$
-\mathbf{K}_{\text{weak}}^{-1}=\begin{bmatrix}1000&1000\\1000&1000.2\end{bmatrix},
-\qquad
-\mathbf{K}_{\text{equal}}^{-1}=\begin{bmatrix}0.2&0.2\\0.2&0.4\end{bmatrix}.
-$$
-
-Every entry of $\mathbf{K}_{\text{weak}}^{-1}$ is about 1000, while the entries of $\mathbf{K}_{\text{weak}}$ are only about 5. A force change of $0.001$ on atom 2 is multiplied by the second column, $(1000,\,1000.2)^{\mathsf T}$, and becomes a displacement change of about $(1,\,1)^{\mathsf T}$, the shift of both atoms we found above. The same force change multiplied by $\mathbf{K}_{\text{equal}}^{-1}$ gives only $(0.0002,\,0.0004)^{\mathsf T}$.
-
-Large entries in the inverse therefore signal sensitivity, but their size alone is not a complete measure. Scaling $\mathbf{K}$ by 10 divides every entry of $\mathbf{K}^{-1}$ by 10 without changing the relative sensitivity. The next section compares the size of the inverse with the size of the matrix itself, and that comparison is the condition number.
+The entries of the weak-spring inverse are about 1000, while the entries of the equal-spring inverse are below 1. The inverse multiplies the force, so with the weak spring even a tiny force change is amplified about a thousandfold in the displacements. This is the large jump we found above.
 :::
 
 ## Measuring sensitivity with the condition number
