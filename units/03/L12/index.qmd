@@ -49,7 +49,7 @@ We will use the bead-and-spring chain to explore three toy systems, each raising
 | 2 | One spring becomes much weaker than the others | How sensitive is the solution to the matrix and forces? | Condition number |
 | 3 | The chain grows to millions of moving atoms | How much computation and storage does the solution require? | Operation count, banded storage |
 
-![Three-atom spring chains with atom 0 fixed and an external force on atom 2: (a) a normal system, (b) a singular system with the anchor spring removed (Scenario 1), and (c) an ill-conditioned system with a soft anchor spring (Scenario 2).](../../../assets/L12-spring-scenarios.png){#fig-spring-scenarios width=100% fig-alt="Three panels of atoms 0, 1, and 2 joined by springs, with fixed atom 0 and an external force pulling atom 2. Panel a has springs k01 and k12. In panel b, spring k01 is removed. In panel c, spring k01 is much softer than k12."}
+![Three-atom spring chains with atom 0 fixed and an external force on atom 2: (a) a normal system, (b) a singular system with the spring to atom 0 removed (Scenario 1), and (c) an ill-conditioned system with a very weak spring to atom 0 (Scenario 2).](../../../assets/L12-spring-scenarios.png){#fig-spring-scenarios width=100% fig-alt="Three panels of atoms 0, 1, and 2 joined by springs, with fixed atom 0 and an external force pulling atom 2. Panel a has springs k01 and k12. In panel b, spring k01 is removed. In panel c, spring k01 is much softer than k12."}
 
 Throughout the lecture, atom 0 is fixed and positive displacement points along the chain away from that fixed end. The matrix properties we investigate are independent of our choice of physical units. We therefore write the spring constants, forces, and displacements as numerical values, with a consistent set of units understood.
 
@@ -197,7 +197,7 @@ np.linalg.matrix_rank(K_b)   # 8: row 5 is zero
 np.linalg.matrix_rank(K_c)   # 8: rows 5 and 8 add to zero
 ```
 
-The difference $N-\text{rank}$ counts the independent free motions. Both singular networks have one: atom 5 alone in (b), and atoms 5 and 8 moving together in (c). For the two-atom chain without its anchor spring, the rank is 1, and the free motion is the shared translation of the pair. `matrix_rank` uses a small tolerance to decide when a value counts as zero in floating-point arithmetic.
+The difference $N-\text{rank}$ counts the independent free motions. Both singular networks have one: atom 5 alone in (b), and atoms 5 and 8 moving together in (c). For the two-atom chain without its spring to the wall, the rank is 1, and the free motion is the shared translation of the pair. `matrix_rank` uses a small tolerance to decide when a value counts as zero in floating-point arithmetic.
 :::
 
 ### Why a small determinant needs care
@@ -214,61 +214,72 @@ Each of the $N$ rows contributes a factor of 10. For example, if $N=16$ and $\de
 
 ## Scenario 2: Ill-conditioned problems -- very weak springs
 
-Instead of removing the anchor spring between atom 1 and the fixed atom 0 entirely, let it become very weak, as in @fig-spring-scenarios (c):
+Instead of removing the spring between atom 1 and the fixed atom 0 entirely, let it become very weak, as in @fig-spring-scenarios (c):
 
 $$
 k_{01}=0.001,\qquad k_{12}=5,
 \qquad
-\mathbf{K}=\begin{bmatrix}5.001&-5\\-5&5\end{bmatrix}.
+\mathbf{K}_{\text{weak}}=\begin{bmatrix}5.001&-5\\-5&5\end{bmatrix}.
 $$
 
-This matrix is **nonsingular**. Under an end force $\mathbf{f}=(0,1)^{\mathsf T}$, both springs carry a force of 1. Their extensions are therefore
+This matrix is **nonsingular**, so it has an inverse. For comparison, a chain with two equal springs, $k_{01}=k_{12}=5$, has
 
 $$
-u_1=\frac{1}{0.001}=1000,
-\qquad
-u_2-u_1=\frac{1}{5}=0.2.
+\mathbf{K}_{\text{equal}}=\begin{bmatrix}10&-5\\-5&5\end{bmatrix}.
 $$
 
-The solution is $\mathbf{u}=(1000,1000.2)^{\mathsf T}$. Looking only at the stiffness of the bond between the moving atoms would have suggested a displacement scale of $0.2$. The large shared translation comes from the weak connection to the support.
+Pull the end atom of each chain with a force of 1, $\mathbf{f}=(0,1)^{\mathsf T}$, and calculate the displacements with `np.linalg.inv(K) @ f`.
 
-For comparison, setting both spring constants to 5 gives
+::: {.quarto-wasm-local notebook="l12_weak_spring.edit.py" view="edit" title="Displacements of the weak-spring and equal-spring chains under an end force" height="420" loading="lazy" fullscreen="true"}
+With the very weak spring, $\mathbf{u}=(1000,\,1000.2)^{\mathsf T}$. With two equal springs, $\mathbf{u}=(0.2,\,0.4)^{\mathsf T}$.
+:::
 
-$$
-\mathbf{K}=\begin{bmatrix}10&-5\\-5&5\end{bmatrix},
-\qquad
-\mathbf{u}=\begin{bmatrix}0.2\\0.4\end{bmatrix}.
-$$
-
-The weak anchor allows much larger displacements under the same end load. An even more striking effect appears when we slightly change the forces: a small relative change in the input can produce a large relative change in the solution.
+Both springs in a chain carry the full end force of 1, so each stretches by $1/k$. The weak spring stretches by $1/0.001=1000$ and carries both atoms with it, while the bond between the moving atoms stretches by only $1/5=0.2$. The weak spring therefore allows much larger displacements under the same end load. An even more striking effect appears when we slightly change the forces.
 
 ### A small force change with a large relative effect
 
-Keep the weak anchor, but start with balanced forces $\mathbf{f}=(-1,1)^{\mathsf T}$. Adding the two force-balance equations gives $0.001u_1=0$, so the solution is $\mathbf{u}=(0,0.2)^{\mathsf T}$. Now increase only the force on atom 2 by $0.001$:
+Now pull the two moving atoms apart with equal and opposite forces, $\mathbf{f}=(-1,1)^{\mathsf T}$. The net force on the pair is zero, so the spring to the wall carries no force and atom 1 stays in place. Only the bond between atoms 1 and 2 stretches, by $1/5=0.2$, so we expect $\mathbf{u}=(0,0.2)^{\mathsf T}$ for both chains.
 
-$$
-\mathbf{f}+\delta\mathbf{f}
-=\begin{bmatrix}-1\\1.001\end{bmatrix}.
-$$
+What happens if we add only $0.001$ to the force on atom 2, giving $\mathbf{f}=(-1,1.001)^{\mathsf T}$? The pair now feels a small net force, which only the spring to the wall can balance. Calculate the displacements before and after this change for both chains.
 
-The net force is now $0.001$. The anchor must extend by 1 to balance it, while the second spring extends by $1.001/5=0.2002$. The new displacements are $(1,1.2002)^{\mathsf T}$. Using vector lengths, the 2-norm $\|\cdot\|_2$ defined in the next section, to compare the changes,
+::: {.quarto-wasm-local notebook="l12_force_perturbation.edit.py" view="edit" title="Displacements before and after a small force change" height="520" loading="lazy" fullscreen="true"}
+For both chains, $\mathbf{f}=(-1,1)^{\mathsf T}$ gives $\mathbf{u}=(0,\,0.2)^{\mathsf T}$, zero to round-off for atom 1. After the change, the weak-spring chain moves to $(1,\,1.2002)^{\mathsf T}$, while the equal-spring chain moves only to $(0.0002,\,0.2004)^{\mathsf T}$.
+:::
+
+::: {.callout-important}
+## A 0.071% change in force, a 707% change in displacement
+
+With the very weak spring, a force change of about $0.071\%$ changes the displacements by about $707\%$. With two equal springs, the same force change changes the displacements by only about $0.224\%$.
+:::
+
+::: {.callout-note collapse="true"}
+## Relative changes from vector lengths, and the physical reason for the large response
+
+We compare the size of each change with the size of the original vector, using vector lengths, the 2-norm $\|\cdot\|_2$ defined in the next section. The force change is $\delta\mathbf{f}=(0,0.001)^{\mathsf T}$, so for both chains
 
 $$
 \frac{\|\delta\mathbf{f}\|_2}{\|\mathbf{f}\|_2}
-=\frac{0.001}{\sqrt{2}}\approx0.000707,
-\qquad
+=\frac{0.001}{\sqrt{2}}\approx0.000707.
+$$
+
+For the weak-spring chain, $\delta\mathbf{u}=(1,1.0002)^{\mathsf T}$ and $\|\mathbf{u}\|_2=0.2$, so
+
+$$
 \frac{\|\delta\mathbf{u}\|_2}{\|\mathbf{u}\|_2}
 =\frac{\sqrt{1^2+1.0002^2}}{0.2}\approx7.07.
 $$
 
-A force perturbation of about $0.071\%$ produces a displacement change of about $707\%$! The small net load excites the pair's weakly restrained translation. With the stronger anchor, the same perturbation changes the displacements from $(0,0.2)$ to $(0.0002,0.2004)$, a relative change of about $0.224\%$.
+For the equal-spring chain, $\delta\mathbf{u}=(0.0002,0.0004)^{\mathsf T}$, which gives a relative change of about $0.00224$.
 
-- **Well-conditioned problem:** small relative changes in the supplied data cause comparably small relative changes in the solution. The equally stiff two-spring system is our example.
-- **Ill-conditioned problem:** some small relative changes in the supplied data can cause much larger relative changes in the solution. The weakly anchored pair has such a sensitive direction of motion.
+The physical reason is the very soft spring. The added net force of $0.001$ must be carried by the spring to the wall, which stretches by $0.001/k_{01}$. With $k_{01}=0.001$ this stretch is 1, and it moves both atoms together by five times the original displacement of atom 2. With $k_{01}=5$, the same net force stretches the spring by only $0.0002$.
+:::
 
-Sensitivity also matters when the data are rounded. A solver receives finite-precision spring constants and forces, then performs arithmetic with further rounding. An ill-conditioned problem can amplify those small changes even when the algorithm is implemented correctly.
+- **Well-conditioned problem:** small relative changes in the supplied data cause comparably small relative changes in the solution. The equal-spring chain, with $\mathbf{K}_{\text{equal}}$, is our example.
+- **Ill-conditioned problem:** some small relative changes in the supplied data can cause much larger relative changes in the solution. The weak-spring chain, with $\mathbf{K}_{\text{weak}}$, has such a sensitive direction of motion: the shared translation of both atoms, held only by the weak spring.
 
-::: {.callout-note}
+Sensitivity also matters when the data are rounded. A solver receives finite-precision spring constants and forces, then performs arithmetic with further rounding. An ill-conditioned problem can amplify those small changes **even when the algorithm is implemented correctly**.
+
+::: {.callout-note collapse="true"}
 ## Round-off during a matrix solve
 
 Round-off occurs during a direct solve even for a well-conditioned system. Dividing by a very small intermediate coefficient can magnify errors already present in the numerator, which is one reason the choice of elimination steps matters. An ill-conditioned system introduces a further difficulty: even small relative errors in the supplied coefficients or forces can produce large relative errors in the solution. In L13, we will examine how pivot selection helps control rounding errors during elimination.
@@ -360,16 +371,16 @@ $$
 \approx20002.
 $$
 
-The weak anchor has increased the potential sensitivity by several orders of magnitude. Our force-perturbation example produced an amplification of about $10001$, consistent with the bound of $20002$.
+The very weak spring has increased the potential sensitivity by several orders of magnitude. Our force-perturbation example produced an amplification of about $10001$, consistent with the bound of $20002$.
 
 With default arguments, `np.linalg.norm(A)` returns a different matrix norm (the Frobenius norm), so use `np.linalg.norm(A, ord=2)` for the matrix 2-norm.
 
-### NumPy experiment: anchor stiffness and force sensitivity
+### NumPy experiment: weak-spring stiffness and force sensitivity
 
 Use the editable calculation below to compare the two spring systems. Predict the effect of changing $k_{01}$ before running it. Then set $k_{01}=0$ and compare the solver's response with the physical argument about free translation.
 
 ::: {.quarto-wasm-local notebook="l12_conditioning.edit.py" view="edit" title="Spring stiffness, singularity, and relative sensitivity" height="850" loading="lazy" fullscreen="true"}
-For $k_{01}=0.001$, $k_{12}=5$, and an end load of 1, the displacements are $(1000,1000.2)$ and the condition number is approximately $20002$. Setting $k_{01}=5$ gives $(0.2,0.4)$ and a condition number of approximately $6.854$. With the weak anchor and balanced initial forces $(-1,1)$, a perturbation $(0,0.001)$ changes the displacements from $(0,0.2)$ to $(1,1.2002)$.
+For $k_{01}=0.001$, $k_{12}=5$, and an end load of 1, the displacements are $(1000,1000.2)$ and the condition number is approximately $20002$. Setting $k_{01}=5$ gives $(0.2,0.4)$ and a condition number of approximately $6.854$. With the weak spring and balanced initial forces $(-1,1)$, a perturbation $(0,0.001)$ changes the displacements from $(0,0.2)$ to $(1,1.2002)$.
 :::
 
 ### In-class comparison
@@ -502,7 +513,7 @@ For the L11 values $k=5$ and $F_{\mathrm{ext}}=10$ with three moving atoms, $\ma
 
 ## Check your understanding
 
-1. Remove the anchor spring from the two-moving-atom system. Why do balanced forces permit infinitely many displacements, while a nonzero net force permits no static equilibrium?
+1. Remove the spring to atom 0 from the two-moving-atom system. Why do balanced forces permit infinitely many displacements, while a nonzero net force permits no static equilibrium?
 2. Why does doubling the end force fail to distinguish the well-conditioned and ill-conditioned examples? What did the small perturbation of the balanced force pair reveal instead?
 3. If $\kappa_2(\mathbf{A})=10^4$ and the relative change in $\mathbf{b}$ is $10^{-6}$, what upper bound follows for the relative solution change when $\mathbf{A}$ is fixed?
 4. For a chain of three moving atoms with stiffnesses $k_{01}=5$, $k_{12}=10$, and $k_{23}=5$ and an end force of 1, predict the displacements from force balance, then check them with `np.linalg.solve`.

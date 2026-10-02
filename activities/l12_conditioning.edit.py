@@ -19,9 +19,9 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""
-    ## How does a weak anchor change the displacement?
-    Atom 0 is fixed; springs connect 0–1 and 1–2. Stiffnesses are in
-    eV/Å², forces in eV/Å, and displacements in Å.
+    ## How does a weak spring change the displacement?
+    Atom 0 is fixed; springs connect 0–1 and 1–2. Stiffnesses, forces,
+    and displacements are numbers in one consistent set of units.
     **Predict:** compare `k01 = 5.0` with `k01 = 0.001`.
     Then try `k01 = 0.0`. Which motion loses its restoring force?
     """)
@@ -39,9 +39,9 @@ def _(np):
     print("2-norm condition number =", np.linalg.cond(K))
     try:
         u = np.linalg.solve(K, f)
-        print("solve: displacements (Å) =", u)
-        print("inverse @ f (Å) =", np.linalg.inv(K) @ f)
-        print("Residual (eV/Å) =", K @ u - f)
+        print("solve: displacements =", u)
+        print("inverse @ f =", np.linalg.inv(K) @ f)
+        print("Residual =", K @ u - f)
     except np.linalg.LinAlgError:
         print("Singular K: no unique displacement. Try f = [-1.0, 1.0].")
     return (K,)
@@ -53,7 +53,7 @@ def _(mo):
     ## A small relative force perturbation
     Equal and opposite forces initially stretch only spring 1–2.
     Add a small net force at atom 2. **Predict:** will the pair translate
-    noticeably when its anchor is weak? Compare relative changes below.
+    noticeably when its spring to the wall is weak? Compare relative changes below.
     A small residual checks the equations; sensitivity measures how much
     their solution changes when the supplied forces change.
     """)
@@ -69,8 +69,8 @@ def _(K, np):
         u_changed = np.linalg.solve(K, f_balanced + delta_f)
         relative_force = np.linalg.norm(delta_f) / np.linalg.norm(f_balanced)
         relative_u = np.linalg.norm(u_changed - u_balanced) / np.linalg.norm(u_balanced)
-        print("Original displacements (Å):", u_balanced)
-        print("Perturbed displacements (Å):", u_changed)
+        print("Original displacements:", u_balanced)
+        print("Perturbed displacements:", u_changed)
         print(f"Relative force change: {relative_force:.6g}")
         print(f"Relative displacement change: {relative_u:.6g}")
         print(f"Condition-number bound: {np.linalg.cond(K) * relative_force:.6g}")
