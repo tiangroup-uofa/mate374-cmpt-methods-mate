@@ -1,9 +1,7 @@
-"""Static L12 figure: dense inverse and solve timings with a power-law fit.
+"""Static L12 figure using the browser benchmark's power-law extrapolations.
 
 Run from the repository root: uv run --locked python scripts/l12_figures.py
-Reads data/L12-dense-benchmark.json, written by scripts/l12_dense_benchmark.py.
 """
-import json
 from pathlib import Path
 
 import matplotlib
@@ -15,29 +13,35 @@ ROOT = Path(__file__).resolve().parents[1]
 DPI = 300
 COLOURS = {"inverse": "#931212", "solve": "#15428e"}
 LABELS = {"inverse": "inv(K) @ f", "solve": "solve(K, f)"}
+TARGET = 1_000_000
+# Browser-run fit summary: exponent and estimated seconds at TARGET.
+BROWSER_FITS = {
+    "inverse": {"p": 3.083, "seconds": 1.45e9},
+    "solve": {"p": 2.605, "seconds": 4.08e5},
+}
 
 
 def dense_benchmark():
-    data = json.loads((ROOT / "data" / "L12-dense-benchmark.json").read_text())
-    sizes = np.array(data["sizes"], dtype=float)
-    target = 1e6
     fig, ax = plt.subplots(figsize=(6.4, 4.0), layout="constrained")
-    grid = np.geomspace(sizes.min(), target, 200)
-    for method, times in data["median_seconds"].items():
-        p, log_c = np.polyfit(np.log(sizes), np.log(times), 1)
-        t_target = np.exp(log_c + p * np.log(target))
-        ax.loglog(sizes, times, "o", color=COLOURS[method], ms=6,
-                  label=f"{LABELS[method]}: measured")
-        ax.loglog(grid, np.exp(log_c + p * np.log(grid)), "--", color=COLOURS[method], lw=1.2,
-                  label=f"fit $t = cN^{{p}}$, $p = {p:.2f}$")
-        ax.plot(target, t_target, "s", color=COLOURS[method], mfc="white", ms=6)
-        ax.annotate(f"{t_target / 86400:.1f} days", (target, t_target), xytext=(-8, 6),
+    grid = np.linspace(0, TARGET, 500)
+    for method, result in BROWSER_FITS.items():
+        p = result["p"]
+        t_target = result["seconds"]
+        times = t_target * (grid / TARGET) ** p
+        ax.plot(grid, times, color=COLOURS[method], lw=2,
+                label=f"{LABELS[method]}: $p = {p:.3f}$")
+        ax.plot(TARGET, t_target, "o", color=COLOURS[method], ms=6)
+        duration = (f"{t_target / (365 * 86400):.1f} years" if method == "inverse"
+                    else f"{t_target / 86400:.2f} days")
+        ax.annotate(f"{t_target:.3g} s ({duration})", (TARGET, t_target),
+                    xytext=(-8, -30 if method == "inverse" else 24),
                     textcoords="offset points", ha="right", color=COLOURS[method], fontsize=9)
-    ax.axvline(target, color="#9aa3ab", lw=0.8, ls=":")
-    ax.set(xlabel="Moving atoms $N$", ylabel="Median time (s)",
-           title=f"Dense spring chain ({data['machine']})")
+    ax.axvline(TARGET, color="#9aa3ab", lw=0.8, ls=":")
+    ax.set(xlim=(0, TARGET * 1.04), xlabel="Moving atoms $N$",
+           ylabel="Extrapolated median time (s)",
+           title="Dense spring chain: browser power-law fits")
     ax.title.set_fontsize(9)
-    ax.grid(True, which="major", alpha=0.25)
+    ax.grid(True, alpha=0.25)
     ax.legend(fontsize=8, loc="upper left")
     fig.savefig(ROOT / "assets" / "L12-dense-benchmark.png", dpi=DPI, facecolor="white")
     plt.close(fig)

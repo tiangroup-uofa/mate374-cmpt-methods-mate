@@ -55,21 +55,12 @@ def _(F, N, k, np, perf_counter, solve_banded):
     print(f"Dense matrix alone: {8 * N**2 / 1e9:.4g} GB")
     print(f"Banded array alone: {K_band.nbytes / 1e6:.4g} MB")
     print(f"End displacement: {u[-1]:.8g}")
-    return K_band, f, u
+    return (u,)
 
 
 @app.cell
-def _(F, N, K_band, f, k, np, u):
+def _(F, N, k, np):
     reference = np.arange(1, N + 1) * F / k
-    # Apply K without creating a dense N-by-N array.
-    residual = K_band[1] * u - f
-    residual[:-1] += K_band[0, 1:] * u[1:]
-    residual[1:] += K_band[2, :-1] * u[:-1]
-    print("Relative solution error:", np.linalg.norm(u - reference) / np.linalg.norm(reference))
-    print("Relative residual:", np.linalg.norm(residual) / np.linalg.norm(f))
-    if N <= 100:
-        dense_K = np.diag(K_band[1]) + np.diag(K_band[0, 1:], 1) + np.diag(K_band[2, :-1], -1)
-        print("Dense/banded agreement:", np.allclose(u, np.linalg.solve(dense_K, f)))
     return (reference,)
 
 
@@ -85,15 +76,6 @@ def _(N, np, plt, reference, u):
     fig
     return
 
-
-@app.cell
-def _(mo):
-    mo.md("""
-    Banded storage preserves the chain's local connections. It changes
-    memory and computational cost, while the force-balance equations
-    stay the same.
-    """)
-    return
 
 
 if __name__ == "__main__":

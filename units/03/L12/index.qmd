@@ -477,11 +477,12 @@ To find $\mathbf{u}$ from $\mathbf{K}\mathbf{u}=\mathbf{f}$, call `np.linalg.sol
 
 ### Timing the dense calculation
 
-In L11, we said that a realistic model may contain millions of atoms. How long would `solve` take for $N=10^6$? We cannot run it, but we can time smaller chains and extrapolate, using the curve fitting from L09. @fig-dense-benchmark shows the times for 512, 1,024, and 2,048 moving atoms on a 4-core laptop, with a fitted power law $t=cN^p$, which is a straight line on a log-log plot.
+In L11, we said that a realistic model may contain millions of atoms. How long would `solve` take for $N=10^6$? We can time chains of 512, 1,024, and 2,048 atoms in a browser and fit the measured times with the power law $t=cN^p$. @fig-dense-benchmark shows one browser run's fits, with separate exponents for inversion and solving. Its linear axes make the difference between their million-atom estimates visible.
 
-![Median times of `np.linalg.inv(K) @ f` and `np.linalg.solve(K, f)` for a dense spring chain on a 4-core laptop. The dashed lines are fits of $t=cN^p$, extrapolated to $N=10^6$.](../../../assets/L12-dense-benchmark.png){#fig-dense-benchmark width=80% fig-alt="Log-log plot of median time against the number of moving atoms. Measured points at 512, 1024, and 2048 atoms lie on straight dashed fit lines with exponents of about 2.4. Extrapolated to one million atoms, the inverse takes about 12 days and solve about 4 days."}
+![Browser-based power-law extrapolations of median times for `np.linalg.inv(K) @ f` and `np.linalg.solve(K, f)` in a dense spring chain.](../../../assets/L12-dense-benchmark.png){#fig-dense-benchmark width=80% fig-alt="Linear-scale plot of browser-based power-law extrapolations against the number of moving atoms. The inverse fit has exponent 3.083 and reaches 1.45 billion seconds, about 46 years, at one million atoms. The solve fit has exponent 2.605 and reaches 408,000 seconds, about 4.7 days."}
 
-- **Time:** both fitted exponents are about 2.4, and the fits predict about 12 days for `inv` and 4 days for `solve` at $N=10^6$. For large matrices, the work of a dense solve grows as $N^3$. Scaling the 2,048-atom time of `solve` by $(10^6/2048)^3$ gives about 4 months.
+- **Time:** this browser run gives fitted exponents of 3.083 for `inv` and 2.605 for `solve`. Extrapolating to $N=10^6$ gives about $1.45\times10^9$ seconds (46 years) for `inv` and $4.08\times10^5$ seconds (4.7 days) for `solve`. Dense direct solves have cubic leading-order work; the fitted exponents and estimates depend on the device and the short timing range, so treat them as illustrative.
+
 - **Memory:** the dense matrix alone holds $N^2=10^{12}$ numbers. At 8 bytes each, that is $8\times10^{12}$ bytes, or 8 TB, far beyond the memory of any laptop.
 
 ::::: {.callout-note collapse="true"}
@@ -525,6 +526,8 @@ This demo is optional. The notebook below solves a chain of one million moving a
 ::: {.quarto-wasm-local notebook="l12_banded_solve.edit.py" view="edit" title="Banded storage and solution of a large spring chain" height="850" loading="lazy" fullscreen="true"}
 At $N=10^6$, a dense float64 stiffness matrix needs 8 TB, while the three stored diagonals need 24 MB. With $k=5$ and an end force $F=10^{-7}$, the displacements increase linearly along the chain, and the end displacement is $u_N=NF/k=0.02$. Actual timings depend on the device.
 :::
+
+**A representative browser run solves one million atoms in about 0.03 s, consistent with the linear work of a tridiagonal solver.**
 
 Look at the plot of the displacements. With equal springs, they increase linearly from the fixed end to the loaded end.
 
