@@ -36,8 +36,8 @@ def _(mo):
 @app.cell
 def _(np):
     sizes = np.array([512, 1024, 2048])
-    k = 5.0  # eV/Å²
-    F = 0.001  # eV/Å
+    k = 5.0
+    F = 0.001
     repeats = 3
     return F, k, repeats, sizes
 

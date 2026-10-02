@@ -369,7 +369,7 @@ With default arguments, `np.linalg.norm(A)` returns a different matrix norm (the
 Use the editable calculation below to compare the two spring systems. Predict the effect of changing $k_{01}$ before running it. Then set $k_{01}=0$ and compare the solver's response with the physical argument about free translation.
 
 ::: {.quarto-wasm-local notebook="l12_conditioning.edit.py" view="edit" title="Spring stiffness, singularity, and relative sensitivity" height="850" loading="lazy" fullscreen="true"}
-For $k_{01}=0.001$, $k_{12}=5$, and an end load of 1 eV/Å, the displacements are $(1000,1000.2)$ Å and the condition number is approximately $20002$. Setting $k_{01}=5$ gives $(0.2,0.4)$ Å and a condition number of approximately $6.854$. With the weak anchor and balanced initial forces $(-1,1)$, a perturbation $(0,0.001)$ changes the displacements from $(0,0.2)$ to $(1,1.2002)$ Å.
+For $k_{01}=0.001$, $k_{12}=5$, and an end load of 1, the displacements are $(1000,1000.2)$ and the condition number is approximately $20002$. Setting $k_{01}=5$ gives $(0.2,0.4)$ and a condition number of approximately $6.854$. With the weak anchor and balanced initial forces $(-1,1)$, a perturbation $(0,0.001)$ changes the displacements from $(0,0.2)$ to $(1,1.2002)$.
 :::
 
 ### In-class comparison
@@ -463,7 +463,7 @@ A **sparse matrix** more generally has relatively few nonzero entries, which nee
 The notebook starts with 10,000 moving atoms. Increase `N` to a million to measure the banded calculation on your device without creating a dense matrix. Compare the measured time and the reported storage with the dense estimate. The residual is also computed from the three diagonals, so checking the solution does not silently recreate the large dense array.
 
 ::: {.quarto-wasm-local notebook="l12_banded_solve.edit.py" view="edit" title="Banded storage and solution of a large spring chain" height="850" loading="lazy" fullscreen="true"}
-At $N=10^6$, a dense float64 stiffness matrix needs 8 TB, while a three-row band array needs 24 MB, excluding right-hand sides and solver workspace. With $k=5$ eV/Å² and $F=10^{-7}$ eV/Å, the analytical end displacement is $u_N=NF/k=0.02$ Å. Actual timings depend on the device. Comparing both the residual and the analytical error helps expose rounding effects as the chain grows.
+At $N=10^6$, a dense float64 stiffness matrix needs 8 TB, while a three-row band array needs 24 MB, excluding right-hand sides and solver workspace. With $k=5$ and $F=10^{-7}$, the analytical end displacement is $u_N=NF/k=0.02$. Actual timings depend on the device. Comparing both the residual and the analytical error helps expose rounding effects as the chain grows.
 :::
 
 ## A check from force balance: the end-loaded chain
@@ -491,7 +491,7 @@ u_3=\frac{F_{\mathrm{ext}}}{k_{01}}
 u_i=\sum_{j=1}^{i}\frac{F_{\mathrm{ext}}}{k_{j-1,j}}.
 $$
 
-For the L11 values $k=5$ eV/Å² and $F_{\mathrm{ext}}=10$ eV/Å with three moving atoms, $\mathbf{u}=(2,4,6)^{\mathsf T}$ Å. Additional connections or forces change the equations, and then we need a general method. L13 shows the one inside `np.linalg.solve`: Gaussian elimination.
+For the L11 values $k=5$ and $F_{\mathrm{ext}}=10$ with three moving atoms, $\mathbf{u}=(2,4,6)^{\mathsf T}$. Additional connections or forces change the equations, and then we need a general method. L13 shows the one inside `np.linalg.solve`: Gaussian elimination.
 
 ## Take-home message
 
@@ -505,7 +505,7 @@ For the L11 values $k=5$ eV/Å² and $F_{\mathrm{ext}}=10$ eV/Å with three movi
 1. Remove the anchor spring from the two-moving-atom system. Why do balanced forces permit infinitely many displacements, while a nonzero net force permits no static equilibrium?
 2. Why does doubling the end force fail to distinguish the well-conditioned and ill-conditioned examples? What did the small perturbation of the balanced force pair reveal instead?
 3. If $\kappa_2(\mathbf{A})=10^4$ and the relative change in $\mathbf{b}$ is $10^{-6}$, what upper bound follows for the relative solution change when $\mathbf{A}$ is fixed?
-4. For a chain of three moving atoms with stiffnesses $k_{01}=5$, $k_{12}=10$, and $k_{23}=5$ eV/Å² and an end force of 1 eV/Å, predict the displacements from force balance, then check them with `np.linalg.solve`.
+4. For a chain of three moving atoms with stiffnesses $k_{01}=5$, $k_{12}=10$, and $k_{23}=5$ and an end force of 1, predict the displacements from force balance, then check them with `np.linalg.solve`.
 
 ## Before next class
 

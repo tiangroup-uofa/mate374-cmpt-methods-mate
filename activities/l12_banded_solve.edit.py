@@ -34,8 +34,8 @@ def _(mo):
 @app.cell
 def _():
     N = 10_000
-    k = 5.0  # eV/Å²
-    F = 1e-7  # eV/Å; small end load keeps extensions small
+    k = 5.0
+    F = 1e-7  # small end load keeps extensions small
     return F, N, k
 
 
@@ -55,7 +55,7 @@ def _(F, N, k, np, perf_counter, solve_banded):
     print(f"Solve time (excluding assembly): {elapsed:.4g} s")
     print(f"Dense matrix alone: {8 * N**2 / 1e9:.4g} GB")
     print(f"Banded array alone: {ab.nbytes / 1e6:.4g} MB")
-    print(f"End displacement: {u[-1]:.8g} Å")
+    print(f"End displacement: {u[-1]:.8g}")
     return ab, f, u
 
 
@@ -80,7 +80,7 @@ def _(N, np, plt, reference, u):
     fig, ax = plt.subplots(figsize=(6, 3.5))
     ax.plot(_indices + 1, reference[_indices], label="i F / k")
     ax.plot(_indices + 1, u[_indices], "--", label="Banded solve")
-    ax.set(xlabel="Moving atom i", ylabel="Displacement (Å)")
+    ax.set(xlabel="Moving atom i", ylabel="Displacement")
     ax.legend()
     fig.tight_layout()
     fig
