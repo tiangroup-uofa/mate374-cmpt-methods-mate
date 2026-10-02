@@ -4,6 +4,19 @@ subtitle: "Singular matrices, conditioning, and practical matrix solution in `nu
 body-classes: lecture-page
 ---
 
+::: {.callout-important}
+## If you remember one thing from this lecture
+
+To solve $\mathbf{K}\mathbf{u}=\mathbf{f}$ in NumPy, do not form the inverse. Use `np.linalg.solve`:
+
+```python
+u = np.linalg.inv(K) @ f    # avoid
+u = np.linalg.solve(K, f)   # use this
+```
+
+The rest of the lecture explains why.
+:::
+
 ::: {.callout-note}
 ## Central question
 
@@ -189,13 +202,7 @@ The argument also works in reverse. If a stiffness matrix turns out to be singul
 ::: {.callout-tip collapse="true"}
 ## How many independent equations? The rank of a matrix
 
-The **rank** of a matrix is the number of independent rows, which always equals the number of independent columns. An $N\times N$ matrix is nonsingular exactly when its rank is $N$. NumPy computes it with `np.linalg.matrix_rank`:
-
-```python
-np.linalg.matrix_rank(K_a)   # 9: all nine equations are independent
-np.linalg.matrix_rank(K_b)   # 8: row 5 is zero
-np.linalg.matrix_rank(K_c)   # 8: rows 5 and 8 add to zero
-```
+The **rank** of a matrix is the number of independent rows, which always equals the number of independent columns. An $N\times N$ matrix is nonsingular exactly when its rank is $N$. NumPy computes it with `np.linalg.matrix_rank(K)`. For our networks, it returns 9 for $\mathbf{K}_a$, where all nine equations are independent, and 8 for both $\mathbf{K}_b$, whose row 5 is zero, and $\mathbf{K}_c$, whose rows 5 and 8 add to zero.
 
 The difference $N-\text{rank}$ counts the independent free motions. Both singular networks have one: atom 5 alone in (b), and atoms 5 and 8 moving together in (c). For the two-atom chain without its spring to the wall, the rank is 1, and the free motion is the shared translation of the pair. `matrix_rank` uses a small tolerance to decide when a value counts as zero in floating-point arithmetic.
 :::
@@ -240,7 +247,23 @@ Both springs in a chain carry the full end force of 1, so each stretches by $1/k
 
 Now pull the two moving atoms apart with equal and opposite forces, $\mathbf{f}=(-1,1)^{\mathsf T}$. The net force on the pair is zero, so the spring to the wall carries no force and atom 1 stays in place. Only the bond between atoms 1 and 2 stretches, by $1/5=0.2$, so we expect $\mathbf{u}=(0,0.2)^{\mathsf T}$ for both chains.
 
-What happens if we add only $0.001$ to the force on atom 2, giving $\mathbf{f}=(-1,1.001)^{\mathsf T}$? The pair now feels a small net force, which only the spring to the wall can balance. Calculate the displacements before and after this change for both chains.
+What happens if we add only $0.001$ to the force on atom 2? The force changes by $\delta\mathbf{f}=(0,0.001)^{\mathsf T}$, and the displacements change by $\delta\mathbf{u}$. We solve the same matrix problem twice, once with the original force and once with the changed force:
+
+$$
+\begin{aligned}
+\mathbf{K}\,\mathbf{u}&=\mathbf{f}=\begin{bmatrix}-1\\1\end{bmatrix},\\[4pt]
+\mathbf{K}\,(\mathbf{u}+\delta\mathbf{u})&=\mathbf{f}+\delta\mathbf{f}=\begin{bmatrix}-1\\1.001\end{bmatrix}.
+\end{aligned}
+$$
+
+The solutions for the two chains are:
+
+| Chain | $\mathbf{u}$ | $\mathbf{u}+\delta\mathbf{u}$ | $\delta\mathbf{u}$ |
+|---|---|---|---|
+| Weak spring, $\mathbf{K}_{\text{weak}}$ | $(0,\ 0.2)$ | $(1,\ 1.2002)$ | $(1,\ 1.0002)$ |
+| Equal springs, $\mathbf{K}_{\text{equal}}$ | $(0,\ 0.2)$ | $(0.0002,\ 0.2004)$ | $(0.0002,\ 0.0004)$ |
+
+The same small $\delta\mathbf{f}$ moves both atoms of the weak-spring chain by about 1, but barely moves the equal-spring chain. Check these solutions in the notebook.
 
 ::: {.quarto-wasm-local notebook="l12_force_perturbation.edit.py" view="edit" title="Displacements before and after a small force change" height="520" loading="lazy" fullscreen="true"}
 For both chains, $\mathbf{f}=(-1,1)^{\mathsf T}$ gives $\mathbf{u}=(0,\,0.2)^{\mathsf T}$, zero to round-off for atom 1. After the change, the weak-spring chain moves to $(1,\,1.2002)^{\mathsf T}$, while the equal-spring chain moves only to $(0.0002,\,0.2004)^{\mathsf T}$.
@@ -426,7 +449,17 @@ $$
 \mathbf{A}^{-1}=\frac{\operatorname{adj}(\mathbf{A})}{\det(\mathbf{A})}.
 $$
 
-How much work would this take? Expanding a determinant along its first row turns one $n\times n$ determinant into $n$ determinants of size $n-1$. Each of those becomes $n-1$ determinants of size $n-2$, and so on, so a naive calculation needs about $n!$ multiplications:
+How much work would this take? Expanding a determinant along its first row turns one $n\times n$ determinant into $n$ determinants of size $n-1$:
+
+$$
+\det(\mathbf{A})=a_{11}\det(\mathbf{A}_{11})-a_{12}\det(\mathbf{A}_{12})+\cdots\pm a_{1n}\det(\mathbf{A}_{1n}),
+$$
+
+where $\mathbf{A}_{1j}$ is $\mathbf{A}$ with row 1 and column $j$ removed. Each of those smaller determinants expands again in the same way, so the number of multiplications grows as
+
+$$
+n\times(n-1)\times(n-2)\times\cdots\times1=n!.
+$$
 
 | $n$ | Multiplications, about $n!$ |
 |---|---|
@@ -444,14 +477,22 @@ To find $\mathbf{u}$ from $\mathbf{K}\mathbf{u}=\mathbf{f}$, call `np.linalg.sol
 
 ### Timing the dense calculation
 
-In L11, we said that a realistic model may contain millions of atoms. How long would `solve` take for $N=10^6$? We cannot run it, but we can time smaller chains and extrapolate, using the curve fitting from L09. Press **Run dense benchmark** to time 512, 1,024, and 2,048 moving atoms. The notebook fits $t=cN^p$ to the measured times, a straight line on a log-log plot, and reports the fitted exponent $p$ and the extrapolated time.
+In L11, we said that a realistic model may contain millions of atoms. How long would `solve` take for $N=10^6$? We cannot run it, but we can time smaller chains and extrapolate, using the curve fitting from L09. @fig-dense-benchmark shows the times for 512, 1,024, and 2,048 moving atoms on a 4-core laptop, with a fitted power law $t=cN^p$, which is a straight line on a log-log plot.
+
+![Median times of `np.linalg.inv(K) @ f` and `np.linalg.solve(K, f)` for a dense spring chain on a 4-core laptop. The dashed lines are fits of $t=cN^p$, extrapolated to $N=10^6$.](../../../assets/L12-dense-benchmark.png){#fig-dense-benchmark width=80% fig-alt="Log-log plot of median time against the number of moving atoms. Measured points at 512, 1024, and 2048 atoms lie on straight dashed fit lines with exponents of about 2.4. Extrapolated to one million atoms, the inverse takes about 12 days and solve about 4 days."}
+
+- **Time:** both fitted exponents are about 2.4, and the fits predict about 12 days for `inv` and 4 days for `solve` at $N=10^6$. For large matrices, the work of a dense solve grows as $N^3$. Scaling the 2,048-atom time of `solve` by $(10^6/2048)^3$ gives about 4 months.
+- **Memory:** the dense matrix alone holds $N^2=10^{12}$ numbers. At 8 bytes each, that is $8\times10^{12}$ bytes, or 8 TB, far beyond the memory of any laptop.
+
+::::: {.callout-note collapse="true"}
+## Run the dense benchmark yourself
+
+The notebook below repeats these timings on your own device. In the browser, the benchmark takes a minute or more. Press **Run dense benchmark** to start it.
 
 ::: {.quarto-wasm-local notebook="l12_dense_solve.edit.py" view="edit" title="Dense spring-chain timing: inverse versus solve" height="850" loading="lazy" fullscreen="true"}
 The notebook times `np.linalg.inv(K) @ f` and `np.linalg.solve(K, f)` for 512, 1,024, and 2,048 moving atoms, fits $\log t$ against $\log N$ with a straight line, and extrapolates the fitted power law $t\approx cN^p$ to $N=10^6$.
 :::
-
-- **Time:** on a 4-core test machine, the fitted exponents were about 2.4 for `inv` and 2.5 for `solve`, and the fit predicted about 5 days for one `solve` at $N=10^6$. For large matrices, the work of a dense solve grows as $N^3$. Scaling the 2,048-atom time by $(10^6/2048)^3$ gives about 4 months. Your browser will be slower.
-- **Memory:** the dense matrix alone holds $N^2=10^{12}$ numbers. At 8 bytes each, that is $8\times10^{12}$ bytes, or 8 TB, far beyond the memory of any laptop.
+:::::
 
 ## From dense matrices to banded and sparse systems
 
@@ -477,9 +518,9 @@ NumPy's `np.linalg` has no banded solver, but SciPy, which builds on NumPy, prov
 
 A **sparse matrix** more generally has relatively few nonzero entries, which need not form a narrow band. Local interactions in a larger network often give sparse matrices even when the geometry is more complicated than a chain. SciPy's sparse arrays and `scipy.sparse.linalg` provide methods for these systems, with a cost that depends on the connection pattern.
 
-### A large chain with compact storage
+### Optional, advanced topic: a large chain with compact storage
 
-The notebook starts with 10,000 moving atoms, all joined by springs with $k=5$. Increase `N` to a million to measure the banded calculation on your device without creating a dense matrix, and compare the time and storage with the dense estimate.
+This demo is optional. The notebook below solves a chain of one million moving atoms, all joined by springs with $k=5$, using only the three stored diagonals. Compare its time and storage with the dense estimate above.
 
 ::: {.quarto-wasm-local notebook="l12_banded_solve.edit.py" view="edit" title="Banded storage and solution of a large spring chain" height="850" loading="lazy" fullscreen="true"}
 At $N=10^6$, a dense float64 stiffness matrix needs 8 TB, while the three stored diagonals need 24 MB. With $k=5$ and an end force $F=10^{-7}$, the displacements increase linearly along the chain, and the end displacement is $u_N=NF/k=0.02$. Actual timings depend on the device.
@@ -501,9 +542,9 @@ If the springs differ, each still carries $F$, but spring $j$ stretches by $F/k_
 
 ## Take-home message
 
+- **Just use `np.linalg.solve(K, f)` to solve $\mathbf{K}\mathbf{u}=\mathbf{f}$.** Do not form `np.linalg.inv(K)`.
 - A missing spring or support makes the stiffness matrix **singular**: $\det(\mathbf{K})=0$, the rank is below $N$, and the equations have no unique solution.
 - A very weak spring makes the matrix **ill-conditioned**: the condition number is large, and small changes in the forces can produce large changes in the displacements. In `float64`, condition numbers up to about $10^2$ to $10^3$ are still tolerable.
-- To solve $\mathbf{K}\mathbf{u}=\mathbf{f}$, just use `np.linalg.solve`.
 - When a dense `solve` becomes too slow or too large, look for other methods that use the shape of the matrix, such as banded or sparse solvers.
 
 ## Check your understanding
