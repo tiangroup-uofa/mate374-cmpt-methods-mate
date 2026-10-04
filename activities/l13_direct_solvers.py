@@ -24,7 +24,7 @@ def _():
 @app.cell
 def controls(mo):
 
-    dimension = mo.ui.number(start=2, stop=6, step=1, value=3, label="Matrix order n")
+    dimension = mo.ui.number(start=2, stop=6, step=1, value=3, label="Matrix dimension n")
     random_button = mo.ui.button(
         value=0, label="🎲 Random A, b", on_click=lambda count: count + 1,
     )
@@ -36,13 +36,12 @@ def controls(mo):
     pivoting = mo.ui.checkbox(value=True, label="Partial pivoting")
     a11_choices = {"as in A": None, "0": 0.0, "10⁻⁴": 1e-4, "10⁻⁸": 1e-8,
                    "10⁻¹²": 1e-12, "10⁻¹⁴": 1e-14, "10⁻¹⁶": 1e-16}
-    small_pivot = mo.ui.dropdown(options=list(a11_choices), value="as in A", label="Set a₁₁ to")
     mo.vstack([
         mo.hstack([dimension, random_button, method], justify="start", align="center", gap=1.5),
-        mo.hstack([pivoting, small_pivot], justify="start", align="center", gap=1.5),
+        pivoting,
     ], gap=0.4)
 
-    return a11_choices, dimension, method, pivoting, random_button, small_pivot
+    return a11_choices, dimension, method, pivoting, random_button
 
 
 @app.cell
@@ -59,14 +58,46 @@ def matrix_inputs(dimension, mo, np, random_button):
             break
     _x_initial = _rng.integers(-3, 4, size=n_input).astype(float)
     b_initial = A_initial @ _x_initial
-    _labels = [str(i + 1) for i in range(n_input)]
+    get_base, set_base = mo.state((A_initial.copy(), b_initial.copy()))
+    return get_base, set_base
+
+
+@app.cell
+def pivot_control(a11_choices, get_base, mo):
+    get_base()  # Manual edits and new systems reset the temporary override.
+    small_pivot = mo.ui.dropdown(
+        options=list(a11_choices), value="as in A", label="Set a₁₁ to",
+    )
+    small_pivot
+    return (small_pivot,)
+
+
+@app.cell
+def editors(a11_choices, get_base, mo, np, set_base, small_pivot):
+    _base_A, _base_b = get_base()
+    _shown_A = _base_A.copy()
+    _override = a11_choices[small_pivot.value]
+    if _override is not None:
+        _shown_A[0, 0] = _override
+    _labels = [str(i + 1) for i in range(len(_base_b))]
+
+    def _edit_A(value):
+        updated = np.array(value, dtype=float, copy=True)
+        # Editing another entry must not commit the temporary pivot to the base.
+        if _override is not None and updated[0, 0] == _shown_A[0, 0]:
+            updated[0, 0] = _base_A[0, 0]
+        set_base((updated, _base_b.copy()))
+
+    def _edit_b(value):
+        set_base((_base_A.copy(), np.array(value, dtype=float).reshape(-1)))
 
     A_editor = mo.ui.matrix(
-        A_initial, min_value=-10, max_value=10, step=0.5, precision=1,
+        _shown_A, min_value=-10, max_value=10, step=0.5,
+        scientific=_override is not None, precision=3 if _override is not None else 1,
         row_labels=_labels, column_labels=_labels, debounce=True, label="A",
     )
     b_editor = mo.ui.matrix(
-        b_initial.reshape(-1, 1), min_value=-60, max_value=60, step=0.5, precision=1,
+        _base_b.reshape(-1, 1), min_value=-60, max_value=60, step=0.5, precision=1,
         row_labels=_labels, column_labels=["b"], debounce=True, label="b",
     )
     mo.vstack([
@@ -74,16 +105,21 @@ def matrix_inputs(dimension, mo, np, random_button):
         mo.md("<small>Drag an entry sideways to change it.</small>"),
     ], gap=0.4)
 
-    return A_editor, b_editor
+    def commit_edits(matrix, rhs):
+        if not np.array_equal(matrix, _shown_A):
+            _edit_A(matrix)
+        elif not np.array_equal(rhs, _base_b):
+            _edit_b(rhs)
+
+    return A_editor, b_editor, commit_edits
 
 
 @app.cell
-def current_system(A_editor, a11_choices, b_editor, np, small_pivot):
+def current_system(A_editor, b_editor, commit_edits, np):
 
-    A = np.asarray(A_editor.value, dtype=float)
-    b = np.asarray(b_editor.value, dtype=float).reshape(-1)
-    if a11_choices[small_pivot.value] is not None:
-        A[0, 0] = a11_choices[small_pivot.value]
+    A = np.array(A_editor.value, dtype=float, copy=True)
+    b = np.array(b_editor.value, dtype=float, copy=True).reshape(-1)
+    commit_edits(A, b)
 
     return A, b
 

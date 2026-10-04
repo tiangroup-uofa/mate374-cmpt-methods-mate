@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="170.22679mm"
+   height="125.55371mm"
+   viewBox="0 0 170.22679 125.55371"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   sodipodi:docname="L13-comparison.svg"
+   inkscape:export-filename="L13-comparison.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.6543997"
+     inkscape:cx="22.921771"
+     inkscape:cy="43.551365"
+     inkscape:window-width="1903"
+     inkscape:window-height="1022"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="marker16"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path16" />
+    </marker>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2"
+       x="-0.037502345"
+       y="-0.075004689"
+       width="1.0750047"
+       height="1.1500094">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.61098316"
+         id="feGaussianBlur2" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-20.887129,-15.483918)">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.499999;stroke-opacity:1"
+       id="rect1"
+       width="45.766712"
+       height="22.883356"
+       x="82.050232"
+       y="17.748894"
+       rx="2.780987"
+       ry="2.780987" />
+    <rect
+       style="mix-blend-mode:normal;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.499999;stroke-opacity:1;filter:url(#filter2)"
+       id="rect2"
+       width="45.766712"
+       height="22.883356"
+       x="82.323418"
+       y="17.200277"
+       rx="2.780987"
+       ry="2.780987" />
+    <text
+       xml:space="preserve"
+       style="font-size:6.17695px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.625336;stroke-opacity:1"
+       x="87.504959"
+       y="27.540771"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="font-size:6.17695px;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:0.625338"
+         x="87.504959"
+         y="27.540771">Goal</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:6.17695px;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:0.625338"
+         x="87.504959"
+         y="35.261955"
+         id="tspan3">Solve <tspan
+   style="font-weight:bold;stroke-width:0.625338"
+   id="tspan4">Ax</tspan> = <tspan
+   style="font-weight:bold;stroke-width:0.625338"
+   id="tspan5">b</tspan></tspan></text>
+    <path
+       style="fill:#b5473a;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker16)"
+       d="M 81.650852,29.190571 H 73.335408"
+       id="path15"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#b5473a;fill-opacity:1;stroke:#b5473a;stroke-width:0.499999;stroke-dasharray:none;stroke-opacity:1"
+       x="76.207993"
+       y="30.958254"
+       id="text16"><tspan
+         sodipodi:role="line"
+         id="tspan16"
+         style="stroke:#b5473a;stroke-width:0.5;stroke-opacity:1"
+         x="76.207993"
+         y="30.958254">X</tspan></text>
+    <g
+       id="g3"
+       transform="translate(-0.19533872)">
+      <path
+         style="fill:#b5473a;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker16)"
+         d="M 85.19455,41.04904 74.995555,50.617024"
+         id="path17"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:#b5473a;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker16)"
+         d="m 125.60967,41.04904 10.199,9.567984"
+         id="path18"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <rect
+       style="fill:#edf2f8;fill-opacity:1;stroke:#3d6a99;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
+       id="rect18"
+       width="65.381226"
+       height="62.416908"
+       x="34.650944"
+       y="52.092358"
+       ry="4.2524371" />
+    <rect
+       style="fill:#f8f1e7;fill-opacity:1;stroke:#b07a3a;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
+       id="rect19"
+       width="65.381218"
+       height="52.349361"
+       x="108.73426"
+       y="52.092358"
+       ry="4.2524371" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.499999;stroke-dasharray:none;stroke-opacity:1"
+       x="37.194916"
+       y="58.02356"
+       id="text19"><tspan
+         sodipodi:role="line"
+         id="tspan19"
+         style="font-weight:bold;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-opacity:1"
+         x="37.194916"
+         y="58.02356">Direct methods</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.499999;stroke-dasharray:none;stroke-opacity:1"
+       x="130.53383"
+       y="58.02356"
+       id="text20"><tspan
+         sodipodi:role="line"
+         id="tspan20"
+         style="font-weight:bold;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-opacity:1"
+         x="130.53383"
+         y="58.02356">Iterative methods</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-dasharray:none;stroke-opacity:1"
+       x="34.340656"
+       y="122.01062"
+       id="text21"><tspan
+         sodipodi:role="line"
+         id="tspan21"
+         style="stroke-width:0.5"
+         x="34.340656"
+         y="122.01062">What <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';fill:#231f20;fill-opacity:1"
+   id="tspan23">np.linalg.solve</tspan></tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.5"
+         x="34.340656"
+         y="128.18425"
+         id="tspan22">actually uses</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';writing-mode:lr-tb;direction:ltr;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-dasharray:none;stroke-opacity:1"
+       x="37.313084"
+       y="69.455482"
+       id="text24"><tspan
+         sodipodi:role="line"
+         id="tspan24"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="69.455482">• Gaussian elimination</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="75.635536"
+         id="tspan25" /><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="81.81559"
+         id="tspan26">• Gauss–Jordan</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="87.995644"
+         id="tspan27" /><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="94.175705"
+         id="tspan28">• LU factorization</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="100.35576"
+         id="tspan29" /><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="106.53581"
+         id="tspan30">• Cholesky factorization</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="112.71587"
+         id="tspan31" /><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="37.313084"
+         y="118.89592"
+         id="tspan32" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';writing-mode:lr-tb;direction:ltr;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-dasharray:none;stroke-opacity:1"
+       x="111.92556"
+       y="69.455482"
+       id="text41"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="111.92556"
+         y="69.455482"
+         id="tspan47">• Jacobi</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="111.92556"
+         y="75.635536"
+         id="tspan48" /><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="111.92556"
+         y="81.81559"
+         id="tspan41">• Gauss–Seidel</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="111.92556"
+         y="87.995644"
+         id="tspan51" /><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.5"
+         x="111.92556"
+         y="94.175705"
+         id="tspan52">• Conjugate gradient</tspan></text>
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#8a8f98;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1"
+       id="rect52"
+       width="152.55882"
+       height="88.575523"
+       x="28.927362"
+       y="44.88596"
+       rx="8.0153494"
+       ry="8.0153494" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:none;fill-opacity:1;stroke:#8a8f98;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1"
+       x="181.1469"
+       y="139.99825"
+       id="text53"><tspan
+         sodipodi:role="line"
+         id="tspan53"
+         style="text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.2"
+         x="181.1469"
+         y="139.99825">Square <tspan
+   style="font-weight:bold"
+   id="tspan54">A</tspan>, rank(<tspan
+   style="font-weight:bold"
+   id="tspan55">A</tspan>) = <tspan
+   style="font-style:italic"
+   id="tspan55b">n</tspan></tspan></text>
+    <path
+       style="fill:#b5473a;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker16)"
+       d="m 127.78452,29.190571 h 8.66046"
+       id="path55"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#8a8f98;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker16)"
+       d="m 93.426853,120.40788 h 4.22837 V 92.621451 H 79.332285"
+       id="path56"
+       sodipodi:nodetypes="cccc" />
+    <g
+       id="g14"
+       transform="translate(110.17449,82.844021)">
+      <rect
+         style="fill:#e4e4e4;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-opacity:1"
+         id="rect5"
+         width="35.298363"
+         height="18.872393"
+         x="28.832821"
+         y="26.036911" />
+      <text
+         xml:space="preserve"
+         style="font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-opacity:1"
+         x="36.749317"
+         y="34.125038"
+         id="text6"><tspan
+           sodipodi:role="line"
+           id="tspan6"
+           style="fill:#231f20;fill-opacity:1;stroke-width:0.5"
+           x="36.749317"
+           y="34.125038">Inverse</tspan><tspan
+           sodipodi:role="line"
+           style="fill:#231f20;fill-opacity:1;stroke-width:0.5"
+           x="36.749317"
+           y="40.298664"
+           id="tspan7"><tspan
+   style="font-weight:bold;fill:#231f20;fill-opacity:1"
+   id="tspan8">x</tspan> = <tspan
+   style="font-weight:bold"
+   id="tspan9">A</tspan><tspan
+   style="font-size:65%;baseline-shift:super"
+   id="tspan10">−1</tspan><tspan
+   style="font-weight:bold"
+   id="tspan11">b</tspan></tspan></text>
+      <path
+         style="fill:#e4e4e4;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-opacity:1"
+         d="M 64.056714,44.685611 28.616402,25.974887 Z"
+         id="path12" />
+      <path
+         style="fill:#b5473a;fill-opacity:1;stroke:#b5473a;stroke-width:0.499999;stroke-opacity:1"
+         d="M 28.941371,26.254786 64.074415,44.773973"
+         id="path13"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:#b5473a;fill-opacity:1;stroke:#b5473a;stroke-width:0.499999;stroke-opacity:1"
+         d="m 29.071358,44.648014 34.87307,-18.46225"
+         id="path14"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:#231f20;fill-opacity:1;stroke:#8a8f98;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1"
+       x="27.945515"
+       y="27.195297"
+       id="text59"><tspan
+         sodipodi:role="line"
+         id="tspan59"
+         style="stroke-width:1.2"
+         x="27.945515"
+         y="27.195297" /></text>
+    <g
+       id="g2"
+       transform="translate(0,0.09831008)">
+      <rect
+         style="fill:#f6e2dc;fill-opacity:1;stroke:#b5473a;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1"
+         id="rect63"
+         width="49.964333"
+         height="16.654772"
+         x="21.487129"
+         y="20.764875"
+         ry="4.2524371" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:none;fill-opacity:1;stroke:#8a8f98;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1"
+         x="23.406223"
+         y="27.316139"
+         id="text62"><tspan
+           sodipodi:role="line"
+           id="tspan62"
+           style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.2"
+           x="23.406223"
+           y="27.316139">rank(<tspan
+   style="font-weight:bold"
+   id="tspan60">A</tspan>) &lt; <tspan
+   style="font-style:italic"
+   id="tspan61">n</tspan></tspan><tspan
+           sodipodi:role="line"
+           style="font-weight:bold;fill:#b5473a;fill-opacity:1;stroke:none;stroke-width:1.2"
+           x="23.406223"
+           y="33.489765"
+           id="tspan63">No unique solution</tspan></text>
+    </g>
+    <g
+       id="g1"
+       transform="translate(-1.5875,-0.76832048)">
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:#8a8f98;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1"
+         id="rect64"
+         width="49.964333"
+         height="16.654772"
+         x="140.54959"
+         y="21.631506"
+         ry="4.2524371" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;font-family:Arial;-inkscape-font-specification:Arial;writing-mode:lr-tb;direction:ltr;fill:none;fill-opacity:1;stroke:#8a8f98;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1"
+         x="142.46869"
+         y="28.152624"
+         id="text67"><tspan
+           sodipodi:role="line"
+           id="tspan66"
+           style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.2"
+           x="142.46869"
+           y="28.152624"><tspan
+   style="font-style:italic"
+   id="tspan64">m</tspan> &gt; <tspan
+   style="font-style:italic"
+   id="tspan65">n</tspan> equations</tspan><tspan
+           sodipodi:role="line"
+           style="font-weight:bold;fill:#231f20;fill-opacity:1;stroke:none;stroke-width:1.2"
+           x="142.46869"
+           y="34.326248"
+           id="tspan67">Least squares</tspan></text>
+    </g>
+  </g>
+</svg>

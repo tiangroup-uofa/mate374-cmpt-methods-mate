@@ -239,10 +239,11 @@ def plotly_animation(
     for _col in [1, 2]:
         solver_figure.update_xaxes(row=1, col=_col, tickmode="array", tickvals=list(range(n+2)),
             ticktext=[str(i+1) for i in range(n)] + ["", "rhs"], fixedrange=True,
-            range=[-0.5, n+1.5], tickfont_size=10)
+            range=[-0.5, n+1.5], tickfont_size=10, constrain="domain")
         solver_figure.update_yaxes(row=1, col=_col, tickmode="array", tickvals=list(range(n)),
             ticktext=[str(i+1) for i in range(n)], range=[n-0.5, -0.5], fixedrange=True,
-            tickfont_size=10)
+            tickfont_size=10, scaleanchor="x" if _col == 1 else "x2",
+            scaleratio=1, constrain="domain", constraintoward="top")
         solver_figure.update_xaxes(row=2, col=_col, tickmode="array", tickvals=list(range(n)),
             ticktext=[f"x{i+1}" for i in range(n)], range=[-0.5, n-0.5], fixedrange=True,
             tickfont_size=10)
@@ -273,11 +274,6 @@ def plotly_animation(
         solver_figure,
     ], gap=0.25)
 
-    return
-
-
-@app.cell
-def _():
     return
 
 

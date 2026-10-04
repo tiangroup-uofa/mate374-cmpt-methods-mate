@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="168.5mm"
+   height="69.399193mm"
+   viewBox="0 0 168.5 69.399193"
+   version="1.1"
+   id="svg28"
+   sodipodi:docname="L13-direct-methods.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   inkscape:export-filename="L13-direct-methods.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview28"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showguides="true"
+     inkscape:zoom="1.3631677"
+     inkscape:cx="325.71195"
+     inkscape:cy="202.1028"
+     inkscape:window-width="1680"
+     inkscape:window-height="936"
+     inkscape:window-x="205"
+     inkscape:window-y="960"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g28">
+    <sodipodi:guide
+       position="58.524547,10.694538"
+       orientation="0,-1"
+       id="guide28"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <title
+     id="title1">Comparison of direct methods for Ax = b</title>
+  <defs
+     id="defs1">
+    <marker
+       id="tri"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       refX="0"
+       refY="0"
+       style="overflow:visible">
+      <path
+         d="M 3,0 -1.5,2.6 V -2.6 Z"
+         transform="scale(0.8)"
+         style="fill:context-stroke;stroke:none"
+         id="path1" />
+    </marker>
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="figure"
+     style="font-size:4.23333px;font-family:Arial;fill:#000000"
+     id="g28"
+     transform="translate(-1.75,1.14919)">
+    <text
+       x="81.416801"
+       y="1.9327898"
+       style="font-size:4.23333px;text-anchor:middle"
+       id="text2"><tspan
+   style="font-weight:bold;font-size:4.23333px"
+   id="tspan1">Direct Methods: Transform Ax</tspan> = <tspan
+   style="font-weight:bold;font-size:4.23333px"
+   id="tspan2">b</tspan></text>
+    <g
+       style="fill:none;stroke:#000000;stroke-width:0.4;marker-end:url(#tri)"
+       id="g4">
+      <path
+         d="M 85.028651,4 H 26 v 5.2"
+         id="path2"
+         sodipodi:nodetypes="ccc" />
+      <path
+         d="M 77,4.2341689 V 9.2"
+         id="path3"
+         sodipodi:nodetypes="cc" />
+      <path
+         d="m 85,4 h 52 v 5.2"
+         id="path4" />
+    </g>
+    <g
+       id="gauss"
+       inkscape:label="Gaussian elimination">
+      <rect
+         x="2"
+         y="10"
+         width="48"
+         height="58"
+         ry="4.5"
+         style="fill:none;stroke:#676767;stroke-width:0.5"
+         id="rect4" />
+      <text
+         x="26"
+         y="16.5"
+         style="font-weight:bold;text-anchor:middle;fill:#231f20"
+         id="text4">Gaussian elimination</text>
+      <g
+         id="g30"
+         transform="translate(1.9121133)">
+        <path
+           d="m 7.5,20 h 2.2 v 2.2 H 7.5 Z m 2.2,0 h 2.2 v 2.2 H 9.7 Z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 H 27.3 Z M 9.7,22.2 h 2.2 v 2.2 H 9.7 Z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -15.4,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -13.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -11,2.2 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 H 27.3 Z M 18.5,31 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -6.6,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -4.4,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 0,2.2 h 2.2 V 42 h -2.2 z"
+           style="fill:#ff7f0e"
+           id="path5" />
+        <path
+           d="M 9.7,20 V 42 M 11.9,20 V 42 M 14.1,20 V 42 M 16.3,20 V 42 M 18.5,20 V 42 M 20.7,20 V 42 M 22.9,20 V 42 M 25.1,20 V 42 M 27.3,20 V 42 M 7.5,22.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 M 7.5,31 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22"
+           style="fill:none;stroke:#8a8f98;stroke-width:0.125"
+           id="path6" />
+        <rect
+           x="7.5"
+           y="20"
+           width="22"
+           height="22"
+           style="fill:none;stroke:#000000;stroke-width:0.5"
+           id="rect6" />
+        <text
+           x="31.5"
+           y="32.5"
+           id="text7"><tspan
+   style="font-weight:bold"
+   id="tspan6">x</tspan> = <tspan
+   style="font-weight:bold"
+   id="tspan7">c</tspan></text>
+        <text
+           x="18.5"
+           y="47"
+           style="font-weight:bold;text-anchor:middle;fill:#ff7f0e"
+           id="text8">U</text>
+      </g>
+      <text
+         x="26"
+         y="58.233337"
+         style="text-anchor:middle"
+         id="text9">Back substitution</text>
+      <text
+         x="26"
+         y="64.233337"
+         style="font-style:italic;text-anchor:middle"
+         id="text11">x<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan9">n</tspan> → x<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan10">n−1</tspan> → … → x<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan11">1</tspan></text>
+    </g>
+    <g
+       id="gauss-jordan"
+       inkscape:label="Gauss-Jordan">
+      <rect
+         x="53"
+         y="10"
+         width="48"
+         height="58"
+         ry="4.5"
+         style="fill:none;stroke:#676767;stroke-width:0.5"
+         id="rect11" />
+      <text
+         x="77.041344"
+         y="16.5"
+         style="font-weight:bold;text-anchor:middle;fill:#231f20"
+         id="text12">Gauss–Jordan</text>
+      <g
+         id="g32"
+         transform="translate(1.9121133)">
+        <path
+           d="m 58.5,20 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 V 31 h -2.2 z m 2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,2.2 h 2.2 V 42 h -2.2 z"
+           style="fill:#2ca02c"
+           id="path12" />
+        <rect
+           x="58.5"
+           y="20"
+           width="22"
+           height="22"
+           style="fill:none;stroke:#000000;stroke-width:0.5"
+           id="rect13" />
+        <g
+           id="g31">
+          <path
+             d="M 60.7,20 V 42 M 62.9,20 V 42 M 65.1,20 V 42 M 67.3,20 V 42 M 69.5,20 V 42 M 71.7,20 V 42 M 73.9,20 V 42 M 76.1,20 V 42 M 78.3,20 V 42 M 58.5,22.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22"
+             style="fill:none;stroke:#8a8f98;stroke-width:0.125"
+             id="path13" />
+          <text
+             x="82.5"
+             y="32.5"
+             id="text14"><tspan
+   style="font-weight:bold"
+   id="tspan13">x</tspan> = <tspan
+   style="font-weight:bold"
+   id="tspan14">c</tspan></text>
+          <text
+             x="69.5"
+             y="47"
+             style="font-weight:bold;text-anchor:middle;fill:#2ca02c"
+             id="text15">I</text>
+        </g>
+      </g>
+      <text
+         x="77"
+         y="58.233334"
+         style="text-anchor:middle"
+         id="text16">Direct readout</text>
+      <text
+         x="77"
+         y="64.23333"
+         style="font-style:italic;text-anchor:middle"
+         id="text17">x<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan16">1</tspan>, …, x<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan17">n</tspan></text>
+    </g>
+    <g
+       id="lu"
+       inkscape:label="LU factorization">
+      <rect
+         x="104"
+         y="10"
+         width="66"
+         height="58"
+         ry="4.5"
+         style="fill:none;stroke:#676767;stroke-width:0.5"
+         id="rect17" />
+      <text
+         x="136.98036"
+         y="16.5"
+         style="font-weight:bold;text-anchor:middle;fill:#231f20"
+         id="text18">LU factorization</text>
+      <g
+         id="g29"
+         transform="translate(1.8242634)">
+        <path
+           d="m 106.5,20 h 2.2 v 2.2 h -2.2 z m 0,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -4.4,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -6.6,2.2 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m -8.8,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -11,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -13.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -15.4,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -17.6,2.2 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z m 2.2,0 h 2.2 V 42 h -2.2 z"
+           style="fill:#1f77b4"
+           id="path18" />
+        <path
+           d="m 108.7,20 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 V 42 M 106.5,22.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22"
+           style="fill:none;stroke:#8a8f98;stroke-width:0.125"
+           id="path19" />
+        <rect
+           x="106.5"
+           y="20"
+           width="22"
+           height="22"
+           style="fill:none;stroke:#000000;stroke-width:0.5"
+           id="rect19" />
+        <path
+           d="m 130.5,20 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -17.6,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -15.4,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -13.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -11,2.2 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m 2.2,0 h 2.2 V 31 h -2.2 z m -8.8,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -6.6,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -4.4,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m -2.2,2.2 h 2.2 v 2.2 h -2.2 z m 2.2,0 h 2.2 v 2.2 h -2.2 z m 0,2.2 h 2.2 V 42 h -2.2 z"
+           style="fill:#ff7f0e"
+           id="path20" />
+        <path
+           d="m 132.7,20 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 v 22 m 2.2,-22 V 42 M 130.5,22.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22 m -22,2.2 h 22"
+           style="fill:none;stroke:#8a8f98;stroke-width:0.125"
+           id="path21" />
+        <rect
+           x="130.5"
+           y="20"
+           width="22"
+           height="22"
+           style="fill:none;stroke:#000000;stroke-width:0.5"
+           id="rect21" />
+        <text
+           x="154.5"
+           y="32.5"
+           id="text22"><tspan
+   style="font-weight:bold"
+   id="tspan21">x</tspan> = <tspan
+   style="font-weight:bold"
+   id="tspan22">b</tspan></text>
+        <text
+           x="117.5"
+           y="47"
+           style="font-weight:bold;text-anchor:middle;fill:#1f77b4"
+           id="text23">L</text>
+        <text
+           x="141.5"
+           y="47"
+           style="font-weight:bold;text-anchor:middle;fill:#ff7f0e"
+           id="text24">U</text>
+      </g>
+      <text
+         x="137"
+         y="55.8"
+         style="text-anchor:middle"
+         id="text27">Forward solve: <tspan
+   style="font-weight:bold"
+   id="tspan24">Ly</tspan> = <tspan
+   style="font-weight:bold"
+   id="tspan25">b</tspan></text>
+      <text
+         x="137"
+         y="60.1"
+         style="text-anchor:middle"
+         id="text29">Backward solve: <tspan
+   style="font-weight:bold"
+   id="tspan26">Ux</tspan> = <tspan
+   style="font-weight:bold"
+   id="tspan27">y</tspan></text>
+      <text
+         x="137"
+         y="65.8"
+         style="font-weight:bold;text-anchor:middle;fill:#b5473a"
+         id="text28">Reuse L, U for each new b</text>
+    </g>
+  </g>
+  <metadata
+     id="metadata32">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Comparison of direct methods for Ax = b</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>
