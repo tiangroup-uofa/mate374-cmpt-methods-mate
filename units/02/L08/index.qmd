@@ -2,6 +2,7 @@
 title: "L08 · Fitting data with a function — the exact approach"
 subtitle: "Interpolation, piecewise polynomials, and a sparse phase boundary"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -139,7 +140,7 @@ So far we have required the curve to pass through the data, but that condition a
   $$
   R(x)=\frac{a_0+a_1x}{1+b_1x+b_2x^2}.
   $$
-  A denominator that approaches zero can produce a very steep rise or a pole. This can be useful when the physical response has that shape, although any poles introduced by the approximation need checking. [Kiusalaas, §3.2](../references.qmd#ref-kiusalaas2013) gives examples of rational interpolation.
+  A denominator that approaches zero can produce a very steep rise or a pole. This can be useful when the physical response has that shape, although any poles introduced by the approximation need checking. @kiusalaas2013 [§3.2] gives examples of rational interpolation.
 - **Trigonometric functions**, such as $1$, $\sin x$, $\cos x$, $\sin 2x$, and $\cos 2x$, naturally describe repeating patterns. Combining them is useful for periodic measurements, such as a property that varies with orientation. Higher frequencies add more oscillations. The [Fourier-series interpretation](https://en.wikipedia.org/wiki/Fourier_series) develops this idea.
 - **Special functions** can supply shapes suggested by a physical problem. For example, **Bessel functions** appear in radial heat conduction and vibrations in cylindrical geometry. Functions such as $J_0(\lambda x)$, with a chosen scale $\lambda$, can be useful building blocks for these problems. The [NIST introduction to Bessel functions](https://dlmf.nist.gov/10.2) and [SciPy's Bessel-function plots](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.jv.html) give a first look at their shapes.
 
@@ -214,7 +215,7 @@ $$
 P_{N-1}(x)=\sum_{i=0}^{N-1}y_i\ell_i(x).
 $$
 
-Here $\prod$ means **multiply the factors**, skipping $j=i$, and $\sum$ means **add the terms**. There are $N-1$ linear factors in each basis function, so each has degree $N-1$. Their weighted sum passes through all the data points ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013), §3.2). The Lagrange basis functions have the **cardinal property**
+Here $\prod$ means **multiply the factors**, skipping $j=i$, and $\sum$ means **add the terms**. There are $N-1$ linear factors in each basis function, so each has degree $N-1$. Their weighted sum passes through all the data points [@kiusalaas2013, §3.2]. The Lagrange basis functions have the **cardinal property**
 
 $$
 \boxed{

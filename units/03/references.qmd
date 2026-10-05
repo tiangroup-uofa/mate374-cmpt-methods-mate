@@ -3,9 +3,9 @@ title: "Unit 03 · References"
 format:
   html:
     toc: true
-bibliography: references.bib
+bibliography: ../../references.bib
 nocite: |
-  @*
+  @burden2016numerical, @kiusalaas2013, @mmbaga_computational
 ---
 
 ## Bibliography

@@ -2,6 +2,7 @@
 title: "L07 · Finding extrema in one dimension"
 subtitle: "Which material state has the lowest free energy?"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -29,7 +30,7 @@ In L05 and L06, the van der Waals equation of state gave us **possible volumes**
 Two phases can both satisfy the equation of state at the same $T$ and $P$. For them to coexist in equilibrium, their molar Gibbs free energies must also be equal!
 :::
 
-To choose between the two candidates, we need to compare their **molar Gibbs free energies** at the same $T$ and $P$ ([Poling, Prausnitz, and O'Connell, 2001](../references.qmd#ref-poling2001properties)).
+To choose between the two candidates, we need to compare their **molar Gibbs free energies** at the same $T$ and $P$ [@poling2001properties].
 
 To simplify, we now use **molar volume** $v=V/n$ (in L/mol). Without diving too deep into the math, the molar free-energy curve $\mathcal G(v;T,P)$ for a vdW gas–liquid system at fixed temperature and pressure is given below. The liquid-like and gas-like states will be distinguished by their volumes.
 
@@ -83,7 +84,7 @@ $$
 =-\left(\frac{\partial P_{\mathrm{EOS}}}{\partial v}\right)_T.}
 $$
 
-A descending EOS branch gives a free-energy minimum; the ascending middle branch gives a maximum. The vdW EOS and its thermodynamic use are discussed in [Poling, Prausnitz, and O'Connell (2001)](../references.qmd#ref-poling2001properties).
+A descending EOS branch gives a free-energy minimum; the ascending middle branch gives a maximum. The vdW EOS and its thermodynamic use are discussed in @poling2001properties.
 :::
 
 We can identify three features on the free-energy curve: two minima and one maximum. They coincide with the three EOS roots!
@@ -150,7 +151,7 @@ We do not need the derivation here. The important point is that values of the or
 
 ## Bounded minimization: golden-section search
 
-Suppose the function we are interested in, $f(x)$, has **exactly one minimum** in $[a,b]$, decreasing toward it and increasing after it. The function is **unimodal** on this interval. We can compare function values inside the interval to discard a part that cannot contain the minimum. This is the basic idea behind bounded minimization, analogous to the bracketing methods in root-finding. A widely used method is **golden-section search** ([Kiefer, 1953](../references.qmd#ref-kiefer1953sequential)).
+Suppose the function we are interested in, $f(x)$, has **exactly one minimum** in $[a,b]$, decreasing toward it and increasing after it. The function is **unimodal** on this interval. We can compare function values inside the interval to discard a part that cannot contain the minimum. This is the basic idea behind bounded minimization, analogous to the bracketing methods in root-finding. A widely used method is **golden-section search** [@kiefer1953sequential].
 
 A single midpoint value does not tell us which side has the lower values (**why?**). Golden-section search evaluates **two interior points**, $x_1<x_2$:
 
@@ -205,7 +206,7 @@ k\ge\left\lceil
 \right\rceil.
 $$
 
-The interval shrinks by about 0.618 each time, compared with 0.5 for a bisection root bracket. The two algorithms use different information: golden section compares function values, while bisection preserves a sign change ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013)).
+The interval shrinks by about 0.618 each time, compared with 0.5 for a bisection root bracket. The two algorithms use different information: golden section compares function values, while bisection preserves a sign change [@kiusalaas2013].
 :::
 
 Like bisection in root-finding, golden-section search reduces the interval by a fixed factor at each step. To reduce an initial width $h_0$ to at most $\varepsilon_x<h_0$, it takes
@@ -232,7 +233,7 @@ In SciPy, use [`minimize_scalar`](https://docs.scipy.org/doc/scipy/reference/gen
 | Method | Search information | Main idea |
 |---|---|---|
 | `golden` | A minimum bracket | Golden-section interval reduction |
-| `brent` | A minimum bracket | Interpolation with golden-section fallback |
+| `brent` | A minimum bracket | Interpolation with golden-section fallback [@brent1973algorithms] |
 | `bounded` | Finite `bounds=(a,b)` | Bounded Brent minimization within the interval |
 
 ```{.python code-fold="false"}
@@ -272,7 +273,7 @@ print(stationary.root, stationary.converged)
 print(d2_free_energy(stationary.root))  # Positive at a strict minimum.
 ```
 
-A zero or small curvature makes the Newton–Raphson step undefined or large. For many-variable energies, the first derivatives form a **gradient** and the second derivatives form a **Hessian matrix**. Computing and solving with that matrix can be expensive ([Nocedal and Wright, 2006](../references.qmd#ref-nocedal2006optimization)).
+A zero or small curvature makes the Newton–Raphson step undefined or large. For many-variable energies, the first derivatives form a **gradient** and the second derivatives form a **Hessian matrix**. Computing and solving with that matrix can be expensive [@nocedal2006optimization].
 
 ### Gradient descent: take a step downhill
 
@@ -282,7 +283,7 @@ $$
 \boxed{x_{k+1}=x_k-\alpha f'(x_k),\qquad \alpha>0.}
 $$
 
-This is **gradient descent** in one dimension ([Nocedal and Wright, 2006](../references.qmd#ref-nocedal2006optimization)). What we did was to introduce one adjustable parameter, the step-size parameter $\alpha$, which controls how far we move downhill according to the current slope. When the objective is a black-box calculation, the numerical slope estimate above can supply $f'(x_k)$; the extra evaluations and any noise in them affect the direction of the update.
+This is **gradient descent** in one dimension [@nocedal2006optimization]. What we did was to introduce one adjustable parameter, the step-size parameter $\alpha$, which controls how far we move downhill according to the current slope. When the objective is a black-box calculation, the numerical slope estimate above can supply $f'(x_k)$; the extra evaluations and any noise in them affect the direction of the update.
 
 - Too small: the calculation makes slow progress.
 - Too large: the step can overshoot the well and increase the energy or diverge.

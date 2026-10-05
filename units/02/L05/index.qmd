@@ -2,6 +2,7 @@
 title: "L05 · Finding a desired state by root finding"
 subtitle: "Grid search, bisection, and bounded methods"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -66,7 +67,7 @@ $$
 \boxed{\left(P+\frac{an^2}{V^2}\right)(V-nb)=nRT.}
 $$
 
-The parameters $a$ and $b$ account for intermolecular attraction and molecular size. Here $V$ is the total volume of $n$ moles, which is why we need both the $n^2$ and $n$ terms. See [Poling, Prausnitz, and O'Connell (2001)](../references.qmd#ref-poling2001properties) for the equation of state.
+The parameters $a$ and $b$ account for intermolecular attraction and molecular size. Here $V$ is the total volume of $n$ moles, which is why we need both the $n^2$ and $n$ terms. See @poling2001properties for the equation of state.
 
 If we write pressure as a function of volume, we get
 
@@ -206,7 +207,7 @@ $$
 
 The midpoint is then at most $\varepsilon_x/2$ from a root. This bounds the error in **$x$**; we check $|f(x_s)|$ separately if we also require a residual tolerance.
 
-For example, shrinking a 0.4 L interval to a width of $10^{-6}$ L takes **19 halvings**. A uniform grid with that spacing needs **400,000 intervals**. Bisection's predictable convergence makes it one of the most reliable root-finding methods ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013)).
+For example, shrinking a 0.4 L interval to a width of $10^{-6}$ L takes **19 halvings**. A uniform grid with that spacing needs **400,000 intervals**. Bisection's predictable convergence makes it one of the most reliable root-finding methods [@kiusalaas2013].
 
 ### Try bisection on the gas problem
 
@@ -232,7 +233,7 @@ Bisection works, but it uses only the **signs** of the endpoint values. Could th
 
 **Regula falsi**, or **false position**, is one of the oldest recorded approaches to solving equations. Ancient Egyptian scribes used false position in arithmetic problems recorded in the Rhind Mathematical Papyrus, around 1650 BCE ([history of false position](https://en.wikipedia.org/wiki/Regula_falsi#History)).
 
-The modern bracketed method draws a straight line through $(a,f(a))$ and $(b,f(b))$ ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013)). If the function is approximately linear near the root, the zero of this line should be a useful estimate:
+The modern bracketed method draws a straight line through $(a,f(a))$ and $(b,f(b))$ [@kiusalaas2013]. If the function is approximately linear near the root, the zero of this line should be a useful estimate:
 
 $$
 \boxed{x_s=\frac{af(b)-bf(a)}{f(b)-f(a)}.}
@@ -252,12 +253,12 @@ In L06, the secant and Newton-Raphson methods will use an estimated slope or a d
 
 ## What do we use in SciPy?
 
-There are several improved bracketing methods. We will use their implementations without deriving every variant. SciPy's [`root_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root_scalar.html) provides a common interface ([Virtanen et al., 2020](../references.qmd#ref-virtanen2020scipy)). Its bracketed methods include:
+There are several improved bracketing methods. We will use their implementations without deriving every variant. SciPy's [`root_scalar`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root_scalar.html) provides a common interface [@virtanen2020scipy]. Its bracketed methods include:
 
 | Method name | Algorithm |
 |---|---|
 | `bisect` | Bisection |
-| `brentq` | Brent's method, combining bisection with interpolation |
+| `brentq` | Brent's method, combining bisection with interpolation [@brent1973algorithms] |
 | `brenth` | A variant of Brent's method |
 | `ridder` | Ridder's method |
 | `toms748` | TOMS Algorithm 748 |

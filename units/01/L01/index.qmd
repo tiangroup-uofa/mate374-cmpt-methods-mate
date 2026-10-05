@@ -2,6 +2,7 @@
 title: "L01 · From a materials question to a computation"
 subtitle: "Mathematical models, numerical methods, computational simulation, and a first experiment"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -59,13 +60,13 @@ $$
 
 These equations describe continuous motion of atoms, but a computer cannot advance through every instant of continuous time! The numerical layer introduces a finite timestep $\Delta t$. The velocity-Verlet **algorithm** uses the current positions, velocities, and accelerations to approximate their values at the next timestep.
 
-Finally, after the algorithm (numerical methods) for implementing the mathematical equations are defined, the are usually distributed as reusable **computational software**. In the case of MD, the computational simulation implements this repeated update for many atoms and many timesteps. It also supplies an atomic structure, an interatomic model, temperature control, boundary conditions, data collection, and visualization. The example in the figure follows a gold nanoparticle as its atomic structure becomes increasingly liquid-like with temperature, an application adapted from [Zeni et al. (2021)](../references.qmd#ref-zeni2021gold).
+Finally, after the algorithm (numerical methods) for implementing the mathematical equations are defined, the are usually distributed as reusable **computational software**. In the case of MD, the computational simulation implements this repeated update for many atoms and many timesteps. It also supplies an atomic structure, an interatomic model, temperature control, boundary conditions, data collection, and visualization. The example in the figure follows a gold nanoparticle as its atomic structure becomes increasingly liquid-like with temperature, an application adapted from @zeni2021gold.
 
 
 
 ## Numerical methods and computational materials science
 
-Textbooks and courses in this area often approach computation from two directions. A numerical-methods course, such as the text by Mmbaga and co-authors, is usually organized around mathematical problems. A computational materials science course, such as LeSar's [*Introduction to Computational Materials Science*](../references.qmd#ref-lesar2013), is usually organized around physical scales and simulation families.
+Textbooks and courses in this area often approach computation from two directions. A numerical-methods course, such as the text by @mmbaga_computational, is usually organized around mathematical problems. A computational materials science course, such as LeSar's *Introduction to Computational Materials Science* [@lesar2013], is usually organized around physical scales and simulation families.
 
 ::: {.columns}
 
@@ -129,7 +130,7 @@ We normally begin with the simplest model that can answer the question. We add d
 
 ### Computational methods for discovery
 
-Advances in electronic-structure software have made large collections of materials calculations possible. Projects such as the [Materials Project](../references.qmd#ref-jain2013materialsproject) organize these calculations into searchable databases. More recently, AI/ML models have been coupled with electronic-structure calculations to screen candidate crystals at an unprecedented scale. The GNoME study, for example, reported millions of candidate structures and used density-functional-theory calculations to evaluate their stability ([Merchant et al., 2023](../references.qmd#ref-merchant2023materials)).
+Advances in electronic-structure software have made large collections of materials calculations possible. Projects such as the Materials Project [@jain2013materialsproject] organize these calculations into searchable databases. More recently, AI/ML models have been coupled with electronic-structure calculations to screen candidate crystals at an unprecedented scale. The GNoME study, for example, reported millions of candidate structures and used density-functional-theory calculations to evaluate their stability [@merchant2023materials].
 
 This scale does not remove the need for experiments or careful interpretation. It allows researchers to narrow a vast search space and decide which candidates deserve more detailed simulation, synthesis, and measurement. We will return to electronic-structure methods and AI/ML-assisted materials simulation later in the course.
 
@@ -139,9 +140,9 @@ This scale does not remove the need for experiments or careful interpretation. I
 
 Modeling can guide experiments and reveal possible failure modes before a design is placed in service. However, a computer carries out the calculation it is given. It does not decide whether the equations represent the manufactured object, whether the material properties are trustworthy, or whether damage accumulated during service has changed the system.
 
-The OceanGate *Titan* submersible imploded on June 18, 2023. The subsequent investigation found that its carbon-fibre composite pressure vessel had accumulated delamination and other damage, and that OceanGate had not adequately established the as-built vessel's strength and durability over repeated dives ([NTSB, 2025](../references.qmd#ref-ntsb2025titan)). Analyses based on idealized geometry and material behaviour could not by themselves establish that the damaged vessel was safe.
+The OceanGate *Titan* submersible imploded on June 18, 2023. The subsequent investigation found that its carbon-fibre composite pressure vessel had accumulated delamination and other damage, and that OceanGate had not adequately established the as-built vessel's strength and durability over repeated dives [@ntsb2025titan]. Analyses based on idealized geometry and material behaviour could not by themselves establish that the damaged vessel was safe.
 
-A later simulation-based reconstruction illustrated how instability could lead to rapid collapse under deep-sea pressure ([Engineering.com, n.d.](../references.qmd#ref-engineeringtitan)). (Side note: such a reconstruction can help explain a plausible failure sequence, but it does not prove that simply running one more simulation would have prevented the disaster.)
+A later simulation-based reconstruction illustrated how instability could lead to rapid collapse under deep-sea pressure [@engineeringtitan]. (Side note: such a reconstruction can help explain a plausible failure sequence, but it does not prove that simply running one more simulation would have prevented the disaster.)
 
 ![Simulation in more extreme conditions may help evaluate real-world scenario and prevent disaster.](../../../assets/L01-oceangate.png){fig-alt="The recovered Titan pressure vessel, the Titan submersible before the accident, and simulated pressure-vessel stress and collapse."}
 
@@ -153,9 +154,9 @@ A model can be internally sophisticated yet still fail as engineering evidence w
 
 ### “What if the computer deceived me?”
 
-A more difficult situation arises when the software itself has been designed to produce misleading results. `Fast16.sys` was a long-lived software-sabotage framework that was targeted to at least one country-wide high-performance computing facilities (most prominently Iran [Constantin, 2026](../references.qmd#ref-constantin2026fast16)). Unlike a traditional error in programming codes (which are usually called a "bug"), `Fast16.sys` was designed originally as a malware that targeted high-precision scientific computing programs ([SentinelOne Labs, 2026](../references.qmd#ref-sentinelone2026fast16)).
+A more difficult situation arises when the software itself has been designed to produce misleading results. `Fast16.sys` was a long-lived software-sabotage framework that was targeted to at least one country-wide high-performance computing facilities (most prominently Iran, as reported by [CSO Online](https://www.csoonline.com/article/4165214/researchers-unearth-industrial-sabotage-malware-that-predated-stuxnet-by-5-years.html)). Unlike a traditional error in programming codes (which are usually called a "bug"), `Fast16.sys` was designed originally as a malware that targeted high-precision scientific computing programs ([SentinelOne Labs, 2026](https://www.sentinelone.com/labs/fast16-mystery-shadowbrokers-reference-reveals-high-precision-software-sabotage-5-years-before-stuxnet/)).
 
-Public analyses reported that it targeted particular builds of LS-DYNA and AUTODYN routines in Ansys, and altered selected high-rate or explosive simulations only after narrow trigger conditions were reached ([Symantec Threat Hunter Team, 2026](../references.qmd#ref-symantec2026fast16)). A small, gradual change to an equation-of-state response could remain plausible while corrupting the final coupled simulation.
+Public analyses reported that it targeted particular builds of LS-DYNA and AUTODYN routines in Ansys, and altered selected high-rate or explosive simulations only after narrow trigger conditions were reached ([Symantec Threat Hunter Team, 2026](https://www.security.com/blog-post/fast16-nuclear-sabotage)). A small, gradual change to an equation-of-state response could remain plausible while corrupting the final coupled simulation.
 
 What's even worse: as all copies of the same software was infected, repeating a calculation on several computers running the same compromised software could reproduce the same false result.
 
@@ -218,7 +219,7 @@ You will not always write a program from a blank page. In many activities, a wor
 
 ## First numerical experiment: Buffon's needle
 
-Buffon's needle problem estimates the mathematical constant $\pi$ through a physical experiment with random throws ([Weisstein, n.d.](../references.qmd#ref-weissteinbuffon)). We will use Buffon's experiment as our first example because the physical picture is simple, the algorithm is short, and the reference value $\pi$ is known.
+Buffon's needle problem estimates the mathematical constant $\pi$ through a physical experiment with random throws [@weissteinbuffon]. We will use Buffon's experiment as our first example because the physical picture is simple, the algorithm is short, and the reference value $\pi$ is known.
 
 Imagine equally spaced parallel lines on a floor. The distance between neighbouring lines is $D$. We drop a needle of length $L$, with $L\le D$, without choosing its position or direction. Sometimes the needle crosses a line and sometimes it does not.
 

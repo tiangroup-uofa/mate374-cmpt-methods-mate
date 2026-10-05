@@ -2,6 +2,7 @@
 title: "L03 · Numbers in computer systems"
 subtitle: "Binary representation, floating point, and round-off error"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -67,7 +68,7 @@ These tolerances are illustrative, not universal. An absolute tolerance is espec
 
 ### When a small representation error becomes a disaster
 
-On February 25, 1991, during the first Gulf War, a US Patriot missile battery at Dhahran, Saudi Arabia, failed to track and intercept an incoming Iraqi Scud. The Scud struck a U.S. Army barracks, killing 28 soldiers. The investigation traced the tracking failure to an inaccurate time conversion after the system had operated continuously for about 100 hours ([GAO, 1992](../references.qmd#ref-gao1992patriot)).
+On February 25, 1991, during the first Gulf War, a US Patriot missile battery at Dhahran, Saudi Arabia, failed to track and intercept an incoming Iraqi Scud. The Scud struck a U.S. Army barracks, killing 28 soldiers. The investigation traced the tracking failure to an inaccurate time conversion after the system had operated continuously for about 100 hours ([GAO, 1992](https://www.gao.gov/products/imtec-92-26)).
 
 What happened? The system counted clock ticks as integers, with each tick representing $1/10$ second. Converting the count to seconds used a truncated binary approximation to $1/10$ in a 24-bit fixed-point calculation. This introduced a conversion bias of about $9.54\times10^{-8}$ seconds per tick, not a fault in the clock's ticking rate. After 100 hours, the time-conversion error had grown to:
 
@@ -345,7 +346,7 @@ It is slightly smaller than $3/10$, by about $1.11\times10^{-17}$. Recovering th
 
 ## IEEE 754: sign, exponent, and fraction
 
-The IEEE 754 standard specifies common floating-point formats ([IEEE, 2019](../references.qmd#ref-ieee7542019)). For a **normal, finite** binary number,
+The IEEE 754 standard specifies common floating-point formats [@ieee7542019]. For a **normal, finite** binary number,
 
 $$
 \boxed{x=(-1)^s\left(1+\frac{F}{2^t}\right)2^{E-b}}
@@ -478,7 +479,7 @@ s_{2N}=\sqrt{2-\sqrt{4-s_N^2}},
 \qquad \pi_N=\frac{Ns_N}{2}.
 $$
 
-As $N$ increases, $s_N$ decreases. The inner square root becomes very close to 2. Subtracting two nearly equal values exposes the rounding error already present in the intermediate result. This is **cancellation**; it can leave few useful significant digits ([Goldberg, 1991](../references.qmd#ref-goldberg1991floating)).
+As $N$ increases, $s_N$ decreases. The inner square root becomes very close to 2. Subtracting two nearly equal values exposes the rounding error already present in the intermediate result. This is **cancellation**; it can leave few useful significant digits [@goldberg1991floating].
 
 A short calculation using Python's usual `float64` precision makes the issue visible:
 

@@ -3,9 +3,9 @@ title: "Unit 01 · References"
 format:
   html:
     toc: true
-bibliography: references.bib
+bibliography: ../../references.bib
 nocite: |
-  @*
+  @beckmann1971pi, @engineeringtitan, @goldberg1991floating, @harris2020numpy, @ieee7542019, @jain2013materialsproject, @kanigel1991, @lam2015numba, @lesar2013, @merchant2023materials, @mmbaga_computational, @ntsb2025titan, @paszke2019pytorch, @ramanujan1914, @weissteinbasel, @weissteinbuffon, @zeni2021gold
 ---
 
 ## Bibliography

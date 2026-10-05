@@ -37,6 +37,14 @@ Use embedded, editable marimo notebooks for student-facing Python calculations, 
 
 `_quarto-full.yml` adds build hooks, not render targets: selecting `--profile full` alone does not undo a narrowed `_quarto.yml`. Profile render lists append to the base list, so a short `_quarto-local.yml` render list does not narrow the scope. Shared notebook-export hooks may still process notebooks outside the selected pages.
 
+## References and citations
+
+- The root `references.bib` is the single source of truth for every bibliography entry in the course. Add or correct entries there only, and do not create per-unit or per-page `.bib` files. Before adding an entry, confirm its authors, title, venue, year, and DOI or URL. Never invent missing details. Leave a field out instead, and note the gap in a `.txt` file for the instructor.
+- Cite with Pandoc syntax: `[@key]` for a parenthetical citation, `@key` for a narrative citation, and `[@key, §3.2]` for a locator. Do not write manual links to `references.qmd#ref-key`.
+- Every page that cites a source sets `bibliography: ../../../references.bib` (the relative path to the root file) in its front matter, so its references appear at the bottom of the page. Once a page has a bibliography, a bare `@word` in prose is read as a citation, so keep decorators and the `@` operator inside code.
+- Each unit's `units/NN/references.qmd` gathers that unit's sources from the root file (`bibliography: ../../references.bib`), listing the keys cited by the unit's pages in `nocite`. When a page in the unit gains or loses a citation, update that list.
+- Do not edit the syllabus references when updating course citations.
+
 ## Figure generation
 
 All script-generated figures must use `dpi=300` when saved. Do not introduce lower-resolution output unless the instructor explicitly requests it.

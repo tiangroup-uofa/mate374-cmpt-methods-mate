@@ -2,6 +2,7 @@
 title: "L09 · Approximating data with a function"
 subtitle: "Least-squares regression, and fitting non-linear functions in Python"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -35,7 +36,7 @@ For example, when measuring the coexistence pressure, a poorly calibrated pressu
 
 Recall that a straight line can pass through two points, and a quadratic can pass through three. More generally, $N$ points with distinct inputs determine one polynomial of degree **at most $N-1$**, whether we write it in Lagrange or Newton form. That polynomial has $N$ adjustable coefficients to satisfy the $N$ data values. As we add noisy data, insisting on an exact match can give us an increasingly complicated curve.
 
-The idea of **curve fitting** is to use a formula with fewer parameters, often just a few, to reproduce the overall trend. We first choose the form of the function, often called a **function family**, then adjust its parameters to represent the data overall. The fitted curve may pass through some points, but it is not required to pass through all of them ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013), §3.4).
+The idea of **curve fitting** is to use a formula with fewer parameters, often just a few, to reproduce the overall trend. We first choose the form of the function, often called a **function family**, then adjust its parameters to represent the data overall. The fitted curve may pass through some points, but it is not required to pass through all of them [@kiusalaas2013, §3.4].
 
 For example, bitumen becomes less viscous as its temperature increases. The synthetic data below illustrate how sample-to-sample differences, small temperature offsets, and measurement noise can obscure this trend. Here we use a synthetic example inspired by an [experimental study of bitumen viscosity](https://www.mdpi.com/1996-1073/12/12/2390) to demonstrate the difference between interpolation and curve fitting. For the curve fitting, we choose a decreasing power law to describe the viscosity:
 

@@ -2,6 +2,7 @@
 title: "L11 · Recap of linear algebra"
 subtitle: "Systems of equations, matrix basics, and solutions in Python"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -219,7 +220,7 @@ For a linear system with fixed, invertible $\mathbf{K}$, doubling the applied fo
 
 ## Matrices, vectors, and linear systems
 
-You may remember solving small systems with [Cramer's rule](https://en.wikipedia.org/wiki/Cramer%27s_rule), which expresses each unknown as a ratio of determinants. NumPy and SciPy provide functions for solving these systems. We will first review scalars, vectors, matrices, and their operations. For a fuller review, see Jaan Kiusalaas, [*Numerical Methods in Engineering with Python 3*, Chapter 2: Systems of Linear Algebraic Equations](../../02/references.qmd#ref-kiusalaas2013).
+You may remember solving small systems with [Cramer's rule](https://en.wikipedia.org/wiki/Cramer%27s_rule), which expresses each unknown as a ratio of determinants. NumPy and SciPy provide functions for solving these systems. We will first review scalars, vectors, matrices, and their operations. For a fuller review, see Chapter 2, *Systems of Linear Algebraic Equations*, of Kiusalaas's *Numerical Methods in Engineering with Python 3* [@kiusalaas2013].
 
 Throughout this lecture, vectors use bold lowercase symbols such as $\mathbf{u}$, while matrices use bold uppercase symbols such as $\mathbf{K}$. Their individual components and entries remain unbolded.
 

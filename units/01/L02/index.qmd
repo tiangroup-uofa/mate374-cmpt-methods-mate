@@ -2,6 +2,7 @@
 title: "L02 · Choosing and judging a numerical method"
 subtitle: "How accuracy changes with effort"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -65,7 +66,7 @@ $$
 \frac{2.37}{\sqrt{N}}.
 $$
 
-The classical probability model is summarized by [Weisstein (n.d.)](../references.qmd#ref-weissteinbuffon). This approximation gives a typical uncertainty of about $0.75$ at $N=10$, $0.24$ at $N=100$, and $0.0024$ at $N=10^6$. The exact error of one run can be smaller or larger.
+The classical probability model is summarized by @weissteinbuffon. This approximation gives a typical uncertainty of about $0.75$ at $N=10$, $0.24$ at $N=100$, and $0.0024$ at $N=10^6$. The exact error of one run can be smaller or larger.
 
 The plot below overlays the observed absolute error from one simulated sequence of up to $10^5$ throws with the analytical $N^{-1/2}$ scale out to $10^9$ throws. Switch between linear and log--log axes. The linear view shows how compressed a wide range can become; the log--log view makes the scaling visible.
 
@@ -167,7 +168,7 @@ where $N$ is the number of throws and $n$ is the number of crossings. The typica
 
 ### 2. Inscribed polygons: geometric refinement
 
-Polygon approximations to a circle were used by Archimedes in the third century BCE and later by Zu Chongzhi in fifth-century China ([Beckmann, 1971](../references.qmd#ref-beckmann1971pi)). As the number of sides increases, the polygon perimeter approaches the circle circumference.
+Polygon approximations to a circle were used by Archimedes in the third century BCE and later by Zu Chongzhi in fifth-century China [@beckmann1971pi]. As the number of sides increases, the polygon perimeter approaches the circle circumference.
 
 ![Inscribed and circumscribed polygons approaching a circle as the number of sides increases. Image credit: [Guillaume Jacquenot](https://commons.wikimedia.org/wiki/File:Pi_archi_approx.svg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).](../../../assets/L02-polygon-approximation.png){#fig-polygon-pi fig-alt="A sequence from triangles to octagons showing inscribed and circumscribed regular polygons approaching a circle" width="92%" fig-align="center"}
 
@@ -190,7 +191,7 @@ $$
 
 ### 3. The Basel series: deterministic truncation
 
-In the eighteenth century, Euler solved the Basel problem by showing that ([Weisstein, n.d.](../references.qmd#ref-weissteinbasel))
+In the eighteenth century, Euler solved the Basel problem by showing that [@weissteinbasel]
 
 $$
 \sum_{k=1}^{\infty}\frac{1}{k^2}=\frac{\pi^2}{6}.
@@ -212,7 +213,7 @@ $$
 
 ### 4. Ramanujan's series: rapid convergence
 
-Srinivasa Ramanujan credited the goddess Namagiri with inspiring mathematical ideas in dreams, an account discussed in his biography by [Kanigel (1991)](../references.qmd#ref-kanigel1991). The formula used here appeared in his 1914 paper, where it was presented as mathematics rather than accepted on inspiration alone ([Ramanujan, 1914](../references.qmd#ref-ramanujan1914)).
+Srinivasa Ramanujan credited the goddess Namagiri with inspiring mathematical ideas in dreams, an account discussed in his biography by @kanigel1991. The formula used here appeared in his 1914 paper, where it was presented as mathematics rather than accepted on inspiration alone [@ramanujan1914].
 
 ![Srinivasa Ramanujan. Image source: [*It Came to Me in A Dream: the Intuitive Mathematician, Srinivasa Ramanujan*](https://thesublimeblog.org/2022/08/09/it-came-to-me-in-a-dream-the-intuitive-mathematician-srinivasa-ramanujan/), *The Sublime Blog*.](../../../assets/L02-ramanujan.jpg){#fig-ramanujan fig-alt="Stylized monochrome portrait of Srinivasa Ramanujan against a background of handwritten mathematical notation" width="48%" fig-align="center"}
 

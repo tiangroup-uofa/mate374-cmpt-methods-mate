@@ -2,6 +2,7 @@
 title: "Lxx · Lecture title"
 subtitle: "The engineering question or numerical method in focus"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 <!--

@@ -2,7 +2,7 @@
 title: "L13 · Inside a numerical matrix solver"
 subtitle: "Gaussian elimination, pivoting, round-off limits, and choosing a practical solver"
 body-classes: lecture-page
-bibliography: ../references.bib
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}

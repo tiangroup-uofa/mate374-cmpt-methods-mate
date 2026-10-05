@@ -2,6 +2,7 @@
 title: "L06 · Root finding in an open domain"
 subtitle: "Secant, Newton–Raphson, and fixed-point methods"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -45,7 +46,7 @@ A single run of a bracketing method keeps one sign-changing interval and returns
 3. Apply a bracketing method to each sign-changing interval.
 4. Refine the grid to check whether we missed closely spaced crossings.
 
-This **incremental search followed by bracketing** is a useful strategy ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013)). A sign-change scan can still miss a root that only touches zero, or two crossings within one grid interval.
+This **incremental search followed by bracketing** is a useful strategy [@kiusalaas2013]. A sign-change scan can still miss a root that only touches zero, or two crossings within one grid interval.
 
 ::: {.callout-note collapse="false"}
 ## The grid-search test
@@ -227,7 +228,7 @@ e_{k+1}\approx
 \frac{f''(x_s)}{2f'(x_s)}e_k^2.
 $$
 
-Under the usual local convergence assumptions, the secant method has order $(1+\sqrt5)/2\approx1.618$. Bisection instead halves a guaranteed interval width at every step ([Kiusalaas, 2013](../references.qmd#ref-kiusalaas2013)).
+Under the usual local convergence assumptions, the secant method has order $(1+\sqrt5)/2\approx1.618$. Bisection instead halves a guaranteed interval width at every step [@kiusalaas2013].
 
 These rates apply once the iterates are sufficiently close. An arbitrary starting point may never reach that region.
 
@@ -396,7 +397,7 @@ Near an attracting fixed point, an input error becomes a smaller error after app
 - $|g'(x_s)|>1$: the fixed point is locally repelling.
 - $|g'(x_s)|=1$: this test does not decide the outcome.
 
-This local slope test is related to a **Lipschitz condition**, which bounds how much $g$ can stretch the distance between any two inputs in an interval. A Lipschitz constant below one makes $g$ a **contraction** ([Burden, Faires, and Burden, 2016](../references.qmd#ref-burden2016numerical), §2.2). The interval conditions are given below.
+This local slope test is related to a **Lipschitz condition**, which bounds how much $g$ can stretch the distance between any two inputs in an interval. A Lipschitz constant below one makes $g$ a **contraction** [@burden2016numerical, §2.2]. The interval conditions are given below.
 
 Near the fixed point, a negative slope produces alternating errors; a positive slope preserves their sign.
 
@@ -416,7 +417,7 @@ A standard sufficient condition on a closed interval $I$ is:
 1. $g(I)\subseteq I$: every update stays in the interval.
 2. $|g(x)-g(y)|\le q|x-y|$ for all $x,y\in I$, with a constant $q<1$.
 
-The second condition is a **contraction**, a Lipschitz bound with constant below one. For a continuously differentiable map, a uniform bound $|g'(x)|\le q<1$ on $I$ is sufficient. Together these conditions give a unique fixed point in $I$ and convergence from any starting point there ([Burden, Faires, and Burden, 2016](../references.qmd#ref-burden2016numerical)).
+The second condition is a **contraction**, a Lipschitz bound with constant below one. For a continuously differentiable map, a uniform bound $|g'(x)|\le q<1$ on $I$ is sufficient. Together these conditions give a unique fixed point in $I$ and convergence from any starting point there [@burden2016numerical].
 
 The cone compares $g(x)$ with one fixed point. The interval-wide Lipschitz bound above compares **every pair** of inputs. A plot can illustrate this geometry; proving the bound and interval invariance requires more than visual inspection. Also, $|g'(x_s)|<1$ is sufficient for local attraction, but is not necessary for every possible convergent iteration.
 :::

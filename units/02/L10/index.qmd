@@ -2,6 +2,7 @@
 title: "L10 · Building a phase diagram program"
 subtitle: "Wrapping up Unit 2: From CO₂ gas measurements to a liquid–gas boundary"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -49,7 +50,7 @@ Photo: [Whoisjohngalt, Wikimedia Commons](https://commons.wikimedia.org/wiki/Fil
 
 | | For this lecture |
 |---|---|
-| **Known data** | CO₂ pressure–volume–temperature measurements from [Ely, Haynes and Bain (1989)](../references.qmd#ref-ely1989isochoric), using 36 states between 300 and 330 K |
+| **Known data** | CO₂ pressure–volume–temperature measurements from @ely1989isochoric, using 36 states between 300 and 330 K |
 | **Model** | The vdW equation of state, with two unknown constants $a$ and $b$ |
 | **Wanted** | $P_{\mathrm{sat}}(T)$ between 250 and 295 K, below the temperatures used for fitting |
 
@@ -216,7 +217,7 @@ Compare the predicted pressure $P_{\mathrm{vdW}}(T_i,v_i)$ with $P_i$ at the **2
 ::: {.callout-important}
 ## Model error at high density
 
-The vdW equation uses a simple excluded-volume correction and a constant attraction parameter. These approximations cannot reproduce the full density dependence of real CO₂. Other equations of state offer more flexibility: the [Peng–Robinson equation](https://doi.org/10.1021/i160057a011) uses a temperature-dependent attraction term, and the [Span–Wagner reference EOS](../references.qmd#ref-span1996co2) was developed specifically to represent CO₂ over a wide range of conditions. Reducing the numerical solver tolerance leaves these vdW modelling assumptions unchanged.
+The vdW equation uses a simple excluded-volume correction and a constant attraction parameter. These approximations cannot reproduce the full density dependence of real CO₂. Other equations of state offer more flexibility: the [Peng–Robinson equation](https://doi.org/10.1021/i160057a011) uses a temperature-dependent attraction term, and the Span–Wagner reference EOS [@span1996co2] was developed specifically to represent CO₂ over a wide range of conditions. Reducing the numerical solver tolerance leaves these vdW modelling assumptions unchanged.
 :::
 
 ## Step 2 · Minimization: Which volume does CO₂ choose?
@@ -365,7 +366,7 @@ $$
 
 is close to the measured CO₂ values of 304.1 K and 73.8 bar. This agreement is encouraging, but the rest of the phase boundary still needs comparison with experiment.
 
-The table below compares direct vdW coexistence calculations with the CO₂ vapour-pressure correlation of [Span and Wagner (1996)](../references.qmd#ref-span1996co2), which represents experimental saturation data.
+The table below compares direct vdW coexistence calculations with the CO₂ vapour-pressure correlation of @span1996co2, which represents experimental saturation data.
 
 | $T$ (K) | vdW, fitted (bar) | vdW, course values (bar) | CO₂ reference (bar) | Fitted vs reference |
 |---:|---:|---:|---:|---:|

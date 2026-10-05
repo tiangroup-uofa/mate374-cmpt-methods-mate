@@ -2,6 +2,7 @@
 title: "L04 · How do I make a computer program faster?"
 subtitle: "From interpreted loops to NumPy arrays, Numba JIT, parallelism, and GPUs"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
@@ -141,7 +142,7 @@ We will keep the Buffon model fixed and change its implementation to compare acc
 
 ## Optimization 1: operate on arrays with NumPy
 
-[NumPy](https://numpy.org/doc/stable/user/absolute_beginners.html) is widely used for numerical computing in Python. Its main data structure is an **array**: a collection of values stored with a common data type. A one-dimensional array can hold all our needle positions; a two-dimensional array can hold values on a simulation grid. Types such as `float32` and `float64` specify the binary representation discussed in [L03](../L03/index.qmd). A `float64` array stores each value in eight bytes, without a separate Python object for each number.
+[NumPy](https://numpy.org/doc/stable/user/absolute_beginners.html) [@harris2020numpy] is widely used for numerical computing in Python. Its main data structure is an **array**: a collection of values stored with a common data type. A one-dimensional array can hold all our needle positions; a two-dimensional array can hold values on a simulation grid. Types such as `float32` and `float64` specify the binary representation discussed in [L03](../L03/index.qmd). A `float64` array stores each value in eight bytes, without a separate Python object for each number.
 
 **Vectorization** means expressing a calculation through array operations. For example, `0.5 * d` multiplies every element of the array `d` by 0.5, and `np.sin(theta)` evaluates the sine of every angle in `theta`.
 
@@ -243,7 +244,7 @@ For the remaining comparisons, use the cloud-hosted [Molab notebook](https://mol
 
 A numerical loop can spend much of its runtime on interpreter overhead. **Just-in-time (JIT) compilation** translates a function into native machine code when it is first called. Later calls with the same argument types reuse that compiled version.
 
-[Numba](https://numba.readthedocs.io/en/stable/user/5minguide.html) provides JIT compilation for many numerical Python functions. The `@numba.njit` decorator requests compilation. In this example, we put the throw arithmetic inside the compiled loop and pass in a NumPy random-number generator.
+[Numba](https://numba.readthedocs.io/en/stable/user/5minguide.html) [@lam2015numba] provides JIT compilation for many numerical Python functions. The `@numba.njit` decorator requests compilation. In this example, we put the throw arithmetic inside the compiled loop and pass in a NumPy random-number generator.
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -336,7 +337,7 @@ A CPU has relatively few powerful cores suited to sequential work and branching.
 
 ![Schematic comparison of CPU and GPU processing units. Source: [SKIMA 2017 paper](https://doi.org/10.1109/SKIMA.2017.8294137).](../../../assets/L04-cpu-vs-gpu.png){#fig-cpu-gpu width="65%" fig-alt="Schematic showing a CPU with a few large cores and a GPU with many smaller processing units; the counts are illustrative."}
 
-You do not need to write GPU kernels in this course. Many simulation packages already provide GPU implementations. Libraries such as [PyTorch](https://docs.pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html) also let us express GPU calculations through familiar array operations.
+You do not need to write GPU kernels in this course. Many simulation packages already provide GPU implementations. Libraries such as [PyTorch](https://docs.pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html) [@paszke2019pytorch] also let us express GPU calculations through familiar array operations.
 
 Here is the calculation used in the Molab demo. The generator is initialized outside the function with `torch.Generator(device="cuda").manual_seed(374)`. The input buffers are reused, and the crossing count stays on the GPU until the end.
 

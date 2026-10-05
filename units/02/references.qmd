@@ -3,9 +3,9 @@ title: "Unit 02 · References"
 format:
   html:
     toc: true
-bibliography: references.bib
+bibliography: ../../references.bib
 nocite: |
-  @*
+  @brent1973algorithms, @burden2016numerical, @ely1989isochoric, @kiefer1953sequential, @kiusalaas2013, @nocedal2006optimization, @poling2001properties, @span1996co2, @virtanen2020scipy
 ---
 
 ## Bibliography
