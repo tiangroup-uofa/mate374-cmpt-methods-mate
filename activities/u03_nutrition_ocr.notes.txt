@@ -1,0 +1,49 @@
+Unit 3 exercise draft: nutrition-label OCR -> Atwater factors (work in progress)
+
+Notebook: activities/u03_nutrition_ocr.edit.py (not yet linked from any page)
+
+Pipeline (all in the browser, no server):
+  1. mo.ui.file upload (several photos) or four embedded sample labels
+     (potato chips, cocoa powder, beef jerky, bamboo shoots; grayscale JPEG, 900 px, q55).
+  2. Per-photo crop sliders (percent of width/height) with a red-box preview.
+  3. Lighting correction in Python: half-resolution grey closing -> background,
+     divide, rescale long side to 1800 px, unsharp mask. Sent as JPEG data URLs.
+  4. Tesseract.js 5.1.1 (WASM) inside an anywidget, loaded from cdn.jsdelivr.net
+     (tesseract.js, tesseract.js-core, @tesseract.js-data/eng@1.0.0 best_int, ~3 MB).
+     Each label is rotated -2, 0, +2 degrees on a canvas and read in page modes 6 and 11
+     (two workers in parallel): six readings per label.
+  5. Regex parser (English/French names; "g" misread as 8/9/q; "Og" -> 0 g; "05g" -> 0.5)
+     and a majority vote per nutrient, with an agreement table.
+  6. Editable CSV text area (human check), multiselect of three foods,
+     np.linalg.solve for (a, b, c) and cond(A).
+
+Tested locally (marimo run + headless Chromium, CDN files served from npm copies):
+  OCR result for the four samples:
+    potato chips  490, 30, 51.6, 3.6
+    cocoa powder   20, 0.5, 3, 1
+    beef jerky     60, 1, 5, 9
+    bamboo shoots  15, 0.5, 2, 0
+  All 16 values correct with the 900 px samples. With 1000 px samples the cocoa
+  carbohydrate (curved can) was not found and showed "?" until edited by hand,
+  so expect occasional misses on student photos; the editable table handles that.
+  A full Pyodide run could not be tested here (CDN blocked in this container);
+  `marimo export html-wasm` succeeds (about 1.45 MB HTML).
+
+Science results with the true label values (kcal/g for fat, carbohydrate, protein):
+  chips, cocoa, jerky     ->  9.00, 4.02, 3.43   cond 67
+  chips, cocoa, bamboo    ->  6.22, 5.94, -0.94  cond 141
+  chips, jerky, bamboo    ->  5.47, 6.13, 2.65   cond 103
+  cocoa, jerky, bamboo    -> 22.5,  1.88, 3.12   cond 78
+  least squares (all 4)   ->  7.95, 4.65, 3.18
+  The spread comes from label rounding (calories under 50 kcal are rounded to 5 kcal,
+  grams to 0.5 or 1 g) amplified by the condition number, and from fibre counted at
+  ~2 kcal/g inside carbohydrate. This fits L12 (conditioning, perturbed right-hand side).
+
+Open questions for the instructor:
+  - Which question to ask students: only the 3x3 solve, or also compare triples /
+    estimate the effect of rounding with cond(A) * relative error in E?
+  - Should a student version leave the solve cell empty (as in s05_solve_3x3.edit.py),
+    with this file renamed *_completed.edit.py?
+  - Destination: assignment A3 question or Unit 3 summary/seminar? The notebook needs a
+    page, a prose/static fallback, and _quarto.yml links once that is decided.
+  - Notebook size is ~600 KB because the four sample photos are embedded inline.
