@@ -1,0 +1,14 @@
+---
+title: "Unit 03 · References"
+format:
+  html:
+    toc: true
+bibliography: references.bib
+nocite: |
+  @*
+---
+
+## Bibliography
+
+::: {#refs}
+:::

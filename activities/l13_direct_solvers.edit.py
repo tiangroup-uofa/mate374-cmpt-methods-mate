@@ -5,8 +5,8 @@
 
 import marimo
 
-__generated_with = "0.24.0"
-app = marimo.App(width="medium")
+__generated_with = "0.25.1"
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -40,7 +40,6 @@ def controls(mo):
         mo.hstack([dimension, random_button, method], justify="start", align="center", gap=1.5),
         pivoting,
     ], gap=0.4)
-
     return a11_choices, dimension, method, pivoting, random_button
 
 
@@ -68,7 +67,6 @@ def pivot_control(a11_choices, get_base, mo):
     small_pivot = mo.ui.dropdown(
         options=list(a11_choices), value="as in A", label="Set a₁₁ to",
     )
-    small_pivot
     return (small_pivot,)
 
 
@@ -100,18 +98,19 @@ def editors(a11_choices, get_base, mo, np, set_base, small_pivot):
         _base_b.reshape(-1, 1), min_value=-60, max_value=60, step=0.5, precision=1,
         row_labels=_labels, column_labels=["b"], debounce=True, label="b",
     )
-    mo.vstack([
-        mo.hstack([A_editor, b_editor], justify="start", align="start", gap=1),
-        mo.md("<small>Drag an entry sideways to change it.</small>"),
-    ], gap=0.4)
-
     def commit_edits(matrix, rhs):
         if not np.array_equal(matrix, _shown_A):
             _edit_A(matrix)
         elif not np.array_equal(rhs, _base_b):
             _edit_b(rhs)
 
-    return A_editor, b_editor, commit_edits
+    # The animation cell shows this panel beside the solver steps.
+    editor_panel = mo.vstack([
+        small_pivot,
+        mo.hstack([A_editor, b_editor], justify="start", align="start", gap=1),
+        mo.md("<small>Drag an entry sideways to change it.</small>"),
+    ], gap=0.6)
+    return A_editor, b_editor, commit_edits, editor_panel
 
 
 @app.cell
@@ -120,7 +119,6 @@ def current_system(A_editor, b_editor, commit_edits, np):
     A = np.array(A_editor.value, dtype=float, copy=True)
     b = np.array(b_editor.value, dtype=float, copy=True).reshape(-1)
     commit_edits(A, b)
-
     return A, b
 
 
@@ -292,12 +290,12 @@ def direct_solver(A, Fraction, b, method, np, pivoting):
         solver_states, solution, solver_pivots = [], None, []
         solver_error = str(error)
     x_exact = exact_solution(A, b) if solver_error is None else None
-
     return fmt, solver_error, solver_states, x_exact
 
 
 @app.cell
 def animation(
+    editor_panel,
     fmt,
     go,
     method,
@@ -448,7 +446,7 @@ def animation(
             ))
         figure.frames = frames
         notes, shapes = decorations(states[0])
-        width = max(int(cell_px * (x_right - x_left)) + 20, 480)
+        width = max(int(cell_px * (x_right - x_left)) + 20, 420)
         height = int(cell_px * (n + 0.9)) + 200
         animate = dict(mode="immediate", frame=dict(duration=0, redraw=True), transition=dict(duration=0))
         figure.update_xaxes(range=[x_left, x_right], visible=False, fixedrange=True)
@@ -484,8 +482,12 @@ def animation(
         output = mo.callout(mo.md(f"**Cannot solve this system:** {solver_error}"), kind="danger")
     else:
         output = build_figure(solver_states, method.value, x_exact)
-    output
+    mo.hstack([editor_panel, output], justify="start", align="start", gap=1, wrap=True)
+    return
 
+
+@app.cell
+def _():
     return
 
 

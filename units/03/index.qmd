@@ -19,3 +19,5 @@ We begin with an atomic chain so that each matrix entry has a physical meaning, 
 - [L14 · Optimizing large systems of equations](L14/index.qmd)
 - [L15 · How do we know minimization really worked?](L15/index.qmd)
 - [L16 · The energy landscape of a 38-atom cluster](L16/index.qmd)
+
+[Unit 03 references](references.qmd)

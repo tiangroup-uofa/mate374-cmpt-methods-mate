@@ -1,6 +1,6 @@
 ---
-title: "L14 · Optimizing large systems of equations"
-subtitle: "From one linear solve to relaxing an atomic structure"
+title: "L14 · Root-dinfing and Optimizing large systems of equations"
+subtitle: "Newton-Raphson for systems of equations; Jacobian and Hessian matrices"
 body-classes: lecture-page
 ---
 
@@ -22,11 +22,12 @@ By the end of this lecture, you should be able to:
 
 ## From springs to stable structures
 
-In L11–L13, we modelled atoms joined by springs, collected the force balances into a linear system, and looked at how a numerical solver finds its solution. Assignment 1 asked a related question about four argon atoms:
+In L11–L13, we modelled atoms joined by springs, so that the interactions between the atoms **near the equilibrium** positions can be approximated by the relation between the spring constants, i.e. the stiffness matrix $\mathbf{K}$. This helps to answer the displacement of atoms $\mathbf{u}$ when applying an external force $\mathbf{f}$.
 
-> Given the interatomic energies or forces, can we obtain the structure with the lowest energy?
+But, we have not answered the question yes, **where do we even get the equilibirum positions**? We have seen one such problem already in assignment 1, using the lennard-jones (LJ) potential, on a few Argon atoms. The formal question we want to ask is:
 
-A structure in which no atom feels a net force is in mechanical equilibrium. Because each force is the negative derivative of the energy, $\mathbf F_i=-\partial E/\partial\mathbf x_i$, equilibrium means that every partial derivative of the total energy is zero. For a stable structure, we want more than equilibrium: we want the energy to be at a minimum. With all atomic coordinates collected in one vector $\mathbf x$, the problem is
+> Given the interatomic energies E as a nonlinear function of atomic positions $\mathbf{x}$, can we obtain the structure $x_min$ with the lowest energy E_min?
+
 
 $$
 \min_{\mathbf x}E(\mathbf x),
@@ -34,83 +35,250 @@ $$
 \nabla E(\mathbf x)=\mathbf 0 .
 $$
 
-Finding the structure by minimizing its energy is called **relaxation**, as in the copper cluster animation of L11.
+This minimization problem is key to **almost any** material simulations! Finding the structure by minimizing its energy is called **relaxation**, as in the [copper cluster animation in L11](../L11/index.qmd#fig-cu-cluster-relaxation). By the end of this class, we should be able to show you how these steps are actually done, and how they are linked closely to the matrix operations.
 
-## 1 · A quadratic energy needs one linear solve
+## From an atomic energy to nonlinear equations
 
-Start with the spring chain from L11. For three atoms between a fixed wall and a pulling force $f$, with displacements $u_1,u_2,u_3$ and identical springs of stiffness $k$, the energy is
+Let $\mathbf x=(x_1,\ldots,x_n)^{\mathsf T}$ collect the $n$ coordinates that are free to change. The energy $E(\mathbf x)$ takes these $n$ inputs and returns one scalar. We will first let atoms move along a line, so each movable atom contributes one coordinate.
 
-$$
-E=\tfrac12k\,u_1^2+\tfrac12k\,(u_2-u_1)^2+\tfrac12k\,(u_3-u_2)^2-f\,u_3 .
-$$
-
-Every term is at most quadratic in the displacements. Any such energy can be written in matrix form,
+At an unconstrained local minimum of a smooth energy, its partial derivative with respect to every free coordinate is zero:
 
 $$
-E(\mathbf x)=\tfrac12\,\mathbf x^{\mathsf T}\mathbf K\,\mathbf x-\mathbf b^{\mathsf T}\mathbf x+C,
+\frac{\partial E}{\partial x_1}=0,\qquad
+\frac{\partial E}{\partial x_2}=0,\qquad\ldots,\qquad
+\frac{\partial E}{\partial x_n}=0.
 $$
 
-where $\mathbf K$ is the symmetric stiffness matrix, $\mathbf b$ collects the external forces, and $C$ is a constant. For the chain, $\mathbf x=(u_1,u_2,u_3)$ and $\mathbf b=(0,0,f)$. Differentiating gives
+These derivatives form the **gradient**, an $n$-component column vector:
 
 $$
-\nabla E(\mathbf x)=\mathbf K\mathbf x-\mathbf b .
+\mathbf g(\mathbf x)=\nabla E(\mathbf x)=
+\begin{bmatrix}
+\partial E/\partial x_1\\
+\partial E/\partial x_2\\
+\vdots\\
+\partial E/\partial x_n
+\end{bmatrix}.
 $$
 
-Setting the gradient to zero gives back the system of L11:
+::: {.callout-note}
+## Notation: nabla, gradient, and Laplacian
+
+The symbol $\nabla$ is read as **nabla**. Applied to a scalar function such as energy, it gives the gradient $\nabla E$: the vector of partial derivatives with respect to the coordinates. The symbol $\Delta$, capital delta, denotes a change, such as the displacement correction $\Delta\mathbf x$ used below.
+
+Later, in diffusion, we will encounter the **Laplacian**, $\nabla^2=\nabla\cdot\nabla$. Applied to a scalar field, it returns a scalar: the sum of its second spatial derivatives. For example, $\nabla^2c=\partial^2c/\partial x^2+\partial^2c/\partial y^2+\partial^2c/\partial z^2$. The related operation $\nabla\cdot\mathbf F$, called divergence, takes a vector field and returns a scalar.
+:::
+
+The force on coordinate $x_i$ is $-g_i$, so $\mathbf g=\mathbf 0$ expresses force balance on every movable atom. It gives us $n$ equations for $n$ unknown coordinates. As in L07, a zero derivative identifies a stationary point. We will still need to establish whether that point is a minimum.
+
+### The equilibrium separation of a Lennard–Jones pair
+
+Return to the Lennard–Jones pair energy from A1:
 
 $$
-\boxed{\mathbf K\mathbf x=\mathbf b}
+V(r)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}
+-\left(\frac{\sigma}{r}\right)^6\right].
 $$
 
-One call to `np.linalg.solve` finds the minimum. No iteration is needed, because the gradient of a quadratic energy is linear in the unknowns.
-
-### What changes for a real interatomic energy?
-
-The spring model came from a quadratic approximation to the pair potential near its minimum. A Lennard-Jones or Morse potential is not quadratic, and its derivative is not linear in the distance. Even harmonic springs give a non-quadratic energy once atoms can move in more than one direction, because a spring length is the square root of the coordinates.
-
-The example we use throughout this lecture shows this. A middle atom $M=(x,y)$ is joined by two springs to atoms fixed at $L=(-a,0)$ and $R=(a,0)$. Each spring has stiffness $k$ and natural length $l_0$:
+Here $r$ is the separation, $\varepsilon$ sets the energy scale, and $\sigma$ is the separation at which the pair energy crosses zero. Differentiating with respect to the separation gives
 
 $$
-E(x,y)=\frac k2\left(r_L-l_0\right)^2+\frac k2\left(r_R-l_0\right)^2,
-\qquad r_L=\sqrt{(x+a)^2+y^2},\quad r_R=\sqrt{(x-a)^2+y^2}.
+V'(r)=4\varepsilon\left(-\frac{12\sigma^{12}}{r^{13}}
++\frac{6\sigma^6}{r^7}\right)
+=24\varepsilon\left(\frac{\sigma^6}{r^7}
+-\frac{2\sigma^{12}}{r^{13}}\right).
 $$
 
-We choose $l_0>a$, so both springs are compressed when $M$ sits midway between $L$ and $R$. The atom lowers its energy by moving off the line to $(0,\pm\sqrt{l_0^2-a^2})$, where both springs reach their natural length. Setting $\nabla E=\mathbf 0$ gives two equations whose unknowns $x$ and $y$ sit inside square roots. There is no matrix $\mathbf K$ to invert. We need an iterative method that improves a guess step by step, as root finding did in Unit 2.
+For an isolated pair, the equilibrium separation satisfies $V'(r)=0$. Multiplying by $r^{13}$ gives $r^6=2\sigma^6$, so $r_0=2^{1/6}\sigma$. This is the minimum of the pair potential: the atoms select their separation through the balance of attraction and repulsion.
 
-## 2 · Newton's method in many dimensions
+### Three atoms: the equations become coupled
 
-In L06, Newton's method found a root of $f(x)$ by replacing the function with its tangent line. To minimize a function of one variable, we apply the same idea to its derivative: we look for $E'(x)=0$, which gives the update
+Now consider three atoms free to change their separations along a line. Choose the first atom as the coordinate origin, and let $0<x_1<x_2$ be the positions of the other two relative to it. Both distances from the origin and the total chain length $x_2$ can change. Translating the whole chain leaves its energy unchanged, so choosing an origin removes that redundant motion while retaining all possible separations.
 
-$$
-x_{n+1}=x_n-\frac{E'(x_n)}{E''(x_n)} .
-$$
-
-Equivalently, near $x_n$ we approximate $E$ by a parabola and jump to its stationary point.
-
-In many dimensions, the second-order Taylor expansion about the current point $\mathbf x_n$ is
+Including all three pair interactions, the energy is
 
 $$
-E(\mathbf x_n+\Delta\mathbf x)\approx E(\mathbf x_n)+\nabla E(\mathbf x_n)^{\mathsf T}\Delta\mathbf x+\tfrac12\,\Delta\mathbf x^{\mathsf T}\mathbf H(\mathbf x_n)\,\Delta\mathbf x ,
+E(x_1,x_2)=V(x_1)+V(x_2)+V(x_2-x_1).
 $$
 
-where $\mathbf H$ is the **Hessian**, the symmetric matrix of second derivatives $H_{kl}=\partial^2E/\partial x_k\,\partial x_l$. For two coordinates,
+Setting each partial derivative to zero gives
+
+$$
+\begin{aligned}
+g_1(x_1,x_2)&=V'(x_1)-V'(x_2-x_1)=0,\\
+g_2(x_1,x_2)&=V'(x_2)+V'(x_2-x_1)=0.
+\end{aligned}
+$$
+
+The minus sign in $g_1$ appears because increasing $x_1$ decreases the separation $x_2-x_1$. Increasing $x_2$ increases that separation, giving the plus sign in $g_2$. The force on the atom chosen as the origin is the negative of the sum of the forces on the other two, so it also vanishes when these two equations are satisfied.
+
+Both equations contain inverse powers of the shared separation $x_2-x_1$. Moving either atom therefore changes both force balances. We must find positions that satisfy the two nonlinear equations simultaneously. Each pair would individually prefer $r_0$, but three ordered atoms cannot have all three separations equal to $r_0$. Their equilibrium positions must balance the combined interactions.
+
+For a longer chain, let $x_0=0$ denote the origin atom and collect the remaining $n$ relative positions into $\mathbf x$. For ordered atoms, the total pair energy is
+
+$$
+E(\mathbf x)=\sum_{i=0}^{n-1}\sum_{j=i+1}^{n}V(x_j-x_i).
+$$
+
+The sums count each pair once, as in the three-term example above. The $n$ equations $\mathbf g(\mathbf x)=\mathbf 0$ determine the $n$ unknown positions, including the chain's relaxed length.
+
+**Discuss:** if the two atoms at $x_1$ and $x_2$ are too close together, which terms in these equations describe their repulsion? What happens to their separation when only $x_1$ increases?
+
+## Newton's method for coupled nonlinear equations
+
+In L06, Newton's method replaced a nonlinear function by its tangent at the current guess. Write the next guess as $x^{(m+1)}=x^{(m)}+\Delta x$, where $m$ counts iterations. The tangent approximation is
+
+$$
+f(x^{(m)}+\Delta x)\approx f(x^{(m)})+f'(x^{(m)})\Delta x.
+$$
+
+Setting this approximation to zero gives
+
+$$
+f'(x^{(m)})\Delta x=-f(x^{(m)}).
+$$
+
+For minimization in L07, we used $f=E'$, so $E''\Delta x=-E'$. To extend this idea to our two movable atoms, we need to account for how each equation changes when **both** coordinates change.
+
+### The Jacobian collects the local slopes
+
+Consider any two nonlinear equations $f_1(x_1,x_2)=0$ and $f_2(x_1,x_2)=0$. Near the current guess, their first-order Taylor approximations are
+
+$$
+\begin{aligned}
+f_1(\mathbf x+\Delta\mathbf x)&\approx f_1(\mathbf x)
++\frac{\partial f_1}{\partial x_1}\Delta x_1
++\frac{\partial f_1}{\partial x_2}\Delta x_2,\\
+f_2(\mathbf x+\Delta\mathbf x)&\approx f_2(\mathbf x)
++\frac{\partial f_2}{\partial x_1}\Delta x_1
++\frac{\partial f_2}{\partial x_2}\Delta x_2.
+\end{aligned}
+$$
+
+Every derivative is evaluated at the current guess $\mathbf x=\mathbf x^{(m)}$. Set both approximations to zero and move the current function values to the right-hand side:
+
+$$
+\underbrace{\begin{bmatrix}
+\partial f_1/\partial x_1 & \partial f_1/\partial x_2\\
+\partial f_2/\partial x_1 & \partial f_2/\partial x_2
+\end{bmatrix}}_{\mathbf J(\mathbf x^{(m)})}
+\begin{bmatrix}\Delta x_1\\\Delta x_2\end{bmatrix}
+=-\begin{bmatrix}f_1(\mathbf x^{(m)})\\f_2(\mathbf x^{(m)})\end{bmatrix}.
+$$
+
+The coefficient matrix is the **Jacobian**. Its entry $J_{ij}=\partial f_i/\partial x_j$ measures how equation $i$ changes when coordinate $j$ changes. Each row belongs to one equation, and each column belongs to one coordinate.
+
+This is the linear-system form from L11–L13: the unknowns are the corrections $\Delta x_1$ and $\Delta x_2$. The nonlinear functions and their derivatives have already been evaluated at the current guess, so they are known numbers during this solve. For $n$ equations in $n$ coordinates, the update is
+
+$$
+\boxed{\mathbf J(\mathbf x^{(m)})\Delta\mathbf x
+=-\mathbf f(\mathbf x^{(m)}),\qquad
+\mathbf x^{(m+1)}=\mathbf x^{(m)}+\Delta\mathbf x.}
+$$
+
+After updating the coordinates, we evaluate the nonlinear equations again. Their values will generally still differ from zero because the tangent approximation only describes their local behaviour. We construct a new Jacobian and repeat the linear solve until the residuals are sufficiently small. Near a root with a nonsingular Jacobian, Newton's method converges quadratically under the usual smoothness assumptions.
+
+### For energy minimization, the Jacobian is the Hessian
+
+In the atomic problem, the functions whose roots we seek are $g_i=\partial E/\partial x_i$. Their Jacobian therefore contains second derivatives of the energy:
+
+$$
+J_{ij}=\frac{\partial g_i}{\partial x_j}
+=\frac{\partial^2E}{\partial x_j\partial x_i}
+=H_{ij}.
+$$
+
+This matrix is called the **Hessian**, $\mathbf H$. For a smooth energy with continuous second derivatives, the mixed derivatives are equal, so $\mathbf H$ is symmetric. Newton's method for finding a stationary atomic structure becomes
+
+$$
+\boxed{\mathbf H(\mathbf x^{(m)})\Delta\mathbf x
+=-\nabla E(\mathbf x^{(m)}),\qquad
+\mathbf x^{(m+1)}=\mathbf x^{(m)}+\Delta\mathbf x.}
+$$
+
+We solve this system for the displacement correction using the linear solvers from L13. Computing an explicit inverse is unnecessary. The Hessian has units of energy per length squared, so multiplying it by a displacement gives the force units on the right-hand side.
+
+## Back to the Lennard–Jones chain
+
+For the two movable atoms, differentiating the force-balance equations once more gives
 
 $$
 \mathbf H=
 \begin{bmatrix}
-\dfrac{\partial^2E}{\partial x^2} & \dfrac{\partial^2E}{\partial x\,\partial y}\\[8pt]
-\dfrac{\partial^2E}{\partial y\,\partial x} & \dfrac{\partial^2E}{\partial y^2}
-\end{bmatrix}.
+V''(x_1)+V''(x_2-x_1) & -V''(x_2-x_1)\\
+-V''(x_2-x_1) & V''(x_2)+V''(x_2-x_1)
+\end{bmatrix},
 $$
 
-Setting the gradient of this quadratic model to zero gives the **Newton step**:
+where the Lennard–Jones curvature is
 
 $$
-\boxed{\mathbf H(\mathbf x_n)\,\Delta\mathbf x=-\nabla E(\mathbf x_n),
-\qquad \mathbf x_{n+1}=\mathbf x_n+\Delta\mathbf x .}
+V''(r)=24\varepsilon\left(
+\frac{26\sigma^{12}}{r^{14}}-\frac{7\sigma^6}{r^8}
+\right).
 $$
 
-Each iteration is a linear solve of the kind studied in L13. For the quadratic spring energy, $\mathbf H=\mathbf K$ everywhere, and one Newton step from any starting point lands on $\mathbf K\mathbf x=\mathbf b$. For a general energy, Newton repeats the linear solve with a new Hessian at every step, and near a minimum it converges quadratically, as in one dimension.
+The off-diagonal entries come from the interaction between the movable atoms. They describe how moving one atom changes the energy derivative on the other. Each diagonal entry collects the curvatures of all pair interactions involving that atom. These curvatures depend on the current separations, so the matrix changes as the chain relaxes.
+
+For a single LJ pair, the preferred separation is $r_0=2^{1/6}\sigma$, where $V'(r_0)=0$. Its curvature there is positive:
+
+$$
+V''(r_0)=\frac{72\varepsilon}{r_0^2}.
+$$
+
+This gives the local spring constant of the pair. At shorter separations, the steep repulsive part of the potential produces a much larger curvature. Farther into the attractive tail, the curvature becomes negative. The Hessian records these local changes across the current structure, which is why one fixed matrix cannot describe an entire LJ relaxation.
+
+### The harmonic limit: an unchanged stiffness matrix
+
+Near $r_0$, the pair energy has the harmonic approximation
+
+$$
+V(r)\approx V(r_0)+\frac12k(r-r_0)^2,
+\qquad k=V''(r_0).
+$$
+
+In a one-dimensional harmonic chain with fixed ordering, separations are linear in the atomic coordinates and each pair curvature is constant. The assembled Hessian is therefore the unchanged **stiffness matrix** $\mathbf K$ from L11.
+
+For example, the three-atom spring chain attached to a fixed wall, with an external force $f$ on its last atom, has energy
+
+$$
+E=\tfrac12k\,u_1^2+\tfrac12k\,(u_2-u_1)^2
++\tfrac12k\,(u_3-u_2)^2-fu_3
+=\tfrac12\mathbf u^{\mathsf T}\mathbf K\mathbf u
+-\mathbf b^{\mathsf T}\mathbf u,
+\qquad \mathbf b=(0,0,f)^{\mathsf T}.
+$$
+
+Here $\mathbf u$ contains displacements from the reference structure. The gradient is $\mathbf K\mathbf u-\mathbf b$, and Newton's equation becomes
+
+$$
+\mathbf K\Delta\mathbf u=\mathbf b-\mathbf K\mathbf u^{(m)}
+\quad\Longrightarrow\quad
+\mathbf K\bigl(\mathbf u^{(m)}+\Delta\mathbf u\bigr)=\mathbf b.
+$$
+
+One Newton step reaches the equilibrium displacement because the gradient is already linear. The fixed-wall chain has a positive-definite stiffness matrix, so this equilibrium is its energy minimum. The LJ chain uses the same kind of linear solve at each iteration, but its gradient and Hessian must be reevaluated at the new positions.
+
+The local energy interpretation follows from the second-order Taylor expansion:
+
+$$
+E(\mathbf x+\Delta\mathbf x)\approx E(\mathbf x)
++\nabla E(\mathbf x)^{\mathsf T}\Delta\mathbf x
++\tfrac12\Delta\mathbf x^{\mathsf T}\mathbf H(\mathbf x)\Delta\mathbf x.
+$$
+
+Newton's correction finds the stationary point of this local quadratic energy. For the harmonic chain this expression is exact. For LJ interactions it is a local approximation, whose accuracy depends on how far the atoms move.
+
+## When Newton's method reaches an unstable structure
+
+To visualize stationary points and optimizer paths, we now allow one atom to move in two dimensions. A middle atom $M=(x,y)$ is joined by two springs to fixed atoms at $L=(-a,0)$ and $R=(a,0)$. Each spring has stiffness $k$ and natural length $l_0$:
+
+$$
+E(x,y)=\frac k2(r_L-l_0)^2+\frac k2(r_R-l_0)^2,
+\qquad r_L=\sqrt{(x+a)^2+y^2},\quad r_R=\sqrt{(x-a)^2+y^2}.
+$$
+
+Although each spring is harmonic in its length, the lengths depend nonlinearly on $x$ and $y$. Consequently, this energy has a position-dependent Hessian. We choose $l_0>a$, so both springs are compressed when $M$ sits at the origin. The atom can lower its energy by moving off the line to $(0,\pm\sqrt{l_0^2-a^2})$, where both springs reach their natural length. At the origin the forces cancel, but a small displacement perpendicular to the line lowers the energy.
 
 ### Two problems with Newton's method
 
@@ -118,7 +286,7 @@ Each iteration is a linear solve of the kind studied in L13. For the quadratic s
 
 **It finds stationary points, not minima.** Newton's method solves $\nabla E=\mathbf 0$, and every stationary point satisfies that equation. The middle-atom example shows what can go wrong. With $l_0=1.2a$ and a start at $(0.3a,\,0.1a)$, Newton's method converges in four steps to the origin, where both springs are compressed and the atom is balanced but not stable. In L15, we will see how the Hessian tells such points apart. Newton's method gives us the idea of using curvature, but in practice we usually avoid computing the full Hessian.
 
-## 3 · What does `scipy.optimize.minimize` need?
+## What does `scipy.optimize.minimize` need?
 
 A practical minimizer needs three things from us: a starting structure, a function that returns the energy, and, for most methods, a function that returns the gradient. From the energy and gradient at the current coordinates, it decides where to try next.
 
@@ -183,7 +351,7 @@ Gradient descent (56 steps) and Nelder–Mead (61) reach the minimum with many s
 The notebook defines the energy and gradient of the middle atom, writes gradient descent and Newton's method by hand, and records the paths of SciPy's Nelder–Mead, CG, BFGS, and L-BFGS-B methods with a callback. For $l_0=1.2a$ and a start at $(0.3a,\,0.1a)$, Newton's method converges to the saddle point at the origin in four steps, while the other methods reach the minimum at $(0,\,0.663a)$ in 7 to 61 iterations.
 :::
 
-## 4 · BFGS: learning the curvature from the gradients
+## BFGS: learning the curvature from the gradients
 
 The BFGS method, named after Broyden, Fletcher, Goldfarb, and Shanno, keeps Newton's step $\mathbf B_n\,\Delta\mathbf x=-\nabla E(\mathbf x_n)$ but replaces the exact Hessian with an approximation $\mathbf B$ learned from the positions and gradients already evaluated. In one dimension, the secant method of L06 did the same with a slope between the last two points:
 
@@ -201,7 +369,7 @@ Each step tells BFGS how the gradient changes along one more direction, so $\mat
 
 **L-BFGS**, the "limited-memory" version, goes one step further. Instead of storing the $3N\times3N$ matrix $\mathbf B$, it stores only the last $m$ pairs $(\mathbf s_n,\mathbf y_n)$, typically 5 to 20, and reconstructs the step from them. For a million atoms, that is a few hundred megabytes instead of tens of terabytes, which makes L-BFGS the standard choice for large structures.
 
-## 5 · Relaxing structures with an atomistic package
+## Relaxing structures with an atomistic package
 
 In practice, materials scientists rarely flatten a structure into an array and call `scipy.optimize.minimize` by hand. An atomistic simulation package already knows the atoms and their coordinates, any boundary conditions, how to calculate energies and forces, and which optimizers suit atomic structures. With the [Atomic Simulation Environment (ASE)](https://wiki.fysik.dtu.dk/ase/), a relaxation takes three objects:
 

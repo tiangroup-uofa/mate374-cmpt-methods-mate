@@ -2,6 +2,7 @@
 title: "L13 · Inside a numerical matrix solver"
 subtitle: "Gaussian elimination, pivoting, round-off limits, and choosing a practical solver"
 body-classes: lecture-page
+bibliography: ../references.bib
 ---
 
 ::: {.callout-note}
@@ -39,7 +40,13 @@ The solvers we call in this course are direct methods, so they are the focus of 
 
 ## Direct methods
 
-In L12, we saw that the structure of a matrix affects how much work a solve requires. Direct methods transform $\mathbf{A}\mathbf{x}=\mathbf{b}$ into systems with simpler structure. Three useful forms are **diagonal**, **lower triangular**, and **upper triangular**. Can we solve these $3\times3$ systems without calling `np.linalg.solve`?
+In L12, we saw that the structure of a matrix affects how much work a solve requires. Direct methods transform $\mathbf{A}\mathbf{x}=\mathbf{b}$ into systems with simpler structure. Three useful forms are:
+
+- A **diagonal matrix** $\mathbf{D}$ has zeros everywhere off the main diagonal.
+- A **lower-triangular matrix** $\mathbf{L}$ has zeros above the main diagonal.
+- An **upper-triangular matrix** $\mathbf{U}$ has zeros below the main diagonal.
+
+Can we solve these $3\times3$ systems without calling `np.linalg.solve`?
 
 ### Diagonal matrix
 
@@ -55,11 +62,11 @@ $$
 x_1=\frac{c_1}{D_{11}},\qquad x_2=\frac{c_2}{D_{22}},\qquad x_3=\frac{c_3}{D_{33}}.
 $$
 
-Every diagonal entry must be nonzero for a unique solution. If all three are 1, the matrix is the identity $\mathbf{I}$ and $\mathbf{x}=\mathbf{c}$.
+A unique solution requires every diagonal entry to be nonzero. When all three diagonal entries equal 1, the matrix is the identity $\mathbf{I}$ and the solution is simply $\mathbf{x}=\mathbf{c}$.
 
 ### Lower-triangular matrix: forward substitution
 
-Here all entries above the diagonal are zero:
+For example, this lower-triangular matrix has zeros above its main diagonal:
 
 $$
 \begin{bmatrix}L_{11}&0&0\\L_{21}&L_{22}&0\\L_{31}&L_{32}&L_{33}\end{bmatrix}
@@ -83,9 +90,46 @@ $$
 x_i=\frac{c_i-\sum_{j=1}^{i-1}L_{ij}x_j}{L_{ii}},\qquad i=1,2,\ldots,n.
 $$
 
+::: {.callout-tip collapse="true"}
+## Two Python implementations of forward substitution
+
+Both functions below carry out the same forward substitution. The first writes the sum in the numerator as a loop over $j$. The second replaces that loop with a NumPy dot product between the known coefficients of row $i$, `L[i, :i]`, and the unknowns already computed, `x[:i]`. Research code would normally call a library routine such as [`scipy.linalg.solve_triangular`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_triangular.html), but writing the loop once shows how the formula above turns into a short program.
+
+:::: {.columns}
+::: {.column width="50%"}
+**Explicit inner loop**
+
+```python
+import numpy as np
+
+def forward_substitute_loop(L: np.ndarray, c: np.ndarray):
+    x = np.zeros_like(c, dtype=float)
+    for i in range(len(c)):
+        numerator = c[i]
+        for j in range(i):
+            numerator -= L[i, j] * x[j]
+        x[i] = numerator / L[i, i]
+    return x
+```
+:::
+
+::: {.column width="50%"}
+**NumPy dot product**
+
+```python
+def forward_substitute_numpy(L: np.ndarray, c: np.ndarray):
+    x = np.zeros_like(c, dtype=float)
+    for i in range(len(c)):
+        x[i] = (c[i] - L[i, :i] @ x[:i]) / L[i, i]
+    return x
+```
+:::
+::::
+:::
+
 ### Upper-triangular matrix: back substitution
 
-With zeros below the diagonal, the system is
+For an upper-triangular matrix, all entries below the main diagonal are zero. The system is
 
 $$
 \begin{bmatrix}U_{11}&U_{12}&U_{13}\\0&U_{22}&U_{23}\\0&0&U_{33}\end{bmatrix}
@@ -119,7 +163,7 @@ $$
 x_i=\frac{c_i-\sum_{j=i+1}^{n}U_{ij}x_j}{U_{ii}},\qquad i=n,n-1,\ldots,1.
 $$
 
-Both triangular solves require nonzero diagonal entries and about $n^2$ arithmetic operations. The main work of a direct method is reaching these convenient forms.
+Lower-triangular systems are solved by forward substitution and upper-triangular systems by back substitution. Row $i$ needs one multiplication and one subtraction for each unknown already found, so a complete triangular solve takes on the order of $n^2$ arithmetic operations. Most of the work in a direct method lies in transforming the original system into one of these easier forms.
 
 ### Popular direct methods and their final form
 
@@ -129,48 +173,71 @@ Both triangular solves require nonzero diagonal entries and about $n^2$ arithmet
 | Gauss–Jordan elimination | $\mathbf{A}\mathbf{x}=\mathbf{b}$ | $\mathbf{I}\mathbf{x}=\mathbf{c}$ | Read off $\mathbf{x}=\mathbf{c}$ |
 | LU factorization | $\mathbf{A}\mathbf{x}=\mathbf{b}$ | $\mathbf{L}\mathbf{U}\mathbf{x}=\mathbf{b}$ | Solve $\mathbf{L}\mathbf{y}=\mathbf{b}$ forward, then $\mathbf{U}\mathbf{x}=\mathbf{y}$ backward |
 
-Row operations preserve the exact solution in exact arithmetic. A computer introduces rounding at each step.
 
 ![The matrix forms produced by three direct methods. Coloured cells show potentially nonzero entries. LU retains two triangular factors for reuse with new right-hand sides.](../../../assets/L13-direct-methods.png){#fig-direct-methods width=100% fig-alt="Gaussian elimination produces upper-triangular U, Gauss–Jordan produces identity I, and LU produces lower- and upper-triangular factors."}
 
-`np.linalg.solve` uses LU factorization with partial pivoting. We begin with Gaussian elimination to see the row operations that produce the triangular factors. You should be able to carry out a small elimination by hand, including in an exam.
-
+The table also describes what happens inside the solver we call most often. `np.linalg.solve` passes the matrix to LAPACK, a compiled linear-algebra library originally written in Fortran, and its routine computes an **LU factorization** with partial pivoting. LU factorization is built from the row operations of Gaussian elimination, so we begin there and follow how arithmetic on whole equations turns a general matrix into a triangular one. You should be able to carry out a small elimination by hand, including in an exam.
 
 ### Gaussian elimination
 
-At each step of Gaussian elimination, we replace one row by itself plus a multiple of another. We write $R_i$ for row $i$. For example, if $R_1$ is $x_1+x_2=3$ and $R_2$ is $2x_1-x_2=0$, then
+Gaussian elimination solves $\mathbf{A}\mathbf{x}=\mathbf{b}$ in two phases:
+
+1. **Elimination phase.** Row operations turn every entry below the main diagonal into zero, converting $\mathbf{A}\mathbf{x}=\mathbf{b}$ into an upper-triangular system $\mathbf{U}\mathbf{x}=\mathbf{c}$.
+2. **Back-substitution phase.** The triangular system $\mathbf{U}\mathbf{x}=\mathbf{c}$ is solved from $x_n$ upward, exactly as in the previous section.
+
+We label the $n$ equations, which are the rows of the system, as $R_1,R_2,\ldots,R_n$. Each label stands for a whole equation, with both its left-hand side and its right-hand side. The elimination phase uses three **elementary row operations**, and none of them changes the solution:
+
+1. **Swap two equations**, written $R_i\leftrightarrow R_j$.
+2. **Multiply an equation by a nonzero number** $k$, written $R_i\leftarrow kR_i$.
+3. **Add a multiple of one equation to another**, written $R_i\leftarrow R_i+kR_j$ for $i\ne j$.
+
+The arrow $\leftarrow$ means that the row on the left is replaced by the expression on the right. Operation 3 combines scaling with addition (or subtraction, when $k<0$), and it does almost all of the work in elimination. Consider the two equations
 
 $$
-R_2\leftarrow R_2+\tfrac12R_1
+\begin{aligned}
+R_1&:\quad x_1+x_2=3,\\
+R_2&:\quad 2x_1+3x_2=0.
+\end{aligned}
+$$
+
+The operation $R_1\leftarrow R_1+R_2$ replaces the first equation by $3x_1+4x_2=3$. The new pair has the same solution, but it is no easier to solve, because both equations still contain both unknowns. A useful operation removes $x_1$ from the second equation:
+
+$$
+R_2\leftarrow R_2-\left(\frac{2}{1}\right)R_1
 \quad\Longrightarrow\quad
-\tfrac52x_1-\tfrac12x_2=\tfrac32.
+0\,x_1+x_2=-6.
 $$
 
-Subtracting $\tfrac12R_1$ recovers the original second equation, so the solution set is unchanged.
-
-We apply these operations until every coefficient below the main diagonal is zero. The original system $\mathbf{A}\mathbf{x}=\mathbf{b}$ has then become
+The second equation now gives $x_2=-6$ directly, and substituting it into $R_1$ gives $x_1=3-(-6)=9$, which is Gaussian elimination in miniature. For a larger square system with a unique solution, we repeat such operations column by column, from left to right, until every coefficient below the main diagonal is zero. The original system $\mathbf{A}\mathbf{x}=\mathbf{b}$ has then become
 
 $$
-\mathbf{U}\mathbf{x}=\mathbf{c},
+\mathbf{U}\mathbf{x}=\mathbf{c}.
 $$
 
-where $\mathbf{U}$ is an **upper-triangular matrix** and $\mathbf{c}$ is the correspondingly modified right-hand side. From there, we use **back substitution**: solve the last row for $x_n$, substitute it into the row above to find $x_{n-1}$, and continue upward to $x_1$.
+This top-to-bottom sweep is called **forward elimination**. Despite the similar name, it differs from forward substitution: elimination changes the equations, whereas forward substitution solves equations that are already lower triangular. At each stage of the sweep, one row is used to eliminate the entries below it in one column. Its diagonal entry is the **pivot**, and the row is the **pivot row**.
 
-@fig-elimination-steps shows how the work is organized for a $5\times5$ matrix. The diagonal entry used to clear a column is called the **pivot**, and its row is the **pivot row**. The first pivot row (hatched) is subtracted, with a suitable multiplier, from each row below it. This creates zeros below $a_{11}$ and changes every remaining entry in those rows, so a block of $4\times4=16$ entries of $\mathbf{A}$ is updated, together with the matching entries of $\mathbf{b}$. The next pivot, $u_{22}$, clears column 2 and updates a $3\times3$ block, and so on until only $\mathbf{U}$ remains.
+@fig-elimination-steps shows how the work is organized for a $5\times5$ matrix. The first pivot row (hatched) is subtracted, with a suitable multiplier, from each row below it. This creates zeros below $a_{11}$ and changes every remaining entry in those rows, so a block of $4\times4=16$ entries of $\mathbf{A}$ is updated, together with the matching entries of $\mathbf{b}$. The next pivot, $u_{22}$, clears column 2 and updates a $3\times3$ block, and so on until only $\mathbf{U}$ remains.
 
 ![Gaussian elimination on a $5\times5$ system $[\mathbf{A}\,|\,\mathbf{b}]$. Grey entries are not yet final, orange rows are finished rows of $[\mathbf{U}\,|\,\mathbf{c}]$, and white entries have been eliminated. The hatched row is the pivot row used in the next step, and the black outline marks its pivot. The arrows show the pivot row being combined with each row below it. ](../../../assets/L13-gauss-elimination-steps.png){#fig-elimination-steps fig-alt="A five-by-five augmented system at the start, after clearing columns one and two, and at the final upper-triangular form. Hatched pivot rows and red arrows indicate elimination below each pivot." width=100%}
 
-The shrinking blocks give the cost of elimination. Clearing column $k$ updates a block of $(n-k)^2$ entries, which requires roughly one multiplication and one subtraction per entry. Summing over the column steps gives
+**How many operations does Gaussian elimination need?**
 
-$$
-2\left[(n-1)^2+(n-2)^2+\cdots+1^2\right]\approx\frac{2}{3}n^3
-$$
+The shrinking blocks in @fig-elimination-steps give the answer. We count the operations of naive elimination, which uses each diagonal entry as the pivot and never swaps rows.
 
-floating-point operations. Back substitution touches each entry of $\mathbf{U}$ about once, which costs about $n^2$ operations. This is the origin of the cubic scaling measured in the L12 dense benchmark: nearly all the effort goes into eliminating, and very little into substituting.
+- **Elimination phase.** Clearing column 1 changes the $n-1$ rows below the first pivot. In each of those rows, the remaining $n-1$ entries of $\mathbf{A}$ are updated as $a_{ij}\leftarrow a_{ij}-\ell\,a_{1j}$, where $\ell$ is the multiplier for that row. Each update needs one multiplication and one subtraction, which is where the factor 2 below comes from. Column 1 therefore costs about $2(n-1)^2$ operations, column 2 about $2(n-2)^2$, and so on:
+
+  $$
+  2\left[(n-1)^2+(n-2)^2+\cdots+1^2\right]\approx\frac{2}{3}n^3.
+  $$
+
+  The approximation uses $1^2+2^2+\cdots+m^2=m(m+1)(2m+1)/6\approx m^3/3$. Computing the multipliers and updating $\mathbf{b}$ add only order $n^2$ operations.
+- **Back-substitution phase.** As shown for triangular systems, this costs about $n^2$ operations.
+
+For $n=1000$, elimination needs about $7\times10^8$ operations and back substitution about $10^6$. Nearly all the effort goes into eliminating, which explains the cubic scaling in the L12 dense benchmark. The count describes the worst case, in which every entry below the diagonal starts nonzero and must be removed. Many engineering matrices begin with most of those entries already zero. In the tridiagonal stiffness matrix $\mathbf{K}$ of the spring chain, each column has a single nonzero entry below the diagonal, and removing it changes only a few entries of the next row, which is why a banded solver needs only order $n$ operations.
 
 #### Worked example: naive elimination on a $4\times4$ system
 
-**Naive elimination** uses the current diagonal entry as the pivot, without swapping rows. Consider
+Consider the following system of equations:
 
 $$
 \begin{aligned}
@@ -181,7 +248,7 @@ $$
 \end{aligned}
 $$
 
-Append the right-hand side to form $[\mathbf{A}\,|\,\mathbf{b}]$. Every row operation must include that final column:
+Gaussian elimination works on the **augmented matrix** $[\mathbf{A}\,|\,\mathbf{b}]$, formed by appending the right-hand side as an extra column. Each row then holds a complete equation, so every row operation **must include** the final column, because leaving it out would change the equations and their solution. For this system, the augmented matrix is
 
 $$
 \left[\begin{array}{rrrr|r}
@@ -192,17 +259,23 @@ $$
 \end{array}\right].
 $$
 
-**Column 1: pivot 2.** The multipliers are $4/2=2$, $-2/2=-1$, and $2/2=1$. Apply
+Every elimination step follows the same rule. Suppose $R_i$ is the pivot row with pivot $a_i$, and $R_j$ is a row below it whose entry in the same column is $a_j$. The operation
 
 $$
-R_2\leftarrow R_2-2R_1,\qquad
-R_3\leftarrow R_3+R_1,\qquad
-R_4\leftarrow R_4-R_1.
+R_j\leftarrow R_j-\left(\frac{a_j}{a_i}\right)R_i
 $$
 
-For example, the new second row is $(4-4,\,5-2,\,0+2,\,1-2\,|\,18-10)$. The full result is
+replaces $a_j$ by $a_j-(a_j/a_i)\,a_i=0$. The ratio $a_j/a_i$ is called the **multiplier**.
+
+**Eliminate column 1.** $R_1$ is the pivot row, with pivot 2. Applying the rule to the three rows below it gives
 
 $$
+\begin{aligned}
+R_2&\leftarrow R_2-\left(\frac{4}{2}\right)R_1\\
+R_3&\leftarrow R_3-\left(\frac{-2}{2}\right)R_1\\
+R_4&\leftarrow R_4-\left(\frac{2}{2}\right)R_1
+\end{aligned}
+\quad\Longrightarrow\quad
 \left[\begin{array}{rrrr|r}
 2&1&-1&1&5\\
 0&3&2&-1&8\\
@@ -211,10 +284,15 @@ $$
 \end{array}\right].
 $$
 
-**Column 2: pivot 3.** Using the updated rows, the multipliers are $6/3=2$ and $-3/3=-1$:
+For example, the new $R_2$ is $\bigl(4-2(2),\;5-2(1),\;0-2(-1),\;1-2(1)\;\big|\;18-2(5)\bigr)=(0,\,3,\,2,\,-1\,|\,8)$.
+
+**Eliminate column 2.** $R_2$ is now the pivot row, with pivot 3. The multipliers use the updated entries of column 2:
 
 $$
-R_3\leftarrow R_3-2R_2,\qquad R_4\leftarrow R_4+R_2
+\begin{aligned}
+R_3&\leftarrow R_3-\left(\frac{6}{3}\right)R_2\\
+R_4&\leftarrow R_4-\left(\frac{-3}{3}\right)R_2
+\end{aligned}
 \quad\Longrightarrow\quad
 \left[\begin{array}{rrrr|r}
 2&1&-1&1&5\\
@@ -224,10 +302,10 @@ R_3\leftarrow R_3-2R_2,\qquad R_4\leftarrow R_4+R_2
 \end{array}\right].
 $$
 
-**Column 3: pivot 3.** The final multiplier is $3/3=1$:
+**Eliminate column 3.** $R_3$ is the pivot row, with pivot 3, and only $R_4$ remains below it:
 
 $$
-R_4\leftarrow R_4-R_3
+R_4\leftarrow R_4-\left(\frac{3}{3}\right)R_3
 \quad\Longrightarrow\quad
 \left[\begin{array}{rrrr|r}
 2&1&-1&1&5\\
@@ -237,30 +315,36 @@ R_4\leftarrow R_4-R_3
 \end{array}\right].
 $$
 
-We have reached $[\mathbf{U}\,|\,\mathbf{c}]$, with $\mathbf{c}=(5,8,21,24)^{\mathsf T}$.
+We have arrived at the upper-triangular system $\mathbf{U}\mathbf{x}=\mathbf{c}$, with $\mathbf{c}=(5,8,21,24)^{\mathsf T}$.
 
-**Back substitution.** The last equation gives $x_4$, then the preceding rows give $x_3$, $x_2$, and $x_1$:
+**Back substitution.** The last equation gives $x_4$, and the rows above it give $x_3$, $x_2$, and $x_1$ in turn:
 
 $$
 \begin{aligned}
 x_4&=\frac{24}{6}=4,\\
-x_3&=\frac{21-3(4)}{3}=3,\\
-x_2&=\frac{8-2(3)+4}{3}=2,\\
-x_1&=\frac{5-2+3-4}{2}=1.
+x_3&=\frac{21-(3)(4)}{3}=3,\\
+x_2&=\frac{8-(2)(3)-(-1)(4)}{3}=2,\\
+x_1&=\frac{5-(1)(2)-(-1)(3)-(1)(4)}{2}=1.
 \end{aligned}
 $$
 
-Substitution into the original equations gives $(5,18,32,42)^{\mathsf T}$, confirming $\mathbf{x}=(1,2,3,4)^{\mathsf T}$.
+Therefore the final solution is $\mathbf{x}=(1,2,3,4)^{\mathsf T}$.
 
 ### Partial pivoting
 
-The elimination above always used the diagonal entry of the current row as the pivot. This naive version divides by whatever number happens to sit there. If a pivot is zero, the method stops immediately, even when the system has a perfectly good solution. The system has solution $(1,1)$, but its augmented matrix begins with a zero pivot:
+**Case 1: zero pivot.** The naive elimination above worked because every pivot happened to be nonzero. Each step divides by the pivot through the multiplier in
+
+$$
+R_j\leftarrow R_j-\left(\frac{a_j}{a_i}\right)R_i,
+$$
+
+so a pivot $a_i=0$ stops the method immediately, even when the system has a perfectly good solution. The two equations below have the solution $(1,1)$ and are well conditioned, yet their augmented matrix begins with a zero pivot:
 
 $$
 \left[\begin{array}{cc|c}0&1&1\\1&1&2\end{array}\right].
 $$
 
-Elimination would need the multiplier $1/0$, so we cannot continue. This is a **zero pivot**.[^burden] Swapping the rows puts a nonzero entry in the first pivot position:
+Eliminating $x_1$ from the second row would need the multiplier $1/0$. This situation is called a **zero pivot** [@burden2016numerical]. The simplest remedy is to swap the rows, which puts a nonzero entry in the pivot position:
 
 $$
 \left[\begin{array}{cc|c}0&1&1\\1&1&2\end{array}\right]
@@ -268,9 +352,7 @@ $$
 \left[\begin{array}{cc|c}1&1&2\\0&1&1\end{array}\right].
 $$
 
-[^burden]: R. L. Burden and J. D. Faires, *Numerical Analysis*, 8th ed. (Thomson Brooks/Cole, 2005), ISBN 0-534-39200-8.
-
-A small nonzero pivot causes a subtler problem. Replace the zero with $\varepsilon$:
+**Case 2: small nonzero pivot.** A trickier case arises when the pivot is not exactly zero but small. Replace the zero by a small number $\varepsilon$:
 
 $$
 \begin{bmatrix}\varepsilon&1\\1&1\end{bmatrix}
@@ -278,73 +360,94 @@ $$
 =\begin{bmatrix}1\\2\end{bmatrix}.
 $$
 
-For small $\varepsilon$, the exact solution is very close to $(1,1)$, and the condition number stays near $2.6$, so the problem is **well-conditioned**. Eliminate without interchanging rows. The multiplier is $1/\varepsilon$, and the second row becomes
+For small $\varepsilon$, the exact solution is very close to $(1,1)$, and the condition number stays near $2.6$, so the problem is **well-conditioned**. With $\varepsilon=10^{-4}$, we therefore expect both unknowns to be close to 1. What happens if we eliminate without interchanging rows? The multiplier is $1/\varepsilon$, and the second row becomes
 
 $$
+R_2\leftarrow R_2-\left(\frac{1}{\varepsilon}\right)R_1
+\quad\Longrightarrow\quad
 \left(1-\frac{1}{\varepsilon}\right)x_2=2-\frac{1}{\varepsilon}.
 $$
 
-Take $\varepsilon=10^{-20}$. Both $1-10^{20}$ and $2-10^{20}$ are stored as $-10^{20}$, because double precision retains only about 16 significant decimal digits. **Rule of thumb:** in `float64`, a contribution smaller than about $10^{-16}$ times the largest term in a sum can be lost. We obtain $x_2=1$, which is accurate. Back substitution then gives
+For $\varepsilon=10^{-4}$, this gives
 
 $$
-x_1=\frac{1-x_2}{\varepsilon}=\frac{1-1}{10^{-20}}=0,
+x_2=\frac{2-10^4}{1-10^4}=\frac{9998}{9999}=0.99989999\ldots
 $$
 
-which is completely wrong. The huge multiplier swamped the information in the second equation, and dividing by the tiny pivot turned a small rounding error in $x_2$ into a large error in $x_1$.
+If we keep only four significant digits, as we might when working by hand, $x_2$ is recorded as $1.000$. Back substitution in the first row then gives
+
+$$
+x_1=\frac{1-(1)x_2}{\varepsilon}=\frac{1-1.000}{10^{-4}}=0,
+$$
+
+whereas the exact value is $x_1=10000/9999\approx1.0001$. The rounding error in $x_2$ was only about $10^{-4}$, but it was then divided by the tiny pivot. The huge multiplier swamped the information in the second equation, and dividing by $\varepsilon$ turned a small rounding error in $x_2$ into a complete loss of $x_1$. Double precision keeps about 16 significant digits instead of four, so in `float64` the same failure appears once $\varepsilon$ approaches $10^{-16}$, as quantified in [Further details](#further-details).
 
 Now interchange the rows first, so that the pivot is 1:
 
 $$
 \begin{bmatrix}1&1\\\varepsilon&1\end{bmatrix}
 \begin{bmatrix}x_1\\x_2\end{bmatrix}
-=\begin{bmatrix}2\\1\end{bmatrix}.
+=\begin{bmatrix}2\\1\end{bmatrix},
+\qquad
+R_2\leftarrow R_2-\left(\frac{\varepsilon}{1}\right)R_1
+\quad\Longrightarrow\quad
+(1-\varepsilon)\,x_2=1-2\varepsilon.
 $$
 
-The multiplier is now $\varepsilon$. The second row becomes $(1-\varepsilon)x_2=1-2\varepsilon$, so $x_2\approx1$, and back substitution gives $x_1=2-x_2\approx1$. Both values are accurate to round-off.
+With $\varepsilon=10^{-4}$, $x_2=0.9998/0.9999$ is again recorded as $1.000$, but back substitution now gives $x_1=2-(1)x_2=1.000$. The small multiplier $\varepsilon$ leaves the information in the second equation intact, and we never divide by a small number, so both values are accurate to the four digits we kept.
 
-This strategy is called **partial pivoting**. Before eliminating column $k$, the solver searches that column from row $k$ downward, finds the entry of largest magnitude, and swaps its row into the pivot position. Every multiplier then satisfies $|\ell_{ij}|\le1$, so no row is ever multiplied by a huge factor and added to another. The row interchanges are recorded so that the right-hand side can be reordered in the same way. The large error without pivoting comes from the elimination arithmetic: a huge multiplier magnifies round-off.
+The two cases lead to one strategy, called **partial pivoting**. Before eliminating each column, the solver searches that column from the pivot position downward, finds the entry of largest magnitude, and swaps its row into the pivot position. A zero pivot is avoided whenever the column still contains a nonzero entry, and every multiplier satisfies $|a_j/a_i|\le1$, so no row is multiplied by a huge factor before being added to another. The row interchanges are recorded so that the right-hand side can be reordered in the same way. @fig-pivoting shows both situations.
 
 ![Row swaps during elimination. Panel a replaces a zero pivot with a nonzero entry. Panel b chooses the largest magnitude in the active column, as required by partial pivoting.](../../../assets/L13-pivoting.png){#fig-pivoting width=100% fig-alt="A zero pivot is exchanged with a row containing 2. A second example exchanges pivot 0.5 with minus 4, the largest available magnitude."}
 
 #### Worked example: partial pivoting at successive columns
 
-Pivot selection is repeated on the **updated** matrix at every column. For this system, the first column has magnitudes $0,2,1$, so swap $R_1$ and $R_2$, including their right-hand sides:
+Pivot selection is repeated on the **updated** matrix before each column is eliminated. Consider the system
 
 $$
-\left[\begin{array}{rrr|r}0&2&1&7\\2&2&1&9\\1&3&4&19\end{array}\right]
-\xrightarrow{R_1\leftrightarrow R_2}
+\left[\begin{array}{rrr|r}0&2&1&7\\2&2&1&9\\1&3&4&19\end{array}\right].
+$$
+
+**Eliminate column 1.** The entries of column 1 have magnitudes $0$, $2$, and $1$. The largest is in $R_2$, so we swap $R_1$ and $R_2$, including their right-hand sides:
+
+$$
+R_1\leftrightarrow R_2
+\quad\Longrightarrow\quad
 \left[\begin{array}{rrr|r}2&2&1&9\\0&2&1&7\\1&3&4&19\end{array}\right].
 $$
 
-The multiplier for row 2 is zero. For row 3 it is $1/2$, giving
+The new pivot is 2, and the rule gives
 
 $$
-R_3\leftarrow R_3-\tfrac12R_1
+\begin{aligned}
+R_2&\leftarrow R_2-\left(\frac{0}{2}\right)R_1\\
+R_3&\leftarrow R_3-\left(\frac{1}{2}\right)R_1
+\end{aligned}
 \quad\Longrightarrow\quad
 \left[\begin{array}{rrr|r}2&2&1&9\\0&2&1&7\\0&2&3.5&14.5\end{array}\right].
 $$
 
-In column 2, the two available entries tie at magnitude 2, so we keep row 2. The multiplier is $2/2=1$:
+**Eliminate column 2.** The candidates in column 2 are the entries of $R_2$ and $R_3$, which tie at magnitude 2. We keep $R_2$ as the pivot row, so no swap is needed:
 
 $$
-R_3\leftarrow R_3-R_2
+R_3\leftarrow R_3-\left(\frac{2}{2}\right)R_2
 \quad\Longrightarrow\quad
 \left[\begin{array}{rrr|r}2&2&1&9\\0&2&1&7\\0&0&2.5&7.5\end{array}\right].
 $$
 
-Back substitution gives
+**Back substitution** gives
 
 $$
 x_3=\frac{7.5}{2.5}=3,\qquad
-x_2=\frac{7-3}{2}=2,\qquad
-x_1=\frac{9-2(2)-3}{2}=1.
+x_2=\frac{7-(1)(3)}{2}=2,\qquad
+x_1=\frac{9-(2)(2)-(1)(3)}{2}=1.
 $$
 
-The original equations give $7$, $9$, and $19$. Swapping equations changed their order while preserving the solution.
+Substituting $\mathbf{x}=(1,2,3)^{\mathsf T}$ into the original equations returns $7$, $9$, and $19$, confirming that the swap changed the order in which the equations were processed while preserving the solution.
 
 ### Gauss–Jordan elimination
 
-Gauss–Jordan is Gaussian elimination on steroids: it continues clearing entries above each pivot and scales the pivots to 1. The coefficient matrix becomes the identity, and the augmented right-hand side contains the solution directly. The normalization and upward-elimination steps can be ordered in different ways; the sequence below is one valid route to the identity.
+Gauss–Jordan elimination is **Gaussian elimination taken to the limit**. Besides clearing the entries below each pivot, it clears the entries above each pivot and scales every pivot to 1. The coefficient matrix becomes the identity, so the system reads $\mathbf{I}\mathbf{x}=\mathbf{c}$ and the last column of the augmented matrix is the solution itself. The normalization and the upward clearing can be ordered in several ways. @fig-gauss-jordan shows one arrangement, which starts from the upper-triangular result of forward elimination and works from the last pivot back to the first.
 
 ![Gauss–Jordan after forward elimination: normalize each hatched pivot row and clear the entries above its pivot, working from right to left. Green diagonal cells are 1, white cells are zero, and the final right-hand side is the solution.](../../../assets/L13-gauss-jordan-steps.png){#fig-gauss-jordan width=100% fig-alt="Four augmented matrix states show upper-triangular U, columns five and four cleared above their pivots, and the final identity matrix with solution x. Red arrows point upward from the pivot row."}
 
@@ -374,7 +477,7 @@ $$
 \underbrace{\left[\begin{array}{rrr|r}1&0&0&1\\0&1&0&2\\0&0&1&3\end{array}\right]}_{[\mathbf{I}\,|\,\mathbf{x}]}.
 $$
 
-The extra elimination replaces back substitution. For solving a system, Gaussian elimination followed by back substitution takes less work.
+The back-elimination steps are basically the same as the back-substitution, we can view Gauss-Jordan just an explicit form showing the back-substitution into the original matrix.
 
 ### LU factorization (Reading material)
 
@@ -490,7 +593,7 @@ Permutation records row ordering, independently of the normalization chosen for 
 
 #### Different forms of LU factorization
 
-Recording elimination multipliers below a diagonal of ones produces **Doolittle's factorization**. Other conventions distribute the diagonal scaling differently:
+An LU factorization is not unique. A matrix with one pair of triangular factors has infinitely many pairs with the same product until we specify the values on the diagonal of one factor, and each convention in the table below fixes that diagonal in a different way. Our multiplier-recording method places a 1 in every diagonal entry of $\mathbf{L}$ and therefore gives the same factors as **Doolittle's factorization**. Optimized Fortran libraries implement a single convention, and LAPACK's LU routine, which `np.linalg.solve` calls, uses the Doolittle convention together with partial pivoting. In the matrix relations below, $\mathbf{P}$ is the permutation matrix that records the row swaps made by partial pivoting, and $\mathbf{P}=\mathbf{I}$ when no swaps are needed.
 
 | Factorization | Constraint | Matrix relation |
 |---|---|---|
@@ -498,13 +601,7 @@ Recording elimination multipliers below a diagonal of ones produces **Doolittle'
 | Crout | $U_{ii}=1$ | $\mathbf{P}\mathbf{A}=\mathbf{L}\mathbf{U}$ |
 | Cholesky, for symmetric positive-definite matrices | $\mathbf{U}=\mathbf{L}^{\mathsf T}$, $L_{ii}>0$ | $\mathbf{A}=\mathbf{L}\mathbf{L}^{\mathsf T}$ |
 
-When an LU factorization exists, its scaling is not unique until a diagonal convention is specified. For any invertible diagonal matrix $\mathbf{D}$,
-
-$$
-\mathbf{L}\mathbf{U}=(\mathbf{L}\mathbf{D})(\mathbf{D}^{-1}\mathbf{U}).
-$$
-
-Thus infinitely many factor pairs have the same product. See the [LU decomposition reference](https://en.wikipedia.org/wiki/LU_decomposition) for the existence and uniqueness conditions.
+See the [LU decomposition reference](https://en.wikipedia.org/wiki/LU_decomposition) for the conditions under which an LU factorization exists and is unique.
 
 ::: {.callout-note collapse="true"}
 ## Worked $3\times3$ factorizations: Doolittle, Crout, and Cholesky
@@ -523,7 +620,7 @@ $$
 \underbrace{\begin{bmatrix}4&2&2\\0&4&2\\0&0&4\end{bmatrix}}_{\mathbf{U}_D}.
 $$
 
-**Crout.** Move the diagonal of $\mathbf{U}_D$ into the lower factor. Here $\mathbf{D}=4\mathbf{I}$, giving
+**Crout.** Collect the diagonal entries of $\mathbf{U}_D$ in a diagonal matrix $\mathbf{D}$, here $\mathbf{D}=4\mathbf{I}$, and move them into the lower factor. Since $\mathbf{D}\mathbf{D}^{-1}=\mathbf{I}$, the product is unchanged:
 
 $$
 \mathbf{A}=
@@ -557,7 +654,7 @@ In SciPy, [`lu_factor`](https://docs.scipy.org/doc/scipy/reference/generated/sci
 
 The notebook animates each row operation of Gaussian elimination, Gauss–Jordan elimination, or LU factorization for a system of order 2 to 6. Compare the three methods on the default random system. Then turn partial pivoting off, set $a_{11}$ to $10^{-4}$, $10^{-8}$, and $10^{-16}$ in turn, and compare the final $\mathbf{x}$ with the exact solution. Very large entries saturate the colour scale, which makes growth caused by a small pivot easy to spot. Relate any loss of accuracy to the large multipliers in the small-pivot example.
 
-::: {.quarto-wasm-local notebook="l13_direct_solvers.py" title="Step-by-step Gaussian elimination, Gauss–Jordan elimination, and LU factorization with optional partial pivoting" height="900" loading="lazy" fullscreen="true"}
+::: {.quarto-wasm-local notebook="l13_direct_solvers.edit.py" view="app" title="Step-by-step Gaussian elimination, Gauss–Jordan elimination, and LU factorization with optional partial pivoting" height="900" loading="lazy" fullscreen="true"}
 Gaussian elimination reaches $[\mathbf{U}\,|\,\mathbf{c}]$ and back-substitutes, Gauss–Jordan elimination reaches $[\mathbf{I}\,|\,\mathbf{x}]$, and LU factorization stores each multiplier in $\mathbf{L}$ before solving $\mathbf{L}\mathbf{y}=\mathbf{P}\mathbf{b}$ and $\mathbf{U}\mathbf{x}=\mathbf{y}$. A very small $a_{11}$ without pivoting produces large multipliers, and the computed solution departs from the exact one, completely so once $a_{11}$ is about $10^{-16}$ of the other entries. With partial pivoting, the solution remains accurate.
 :::
 
@@ -588,7 +685,7 @@ Here $k$ counts completed sweeps. Monitor both the change $\|\mathbf{x}^{(k+1)}-
 - **Successive over-relaxation (SOR)** weights each Gauss–Seidel update, usually with $1<\omega<2$, to accelerate convergence when the matrix and weight permit it.
 - **Conjugate gradient (CG)** applies to symmetric positive-definite systems. It chooses search directions that reduce the associated quadratic energy, using matrix-vector products rather than a dense factorization. See the [SciPy CG reference](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.cg.html).
 
-For further detail on Jacobi and SOR, consult Mmbaga et al.'s *Computational Methods for Engineers: Modeling, Algorithms and Analysis* or Kiusalaas's [*Numerical Methods in Engineering with Python 3*](../../02/references.qmd#ref-kiusalaas2013).
+Jacobi, Gauss–Seidel, and SOR are developed in more detail in the course textbooks [@mmbaga_computational; @kiusalaas2013].
 
 As in fixed-point root finding, convergence depends on the update rule and the matrix. Strict diagonal dominance is a sufficient condition for both Jacobi and Gauss–Seidel. The starting guess affects the number of sweeps, and a poorly chosen relaxation weight can cause divergence.
 
@@ -600,7 +697,7 @@ The demo places a direct method beside an iterative method on the same banded sy
 - **Direct method:** applies row operations to $\mathbf{A}$ and $\mathbf{b}$. For a given method and dimension, the number of steps is determined.
 - **Iterative method:** keeps $\mathbf{A}$ and $\mathbf{b}$ fixed while updating the estimate $\mathbf{x}$. The number of updates depends on the matrix and stopping tolerance.
 
-::: {.quarto-wasm-local notebook="l13_direct_vs_iterative.py" title="Gaussian elimination beside relaxed Jacobi for a banded system" height="880" loading="lazy" fullscreen="true"}
+::: {.quarto-wasm-local notebook="l13_direct_vs_iterative.edit.py" view="app" title="Gaussian elimination beside relaxed Jacobi for a banded system" height="880" loading="lazy" fullscreen="true"}
 Gaussian elimination applies a finite, dimension-dependent sequence of row operations to $\mathbf{A}$ and $\mathbf{b}$, then back-substitutes. Relaxed Jacobi keeps $\mathbf{A}$ and $\mathbf{b}$ fixed while updating $\mathbf{x}$ until its relative residual meets the chosen tolerance. Its sweep count depends on the matrix and relaxation parameter.
 :::
 
