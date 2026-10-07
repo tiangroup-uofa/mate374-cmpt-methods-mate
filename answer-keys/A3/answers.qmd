@@ -1,0 +1,414 @@
+---
+title: "MAT E 374 · Assignment 3 answers"
+bibliography: ../../references.bib
+---
+
+## Completed reference notebooks
+
+- [Q2 · Direct methods and triangular solves](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a3_q2_linear_systems_completed.html)
+- [Q3 · Least-squares fit to nutrition labels](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a3_q3_food_energy_completed.html)
+- [Q4 · Acetylene vibrational modes](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a3_q4_acetylene_completed.html)
+
+The Q3 reference fit uses IMG_5426 and IMG_5427 as additional training rows and holds out the higher-energy IMG_5425 label. Student results will differ with their own measurements.
+
+## Problem 1 · Short answers — 20 marks
+
+**1.1** Uniform translation of a free chain leaves all spring extensions unchanged and produces no restoring force. If $\mathbf K\mathbf x=\mathbf f$ has one solution, translating that configuration gives infinitely many solutions for the same applied forces. Loads incompatible with equilibrium give no solution. Thus the free-chain stiffness matrix has no unique displacement solution and must be singular.
+
+**1.2** The statement is false. Conditioning describes the sensitivity of the mathematical solution to perturbations, while the algorithm determines how much numerical error is introduced. Elimination without pivoting can divide by a tiny pivot and suffer severe cancellation even for a reasonably well-conditioned matrix. A stable method, appropriate scaling, and adequate precision are still needed.
+
+**1.3** The $\tfrac23n^3$ estimate describes general dense elimination. A solver that exploits a narrow band of nonzeros can avoid much of that work: a tridiagonal solve takes order $n$ operations, and a banded solve with fixed half-bandwidth $p$ takes order $np^2$. Credit requires recognizing that the implementation must exploit the structure and that elimination can introduce additional nonzeros.
+
+**1.4** The student's formula is mathematically correct when $\mathbf A$ is nonsingular: multiplying $\mathbf A\mathbf x=\mathbf b$ by $\mathbf A^{-1}$ gives $\mathbf x=\mathbf A^{-1}\mathbf b$. But obtaining the inverse requires substantial computation, and explicitly forming and using it is generally less efficient and less numerically reliable than factoring $\mathbf A=\mathbf L\mathbf U$ once and reusing the factors for triangular solves. If the inverse has already been computed for another reason, the matrix-vector product gives the solution, but for solving systems it is usually better to reuse the factorization. A singular matrix has no inverse.
+
+## Problem 2 · Direct methods — 20 marks
+
+### 2.1 Gaussian elimination with partial pivoting
+
+The initial augmented matrix is
+
+$$
+\left[\begin{array}{rrrr|r}
+0&2&1&-1&-3/2\\
+4&2&0&2&7\\
+2&1&3&1&11/2\\
+0&4&0&2&1
+\end{array}\right].
+$$
+
+Swap $R_1\leftrightarrow R_2$. The first nonzero multiplier is $m_{31}=1/2$. Apply $R_3\leftarrow R_3-\tfrac12R_1$:
+
+$$
+\left[\begin{array}{rrrr|r}
+4&2&0&2&7\\
+0&2&1&-1&-3/2\\
+0&0&3&0&2\\
+0&4&0&2&1
+\end{array}\right].
+$$
+
+The following route applies largest-magnitude pivoting at every stage. In column 2, the largest available entry is 4. Swap the current $R_2\leftrightarrow R_4$, then use $m_{42}=1/2$ and $R_4\leftarrow R_4-\tfrac12R_2$:
+
+$$
+\left[\begin{array}{rrrr|r}
+4&2&0&2&7\\
+0&4&0&2&1\\
+0&0&3&0&2\\
+0&0&1&-2&-2
+\end{array}\right].
+$$
+
+The third pivot is already the largest available entry. With $m_{43}=1/3$, apply $R_4\leftarrow R_4-\tfrac13R_3$:
+
+$$
+\left[\begin{array}{rrrr|r}
+4&2&0&2&7\\
+0&4&0&2&1\\
+0&0&3&0&2\\
+0&0&0&-2&-8/3
+\end{array}\right].
+$$
+
+Backward substitution gives
+
+$$
+\begin{aligned}
+x_4&=\frac{-8/3}{-2}=\frac43,\\
+x_3&=\frac23,\\
+x_2&=\frac{1-2x_4}{4}=-\frac5{12},\\
+x_1&=\frac{7-2x_2-2x_4}{4}=\frac{31}{24}.
+\end{aligned}
+$$
+
+Thus
+
+$$
+\boxed{\mathbf x=(1.292,-0.417,0.667,1.333)^{\mathsf T}}
+$$
+
+to three decimal places. Substitution of the exact fractions gives zero residual. Substitution of the rounded vector gives $(0,0,0.001,-0.002)^{\mathsf T}$, up to floating-point noise.
+
+The second swap is required for partial pivoting. Ordinary elimination can also keep the nonzero second pivot: Keeping the nonzero second pivot gives another valid route: apply $R_4\leftarrow R_4-2R_2$ and then $R_4\leftarrow R_4+\tfrac23R_3$ to obtain
+
+$$
+\left[\begin{array}{rrrr|r}
+4&2&0&2&7\\
+0&2&1&-1&-3/2\\
+0&0&3&0&2\\
+0&0&0&4&16/3
+\end{array}\right].
+$$
+
+Backward substitution gives $x_4=4/3$, $x_3=2/3$, $x_2=(-3/2-x_3+x_4)/2=-5/12$, and $x_1=31/24$, the same solution.
+
+### 2.2 LU factorization
+
+**(a)** Multiplication gives
+
+$$
+\mathbf L\mathbf U=
+\begin{bmatrix}
+4&2&-2\\
+2&1+3&-1+1\\
+-2&-1+3&1+1+2
+\end{bmatrix}
+=\begin{bmatrix}4&2&-2\\2&4&0\\-2&2&4\end{bmatrix}=\mathbf A.
+$$
+
+**(b)** For the first load,
+
+$$
+\begin{aligned}
+y_{1,1}&=5.5,\\
+y_{1,2}&=4-0.5(5.5)=1.25,\\
+y_{1,3}&=-2+0.5(5.5)-1.25=-0.5.
+\end{aligned}
+$$
+
+Here the first subscript labels the load and the second labels the component. Back substitution gives
+
+$$
+x_{1,3}=-0.25,\qquad x_{1,2}=\frac{1.25-(-0.25)}3=0.5,\qquad
+x_{1,1}=\frac{5.5-2(0.5)+2(-0.25)}4=1.
+$$
+
+Therefore $\mathbf y_1=(5.5,1.25,-0.5)^{\mathsf T}$ and $\mathbf x_1=(1,0.5,-0.25)^{\mathsf T}$. Direct multiplication gives $\mathbf A\mathbf x_1=(5.5,4,-2)^{\mathsf T}=\mathbf b_1$.
+
+**(c)** For the second load,
+
+$$
+\mathbf y_2=\begin{bmatrix}-1\\4-0.5(-1)\\6.5+0.5(-1)-4.5\end{bmatrix}
+=\begin{bmatrix}-1\\4.5\\1.5\end{bmatrix}.
+$$
+
+Back substitution gives
+
+$$
+x_{2,3}=0.75,\qquad x_{2,2}=\frac{4.5-0.75}3=1.25,\qquad
+x_{2,1}=\frac{-1-2(1.25)+2(0.75)}4=-0.5.
+$$
+
+Thus $\mathbf x_2=(-0.5,1.25,0.75)^{\mathsf T}$ and $\mathbf A\mathbf x_2=(-1,4,6.5)^{\mathsf T}=\mathbf b_2$.
+
+An acceptable code route for (a)–(c) is:
+
+```python
+import numpy as np
+from scipy.linalg import solve_triangular
+
+A = np.array([[4, 2, -2], [2, 4, 0], [-2, 2, 4]], dtype=float)
+L = np.array([[1, 0, 0], [0.5, 1, 0], [-0.5, 1, 1]])
+U = np.array([[4, 2, -2], [0, 3, 1], [0, 0, 2]], dtype=float)
+print(L @ U)
+for b in (np.array([5.5, 4, -2]), np.array([-1, 4, 6.5])):
+    y = solve_triangular(L, b, lower=True)
+    x = solve_triangular(U, y)
+    print("y =", y, "x =", x, "A @ x =", A @ x)
+```
+
+Its outputs are the product and vectors reported above. Using `np.linalg.solve(A, b)` alone does not demonstrate the requested two triangular substitutions.
+
+**(d)** For $m=1000$ loads,
+
+$$
+C_{\mathrm{repeated}}\approx m\left(\tfrac23n^3+2n^2\right),\qquad
+C_{\mathrm{reuse}}\approx\tfrac23n^3+2mn^2.
+$$
+
+In the repeated-solve estimate, the two $n^2$ contributions account for updating the right-hand side during elimination and for backward substitution. In the reused-LU estimate, they account for forward and backward substitution. The main comparison is the cubic work: repeating elimination performs it 1,000 times, while reused LU performs it once. Reuse avoids 999 additional factorizations, making it more efficient for a large dense matrix.
+
+## Problem 3 · Food energy — 30 marks
+
+### 3.1 Solving three labels
+
+The supplied panel gives:
+
+| Label | Fat (g) | Protein (g) | Total carbohydrate (g) | Energy (kcal) |
+|:--|--:|--:|--:|--:|
+| 1 | 30.0 | 3.6 | 51.6 | 490 |
+| 2 | 0 | 8 | 15 | 90 |
+| 3 | 0.5 | 1 | 3 | 20 |
+| 4 | 0.5 | 0 | 2 | 15 |
+
+For each label, use the nutrient amounts and energy from the same reported basis. Labels 1–3 give
+
+$$
+\begin{aligned}
+30.0c_f+3.6c_p+51.6c_c&=490,\\
+8c_p+15c_c&=90,\\
+0.5c_f+c_p+3c_c&=20.
+\end{aligned}
+$$
+
+Thus
+
+$$
+\boxed{\mathbf A_3=\begin{bmatrix}30.0&3.6&51.6\\0&8&15\\0.5&1&3\end{bmatrix},\quad
+\mathbf C=\begin{bmatrix}c_f\\c_p\\c_c\end{bmatrix},\quad
+\mathbf E_3=\begin{bmatrix}490\\90\\20\end{bmatrix}.}
+$$
+
+Entries of $\mathbf A_3$ are in g, coefficients in kcal/g, and entries of $\mathbf E_3$ in kcal, all on the corresponding label's basis.
+
+The second and third equations give
+
+$$
+c_p=11.25-1.875c_c,\qquad c_f=17.5-2.25c_c.
+$$
+
+Substitution into the first equation gives $565.5-22.65c_c=490$, so $c_c=75.5/22.65=10/3$. Therefore
+
+$$
+\boxed{\mathbf C_3=(10.000,\ 5.000,\ 3.333)^{\mathsf T}\ \mathrm{kcal/g}.}
+$$
+
+Using the unrounded coefficients $(10,5,10/3)^{\mathsf T}$ reproduces all three printed energies exactly. The matrix has determinant 90.6 and rank 3, so the solution is unique. Its 2-norm condition number is approximately 426.189, indicating sensitivity to small changes in the label data.
+
+An equivalent NumPy calculation is:
+
+```python
+import numpy as np
+
+A = np.array([[30.0, 3.6, 51.6],
+              [0.0, 8.0, 15.0],
+              [0.5, 1.0, 3.0],
+              [0.5, 0.0, 2.0]])
+E = np.array([490.0, 90.0, 20.0, 15.0])
+coefficients_three = np.linalg.solve(A[:3], E[:3])
+print(coefficients_three)
+print(A[:3] @ coefficients_three - E[:3])
+print(A[3] @ coefficients_three)
+```
+
+The outputs are $(10,5,3.333333\ldots)$ kcal/g, residuals of zero to floating-point precision, and a prediction of $11.666666\ldots$ kcal.
+
+### 3.2 Predicting label 4
+
+Using the unrounded coefficients,
+
+$$
+E_{4,\mathrm{predicted}}=0.5(10)+0(5)+2\left(\frac{10}{3}\right)
+=\frac{35}{3}=\boxed{11.667\ \mathrm{kcal}}.
+$$
+
+The printed energy is 15 kcal, so
+
+$$
+\Delta E_4=\left|\frac{35}{3}-15\right|
+=\frac{10}{3}=\boxed{3.333\ \mathrm{kcal}}.
+$$
+
+The relative error is $(10/3)/15\times100\%=22.2\%$. The model underpredicts the printed energy and does not reproduce it exactly. At this low energy, label rounding matters strongly: Canadian nutrition labels report energies from 5 to 50 kcal to the nearest 5 kcal [@cfia2026nutritionfacts]. The 9–4–4 estimate for this example is 12.5 kcal, which can appear as 15 kcal on the label. This example checks the initial three-label model; it is included in the later least-squares fit.
+
+### 3.3 Adding more data
+
+The dimensions are $\mathbf A:n\times3$, $\mathbf C:3\times1$, and $\mathbf E:n\times1$. `np.linalg.solve` requires a square coefficient matrix, so it cannot solve this rectangular system directly. Food-specific energy factors and rounded label values can give conflicting equations [@fao2003foodenergy, §3.5; @cfia2026nutritionfacts].
+
+### 3.4 Least squares
+
+The fitted coefficients depend on the students' photographs. Use total carbohydrate and the same serving column throughout. Include all four supplied labels and 3–5 additional products, holding out the highest-energy additional label. This leaves 6–8 fitting rows and one test row.
+
+With the additional rows appended to `A` and `E` in label order, an acceptable calculation is:
+
+```python
+held_out_index = 4 + np.argmax(E[4:])  # Highest-energy additional label.
+fit_indices = np.delete(np.arange(len(E)), held_out_index)
+A_fit, E_fit = A[fit_indices], E[fit_indices]
+C_fit, _, rank, singular_values = np.linalg.lstsq(A_fit, E_fit, rcond=None)
+held_out_prediction = A[held_out_index] @ C_fit
+held_out_error = abs(held_out_prediction - E[held_out_index])
+held_out_relative_error = held_out_error / E[held_out_index]
+```
+
+For the held-out row $h$, report
+
+$$
+E_{h,\mathrm{fit}}=f_hc_{f,\mathrm{fit}}+p_hc_{p,\mathrm{fit}}+c_hc_{c,\mathrm{fit}},\qquad
+\Delta E_h=|E_{h,\mathrm{fit}}-E_h|,\qquad
+\frac{\Delta E_h}{E_h}\times100\%.
+$$
+
+The instructor's three additional photographs used in the completed reference notebook give these additional rows:
+
+| Photo | Fat (g) | Protein (g) | Total carbohydrate (g) | Energy (kcal) |
+|:--|--:|--:|--:|--:|
+| IMG_5425 | 45 | 25 | 19 | 580 |
+| IMG_5426 | 0.7 | 0 | 26.1 | 115 |
+| IMG_5427 | 30 | 6 | 64 | 550 |
+
+The notebook excludes IMG_5428, which was identified as a stock-photo label. For the worked example, IMG_5425 (580 kcal) is held out; labels 1–4 and IMG_5426 and IMG_5427 are fitted. The least-squares coefficients are approximately $(8.742,3.414,4.176)^{\mathsf T}$ kcal/g, with condition number 14.25. The held-out prediction is 558.083 kcal, an absolute error of 21.917 kcal and relative error of 3.78%. Labels 1–3 already have rank 3, so adding fitting rows retains rank 3 when those supplied rows are entered correctly.
+
+Check the reported fitting matrix $\mathbf A$ and energy vector $\mathbf E$, the three fitted coefficients, and the held-out absolute prediction error. The matrix rank and condition number provide additional diagnostics. The comparison with the three-label solution and 9–4–4 below supports interpretation. Label rounding, food-specific factors, fibre, and nutrient-profile similarity can affect the estimates. Do not grade by proximity to 9–4–4. Rank below 3 means the coefficients are not uniquely identified. Rank 3 establishes uniqueness, but a large condition number can still make the estimates sensitive to the data.
+
+Least squares minimizes the total squared residual over the fitting rows. Its error on the held-out high-energy label can increase or decrease. With the held-out row fixed, changing only its printed energy must leave the fitted coefficients unchanged, providing a direct check that it was held out.
+
+### Comparison with the 9–4–4 rule
+
+The reference factors are $(9,4,4)^{\mathsf T}$ kcal/g [@fao2003foodenergy, §3.5.1]. The three-label solution differs from them by $(1,1,-2/3)^{\mathsf T}$ kcal/g: the fat and protein factors are higher, and the carbohydrate factor is lower.
+
+The 9–4–4 rule predicts $(490.8,92.0,20.5,12.5)^{\mathsf T}$ kcal for labels 1–4. Its label-4 absolute error is $|12.5-15|=2.500$ kcal, smaller than the three-label fit's 3.333 kcal. Its predictions for the first three labels are also close to the printed energies, despite the differences in the fitted coefficients. Rounding and food-specific energy factors help explain why solving three rounded equations exactly need not improve prediction on another food. For the new held-out example, IMG_5425, the three-label model predicts 638.333 kcal (10.1% error), and 9–4–4 predicts 581 kcal (0.172% error). Compare models on the same held-out label. Whether the students' least-squares fit improves these benchmarks depends on their additional labels.
+
+## Problem 4 · Acetylene stretching vibrations — 30 marks
+
+### 4.1 Eigenvalues
+
+An eigenvalue satisfies $\mathbf D\mathbf u=\lambda\mathbf u$ for a nonzero vector $\mathbf u$. Comparing this with $\mathbf D\mathbf u=\omega^2\mathbf u$ identifies $\lambda=\omega^2$. Each eigenvector gives the relative atomic displacements of a normal mode.
+
+### 4.2 Eigensolver
+
+Entering 592 and 1580 for the spring constants in N/m, and 1 and 12 for the masses in a.u., gives
+
+$$
+\mathbf D=
+\begin{bmatrix}
+592&-592&0&0\\
+-592/12&2172/12&-1580/12&0\\
+0&-1580/12&2172/12&-592/12\\
+0&0&-592&592
+\end{bmatrix}\quad\mathrm{N/(m\,a.u.)}.
+$$
+
+The numerical eigenvalues and angular frequencies, in ascending order, are:
+
+| Mode | $\omega^2$ ($\mathrm{N/(m\,a.u.)}$) | $\omega$ ($[\mathrm{N/(m\,a.u.)}]^{1/2}$) |
+|:--|--:|--:|
+| 1 | 0.000000 | 0.000000 |
+| 2 | 231.625130 | 15.219236 |
+| 3 | 641.333333 | 25.324560 |
+| 4 | 673.041537 | 25.943044 |
+
+A short worked check is the vector $\mathbf u=(1,-1/12,-1/12,1)^{\mathsf T}$. The first row gives $592(1+1/12)=641.333333$. The middle two atoms have equal amplitudes, so the central spring is unextended. The remaining rows give the same eigenvalue, identifying mode 3 directly.
+
+One NumPy calculation for the matrix, frequencies, and modes is:
+
+```python
+import numpy as np
+
+m = np.array([1., 12., 12., 1.])  # atomic mass units
+k_CH, k_CC = 592., 1580.  # N/m
+K = np.array([[k_CH, -k_CH, 0, 0],
+              [-k_CH, k_CH + k_CC, -k_CC, 0],
+              [0, -k_CC, k_CH + k_CC, -k_CH],
+              [0, 0, -k_CH, k_CH]])
+D = K / m[:, None]
+values, vectors = np.linalg.eig(D)
+order = np.argsort(values.real)
+values, vectors = values.real[order], vectors[:, order].real
+values[np.abs(values) < 1e-10 * np.max(np.abs(values))] = 0
+vectors /= np.max(np.abs(vectors), axis=0)
+vectors *= np.where(vectors[0] < 0, -1, 1)
+omega = np.sqrt(values)
+wavenumber = omega / (2 * np.pi * 1.2216313e-3)
+print(values, omega, wavenumber, vectors, sep="\n")
+```
+
+`np.linalg.eig` returns eigenvectors as columns and does not sort them. Using `np.linalg.eigh` directly on this nonsymmetric matrix gives incorrect results. An equivalent symmetric mass-weighted calculation is acceptable if its vectors are converted back to physical displacements.
+
+The normalized vectors are dimensionless relative amplitudes. Choose their common signs so that H$_1$ is positive:
+
+| Mode | H$_1$ | C$_2$ | C$_3$ | H$_4$ | Arrow directions |
+|:--|--:|--:|--:|--:|:--|
+| 1 | 1 | 1 | 1 | 1 | $\rightarrow\ \rightarrow\ \rightarrow\ \rightarrow$ |
+| 2 | 1 | 0.608741 | $-0.608741$ | $-1$ | $\rightarrow\ \rightarrow\ \leftarrow\ \leftarrow$ |
+| 3 | 1 | $-1/12$ | $-1/12$ | 1 | $\rightarrow\ \leftarrow\ \leftarrow\ \rightarrow$ |
+| 4 | 1 | $-0.136894$ | 0.136894 | $-1$ | $\rightarrow\ \leftarrow\ \rightarrow\ \leftarrow$ |
+
+### 4.3 Wavenumbers
+
+With $\omega$ in the units of 4.2, the direct conversion is
+
+$$
+\nu=\frac{\omega}{2\pi\,(1.2216313\times10^{-3})}\quad(\mathrm{cm^{-1}}).
+$$
+
+The resulting wavenumbers and motions are:
+
+| Mode | $\nu$ ($\mathrm{cm^{-1}}$) | Atomic motion |
+|:--|--:|:--|
+| 1 | 0.000 | Rigid translation |
+| 2 | 1982.772 | Predominantly symmetric C$\equiv$C stretch |
+| 3 | 3299.301 | Asymmetric C–H stretch |
+| 4 | 3379.877 | Predominantly symmetric C–H stretch |
+
+Mode 1 is rigid translation: all four atoms have equal displacements, so no spring length changes. Every row of $\mathbf D$ sums to zero, giving $\mathbf D\mathbf1=\mathbf0$. Small signed eigenvalues at round-off scale should be classified as zero before taking square roots, as in the notebook.
+
+The relative changes in the left C–H, C$\equiv$C, and right C–H bond lengths are $(u_2-u_1,u_3-u_2,u_4-u_3)$:
+
+- **Mode 1:** $(0,0,0)$, rigid translation.
+- **Mode 2:** approximately $(-0.391259,-1.217483,-0.391259)$. All three bonds contract at this instant, with the strongest change in C$\equiv$C. This is the predominantly C$\equiv$C symmetric stretch.
+- **Mode 3:** $(-13/12,0,13/12)$. The left C–H contracts while the right C–H extends, and C$\equiv$C is unchanged. This is the asymmetric C–H stretch.
+- **Mode 4:** approximately $(-1.136894,0.273789,-1.136894)$. Both C–H bonds contract while C$\equiv$C extends. This is the predominantly C–H symmetric stretch.
+
+### 4.4 Infrared spectrum
+
+**Mode 3**, at $3299.301\ \mathrm{cm^{-1}}$, explains the stretching band containing the measured peak at $3258\ \mathrm{cm^{-1}}$. Its vector is proportional to $(1,-1/12,-1/12,1)^{\mathsf T}$: both H atoms move right and both C atoms move left. One C–H bond contracts while the other extends, changing the molecular dipole and producing IR-active asymmetric stretching. Modes 2 and 4 are symmetric stretches and are IR-inactive in ideal acetylene.
+
+The measured maxima at 3258 and $3314\ \mathrm{cm^{-1}}$ belong to the structured stretching band. NIST lists the asymmetric C–H fundamental near $3289\ \mathrm{cm^{-1}}$ [@nistacetylene]. The harmonic model estimates a vibrational frequency, while the gas-phase spectrum also contains rotational structure.
+
+### 4.5 Additional peaks
+
+Allow each atom to move in all three spatial directions and include restoring forces for changes in bond angles. Adding transverse displacements represents bending, including the strong band near $730\ \mathrm{cm^{-1}}$ [@nistacetylene]. A model with only bond-length springs along a perfectly straight chain has no harmonic transverse restoring force, so bending stiffness is needed as well as the extra coordinates.
+
+For four atoms, the full displacement vector has 12 components and the dynamical matrix is $12\times12$. Removing three translations and two rotations leaves seven vibrational modes for a linear molecule: three stretches and four bending modes, arranged as two doubly degenerate pairs. Students need only propose extra displacement directions with suitable restoring forces.
+
+For further interpretation, the weaker band near $1330\ \mathrm{cm^{-1}}$ is the $\nu_4+\nu_5$ bending combination band [@coburn1956acetylene]. It excites two bending modes together, rather than corresponding to an additional harmonic eigenvector. Representing such transitions requires molecular anharmonicity or nonlinear dipole dependence.

@@ -4,6 +4,7 @@ project:
   render:
     - A1/answers.qmd
     - A2/answers.qmd
+    - A3/answers.qmd
 # Reuse the canonical assignment PDF options for every answer key.
 metadata-files:
   - ../assignments/_metadata.yml

@@ -16,7 +16,7 @@ def main():
         cwd=ROOT, check=True,
     )
     subprocess.run(["quarto", "render", "answer-keys", "--to", "pdf"], cwd=ROOT, check=True)
-    for assignment in ("A1", "A2"):
+    for assignment in ("A1", "A2", "A3"):
         source = ROOT / f"answer-keys/render/{assignment}/answers.pdf"
         target = ROOT / f"assignments/{assignment}/{assignment}-answers.pdf"
         if not source.is_file():

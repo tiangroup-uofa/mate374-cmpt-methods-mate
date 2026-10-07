@@ -140,6 +140,8 @@ website:
             text: "A1 · Answers"
           - href: assignments/A2/index.qmd
             text: "A2 · Working with functions"
+          - href: assignments/A3/index.qmd
+            text: "A3 · Systems of equations"
       - href: project/index.qmd
         text: Project
 

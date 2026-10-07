@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="176mm" height="52mm" viewBox="0 0 176 52">
+  <title>Acetylene and its free-ended axial spring model</title>
+  <desc>Panel a shows H1–C2 triple-bond C3–H4. Panel b replaces each bond with a spring, labels the hydrogen and carbon masses, and defines all four positive displacements to the right. There are no fixed ends.</desc>
+  <defs>
+    <marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid">
+      <path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/>
+    </marker>
+    <path id="spring" style="fill:none;stroke:#5e5e5e;stroke-width:0.45" d="M 0,0 H 3 L 5,2 7,-2 9,2 11,-2 13,2 15,-2 17,2 19,-2 21,2 23,-2 25,2 27,0 H 30"/>
+  </defs>
+  <g inkscape:groupmode="layer" inkscape:label="Molecule" id="molecule" style="font-family:Arial;fill:#231f20">
+    <text x="2" y="10" style="font-size:6.35px;font-weight:bold">a</text>
+    <path d="M 32,9 H 62 M 112,9 H 142 M 72,9 H 102 M 72,7.4 H 102 M 72,10.6 H 102" style="fill:none;stroke:#231f20;stroke-width:0.5"/>
+    <circle cx="27" cy="9" r="5" style="fill:#ffffff;stroke:#231f20;stroke-width:0.265"/>
+    <circle cx="67" cy="9" r="5" style="fill:#e4e4e4;stroke:#231f20;stroke-width:0.265"/>
+    <circle cx="107" cy="9" r="5" style="fill:#e4e4e4;stroke:#231f20;stroke-width:0.265"/>
+    <circle cx="147" cy="9" r="5" style="fill:#ffffff;stroke:#231f20;stroke-width:0.265"/>
+    <g style="font-size:4.23333px;text-anchor:middle">
+      <text x="27" y="10.5">H<tspan style="font-size:2.82222px;baseline-shift:sub">1</tspan></text>
+      <text x="67" y="10.5">C<tspan style="font-size:2.82222px;baseline-shift:sub">2</tspan></text>
+      <text x="107" y="10.5">C<tspan style="font-size:2.82222px;baseline-shift:sub">3</tspan></text>
+      <text x="147" y="10.5">H<tspan style="font-size:2.82222px;baseline-shift:sub">4</tspan></text>
+    </g>
+  </g>
+  <g inkscape:groupmode="layer" inkscape:label="Spring model" id="spring-model" style="font-family:Arial;fill:#231f20">
+    <text x="2" y="33.5" style="font-size:6.35px;font-weight:bold">b</text>
+    <use href="#spring" transform="translate(32,32)"/>
+    <use href="#spring" transform="translate(72,32)"/>
+    <use href="#spring" transform="translate(112,32)"/>
+    <g style="font-size:4.23333px;text-anchor:middle;font-style:italic">
+      <text x="47" y="24">k<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">CH</tspan></text>
+      <text x="87" y="24">k<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">CC</tspan></text>
+      <text x="127" y="24">k<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">CH</tspan></text>
+    </g>
+    <circle cx="27" cy="32" r="5" style="fill:#ffffff;stroke:#231f20;stroke-width:0.265"/>
+    <circle cx="67" cy="32" r="5" style="fill:#e4e4e4;stroke:#231f20;stroke-width:0.265"/>
+    <circle cx="107" cy="32" r="5" style="fill:#e4e4e4;stroke:#231f20;stroke-width:0.265"/>
+    <circle cx="147" cy="32" r="5" style="fill:#ffffff;stroke:#231f20;stroke-width:0.265"/>
+    <g style="font-size:4.23333px;text-anchor:middle;font-style:italic">
+      <text x="27" y="33.3">m<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">H</tspan></text>
+      <text x="67" y="33.3">m<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">C</tspan></text>
+      <text x="107" y="33.3">m<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">C</tspan></text>
+      <text x="147" y="33.3">m<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">H</tspan></text>
+    </g>
+    <g style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri)">
+      <path d="M 22,42 H 31"/>
+      <path d="M 62,42 H 71"/>
+      <path d="M 102,42 H 111"/>
+      <path d="M 142,42 H 151"/>
+    </g>
+    <g style="font-size:4.23333px;text-anchor:middle;font-style:italic;fill:#b5473a">
+      <text x="27" y="49">u<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">1</tspan></text>
+      <text x="67" y="49">u<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">2</tspan></text>
+      <text x="107" y="49">u<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">3</tspan></text>
+      <text x="147" y="49">u<tspan style="font-size:2.82222px;baseline-shift:sub;font-style:normal">4</tspan></text>
+    </g>
+    <path d="M 162,42 H 170" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)"/>
+    <text x="169" y="49" style="font-size:4.23333px;font-style:italic">x</text>
+  </g>
+</svg>
