@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="178mm" height="94mm" viewBox="0 0 178 94">
+  <title>Constant and changing tangent stiffness in Newton iteration</title>
+  <desc>A linear net force reaches zero in one correction. A nonlinear net force requires new tangents at successive positions. The plots represent one displacement direction.</desc>
+  <defs>
+    <marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid">
+      <path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/>
+    </marker>
+    <path id="spring" style="fill:none;stroke:#8a8f98;stroke-width:0.6" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/>
+  </defs>
+  <rect width="178" height="94" style="fill:white"/>
+  <g id="constant" inkscape:groupmode="layer" inkscape:label="Constant stiffness" style="font-family:Arial;fill:#231f20;font-size:4.23px">
+    <text x="2" y="7" style="font-size:6.35px;font-weight:bold">a</text>
+    <text x="13" y="7">Constant stiffness</text>
+    <use href="#spring" transform="translate(30,19) scale(1.25,1)"/>
+    <circle cx="27" cy="19" r="3" style="fill:#b3b3b3;stroke:#231f20;stroke-width:0.4"/>
+    <circle cx="58" cy="19" r="3" style="fill:#f5d9d9;stroke:#b5473a;stroke-width:0.4"/>
+    <path d="M 27,22 V 25 M 22,25 H 32 M 22,25 l -2,2 M 27,25 l -2,2 M 32,25 l -2,2" style="fill:none;stroke:#5e5e5e;stroke-width:0.4"/>
+    <path d="M 63,19 H 72" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri)"/>
+    <text x="42" y="15" style="font-style:italic">k</text>
+    <path d="M 14,81 V 34 M 14,65 H 78" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)"/>
+    <text x="5" y="37" style="font-style:italic">F</text>
+    <text x="79" y="71" style="font-style:italic">x</text>
+    <path d="M 19,37 L 74,81" style="fill:none;stroke:#231f20;stroke-width:0.8"/>
+    <path d="M 25,41.8 V 65" style="fill:none;stroke:#5e5e5e;stroke-width:0.3;stroke-dasharray:1.5,1"/>
+    <path d="M 25,41.8 L 54,65" style="fill:none;stroke:#b5473a;stroke-width:0.55;marker-end:url(#tri)"/>
+    <circle cx="25" cy="41.8" r="1.1" style="fill:#b5473a"/>
+    <circle cx="54" cy="65" r="1.1" style="fill:#b5473a"/>
+    <text x="21" y="72" style="font-style:italic">x⁽⁰⁾</text>
+    <text x="37" y="79" style="font-style:italic">x⁽¹⁾ = x*</text>
+    <text x="30" y="39" style="fill:#b5473a;font-size:3.53px">Exact linear force law</text>
+    <text x="17" y="90">One correction reaches F = 0</text>
+  </g>
+  <g id="changing" inkscape:groupmode="layer" inkscape:label="Changing stiffness" style="font-family:Arial;fill:#231f20;font-size:4.23px">
+    <text x="91" y="7" style="font-size:6.35px;font-weight:bold">b</text>
+    <text x="102" y="7">Changing local stiffness</text>
+    <path d="M 119,19 H 147" style="fill:none;stroke:#8a8f98;stroke-width:1"/>
+    <circle cx="116" cy="19" r="3" style="fill:#b3b3b3;stroke:#231f20;stroke-width:0.4"/>
+    <circle cx="150" cy="19" r="3" style="fill:#f5d9d9;stroke:#b5473a;stroke-width:0.4"/>
+    <path d="M 116,22 V 25 M 111,25 H 121 M 111,25 l -2,2 M 116,25 l -2,2 M 121,25 l -2,2" style="fill:none;stroke:#5e5e5e;stroke-width:0.4"/>
+    <path d="M 155,19 H 164" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri)"/>
+    <text x="127" y="15" style="font-size:3.53px">Nonlinear bond</text>
+    <path d="M 104,81 V 34 M 104,65 H 171" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)"/>
+    <text x="95" y="37" style="font-style:italic">F</text>
+    <text x="172" y="71" style="font-style:italic">x</text>
+    <!-- y = 38 + (x-110)^2 / 60; root x = 150.2492. -->
+    <path d="M 110,38 Q 135,38 160,79.6667" style="fill:none;stroke:#231f20;stroke-width:0.8"/>
+    <!-- Tangents at x=132 and x=157.8182; zero intercepts 157.8182 and 150.8483. -->
+    <path d="M 132,46.0667 L 157.8182,65 M 157.8182,76.1096 L 150.8483,65" style="fill:none;stroke:#b5473a;stroke-width:0.55;marker-end:url(#tri)"/>
+    <path d="M 132,46.0667 V 65 M 157.8182,65 V 76.1096" style="fill:none;stroke:#5e5e5e;stroke-width:0.3;stroke-dasharray:1.5,1"/>
+    <circle cx="132" cy="46.0667" r="1.1" style="fill:#b5473a"/>
+    <circle cx="157.8182" cy="76.1096" r="1.1" style="fill:#b5473a"/>
+    <circle cx="150.2492" cy="65" r="1.1" style="fill:#231f20"/>
+    <text x="126" y="72" style="font-style:italic">x⁽⁰⁾</text>
+    <text x="158" y="62" style="font-style:italic">x⁽¹⁾</text>
+    <text x="140" y="79" style="font-style:italic">x*</text>
+    <path d="M 145,75 L 149.8,67" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+    <text x="112" y="34" style="fill:#b5473a;font-size:3.53px">New tangent at each position</text>
+    <text x="106" y="90">Successive corrections reach F = 0</text>
+  </g>
+</svg>

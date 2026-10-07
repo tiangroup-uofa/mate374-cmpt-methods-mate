@@ -1,428 +1,450 @@
 ---
-title: "L14 · Root-dinfing and Optimizing large systems of equations"
-subtitle: "Newton-Raphson for systems of equations; Jacobian and Hessian matrices"
+title: "L14 · Root-finding for systems of nonlinear equations"
+subtitle: "Force balance, Newton's method, and the breaking of atomic bonds"
 body-classes: lecture-page
+bibliography: ../../../references.bib
 ---
 
 ::: {.callout-note}
 ## Central question
 
-**How can we use systems of equations to find the stable structure of a group of atoms?**
+**How far can a chain of atoms be stretched before its bonds break? Can we solve this using NumPy?**
 :::
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to:
 
-1. **Explain** why minimizing a quadratic energy reduces to one linear solve, $\mathbf K\mathbf x=\mathbf b$, and why a general interatomic energy does not.
-2. **Derive** the multidimensional Newton step $\mathbf H\,\Delta\mathbf x=-\nabla E$ from the one-dimensional Newton method, and state its costs and risks.
-3. **Use** `scipy.optimize.minimize` with an energy, a gradient, and a starting point, and compare how different method families choose their steps.
-4. **Describe** how BFGS and L-BFGS approximate the curvature from previous gradients.
-5. **Relax** a cluster with an atomistic package by combining a structure, a calculator, and an optimizer.
+1. **Formulate** the force balance of an atomic system as coupled nonlinear equations $\mathbf F(\mathbf x;f)=\mathbf 0$.
+2. **Derive** the two-dimensional Newton update and identify the entries of its Jacobian.
+3. **Solve** a loaded LJ chain with a handwritten Newton loop and `scipy.optimize.root`, checking the force residual.
+4. **Interpret** bond softening and a nearly singular Jacobian in relation to the harmonic model and the chain's limiting load.
 
-## From springs to stable structures
+## How far can we pull an atomic chain?
 
-In L11–L13, we modelled atoms joined by springs, so that the interactions between the atoms **near the equilibrium** positions can be approximated by the relation between the spring constants, i.e. the stiffness matrix $\mathbf{K}$. This helps to answer the displacement of atoms $\mathbf{u}$ when applying an external force $\mathbf{f}$.
+In L11 and L12, we applied forces to atoms connected by springs and calculated their displacements from $\mathbf K\mathbf u=\mathbf b$. Let us return to that chain model. Before doing any numerical calculation, imagine what happens as we pull harder:
 
-But, we have not answered the question yes, **where do we even get the equilibirum positions**? We have seen one such problem already in assignment 1, using the lennard-jones (LJ) potential, on a few Argon atoms. The formal question we want to ask is:
+- **How will the distances between the atoms change?** In the bead-and-spring model, the extensions increase proportionally to the applied force.
+- **What happens if the force becomes extremely large?** A Hookean spring keeps stretching, with an ever-increasing restoring force.
 
-> Given the interatomic energies E as a nonlinear function of atomic positions $\mathbf{x}$, can we obtain the structure $x_min$ with the lowest energy E_min?
+::: {.callout-important}
+## The harmonic spring has no breaking force
 
-
-$$
-\min_{\mathbf x}E(\mathbf x),
-\qquad\text{where at the minimum}\qquad
-\nabla E(\mathbf x)=\mathbf 0 .
-$$
-
-This minimization problem is key to **almost any** material simulations! Finding the structure by minimizing its energy is called **relaxation**, as in the [copper cluster animation in L11](../L11/index.qmd#fig-cu-cluster-relaxation). By the end of this class, we should be able to show you how these steps are actually done, and how they are linked closely to the matrix operations.
-
-## From an atomic energy to nonlinear equations
-
-Let $\mathbf x=(x_1,\ldots,x_n)^{\mathsf T}$ collect the $n$ coordinates that are free to change. The energy $E(\mathbf x)$ takes these $n$ inputs and returns one scalar. We will first let atoms move along a line, so each movable atom contributes one coordinate.
-
-At an unconstrained local minimum of a smooth energy, its partial derivative with respect to every free coordinate is zero:
-
-$$
-\frac{\partial E}{\partial x_1}=0,\qquad
-\frac{\partial E}{\partial x_2}=0,\qquad\ldots,\qquad
-\frac{\partial E}{\partial x_n}=0.
-$$
-
-These derivatives form the **gradient**, an $n$-component column vector:
-
-$$
-\mathbf g(\mathbf x)=\nabla E(\mathbf x)=
-\begin{bmatrix}
-\partial E/\partial x_1\\
-\partial E/\partial x_2\\
-\vdots\\
-\partial E/\partial x_n
-\end{bmatrix}.
-$$
-
-::: {.callout-note}
-## Notation: nabla, gradient, and Laplacian
-
-The symbol $\nabla$ is read as **nabla**. Applied to a scalar function such as energy, it gives the gradient $\nabla E$: the vector of partial derivatives with respect to the coordinates. The symbol $\Delta$, capital delta, denotes a change, such as the displacement correction $\Delta\mathbf x$ used below.
-
-Later, in diffusion, we will encounter the **Laplacian**, $\nabla^2=\nabla\cdot\nabla$. Applied to a scalar field, it returns a scalar: the sum of its second spatial derivatives. For example, $\nabla^2c=\partial^2c/\partial x^2+\partial^2c/\partial y^2+\partial^2c/\partial z^2$. The related operation $\nabla\cdot\mathbf F$, called divergence, takes a vector field and returns a scalar.
+From our chemistry and materials perspective, sufficiently strong pulling can break a chemical bond. A harmonic spring simply stretches farther: double the force and its extension doubles. To describe bond breaking, we need an interaction whose restoring force has a limit.
 :::
 
-The force on coordinate $x_i$ is $-g_i$, so $\mathbf g=\mathbf 0$ expresses force balance on every movable atom. It gives us $n$ equations for $n$ unknown coordinates. As in L07, a zero derivative identifies a stationary point. We will still need to establish whether that point is a minimum.
+**Our question: what changes when we replace the springs with an interaction that allows the atoms to separate?** We will start with three atoms along a line. The energy and forces can now be nonlinear functions of their positions, so a larger force need not produce a proportionally larger extension. Eventually, there may be no position at which the attraction can balance the pull.
 
-### The equilibrium separation of a Lennard–Jones pair
+![A three-atom model under equal outward pulls, beside an atomic-resolution image of a three-atom gold chain. The central atom in the model is held at the origin. The experimental panel is cropped from Fig. 1C of @hao2026gold, with its original 1 nm scale bar and inset retained. © 2026 American Chemical Society.](../../../assets/L14-chain-experiment.png){#fig-chain-experiment width="100%" fig-alt="Left: three atoms on a horizontal line, the middle atom fixed at zero and the outer atoms pulled outward by equal forces. Right: an AC-HRTEM image of a three-atom gold chain joining two supports, with a 1 nm scale bar."}
 
-Return to the Lennard–Jones pair energy from A1:
+Atomic chains can actually be imaged during experiments. @hao2026gold studied stretched gold chains using state-of-the-art electron microscopy. We will return to their observations after working out how to solve the force balance.
 
-$$
-V(r)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}
--\left(\frac{\sigma}{r}\right)^6\right].
-$$
+## From an energy model to coupled force equations
 
-Here $r$ is the separation, $\varepsilon$ sets the energy scale, and $\sigma$ is the separation at which the pair energy crosses zero. Differentiating with respect to the separation gives
+*If we don't use the bead-and-spring model, what can we use?* An interatomic energy model takes the atomic coordinates $\mathbf x$ and returns a single number, the total energy $E$, often together with its derivatives. Experiments can help determine or test such models. The relationship between $E$ and $\mathbf x$ can be complicated and strongly nonlinear, and we will study these energy models in more detail later in the course.
 
-$$
-V'(r)=4\varepsilon\left(-\frac{12\sigma^{12}}{r^{13}}
-+\frac{6\sigma^6}{r^7}\right)
-=24\varepsilon\left(\frac{\sigma^6}{r^7}
--\frac{2\sigma^{12}}{r^{13}}\right).
-$$
+A useful relation to remember from L11 is that a derivative of the energy gives a force. For atoms moving in one dimension, each coordinate $x_i$ has a corresponding internal force:
 
-For an isolated pair, the equilibrium separation satisfies $V'(r)=0$. Multiplying by $r^{13}$ gives $r^6=2\sigma^6$, so $r_0=2^{1/6}\sigma$. This is the minimum of the pair potential: the atoms select their separation through the balance of attraction and repulsion.
-
-### Three atoms: the equations become coupled
-
-Now consider three atoms free to change their separations along a line. Choose the first atom as the coordinate origin, and let $0<x_1<x_2$ be the positions of the other two relative to it. Both distances from the origin and the total chain length $x_2$ can change. Translating the whole chain leaves its energy unchanged, so choosing an origin removes that redundant motion while retaining all possible separations.
-
-Including all three pair interactions, the energy is
+::: {.callout-note}
+## Internal force: the negative derivative of total energy
 
 $$
-E(x_1,x_2)=V(x_1)+V(x_2)+V(x_2-x_1).
+F_{\mathrm{int},i}(\mathbf x)=-\frac{\partial E}{\partial x_i}.
 $$
 
-Setting each partial derivative to zero gives
+The partial derivative means that we move atom $i$ while holding the other coordinates fixed. Its units are energy per length.
+:::
+
+Let $b_i$ be the applied force on that atom, positive toward increasing $x$. At equilibrium, the **net force** must be zero:
+
+$$
+\boxed{F_i(\mathbf x)=b_i-\frac{\partial E}{\partial x_i}=0.}
+$$
+
+Here and below, $F_i$ denotes the total force, including the applied load. For $n$ moving coordinates, we have $n$ equations to satisfy simultaneously:
 
 $$
 \begin{aligned}
-g_1(x_1,x_2)&=V'(x_1)-V'(x_2-x_1)=0,\\
-g_2(x_1,x_2)&=V'(x_2)+V'(x_2-x_1)=0.
+F_1(x_1,x_2,\ldots,x_n)&=b_1-\frac{\partial E}{\partial x_1}=0,\\
+F_2(x_1,x_2,\ldots,x_n)&=b_2-\frac{\partial E}{\partial x_2}=0,\\
+&\ \vdots\\
+F_n(x_1,x_2,\ldots,x_n)&=b_n-\frac{\partial E}{\partial x_n}=0.
 \end{aligned}
 $$
 
-The minus sign in $g_1$ appears because increasing $x_1$ decreases the separation $x_2-x_1$. Increasing $x_2$ increases that separation, giving the plus sign in $g_2$. The force on the atom chosen as the origin is the negative of the sum of the forces on the other two, so it also vanishes when these two equations are satisfied.
+This is the root-finding problem we saw in Unit 02, extended to a **vector of residuals** $\mathbf F$. The equations are **coupled** because moving one atom can change forces on several atoms. In general, their coefficients depend on the coordinates, so we cannot collect them into one constant matrix and solve the entire nonlinear problem in one linear solve.
 
-Both equations contain inverse powers of the shared separation $x_2-x_1$. Moving either atom therefore changes both force balances. We must find positions that satisfy the two nonlinear equations simultaneously. Each pair would individually prefer $r_0$, but three ordered atoms cannot have all three separations equal to $r_0$. Their equilibrium positions must balance the combined interactions.
+### Two equations for the three-atom model
 
-For a longer chain, let $x_0=0$ denote the origin atom and collect the remaining $n$ relative positions into $\mathbf x$. For ordered atoms, the total pair energy is
+There are three atoms in @fig-chain-experiment, but only **two moving coordinates**. The middle atom is held at zero, the left atom is at $x_1<0$, and the right atom is at $x_2>0$. Equal outward forces have magnitude $f\geq0$, giving $b_1=-f$ and $b_2=+f$.
 
-$$
-E(\mathbf x)=\sum_{i=0}^{n-1}\sum_{j=i+1}^{n}V(x_j-x_i).
-$$
-
-The sums count each pair once, as in the three-term example above. The $n$ equations $\mathbf g(\mathbf x)=\mathbf 0$ determine the $n$ unknown positions, including the chain's relaxed length.
-
-**Discuss:** if the two atoms at $x_1$ and $x_2$ are too close together, which terms in these equations describe their repulsion? What happens to their separation when only $x_1$ increases?
-
-## Newton's method for coupled nonlinear equations
-
-In L06, Newton's method replaced a nonlinear function by its tangent at the current guess. Write the next guess as $x^{(m+1)}=x^{(m)}+\Delta x$, where $m$ counts iterations. The tangent approximation is
+Without choosing a particular energy model yet, we can write
 
 $$
-f(x^{(m)}+\Delta x)\approx f(x^{(m)})+f'(x^{(m)})\Delta x.
+E=E(x_1,x_2),\qquad
+\begin{aligned}
+F_1(x_1,x_2;f)&=-f-\frac{\partial E}{\partial x_1}=0,\\
+F_2(x_1,x_2;f)&=+f-\frac{\partial E}{\partial x_2}=0.
+\end{aligned}
 $$
 
-Setting this approximation to zero gives
+The semicolon separates the unknown coordinates from the prescribed load $f$. Holding the middle atom fixes the position of the chain as a whole. We solve only the two equations for the moving atoms.
 
-$$
-f'(x^{(m)})\Delta x=-f(x^{(m)}).
-$$
+### Bracketing and open methods
 
-For minimization in L07, we used $f=E'$, so $E''\Delta x=-E'$. To extend this idea to our two movable atoms, we need to account for how each equation changes when **both** coordinates change.
+As in one-variable root finding, we can approach the problem in two ways:
 
-### The Jacobian collects the local slopes
+- **Bracketed methods** begin with a region known to contain a root. For a continuous scalar function, opposite endpoint signs guarantee a root in the interval. In several dimensions, we would need a corresponding condition on a region, such as a rectangle in $(x_1,x_2)$.
+- **Open methods** begin with a trial point, such as $\mathbf x^{(0)}=(x_1^{(0)},x_2^{(0)})$, and use local function information to improve it. Multidimensional Newton–Raphson is an extension of the method we already know.
 
-Consider any two nonlinear equations $f_1(x_1,x_2)=0$ and $f_2(x_1,x_2)=0$. Near the current guess, their first-order Taylor approximations are
+::: {.callout-caution}
+## What would bracket a simultaneous root?
+
+There is no single positive or negative sign for a vector. Finding a sign change in $F_1$ while holding $x_2$ fixed, and another in $F_2$ while holding $x_1$ fixed, need not give a point where both vanish. Multidimensional bracketing methods require stronger conditions on the region. For our coupled force equations, we will use an open method and examine its convergence.
+:::
+
+## Newton's method: a linear system at each step
+
+Suppose the current coordinates are $x_1$ and $x_2$, giving net forces $F_1$ and $F_2$. Our goal is to bring both forces to zero by moving the atoms through $\Delta x_1$ and $\Delta x_2$. Where should they move?
+
+We can use a first-order Taylor expansion in two dimensions. Notice that changing **either coordinate can affect both forces**:
 
 $$
 \begin{aligned}
-f_1(\mathbf x+\Delta\mathbf x)&\approx f_1(\mathbf x)
-+\frac{\partial f_1}{\partial x_1}\Delta x_1
-+\frac{\partial f_1}{\partial x_2}\Delta x_2,\\
-f_2(\mathbf x+\Delta\mathbf x)&\approx f_2(\mathbf x)
-+\frac{\partial f_2}{\partial x_1}\Delta x_1
-+\frac{\partial f_2}{\partial x_2}\Delta x_2.
+F_1(\mathbf x+\Delta\mathbf x)&\approx F_1(\mathbf x)
++\frac{\partial F_1}{\partial x_1}\Delta x_1
++\frac{\partial F_1}{\partial x_2}\Delta x_2,\\
+F_2(\mathbf x+\Delta\mathbf x)&\approx F_2(\mathbf x)
++\frac{\partial F_2}{\partial x_1}\Delta x_1
++\frac{\partial F_2}{\partial x_2}\Delta x_2.
 \end{aligned}
 $$
 
-Every derivative is evaluated at the current guess $\mathbf x=\mathbf x^{(m)}$. Set both approximations to zero and move the current function values to the right-hand side:
+All derivatives are evaluated at the current coordinates. Setting the two approximations to zero gives
 
 $$
 \underbrace{\begin{bmatrix}
-\partial f_1/\partial x_1 & \partial f_1/\partial x_2\\
-\partial f_2/\partial x_1 & \partial f_2/\partial x_2
-\end{bmatrix}}_{\mathbf J(\mathbf x^{(m)})}
+\displaystyle\frac{\partial F_1}{\partial x_1} & \displaystyle\frac{\partial F_1}{\partial x_2}\\[6pt]
+\displaystyle\frac{\partial F_2}{\partial x_1} & \displaystyle\frac{\partial F_2}{\partial x_2}
+\end{bmatrix}}_{\mathbf J(\mathbf x)}
 \begin{bmatrix}\Delta x_1\\\Delta x_2\end{bmatrix}
-=-\begin{bmatrix}f_1(\mathbf x^{(m)})\\f_2(\mathbf x^{(m)})\end{bmatrix}.
+=-\begin{bmatrix}F_1(\mathbf x)\\F_2(\mathbf x)\end{bmatrix}.
 $$
 
-The coefficient matrix is the **Jacobian**. Its entry $J_{ij}=\partial f_i/\partial x_j$ measures how equation $i$ changes when coordinate $j$ changes. Each row belongs to one equation, and each column belongs to one coordinate.
+The matrix $\mathbf J$ is the **Jacobian matrix**, or simply the Jacobian. Its entry $J_{ij}=\partial F_i/\partial x_j$ tells us how force $i$ changes when coordinate $j$ changes. Thus row $i$ describes one force, while column $j$ describes the effect of moving one coordinate.
 
-This is the linear-system form from L11–L13: the unknowns are the corrections $\Delta x_1$ and $\Delta x_2$. The nonlinear functions and their derivatives have already been evaluated at the current guess, so they are known numbers during this solve. For $n$ equations in $n$ coordinates, the update is
-
-$$
-\boxed{\mathbf J(\mathbf x^{(m)})\Delta\mathbf x
-=-\mathbf f(\mathbf x^{(m)}),\qquad
-\mathbf x^{(m+1)}=\mathbf x^{(m)}+\Delta\mathbf x.}
-$$
-
-After updating the coordinates, we evaluate the nonlinear equations again. Their values will generally still differ from zero because the tangent approximation only describes their local behaviour. We construct a new Jacobian and repeat the linear solve until the residuals are sufficiently small. Near a root with a nonsingular Jacobian, Newton's method converges quadratically under the usual smoothness assumptions.
-
-### For energy minimization, the Jacobian is the Hessian
-
-In the atomic problem, the functions whose roots we seek are $g_i=\partial E/\partial x_i$. Their Jacobian therefore contains second derivatives of the energy:
+Although the original equations are nonlinear, the equation for the correction is **linear**:
 
 $$
-J_{ij}=\frac{\partial g_i}{\partial x_j}
-=\frac{\partial^2E}{\partial x_j\partial x_i}
-=H_{ij}.
+\boxed{\mathbf J(\mathbf x)\,\Delta\mathbf x=-\mathbf F(\mathbf x).}
 $$
 
-This matrix is called the **Hessian**, $\mathbf H$. For a smooth energy with continuous second derivatives, the mixed derivatives are equal, so $\mathbf H$ is symmetric. Newton's method for finding a stationary atomic structure becomes
+We therefore use the linear algebra tools from L11–L13:
+
+```python
+Delta_x = np.linalg.solve(J, -F)
+x = x + Delta_x
+```
+
+### Case 1: constant-stiffness springs
+
+For a harmonic system, the net force is $\mathbf F=\mathbf b-\mathbf K\mathbf u$, where $\mathbf u$ is displacement from the unloaded configuration. Therefore
 
 $$
-\boxed{\mathbf H(\mathbf x^{(m)})\Delta\mathbf x
-=-\nabla E(\mathbf x^{(m)}),\qquad
-\mathbf x^{(m+1)}=\mathbf x^{(m)}+\Delta\mathbf x.}
+\mathbf J=-\mathbf K,\qquad
+-\mathbf K\Delta\mathbf u=-(\mathbf b-\mathbf K\mathbf u),
 $$
 
-We solve this system for the displacement correction using the linear solvers from L13. Computing an explicit inverse is unnecessary. The Hessian has units of energy per length squared, so multiplying it by a displacement gives the force units on the right-hand side.
+which rearranges to $\mathbf K(\mathbf u+\Delta\mathbf u)=\mathbf b$. **One Newton correction gives the exact harmonic solution**, provided the constrained stiffness matrix is nonsingular.
 
-## Back to the Lennard–Jones chain
-
-For the two movable atoms, differentiating the force-balance equations once more gives
+For our centre-fixed three-atom chain with just two nearest-neighbour springs, each moving atom is connected to the fixed centre by a spring of stiffness $k$:
 
 $$
-\mathbf H=
-\begin{bmatrix}
-V''(x_1)+V''(x_2-x_1) & -V''(x_2-x_1)\\
--V''(x_2-x_1) & V''(x_2)+V''(x_2-x_1)
-\end{bmatrix},
+\mathbf K=\begin{bmatrix}k&0\\0&k\end{bmatrix},\qquad
+\mathbf J=\begin{bmatrix}-k&0\\0&-k\end{bmatrix}.
 $$
 
-where the Lennard–Jones curvature is
+If an additional spring of stiffness $k_c$ connects the two outer atoms, the matrices become
 
 $$
-V''(r)=24\varepsilon\left(
-\frac{26\sigma^{12}}{r^{14}}-\frac{7\sigma^6}{r^8}
-\right).
+\mathbf K=\begin{bmatrix}k+k_c&-k_c\\-k_c&k+k_c\end{bmatrix},\qquad
+\mathbf J=-\mathbf K.
 $$
 
-The off-diagonal entries come from the interaction between the movable atoms. They describe how moving one atom changes the energy derivative on the other. Each diagonal entry collects the curvatures of all pair interactions involving that atom. These curvatures depend on the current separations, so the matrix changes as the chain relaxes.
+### Case 2: a changing local stiffness
 
-For a single LJ pair, the preferred separation is $r_0=2^{1/6}\sigma$, where $V'(r_0)=0$. Its curvature there is positive:
+For general nonlinear forces, the Jacobian changes with the atomic positions. At each point, it acts like a **local spring model**: a small displacement produces approximately $\mathbf J\Delta\mathbf x$ of force change. Solving the linearized equations tells us where this local approximation predicts force balance.
 
-$$
-V''(r_0)=\frac{72\varepsilon}{r_0^2}.
-$$
-
-This gives the local spring constant of the pair. At shorter separations, the steep repulsive part of the potential produces a much larger curvature. Farther into the attractive tail, the curvature becomes negative. The Hessian records these local changes across the current structure, which is why one fixed matrix cannot describe an entire LJ relaxation.
-
-### The harmonic limit: an unchanged stiffness matrix
-
-Near $r_0$, the pair energy has the harmonic approximation
+After moving the atoms, the true force will generally still be nonzero because the local approximation changes along the step. We evaluate the force and Jacobian again at the new position and repeat. Thus the multidimensional Newton update is
 
 $$
-V(r)\approx V(r_0)+\frac12k(r-r_0)^2,
-\qquad k=V''(r_0).
+\boxed{
+\begin{aligned}
+\mathbf J(\mathbf x^{(m)})\,\Delta\mathbf x^{(m)}&=-\mathbf F(\mathbf x^{(m)}),\\
+\mathbf x^{(m+1)}&=\mathbf x^{(m)}+\Delta\mathbf x^{(m)}.
+\end{aligned}}
 $$
 
-In a one-dimensional harmonic chain with fixed ordering, separations are linear in the atomic coordinates and each pair curvature is constant. The assembled Hessian is therefore the unchanged **stiffness matrix** $\mathbf K$ from L11.
+Here $m$ counts iterations, while the subscripts 1 and 2 label coordinates. The local spring constants belong to interactions between atoms and can depend on several coordinates. Off-diagonal entries describe the coupling between coordinates, just as they did in the spring stiffness matrix.
 
-For example, the three-atom spring chain attached to a fixed wall, with an external force $f$ on its last atom, has energy
-
-$$
-E=\tfrac12k\,u_1^2+\tfrac12k\,(u_2-u_1)^2
-+\tfrac12k\,(u_3-u_2)^2-fu_3
-=\tfrac12\mathbf u^{\mathsf T}\mathbf K\mathbf u
--\mathbf b^{\mathsf T}\mathbf u,
-\qquad \mathbf b=(0,0,f)^{\mathsf T}.
-$$
-
-Here $\mathbf u$ contains displacements from the reference structure. The gradient is $\mathbf K\mathbf u-\mathbf b$, and Newton's equation becomes
-
-$$
-\mathbf K\Delta\mathbf u=\mathbf b-\mathbf K\mathbf u^{(m)}
-\quad\Longrightarrow\quad
-\mathbf K\bigl(\mathbf u^{(m)}+\Delta\mathbf u\bigr)=\mathbf b.
-$$
-
-One Newton step reaches the equilibrium displacement because the gradient is already linear. The fixed-wall chain has a positive-definite stiffness matrix, so this equilibrium is its energy minimum. The LJ chain uses the same kind of linear solve at each iteration, but its gradient and Hessian must be reevaluated at the new positions.
-
-The local energy interpretation follows from the second-order Taylor expansion:
-
-$$
-E(\mathbf x+\Delta\mathbf x)\approx E(\mathbf x)
-+\nabla E(\mathbf x)^{\mathsf T}\Delta\mathbf x
-+\tfrac12\Delta\mathbf x^{\mathsf T}\mathbf H(\mathbf x)\Delta\mathbf x.
-$$
-
-Newton's correction finds the stationary point of this local quadratic energy. For the harmonic chain this expression is exact. For LJ interactions it is a local approximation, whose accuracy depends on how far the atoms move.
-
-## When Newton's method reaches an unstable structure
-
-To visualize stationary points and optimizer paths, we now allow one atom to move in two dimensions. A middle atom $M=(x,y)$ is joined by two springs to fixed atoms at $L=(-a,0)$ and $R=(a,0)$. Each spring has stiffness $k$ and natural length $l_0$:
-
-$$
-E(x,y)=\frac k2(r_L-l_0)^2+\frac k2(r_R-l_0)^2,
-\qquad r_L=\sqrt{(x+a)^2+y^2},\quad r_R=\sqrt{(x-a)^2+y^2}.
-$$
-
-Although each spring is harmonic in its length, the lengths depend nonlinearly on $x$ and $y$. Consequently, this energy has a position-dependent Hessian. We choose $l_0>a$, so both springs are compressed when $M$ sits at the origin. The atom can lower its energy by moving off the line to $(0,\pm\sqrt{l_0^2-a^2})$, where both springs reach their natural length. At the origin the forces cancel, but a small displacement perpendicular to the line lowers the energy.
-
-### Two problems with Newton's method
-
-**Cost.** A structure of $N$ atoms has $3N$ coordinates, so its Hessian is a $3N\times3N$ matrix. For 1000 atoms, that is about $9\times10^6$ second derivatives to recalculate, followed by a $3000\times3000$ linear solve, at every step.
-
-**It finds stationary points, not minima.** Newton's method solves $\nabla E=\mathbf 0$, and every stationary point satisfies that equation. The middle-atom example shows what can go wrong. With $l_0=1.2a$ and a start at $(0.3a,\,0.1a)$, Newton's method converges in four steps to the origin, where both springs are compressed and the atom is balanced but not stable. In L15, we will see how the Hessian tells such points apart. Newton's method gives us the idea of using curvature, but in practice we usually avoid computing the full Hessian.
-
-## What does `scipy.optimize.minimize` need?
-
-A practical minimizer needs three things from us: a starting structure, a function that returns the energy, and, for most methods, a function that returns the gradient. From the energy and gradient at the current coordinates, it decides where to try next.
+![A constant-stiffness force law reaches its root in one Newton correction. For a nonlinear force law, the tangent stiffness changes with position, requiring successive corrections. These scalar plots illustrate one displacement coordinate, with the root labelled $x^*$.](../../../assets/L14-newton-tangents.png){#fig-newton-tangents width="100%" fig-alt="Two panels with a spring and two atoms above force-versus-displacement plots. The linear force law reaches zero in one step, while the nonlinear curve requires a sequence of tangent steps."}
 
 ::: {.callout-note}
-## Syntax: `minimize` with an energy and its gradient
+## The inverse notation and the actual calculation
+
+It is mathematically convenient to write $\mathbf x^{(m+1)}=\mathbf x^{(m)}-\mathbf J^{-1}\mathbf F$. As in L12, we calculate the correction by solving a linear system with `np.linalg.solve`, without constructing the inverse at every step.
+:::
+
+### A Newton–Raphson solver
+
+The core algorithm can be written before choosing the energy or force model. At a fixed load, it needs an initial position, a vector-valued force function, and its Jacobian.
+
+::: {.callout-tip}
+## Newton loop for coupled equations
+
+1. Choose an initial position $\mathbf x^{(0)}$.
+2. Evaluate $\mathbf F(\mathbf x)$ and $\mathbf J(\mathbf x)$.
+3. Solve $\mathbf J\Delta\mathbf x=-\mathbf F$.
+4. If the force residual and correction are both small, accept $\mathbf x$.
+5. Otherwise, set $\mathbf x\leftarrow\mathbf x+\Delta\mathbf x$ and repeat, up to a maximum number of steps.
+:::
+
+The following core is editable in both demos. The notebook versions also record the iteration history and report singular matrices or inadmissible positions.
 
 ```python
-from scipy.optimize import minimize
-
-result = minimize(energy, x0, args=(l0,), jac=gradient, method="BFGS")
-result.x       # coordinates at the end
-result.fun     # energy there
-result.nit     # number of iterations
-result.success # True when a stopping criterion was met
-# energy(x, l0) returns a number, gradient(x, l0) returns an array shaped like x
+def newton_raphson_multidim(force, jacobian, x0,
+                           ftol=1e-9, xtol=1e-10, max_steps=40):
+    x = np.array(x0, dtype=float)
+    for m in range(max_steps):
+        F = force(x)
+        J = jacobian(x)
+        Delta_x = np.linalg.solve(J, -F)
+        if (np.max(np.abs(F)) < ftol
+                and np.max(np.abs(Delta_x)) < xtol):
+            return x
+        x = x + Delta_x
+    raise RuntimeError("Newton iteration did not converge")
 ```
 
-The gradient is passed as `jac`, short for Jacobian. Without it, gradient-based methods estimate the gradient by finite differences, at the cost of extra energy evaluations. See [`scipy.optimize.minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html).
+`ftol` and `xtol` have different units: force and length for the atomic problem. Requiring a small residual prevents a small step from being mistaken for force balance. Close to a simple root, smooth functions and a nonsingular Jacobian give Newton's familiar rapid, quadratic convergence. An unsuitable starting point can instead lead to another root, a singular matrix, or an excessively large step.
+
+## Demo 1: two nonlinear functions
+
+Before supplying atomic forces, let us test the solver on two functions:
+
+$$
+\begin{aligned}
+F_1(x_1,x_2)&=x_2-\frac12\left(e^{x_1/2}+e^{-x_1/2}\right),\\
+F_2(x_1,x_2)&=9x_1^2+25x_2^2-225.
+\end{aligned}
+$$
+
+A simultaneous root is an intersection of the surfaces $F_1$ and $F_2$ at zero height, where $F_1=F_2=0$. Differentiating gives all four Jacobian entries:
+
+$$
+\mathbf J(x_1,x_2)=
+\begin{bmatrix}
+-\frac14\left(e^{x_1/2}-e^{-x_1/2}\right)&1\\[4pt]
+18x_1&50x_2
+\end{bmatrix}.
+$$
+
+**Predict:** starting near the right-hand intersection, which root should Newton find? What changes if we reverse the sign of the initial $x_1$? Use the 3D residual surfaces and their zero-curve projection to identify the two roots, then inspect the Newton steps.
+
+::: {.quarto-wasm-local notebook="l14_newton_system.edit.py" view="app" title="Newton iteration for two nonlinear equations: surfaces, zero curves, and Jacobian steps" height="1050" loading="lazy" fullscreen="true"}
+The two roots are approximately $(x_1,x_2)=(\pm3.03116,2.38587)$. Starting from $(2,2)$ or $(-2,2)$ reaches the corresponding root. At $x_1=0$, the first column of the Jacobian vanishes and the linear solve is singular. The 3D view plots $F_1$ and $F_2/75$ to keep both surfaces visible, while the solver uses the original functions.
+
+![Residual surfaces, their zero curves, and the Newton path from the initial guess (2,2).](../../../assets/L14-newton-system.png){fig-alt="Three-dimensional residual surfaces and a two-dimensional projection showing the two intersections of a hyperbolic cosine curve and an ellipse."}
 :::
 
-::: {.callout-tip collapse="true"}
-## Example code: Energy and gradient of the middle atom
+The start $(0,2)$ gives a useful failure case: both derivatives with respect to $x_1$ are zero there. The linearized equations cannot determine a unique correction even though the nonlinear system has two roots. This is why the starting point matters.
+
+## Demo 2: force balance in an atomic chain
+
+### Nonlinear energies from Lennard–Jones interactions
+
+Now return to the line of atoms. A simple nonlinear model is the pairwise Lennard–Jones (LJ) interaction that we have used earlier in the course. For three atoms, there are three pair contributions:
+
+$$
+E(x_1,x_2)=V(-x_1)+V(x_2)+V(x_2-x_1).
+$$
+
+The first two terms join each outer atom to the centre. The third joins the two outer atoms. The pair energy takes a positive separation as its input:
+
+$$
+V(r)=4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12}
+-\left(\frac{\sigma}{r}\right)^6\right],\qquad
+V'(r)=24\varepsilon\left(\frac{\sigma^6}{r^7}-\frac{2\sigma^{12}}{r^{13}}\right).
+$$
+
+What differs from the simple spring system?
+
+1. The energy is not parabolic over the full range of separations.
+2. Atoms that are not nearest neighbours also interact, although more weakly.
+3. The restoring force reaches a maximum and then decreases as the atoms separate.
+
+![LJ and harmonic pair interactions matched at the unloaded pair separation. Panel a compares energies, and panel b compares restoring forces against extension. The initial stiffnesses match, but only the LJ force reaches a maximum.](../../../assets/L14-force-models.png){#fig-force-models width="100%" fig-alt="Lennard-Jones and harmonic pair energies overlap near their minima. The harmonic force then rises linearly, while the Lennard-Jones restoring force peaks and decreases."}
+
+For example, moving the left atom to the right decreases both separations $-x_1$ and $x_2-x_1$. Differentiating the total energy and adding the applied forces gives
+
+$$
+\begin{aligned}
+F_1(x_1,x_2;f)&=-f+V'(-x_1)+V'(x_2-x_1)=0,\\
+F_2(x_1,x_2;f)&=+f-V'(x_2)-V'(x_2-x_1)=0.
+\end{aligned}
+$$
+
+These are the two functions supplied to Newton's method. Their derivatives form the Jacobian, with the same diagonal and off-diagonal assembly pattern as a spring system. The full expression is useful when checking the code:
+
+::: {.callout-note collapse="true"}
+## Complete Jacobian for the centre-fixed three-atom chain
+
+Write $k_L=V''(-x_1)$, $k_R=V''(x_2)$, and $k_c=V''(x_2-x_1)$. Then
+
+$$
+\mathbf J=
+\begin{bmatrix}-k_L-k_c&k_c\\k_c&-k_R-k_c\end{bmatrix},\qquad
+V''(r)=24\varepsilon\left(\frac{26\sigma^{12}}{r^{14}}-\frac{7\sigma^6}{r^8}\right).
+$$
+
+The applied forces are constant at a given load, so their coordinate derivatives are zero. Unlike a Hookean spring constant, $V''(r)$ changes with separation and can become negative.
+:::
+
+### Increasing the applied force
+
+We will start from zero force, record the positions, and then gradually increase the pull. To simplify the calculation, use **LJ reduced units**: coordinates in $\sigma$, energy in $\varepsilon$, and force in $\varepsilon/\sigma$.
+
+Newton needs an initial guess. Placing all atoms at zero would give zero separation and a divergent LJ energy. Instead, begin with $(x_1^{(0)},x_2^{(0)})=(-1.12,1.12)$, near the unloaded pair spacing $2^{1/6}\sigma$. The unloaded three-atom chain settles at approximately $(-1.12103,1.12103)\sigma$, slightly closer together because of the outer-pair attraction.
+
+For each increase in force, use the preceding solution as the next initial guess. This procedure is called **continuation**. Small load increments keep the starting point near the branch of solutions already found. The demo lets us compare it with a direct Newton solve from the two typed coordinates.
+
+::: {.quarto-wasm-local notebook="l14_bond_chain.edit.py" view="app" title="Centre-fixed three-atom LJ chain: load, atomic positions, total energy, and Newton iterations" height="1150" loading="lazy" fullscreen="true"}
+At $f=2\,\varepsilon/\sigma$, Newton gives $(x_1,x_2)=(-1.179363,1.179363)\sigma$. Both nearest-neighbour bonds have stretched by about 5.2% relative to the unloaded chain. The total internal energy, including the outer pair, is $E=-1.891269\,\varepsilon$. The residual is below $10^{-9}\,\varepsilon/\sigma$. Raising the load toward $2.43683\,\varepsilon/\sigma$ makes the symmetric branch approach its limiting point.
+
+![Three-atom positions and a contour plot of their total internal energy, with the Newton path.](../../../assets/L14-trimer-newton.png){fig-alt="The centre atom is fixed and the outer two atoms move symmetrically under load. A contour plot of the sum of all three pair energies shows the Newton iterates."}
+:::
+
+**In class:** compare $f=0$, $2$, $2.43$, and $2.45$. At each load, inspect the atom positions, the remaining force, and the total bond energy. Turning continuation off makes the effect of the initial guess easier to see. The energy panel shows the total **internal** bond energy $E(x_1,x_2)$. At nonzero load, force balance also includes the work of the applied forces, so the solution shifts away from the minimum of $E$ alone.
+
+### What happens at a large force?
+
+Near the limiting load, Newton's method becomes sensitive because the force changes very little along a particular displacement direction. Compare the converged Jacobians at two loads, in units of $\varepsilon/\sigma^2$:
+
+$$
+\begin{aligned}
+f=2:\quad &\mathbf J\approx
+\begin{bmatrix}-16.90168&-0.17156\\-0.17156&-16.90168\end{bmatrix},
+&&\operatorname{cond}_2(\mathbf J)\approx1.02,\\[6pt]
+f=2.436:\quad &\mathbf J\approx
+\begin{bmatrix}-0.61484&-0.11590\\-0.11590&-0.61484\end{bmatrix},
+&&\operatorname{cond}_2(\mathbf J)\approx1.46.
+\end{aligned}
+$$
+
+The entries have become much smaller, even though the condition number is still modest. At the symmetric branch limit, $f\approx2.436832$ and $x_2=-x_1\approx1.242867$, the Jacobian tends to
+
+$$
+\mathbf J_{\mathrm{limit}}\approx
+\begin{bmatrix}-0.113443&-0.113443\\-0.113443&-0.113443\end{bmatrix}.
+$$
+
+Its rows become identical, so the limiting matrix is singular. Multiplying by the outward displacement vector $(-1,1)^T$ gives zero: to first order, this stretching motion produces no restoring change in net force. Close to this point, solving for the Newton correction becomes increasingly sensitive, and the condition number grows without bound.
+
+For this symmetric branch, the limiting nearest-neighbour bond extension is about **10.9%** relative to the unloaded chain. Above the force maximum, a larger symmetric separation cannot provide enough attraction to balance the pull. A failed Newton solve by itself can also come from a poor initial guess or an overly large load step. Refining the load increments and examining the force maximum lets us distinguish those numerical failures from the physical limit of this model.
+
+### The library version: `scipy.optimize.root`
+
+Once we have supplied `force(x, f)` and `force_jacobian(x, f)`, the library call is short. It is also runnable in the atom demo:
 
 ```python
-A, K = 1.0, 1.0
-FIXED = np.array([[-A, 0.0], [A, 0.0]])    # positions of L and R
+from scipy.optimize import root
 
-def energy(p, l0):
-    r = np.linalg.norm(p - FIXED, axis=1)
-    return 0.5*K*np.sum((r - l0)**2)
-
-def gradient(p, l0):
-    d = p - FIXED                           # one row per spring
-    r = np.linalg.norm(d, axis=1)
-    return np.sum((K*(r - l0)/r)[:, None]*d, axis=0)
+result = root(force, x0, args=(f,), jac=force_jacobian, method="hybr")
+x = result.x
+largest_force = np.max(np.abs(force(x, f)))
 ```
 
-Each spring contributes $k(r-l_0)\,\mathbf d/r$ to the gradient, a vector along the spring whose sign depends on whether the spring is stretched or compressed.
-:::
+[`scipy.optimize.root`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root.html) solves **vector equations**. Use `root_scalar` when the unknown and residual are scalar. The default `hybr` method is a modified Powell hybrid method, using Newton-like steps with safeguards on their size.
 
-The methods available differ mainly in how much information they use to choose the next point. It is useful to think of them as families:
+| Information available | Practical starting choice |
+|---|---|
+| An analytical Jacobian for a small or medium system | `hybr` with `jac=...` |
+| A force function whose Jacobian is awkward to derive | `hybr` without `jac`, which estimates derivatives numerically |
+| Repeated derivative evaluations are expensive | `broyden1`, which updates a Jacobian approximation from changes in coordinates and residuals |
+| A large system where storing a dense Jacobian is costly | `krylov`, which approximates the action of an inverse Jacobian through iterative linear algebra |
 
-| Method | Basic idea | What it uses |
-|---|---|---|
-| Nelder–Mead (simplex) | Moves a triangle (in 2D) of trial points by reflecting and shrinking it | Energies only |
-| Gradient descent | Steps a fixed distance downhill, $\Delta\mathbf x=-\alpha\nabla E$ | Gradient |
-| Conjugate gradient (CG) | Chooses each new direction so that it does not undo progress along earlier ones | Gradient |
-| Newton | Solves $\mathbf H\Delta\mathbf x=-\nabla E$ with the exact Hessian | Gradient and Hessian |
-| BFGS | Builds an approximate Hessian from previous gradients | Gradient and its history |
-| L-BFGS | Keeps only the last few steps of that history | Gradient and a short history |
-| FIRE | Moves the atoms like a damped dynamics simulation | Forces (negative gradient) |
+These methods have different convergence behaviour. There is no universal guarantee from an arbitrary starting point, so inspect `result.success`, `result.message`, the force residual, and the admissibility of the returned coordinates together. Root finding establishes force balance. Whether that balance is stable will become a central question in L15–L16.
 
-### The same landscape, six paths
+### Extending to seven atoms
 
-The first notebook runs gradient descent and Newton's method written by hand, and four SciPy methods, from the same starting point on the middle-atom landscape. The figure shows their paths for $l_0=1.2a$ starting from $(0.3a,\,0.1a)$.
+With these ingredients, we can build a longer chain. For $N=7$, hold the middle atom and apply equal outward forces to the two ends. Six coordinates remain unknown. Each interacting pair contributes equal and opposite forces, and its derivatives contribute to the Jacobian. After summing those contributions, retain the six rows and columns corresponding to the moving atoms.
 
-![Paths of six methods on the middle-atom energy landscape, $l_0=1.2a$, starting at $(0.3a,\,0.1a)$. Shading shows $\log_{10}E$. Five methods reach the minimum at $(0,\,0.663a)$. Newton's method converges to the saddle point at the origin.](../../../assets/L14-minimizer-paths.png){#fig-minimizer-paths fig-alt="Contour plot of the energy of a middle atom between two fixed atoms, with minima above and below the origin. Six coloured paths start at the same point to the right of the origin. Newton's path ends at the origin. The others end at the upper minimum, with gradient descent and Nelder-Mead taking many small steps." width="85%"}
-
-Gradient descent (56 steps) and Nelder–Mead (61) reach the minimum with many small steps. CG, BFGS, and L-BFGS-B, which use curvature information, need 7 to 9. Making $l_0$ closer to $a$ in the notebook makes the valley narrower: gradient descent then needs well over a hundred steps, because a fixed step that is safe across the steep direction is far too small along the gentle one.
-
-::: {.quarto-wasm-local notebook="l14_minimizer_paths.edit.py" view="edit" title="Minimizer paths on the middle-atom energy landscape" height="1000" loading="lazy" fullscreen="true"}
-The notebook defines the energy and gradient of the middle atom, writes gradient descent and Newton's method by hand, and records the paths of SciPy's Nelder–Mead, CG, BFGS, and L-BFGS-B methods with a callback. For $l_0=1.2a$ and a start at $(0.3a,\,0.1a)$, Newton's method converges to the saddle point at the origin in four steps, while the other methods reach the minimum at $(0,\,0.663a)$ in 7 to 61 iterations.
-:::
-
-## BFGS: learning the curvature from the gradients
-
-The BFGS method, named after Broyden, Fletcher, Goldfarb, and Shanno, keeps Newton's step $\mathbf B_n\,\Delta\mathbf x=-\nabla E(\mathbf x_n)$ but replaces the exact Hessian with an approximation $\mathbf B$ learned from the positions and gradients already evaluated. In one dimension, the secant method of L06 did the same with a slope between the last two points:
-
-$$
-E''\approx\frac{E'(x_{n+1})-E'(x_n)}{x_{n+1}-x_n}.
-$$
-
-BFGS imposes the same condition in many dimensions. With the step $\mathbf s_n=\mathbf x_{n+1}-\mathbf x_n$ and the change in gradient $\mathbf y_n=\nabla E(\mathbf x_{n+1})-\nabla E(\mathbf x_n)$, the new approximation must satisfy the **secant condition**
-
-$$
-\mathbf B_{n+1}\,\mathbf s_n=\mathbf y_n .
-$$
-
-Each step tells BFGS how the gradient changes along one more direction, so $\mathbf B$ gradually approaches the true Hessian. BFGS also accepts a step only if the energy goes down, which is why, in the figure above, it reaches the minimum from the same start where Newton's method stopped at the saddle point.
-
-**L-BFGS**, the "limited-memory" version, goes one step further. Instead of storing the $3N\times3N$ matrix $\mathbf B$, it stores only the last $m$ pairs $(\mathbf s_n,\mathbf y_n)$, typically 5 to 20, and reconstructs the step from them. For a million atoms, that is a few hundred megabytes instead of tens of terabytes, which makes L-BFGS the standard choice for large structures.
-
-## Relaxing structures with an atomistic package
-
-In practice, materials scientists rarely flatten a structure into an array and call `scipy.optimize.minimize` by hand. An atomistic simulation package already knows the atoms and their coordinates, any boundary conditions, how to calculate energies and forces, and which optimizers suit atomic structures. With the [Atomic Simulation Environment (ASE)](https://wiki.fysik.dtu.dk/ase/), a relaxation takes three objects:
+The atom notebook includes this general force assembly as `chain_model`. The calculation has the same form:
 
 ```python
-from ase import Atoms
-from ase.calculators.lj import LennardJones
-from ase.optimize import BFGS
+f = 2.0  # force in ε/σ
+positions, evaluate, valid = chain_model(7)
+x0 = 2**(1/6) * np.array([-3, -2, -1, 1, 2, 3])
 
-atoms = Atoms("Ar13", positions=X)                         # structure
-atoms.calc = LennardJones(epsilon=0.0103, sigma=3.40, rc=50.0)   # calculator: E and F
-BFGS(atoms).run(fmax=0.001)                                # optimizer, in eV/Å
+# evaluate(x, f) returns total energy, net forces, and the Jacobian.
+force7 = lambda x: evaluate(x, f)[1]
+jacobian7 = lambda x: evaluate(x, f)[2]
+x, history, ok, message = newton_system(force7, jacobian7, x0, valid=valid)
 ```
 
-The optimizer stops when the largest force component on any atom is below `fmax`, a criterion with direct physical meaning. Besides BFGS and L-BFGS, ASE offers **FIRE**, the fast inertial relaxation engine of [Bitzek et al. (2006)](https://doi.org/10.1103/PhysRevLett.97.170201). FIRE lets the atoms move like a damped molecular dynamics simulation, speeding up while the forces keep pointing the same way and stopping when they reverse. It uses only forces, which makes it robust for large or awkward structures.
+For a loading sweep, first solve at zero force and then reuse each converged solution at the next load. The number of equations and matrix size change, while the Newton update stays the same.
 
-The second notebook relaxes the same randomly displaced 13-atom cluster with all three optimizers. For argon with the Lennard-Jones calculator, each run reaches the icosahedron at $-0.45657$ eV, which is $-44.327\,\varepsilon$, in 58 to 63 steps. For 13 atoms, L-BFGS remembers every step of the run, so its path is identical to BFGS. Switching to copper with the EMT calculator changes one line of the program.
+![Force–extension curve for seven atoms, with the middle atom fixed and both ends pulled. The dashed line is the harmonic tangent at zero load. The inset shows the last accepted configuration and each bond's strain relative to its unloaded length. The endpoint depends slightly on load-step resolution.](../../../assets/L14-chain-pull.png){#fig-chain-pull width="100%" fig-alt="Seven-atom LJ force-extension curve bending away from its harmonic tangent and approaching a load of 2.44262. An inset shows symmetric bond strains of about 10.9, 9.0, 8.9, 8.9, 9.0, and 10.9 percent."}
 
-![Relaxation of a displaced 13-atom argon cluster with ASE's BFGS, LBFGS, and FIRE optimizers. Left: energy above the final value. Right: the largest force component, with the stopping tolerance $f_{\max}=10^{-3}$ eV/Å.](../../../assets/L14-ase-relaxation.png){#fig-ase-relaxation fig-alt="Two semilog plots against optimizer step. The energy and largest force of BFGS and LBFGS overlap and fall to the tolerance in 58 steps. FIRE falls more smoothly and reaches the tolerance in 63 steps." width="100%"}
+We can now use a nonlinear solver to answer a materials question: how the chain extends as we pull it, and where the force-balanced branch ends. The following optional analysis explains the bond softening behind this result.
 
-::: {.quarto-wasm-local notebook="l14_ase_relax.edit.py" view="edit" title="Relaxing argon and copper clusters with ASE optimizers" height="1000" loading="lazy" fullscreen="true"}
-The notebook builds a displaced cluster from the centre of an icosahedron, attaches a Lennard-Jones calculator for argon or an EMT calculator for copper, and relaxes it with ASE's BFGS, LBFGS, and FIRE optimizers. For 13 argon atoms displaced by up to 0.3 Å, all three optimizers reach $-0.45657$ eV in 58 to 63 steps, with the largest force component below $10^{-3}$ eV/Å.
-:::
+## Analyzing the results: advanced reading
 
-The workflow to remember is
+### Bond softening and the limiting load
+
+Why does the bond lose its ability to sustain a larger force? The Jacobian acts like a local stiffness, which changes with the atomic positions. A two-atom LJ pair makes this especially clear. For separation $r$, its local spring constant is
 
 $$
-\text{structure}
-\;\rightarrow\;
-\text{calculator }(E,\ \mathbf F)
-\;\rightarrow\;
-\text{optimizer}
-\;\rightarrow\;
-\text{relaxed structure}.
+k_{\mathrm{local}}(r)=V''(r)=24\varepsilon\left(\frac{26\sigma^{12}}{r^{14}}-\frac{7\sigma^6}{r^8}\right).
 $$
 
-The calculator could be a Lennard-Jones potential today, a Morse potential tomorrow, and eventually density functional theory or a machine-learned potential. The optimization machinery does not depend on where the energy and forces come from.
+![The local stiffness of one LJ pair decreases from its unloaded value and crosses zero at the maximum restoring force.](../../../assets/L14-local-stiffness.png){#fig-local-stiffness width="80%" fig-alt="Second derivative of the Lennard-Jones pair energy against separation, crossing zero at approximately 1.24446 sigma."}
 
-## What to keep
+The largest restoring force occurs where $V''(r_s)=0$, at the **inflection point of the pair energy**:
 
-1. A stable structure minimizes the energy, so all forces, $-\nabla E$, vanish there.
-2. For a quadratic (harmonic) energy, $\nabla E=\mathbf K\mathbf x-\mathbf b$, and the minimum is one linear solve.
-3. For a general energy, we iterate. Newton's method solves $\mathbf H\Delta\mathbf x=-\nabla E$ at every step. It converges quickly, but the Hessian is expensive, and Newton's method can converge to a saddle point.
-4. BFGS learns an approximate Hessian from the secant condition $\mathbf B\mathbf s=\mathbf y$ and keeps every step downhill. L-BFGS keeps only a short history, which makes it suitable for very large structures.
-5. Atomistic packages separate the structure, the calculator, and the optimizer, so the same relaxation works with any source of energies and forces.
+$$
+r_s=\left(\frac{26}{7}\right)^{1/6}\sigma,
+\qquad f_{\max}=V'(r_s)=2.3964\,\varepsilon/\sigma.
+$$
 
-## Check your understanding
+Below this maximum, a positive tensile load intersects the pair restoring-force curve twice: once on its rising side and once on its falling side. At the maximum, these two scalar roots merge. Beyond it, no pair separation balances the pull. The strain at the limiting point is $r_s/r_0-1=10.9\%$, where $r_0=2^{1/6}\sigma$.
 
-1. Write the energy of the three-atom spring chain in the form $\tfrac12\mathbf x^{\mathsf T}\mathbf K\mathbf x-\mathbf b^{\mathsf T}\mathbf x$. Show that one Newton step from any starting point gives the solution of $\mathbf K\mathbf x=\mathbf b$.
-2. Why does the middle-atom energy fail to be quadratic in $x$ and $y$, even though each spring is harmonic?
-3. In the notebook, start Newton's method at $(0.3a,\,0.1a)$ and BFGS at the same point. Both stop with a zero gradient. Why does BFGS reach the minimum while Newton reaches the saddle point?
-4. Estimate the memory needed for the full BFGS matrix and for L-BFGS with $m=10$ for a structure of $10^5$ atoms. Which method would you choose?
-5. An ASE relaxation stops with `fmax=0.05` eV/Å. A classmate tightens it to `0.001` eV/Å and the energy changes by less than 1 meV. What does this tell you about the first result, and when would the tighter tolerance matter?
+For this one-coordinate problem, $J=-V''(r)$ tends to zero. A nonzero $1\times1$ matrix always has condition number one, so its condition number cannot diagnose the approach to zero stiffness. We must also inspect the magnitude of $J$. In a multi-coordinate system, different displacement directions can soften at different rates, as the three-atom matrices showed.
 
-## Next
+These values describe a quasistatic, zero-temperature, **force-controlled** LJ pair. The boundary conditions matter: prescribing the separation instead would allow us to calculate forces beyond this peak.
 
-Every method in this lecture stops when the gradient is small, which only tells us that we reached a stationary point. Newton's method stopped at a saddle point in our example, and a perfectly symmetric structure can trap any minimizer at one. L15 asks how to confirm that a relaxed structure is really a minimum.
+### Which bond stretches most?
+
+In the all-pair seven-atom chain, both end bonds stretch more than the interior bonds. Longer-range attractions carry some tension across each cut through the chain. Interior cuts have more of these contributions, so the end bonds carry more of their load through a single nearest-neighbour interaction. With nearest-neighbour interactions alone, every identical bond on the same short-bond branch would instead satisfy the same equation $V'(r)=f$.
+
+The pair limit is $2.3964$, the three-atom chain reaches about $2.437$, and the seven-atom loading sweep reaches about $2.4426\,\varepsilon/\sigma$. Symmetry makes the two ends equally susceptible in this model. A numerical asymmetry or physical perturbation can favour one end, so the symmetric calculation does not select a unique end bond in advance.
+
+### What do the gold chains do?
+
+Return to the image in @fig-chain-experiment. Hao and colleagues observed an approximately linear low-strain regime, but above about 12% the gold chains developed distinct short and long bond lengths. Their observed chains reached strains up to 46%, and changes in atomic configuration accompanied stepwise changes in electrical conductance [@hao2026gold]. A chain can therefore redistribute its extension through structural changes well beyond the first departure from a harmonic law.
+
+Our LJ calculation identifies a force limit for its specified interaction and constraints. Gold's metallic bonding, its supporting electrodes, and the experimental loading conditions determine a different energy landscape. The experimental question is how that landscape produces the observed short–long patterns. Replacing the energy model would change the forces and derivatives supplied to our solver, while preserving the force-balance formulation.
+
+![Long and short bonds in a stretched gold atomic chain: (a) electron-microscopy image with measured bond lengths and (b) a structural model labelling long (L) and short (S) bonds [@hao2026gold]. © 2026 American Chemical Society.](../../../assets/L14-hao-long-short-bonds.png){#fig-gold-long-short width="65%" fig-alt="Electron-microscopy image of a gold atomic chain with successive bond lengths of 0.395, 0.286, 0.391, and 0.298 nanometres, beside a structural model showing alternating long and short bonds between two gold supports."}
+
+## Take-home message
+
+- Coupled nonlinear equations $\mathbf F(\mathbf x)=\mathbf 0$ can be solved by multidimensional Newton–Raphson iteration.
+- Each step solves the linear system $\mathbf J\Delta\mathbf x=-\mathbf F$, using a solver such as `np.linalg.solve`.
+- The Jacobian tells us how every residual changes with every coordinate. For atomic net forces, it is the negative local stiffness matrix.
+- `scipy.optimize.root` supplies practical solvers for vector equations. Check the residual and the returned configuration.
+- A nonlinear bond can soften and reach a limiting load, which a constant-stiffness harmonic spring cannot describe.
+
+## Before next lecture
+
+At zero applied force, our short-bond chain settled into a minimum of its internal energy. This prompts another important task in nonlinear atomic systems: **minimizing the energy of a structure**. How could we minimize $E(\mathbf x)$ directly, and how would we know whether a force-balanced structure is actually a minimum? We will take up those questions in L15.
