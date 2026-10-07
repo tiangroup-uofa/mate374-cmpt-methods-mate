@@ -28,19 +28,11 @@ def _(mo):
     $$E=c_f f+c_p p+c_c c,$$
 
     where $f$, $p$, and $c$ are the masses of fat, protein, and carbohydrate in
-    grams, and $E$ is energy in kilocalories. The labels in the table provide the
-    data for a least-squares estimate of $c_f$, $c_p$, and $c_c$.
-
-    ## How to use the table
-
-    - Use supplied labels 1–3 for the initial model. The fourth supplied
-      example checks that prediction and is included in the later fit.
-
-    - Enter **3–5 additional labels** in the blank rows. The highest-energy
-      additional label is held out from the least-squares fit; all four
-      supplied labels and the remaining additions are used for fitting.
-
-    - Select **Calculate** to submit the table.
+    grams, and $E$ is energy in kilocalories. Labels 1–3 in the assignment
+    figure give an exact three-label solution. The fourth label in the figure
+    is the held-out label (23 g fat, 3 g protein, 15 g carbohydrate, 270 kcal).
+    It never enters a fit, so both the three-label model and the
+    least-squares model are tested on the same food.
     """)
     return
 
@@ -48,36 +40,98 @@ def _(mo):
 @app.cell(hide_code=True)
 def _():
     label_rows = [
-        {"Fat (g)": 30.0, "Protein (g)": 3.6, "Carbohydrate (g)": 51.6, "Energy (kcal)": 490},
-        {"Fat (g)": 0.0, "Protein (g)": 8.0, "Carbohydrate (g)": 15.0, "Energy (kcal)": 90},
-        {"Fat (g)": 0.5, "Protein (g)": 1.0, "Carbohydrate (g)": 3.0, "Energy (kcal)": 20},
-        {"Fat (g)": 0.5, "Protein (g)": 0.0, "Carbohydrate (g)": 2.0, "Energy (kcal)": 15},
+        # Labels 1–3 from the assignment figure.
+        {"Fat (g)": 30.0, "Protein (g)": 3.6, "Carbohydrate (g)": 51.6, "Energy (kcal)": 490.0},
+        {"Fat (g)": 0.0, "Protein (g)": 8.0, "Carbohydrate (g)": 15.0, "Energy (kcal)": 90.0},
+        {"Fat (g)": 0.5, "Protein (g)": 1.0, "Carbohydrate (g)": 3.0, "Energy (kcal)": 20.0},
     ]
-    label_rows += [
-        {field: "" for field in ("Fat (g)", "Protein (g)", "Carbohydrate (g)", "Energy (kcal)")}
-        for _ in range(5)
-    ]
-    return (label_rows,)
+    # The held-out label from the assignment figure.
+    held_out_label = {"Fat (g)": 23.0, "Protein (g)": 3.0, "Carbohydrate (g)": 15.0, "Energy (kcal)": 270}
+    return held_out_label, label_rows
 
 
 @app.cell
-def _(label_rows, mo, np):
-    _data = np.array([[float(_row[_field]) for _field in
-                      ("Fat (g)", "Protein (g)", "Carbohydrate (g)", "Energy (kcal)")]
-                     for _row in label_rows[:4]])
-    _coefficients = np.linalg.solve(_data[:3, :3], _data[:3, 3])
-    _prediction = float(_data[3, :3] @ _coefficients)
-    _error = abs(_prediction - _data[3, 3])
-    mo.md(f"""
-    ## Q3.1–3.2 · Initial three-label model
+def _(held_out_label, label_rows, np):
+    # The code below shows how to solve the coefficients from labels 1–3 of the
+    # assignment figure and test them on the held-out label. See the comments for details.
+    _fields = ("Fat (g)", "Protein (g)", "Carbohydrate (g)", "Energy (kcal)")
 
-    Coefficients (fat, protein, carbohydrate): **{_coefficients[0]:.3f},
-    {_coefficients[1]:.3f}, {_coefficients[2]:.3f} kcal/g**.
+    # These are labels 1–3 from the assignment figure, one row per label
+    _data = np.array([[float(_row[_field]) for _field in _fields]
+                      for _row in label_rows[:3]])
 
-    For the fourth supplied label (15 kcal), the prediction is
-    **{_prediction:.3f} kcal**, with absolute error **{_error:.3f} kcal**
-    and relative error **{_error / _data[3, 3]:.1%}**.
-    This label joins the later least-squares fit.
+    # extract the matrix A and vector E from the data
+    A_first_three = _data[:, :3]  # rows 0-2, cols 0-2 (fat, protein, carbohydrate)
+    E_first_three = _data[:, 3]  # rows 0-2, col 3 (energy)
+
+    # nutrient masses and printed energy of the held-out label
+    a_held_out = np.array([float(held_out_label[_field]) for _field in _fields[:3]])
+    e_held_out = float(held_out_label["Energy (kcal)"])
+
+    # coefficients solved using np.linalg.solve for AC = E
+    C_first_three = np.linalg.solve(A_first_three, E_first_three)
+
+    # prediction on the held-out label
+    e_prediction_first_three = a_held_out @ C_first_three
+
+    # abs and rel error of that prediction on the held-out label
+    abs_error_first_three = np.abs(e_prediction_first_three - e_held_out)
+    rel_error_first_three = abs_error_first_three / e_held_out
+    C_first_three, abs_error_first_three, rel_error_first_three
+    return (
+        A_first_three,
+        C_first_three,
+        E_first_three,
+        a_held_out,
+        abs_error_first_three,
+        e_held_out,
+        e_prediction_first_three,
+        rel_error_first_three,
+    )
+
+
+@app.cell(hide_code=True)
+def _(
+    A_first_three,
+    C_first_three,
+    E_first_three,
+    abs_error_first_three,
+    e_held_out,
+    e_prediction_first_three,
+    mo,
+    rel_error_first_three,
+):
+    _A_entries = r" \\ ".join(" & ".join(f"{_value:g}" for _value in _row) for _row in A_first_three)
+    _E_entries = r" \\ ".join(f"{_value:g}" for _value in E_first_three)
+    mo.md(rf"""
+    ## Reference answer Q3.1–3.2
+
+    - **Worked-out $\mathbf A$** (`A_first_three`): $\begin{{bmatrix}}{_A_entries}\end{{bmatrix}}$ g
+    - **Worked-out $\mathbf E$** (`E_first_three`): $\begin{{bmatrix}}{_E_entries}\end{{bmatrix}}$ kcal
+    - **Solved coefficients** (`C_first_three`): $c_f={C_first_three[0]:.3f}$, $c_p={C_first_three[1]:.3f}$, $c_c={C_first_three[2]:.3f}$ kcal/g
+    - **On the held-out label** ({e_held_out:g} kcal printed):
+        - Predicted energy: {e_prediction_first_three:.1f} kcal
+        - Absolute error: {abs_error_first_three:.1f} kcal, relative error: {rel_error_first_three:.1%}
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Q3.4 · Least-squares table
+
+    - The table starts with labels 1–3 from the assignment figure.
+
+    - Add **3–5 of your own labels**: click the **+** row at the bottom of the
+      table to append a row, then enter its fat, protein, carbohydrate, and
+      energy. Every row in the table is used in the least-squares fit.
+
+    - The held-out label stays outside the table. The least-squares
+      coefficients predict its energy, so the error can be compared directly
+      with Q3.2.
+
+    - Select **Calculate** to submit the table.
     """)
     return
 
@@ -92,7 +146,7 @@ def _(label_rows, mo):
     return (label_input,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(label_input, mo, np):
     mo.stop(
         label_input.value is None,
@@ -108,24 +162,24 @@ def _(label_input, mo, np):
         if any(_row.get(_field) is not None and str(_row.get(_field)).strip() for _field in _fields)
     ]
     mo.stop(
-        len(_used_rows) < 7,
+        len(_used_rows) < 6,
         mo.callout(
             mo.md(
-                "Add at least three labels of your own. The four supplied labels and "
-                "your additions provide at least seven examples; the highest-energy "
-                "additional label is held out, leaving six fitting rows."
+                "Add at least three labels of your own with the **+** row at the "
+                "bottom of the table. Together with labels 1–3, they give at least "
+                "six fitting rows."
             ),
             kind="warn",
         ),
     )
     try:
-        all_data = np.asarray(
+        total_data = np.asarray(
             [[float(_row[_field]) for _field in _fields] for _row in _used_rows],
             dtype=float,
         )
-        _valid_data = np.isfinite(all_data).all() and (all_data >= 0).all()
+        _valid_data = np.isfinite(total_data).all() and (total_data >= 0).all()
     except (KeyError, TypeError, ValueError):
-        all_data = np.empty((0, 4))
+        total_data = np.empty((0, 4))
         _valid_data = False
     mo.stop(
         not _valid_data,
@@ -134,104 +188,107 @@ def _(label_input, mo, np):
             kind="warn",
         ),
     )
-    held_out_index = 4 + int(np.argmax(all_data[4:, 3]))
-    held_out_nutrients = all_data[held_out_index, :3]
-    held_out_energy = float(all_data[held_out_index, 3])
-    mo.stop(
-        held_out_energy <= 0,
-        mo.callout("Enter an additional label with positive energy to compute a relative error.", kind="warn"),
-    )
-    fit_data = np.delete(all_data, held_out_index, axis=0)
-    return fit_data, held_out_nutrients, held_out_energy
+    return (total_data,)
 
 
 @app.cell
-def least_squares_calculation(fit_data, held_out_energy, held_out_nutrients, np):
-    # Each row of A_fit contains fat, protein, and carbohydrate in that order.
-    A_fit = fit_data[:, :3]
-    E_fit = fit_data[:, 3]
+def least_squares_calculation(a_held_out, e_held_out, total_data, np):
+    # Each row of A_total contains fat, protein, and carbohydrate in that order.
+    A_total = total_data[:, :3]
+    E_total = total_data[:, 3]
 
-    # Find c_f, c_p, and c_c that minimize ||A_fit @ coefficients - E_fit||².
-    coefficients, _, _, _ = np.linalg.lstsq(A_fit, E_fit, rcond=None)
+    # Find c_f, c_p, and c_c that minimize ||A_total @ C_fit - E_total||².
+    C_fit, _, _, _ = np.linalg.lstsq(A_total, E_total, rcond=None)
 
-    fit_predictions = A_fit @ coefficients
-    fit_residuals = fit_predictions - E_fit
-    condition_number = float(np.linalg.cond(A_fit))
+    fit_predictions = A_total @ C_fit
+    fit_residuals = fit_predictions - E_total
+    condition_number = float(np.linalg.cond(A_total))
 
-    # The highest-energy additional example stays out of the fit.
-    held_out_prediction = float(held_out_nutrients @ coefficients)
-    held_out_error = abs(held_out_prediction - held_out_energy)
-    held_out_relative_error = held_out_error / held_out_energy
+    # The held-out label from Q3.2 stays out of the fit and tests the new coefficients.
+    e_prediction_fit = float(a_held_out @ C_fit)
+    abs_error_fit = abs(e_prediction_fit - e_held_out)
+    rel_error_fit = abs_error_fit / e_held_out
     return (
-        A_fit,
-        E_fit,
-        coefficients,
+        A_total,
+        C_fit,
+        E_total,
+        abs_error_fit,
         condition_number,
+        e_prediction_fit,
         fit_predictions,
         fit_residuals,
-        held_out_error,
-        held_out_prediction,
-        held_out_relative_error,
-        held_out_nutrients,
-        held_out_energy,
+        rel_error_fit,
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def least_squares_results(
-    A_fit,
-    E_fit,
-    coefficients,
+    A_total,
+    C_fit,
+    E_total,
+    a_held_out,
+    abs_error_first_three,
+    abs_error_fit,
     condition_number,
+    e_held_out,
+    e_prediction_first_three,
+    e_prediction_fit,
     fit_predictions,
     fit_residuals,
-    held_out_error,
-    held_out_prediction,
-    held_out_relative_error,
-    held_out_nutrients,
-    held_out_energy,
     mo,
+    rel_error_first_three,
+    rel_error_fit,
 ):
     mo.vstack([
         mo.md(
-            f"""## How is the least-squares fit?
+            f"""## Least-squares coefficients
 
-    - **Total data input:** N = {len(E_fit) + 1} labels ({len(E_fit)} fitting labels and 1 held-out label).
-    - **Condition number of the fitting matrix $A$:** {condition_number:.3g}."""
+    - **Fitting rows:** {len(E_total)} labels. The held-out label is not among them.
+    - **Condition number of `A_total`:** {condition_number:.3g}."""
         ),
         mo.ui.table([
             {"Coefficient": _symbol, "Estimate (kcal/g)": round(float(_value), 4)}
-            for _symbol, _value in zip(("c_f", "c_p", "c_c"), coefficients)
+            for _symbol, _value in zip(("c_f", "c_p", "c_c"), C_fit)
         ], selection=None),
         mo.md(
-            f"""## How accurate is the held-out prediction?
+            f"""## Held-out prediction: three labels versus least squares
 
-    The highest-energy additional example is held out. Its entered nutrient masses and printed energy appear in the final row of the table below.
-
-    - **Prediction:** {held_out_prediction:.1f} kcal.
-    - **Absolute error:** {held_out_error:.1f} kcal.
-    - **Relative error:** {held_out_relative_error:.1%} (absolute error divided by reported energy)."""
+    Both models predict the same held-out label, printed as {e_held_out:g} kcal."""
         ),
-        mo.md("## Fitting examples and final held-out example"),
+        mo.ui.table([
+            {
+                "Model": "Three labels (Q3.2)",
+                "Predicted energy (kcal)": round(float(e_prediction_first_three), 2),
+                "Absolute error (kcal)": round(float(abs_error_first_three), 2),
+                "Relative error (%)": round(100 * float(rel_error_first_three), 2),
+            },
+            {
+                "Model": f"Least squares, {len(E_total)} labels (Q3.4)",
+                "Predicted energy (kcal)": round(e_prediction_fit, 2),
+                "Absolute error (kcal)": round(abs_error_fit, 2),
+                "Relative error (%)": round(100 * rel_error_fit, 2),
+            },
+        ], selection=None),
+        mo.md("## Fitting rows and the held-out label"),
         mo.ui.table([
             {
                 "Use": "Fit",
                 "Fat (g)": float(_row[0]),
                 "Protein (g)": float(_row[1]),
                 "Carbohydrate (g)": float(_row[2]),
-                "Printed energy (kcal)": float(E_fit[_i]),
+                "Printed energy (kcal)": float(E_total[_i]),
                 "Predicted energy (kcal)": round(float(fit_predictions[_i]), 2),
                 "Prediction error (predicted − printed, kcal)": round(float(fit_residuals[_i]), 2),
             }
-            for _i, _row in enumerate(A_fit)
+            for _i, _row in enumerate(A_total)
         ] + [{
             "Use": "Held out",
-            "Fat (g)": float(held_out_nutrients[0]),
-            "Protein (g)": float(held_out_nutrients[1]),
-            "Carbohydrate (g)": float(held_out_nutrients[2]),
-            "Printed energy (kcal)": held_out_energy,
-            "Predicted energy (kcal)": round(held_out_prediction, 2),
-            "Prediction error (predicted − printed, kcal)": round(held_out_prediction - held_out_energy, 2),
+            "Fat (g)": float(a_held_out[0]),
+            "Protein (g)": float(a_held_out[1]),
+            "Carbohydrate (g)": float(a_held_out[2]),
+            "Printed energy (kcal)": e_held_out,
+            "Predicted energy (kcal)": round(e_prediction_fit, 2),
+            "Prediction error (predicted − printed, kcal)": round(e_prediction_fit - e_held_out, 2),
         }], selection=None),
     ])
     return

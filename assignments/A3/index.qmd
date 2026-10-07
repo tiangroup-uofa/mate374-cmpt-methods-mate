@@ -18,7 +18,7 @@ Submit **one PDF answering all four problems**. You may use [https://marimo.app]
 
 Keep your answers concise. If you use AI to help with these questions, clearly state which model you used.
 
-1. **A free atomic chain** (Lectures [11](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/03/L11/index.html) and [12](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/03/L12/index.html)). Consider $N$ atoms arranged in a line, with each neighboring pair connected by a spring with positive spring constant $k$. All atoms can move freely in space. Without writing the stiffness matrix $\mathbf K$, explain why this matrix **must be singular**. **Hint:** How many solutions can $\mathbf K\mathbf x=\mathbf f$ have?
+1. **A free atomic chain** (Lectures [11](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/03/L11/index.html) and [12](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/03/L12/index.html)). Consider $N$ atoms arranged in a line, with each neighboring pair connected by a spring with positive spring constant $k$. All atoms can move freely in space. Without writing the stiffness matrix $\mathbf K$, explain why this matrix **must be singular**. **Hint:** How many solutions can $\mathbf K\mathbf u=\mathbf f$ have?
 
 ```{=latex}
 \vspace{1em}
@@ -36,7 +36,7 @@ Keep your answers concise. If you use AI to help with these questions, clearly s
 \vspace{1em}
 ```
 
-4. **Reusing a matrix factorization** ([Lecture 13](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/03/L13/index.html)). In Lecture 13, we learned that after factoring $\mathbf A=\mathbf L\mathbf U$, we can reuse the factors to solve $\mathbf L\mathbf y=\mathbf b$ and then $\mathbf U\mathbf x=\mathbf y$ for each new right-hand side. A student argues: “If we already know $\mathbf A^{-1}$, we can just calculate $\mathbf x=\mathbf A^{-1}\mathbf b$. So reusing $\mathbf A^{-1}$ is enough.” To what extent do you agree? Briefly compare the mathematical validity of this approach with its computational and numerical merits.
+4. **Reusing a matrix factorization** ([Lecture 13](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/03/L13/index.html)). In Lecture 13, we learned that after factoring $\mathbf A=\mathbf L\mathbf U$, we can reuse the factors to solve $\mathbf L\mathbf y=\mathbf b$ and then $\mathbf U\mathbf x=\mathbf y$ for each new right-hand side. A student argues: “If we already know $\mathbf A^{-1}$, we can just calculate $\mathbf x=\mathbf A^{-1}\mathbf b$. So reusing $\mathbf A^{-1}$ is enough.” To what extent do you agree?  **Hint:** This is an open-ended question, you can choose either to agree or disagree with their opinion.
 
 ```{=latex}
 \newpage
@@ -102,9 +102,9 @@ $$
 E=c_f f+c_p p+c_c c,
 $$
 
-where $f$, $p$, and $c$ are the masses of fat, protein, and total carbohydrate in grams, respectively. The unknown coefficients $c_f$, $c_p$, and $c_c$ have units of kcal/g. The four supplied Canadian nutrition-label photographs below were taken from the instructor's household. Use the first three to determine an initial model and check that prediction against the fourth. In the least-squares fit, all four supplied labels are training data; hold out the highest-energy label among your additional photographs for the final test. Parts 3.3 and 3.4 can be done using our [Q3 demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a3_q3_food_energy.html).
+where $f$, $p$, and $c$ are the masses of fat, protein, and total carbohydrate in grams, respectively. The unknown coefficients $c_f$, $c_p$, and $c_c$ have units of kcal/g. The four Canadian nutrition-label photographs below were taken from the instructor's household. Labels 1–3 determine an initial model. The fourth photograph is the held-out label: it is never used to fit the coefficients, and both the initial model (3.2) and the least-squares model (3.4) predict its energy, so the two models are compared on the same food. Parts 3.3 and 3.4 can be done using our [Q3 demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a3_q3_food_energy.html).
 
-![The first three nutrition labels determine the initial fit; the fourth checks that prediction and joins the later least-squares fit. Red arrows indicate values to record.](../../assets/A03-nutrition-label-instructor-example.png){width=100% fig-alt="Four instructor-supplied labels. Labels 1–3 determine the initial fit: label 1 has 30.0 g fat, 3.6 g protein, 51.6 g carbohydrate, 490 kcal; label 2 has 0 g fat, 8 g protein, 15 g carbohydrate, 90 kcal; label 3 has 0.5 g fat, 1 g protein, 3 g carbohydrate, 20 kcal. The fourth label has 0.5 g fat, 0 g protein, 2 g carbohydrate, 15 kcal. It first checks the initial prediction and is included in the later least-squares fit."}
+![Labels 1–3 determine the initial fit. The held-out label tests both the initial and the least-squares models and is never used for fitting. Red arrows indicate values to record.](../../assets/A03-nutrition-label-instructor-example.png){width=100% fig-alt="Four instructor-supplied labels. Labels 1–3 determine the initial fit: label 1 has 30.0 g fat, 3.6 g protein, 51.6 g carbohydrate, 490 kcal; label 2 has 0 g fat, 8 g protein, 15 g carbohydrate, 90 kcal; label 3 has 0.5 g fat, 1 g protein, 3 g carbohydrate, 20 kcal. The held-out label has 23 g fat, 3 g protein, 15 g carbohydrate, 270 kcal. It tests both fits and is never used for fitting."}
 
 **3.1 Solving three labels.** With three unknown coefficients, three independent equations give a unique solution. Use products 1–3 in the figure to solve for $\mathbf C=(c_f,c_p,c_c)^{\mathsf T}$. First write down the equations. For example, label 1 gives
 
@@ -114,20 +114,20 @@ $$
 
 Write the equations for labels 2 and 3 and convert the system to matrix form $\mathbf A\mathbf C=\mathbf E$. Solve it by hand or with Python, and report $\mathbf C$ in kcal/g to three decimal places.
 
-**3.2 Checking the initial model.** Use $\mathbf C$ from 3.1 to predict the energy of the fourth supplied label. Report the absolute error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|$ in kcal and the relative error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|/E_{\mathrm{label}}$ as a percentage. Does the prediction reproduce the printed energy?
+**3.2 Checking the initial model.** Use $\mathbf C$ from 3.1 to predict the energy of the held-out label. Report the absolute error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|$ in kcal and the relative error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|/E_{\mathrm{label}}$ as a percentage. Does the prediction reproduce the printed energy?
 
 **3.3 Adding more data.** With $n$ labels ($n>3$), $\mathbf A\mathbf C=\mathbf E$ still describes the system of equations. What are the dimensions of $\mathbf A$, $\mathbf C$, and $\mathbf E$? Explain why `np.linalg.solve` cannot solve this rectangular system. A direct call will raise a `LinAlgError`.
 
-**3.4 Least squares.** Take pictures of **3–5 additional nutrition labels** from your kitchen or a supermarket shelf (*no purchase is required*). If obtaining photographs is difficult, ask the instructor for an alternative label set. Enter them in the table. The notebook uses least squares (`np.linalg.lstsq`) to find the best-fitting $\mathbf C=(c_f,c_p,c_c)^{\mathsf T}$ using all four supplied labels and all but the highest-energy one of your additional labels. The highest-energy additional label is held out to test the fit. Report:
+**3.4 Least squares.** Take pictures of **3–5 additional nutrition labels** from your kitchen or a supermarket shelf (*no purchase is required*). If obtaining photographs is difficult, ask the instructor for an alternative label set. Add them as new rows below labels 1–3 in the notebook table. The notebook uses least squares (`np.linalg.lstsq`) to find the best-fitting $\mathbf C=(c_f,c_p,c_c)^{\mathsf T}$ from labels 1–3 and your labels. The held-out label stays out of the fit and tests the new coefficients. Report:
 
 - the new $\mathbf A$ and $\mathbf E$ used for the fit (food photographs need not be submitted);
 - the three fitted coefficients $(c_f,c_p,c_c)$ in kcal/g to three decimal places;
-- the absolute prediction error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|$ in kcal for the highest-energy additional label;
-- the relative prediction error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|/E_{\mathrm{label}}$ for that label, as a percentage.
+- the absolute prediction error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|$ in kcal for the held-out label;
+- the relative prediction error $|E_{\mathrm{predicted}}-E_{\mathrm{label}}|/E_{\mathrm{label}}$ for that label, as a percentage, and how it compares with your result from 3.2.
 
 :::: {.content-visible when-format="html"}
 ::: {.quarto-wasm-local notebook="a3_q3_food_energy.edit.py" view="edit" title="A3 Q3 · Enter nutrition labels, fit coefficients, and test a held-out label" height="1100" loading="lazy" fullscreen="true"}
-The [Q3 notebook](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a3_q3_food_energy.html) first solves the system from labels 1–3. For least squares, it includes all four supplied labels and holds out the highest-energy additional label.
+The [Q3 notebook](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a3_q3_food_energy.html) solves the system from labels 1–3 and predicts the held-out label. Its least-squares fit uses labels 1–3 and your labels, then predicts the same held-out label.
 :::
 ::::
 
@@ -141,7 +141,7 @@ Acetylene ($\mathrm{C_2H_2}$), an important industrial chemical, can be represen
 
 Use $k_{\mathrm{CH}}=592\ \mathrm{N/m}$, $k_{\mathrm{CC}}=1580\ \mathrm{N/m}$, $m_{\mathrm H}=1\ \mathrm{a.u.}$, and $m_{\mathrm C}=12\ \mathrm{a.u.}$, with a.u. denoting the atomic mass unit. The [Q4 demo](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/a3_q4_acetylene.html) calculates the modes and displays their atomic motions.
 
-![**a** Acetylene and its free-ended axial spring model. Red arrows define positive displacements. **b** Measured IR spectrum, with selected peaks labelled in $\mathrm{cm^{-1}}$.](../../assets/A3-acetylene-model-ir.png){width=100% fig-alt="Left: H1–C2 triple-bond C3–H4 and four free masses joined by CH, CC, and CH springs, with positive displacements to the right. Right: measured IR absorbance, with labelled peaks at 3258, 3314, 1298, 1354, 734, and 758 inverse centimetres."}
+![**a** Acetylene and its free-ended axial spring model. Red arrows define positive displacements. **b** Measured IR spectrum, with selected peaks labelled in $\mathrm{cm^{-1}}$.](../../assets/A03-acetylene-model-ir.png){width=100% fig-alt="Left: H1–C2 triple-bond C3–H4 and four free masses joined by CH, CC, and CH springs, with positive displacements to the right. Right: measured IR absorbance, with labelled peaks at 3258, 3314, 1298, 1354, 734, and 758 inverse centimetres."}
 
 At room temperature, the atoms vibrate about their equilibrium positions, changing the bond lengths. A **normal mode** has a fixed pattern of relative atomic displacements and an angular frequency $\omega$. Newton's law gives
 
