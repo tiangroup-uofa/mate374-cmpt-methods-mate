@@ -34,8 +34,24 @@ jobs:
           enable-cache: true
           cache-dependency-glob: uv.lock
 
+      # Quarto scans every file under the project root on each render, and a
+      # .venv inside the checkout adds thousands of files to that scan.
+      - name: Place the Python environment outside the Quarto project
+        run: echo "UV_PROJECT_ENVIRONMENT=$RUNNER_TEMP/venv" >> "$GITHUB_ENV"
+
       - name: Install locked Python environment
         run: uv sync --locked
+
+      # The exporters keep per-notebook manifests, so an older cache is still
+      # useful: only notebooks whose source changed are exported again.
+      - name: Restore exported marimo notebooks
+        uses: actions/cache@v4
+        with:
+          path: |
+            wasm-local
+            completed-notebooks
+          key: marimo-${{ hashFiles('uv.lock', 'pyproject.toml', '_marimo_export.py', 'scripts/export_completed_notebooks.py', 'activities/*.py', 'assignments/**/*.py') }}
+          restore-keys: marimo-
 
       - name: Set up Quarto and TinyTeX
         uses: quarto-dev/quarto-actions/setup@v2

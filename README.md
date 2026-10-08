@@ -23,7 +23,11 @@ Use the full profile to build the complete site:
 quarto render --profile full
 ```
 
-Both paths export notebooks from `activities/` into the ignored `wasm-local/` resource directory. Unchanged exports are reused; Quarto copies the complete bundle into the built site.
+Both paths export notebooks from `activities/` into the ignored `wasm-local/` resource directory, and Quarto copies that bundle into the built site. The exporter caches each notebook by its source content, so a render re-exports only notebooks that changed or are new. It also limits the work to the pages Quarto is rendering: a one-page render or a preview re-render of an edited page exports only the notebooks that page uses. A change to `uv.lock`, `pyproject.toml`, or the export code rebuilds the whole bundle once.
+
+Stale notebooks export in parallel, one job per CPU core by default; set `MATE374_EXPORT_JOBS` to change the count. Each export runs with `--no-sandbox` in the locked project environment, so the exported marimo version follows `uv.lock` rather than the newest release that a notebook's `# /// script` header allows. Every exported notebook's dependencies must therefore be listed in `pyproject.toml`.
+
+Quarto scans every file under the project root at the start of each render, including a `.venv/` there. Keeping the environment outside the project roughly halves the fixed cost of a one-page render or preview refresh. Either set `UV_PROJECT_ENVIRONMENT` to a path outside the repository, or move `.venv` elsewhere and leave a `.venv` symlink, which Quarto does not follow.
 
 The `full` profile also regenerates scripted course figures, builds and stages answer PDFs and enables the HTML pages' PDF download links. Plain preview and HTML-only builds skip the answer-PDF hook and hide those format links. Explicit handout links in the page text may still point to PDFs from an earlier full build; run the full build to refresh them.
 
@@ -31,7 +35,7 @@ Keep both output-format definitions in `_quarto.yml` so page-specific PDF settin
 
 ## Deployment
 
-Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/render_pages.yml). The workflow installs the locked `uv` environment, Quarto, and TinyTeX, then runs `quarto render --profile full` to export notebooks, regenerate scripted figures, stage answer PDFs, render all HTML and PDF pages, and deploy `_site/` with GitHub Pages. The post-render hook generates the agent-facing `llms.txt` index.
+Pushes to `main` run [`.github/workflows/render_pages.yml`](.github/workflows/render_pages.yml). The workflow installs the locked `uv` environment, Quarto, and TinyTeX, restores the cached `wasm-local/` and `completed-notebooks/` exports, then runs `quarto render --profile full` to export changed notebooks, regenerate scripted figures, stage answer PDFs, render all HTML and PDF pages, and deploy `_site/` with GitHub Pages. The post-render hook generates the agent-facing `llms.txt` index.
 
 Figure generation is managed by [`scripts/render_figures.py`](scripts/render_figures.py), which runs the plotting scripts from source and saved data without rerunning benchmarks. Add new figure generators to its explicit list. To refresh figures without a full site build, run `uv run --locked python scripts/render_figures.py`. Daily HTML builds reuse the existing images.
 

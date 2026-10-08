@@ -17,7 +17,9 @@ project:
   preview:
     port: 7777
   render:
-    - "*.qmd"
+    # Quarto matches a bare "*.qmd" at every depth, which also rendered the
+    # answer-keys/ PDF project into the site. Name the root page instead.
+    - "index.qmd"
     - "syllabus/**/*.qmd"
     - "introduction/**/*.qmd"
     - "units/**/*.qmd"
