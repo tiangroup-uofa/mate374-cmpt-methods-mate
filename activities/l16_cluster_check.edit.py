@@ -24,7 +24,7 @@ def imports():
 @app.cell(hide_code=True)
 def introduction(mo):
     mo.md(r"""
-    ## L15 · Did the minimizer find a minimum? Four argon atoms from A1
+    ## L16 · Did the minimizer find a minimum? Four argon atoms from A1
 
     In Assignment 1, the tetrahedron was the lowest of three four-atom shapes. Here
     we start from a perfect **square** and let a minimizer relax it. The energy uses LJ

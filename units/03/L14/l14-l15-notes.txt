@@ -1,43 +1,156 @@
-L14 and L15 · authoring notes for the instructor
-================================================
+L14, L15 and L16 · authoring notes for the instructor
+=====================================================
 
-Source drafts
--------------
-- Both pages were written from the rough notes committed in 4b08399 ("rough L14 and L15
-  notes"). Recover them with: git show 4b08399:units/03/L14/index.qmd (and L15).
-- L14 follows the draft order: (1) spring model -> one linear solve, (2) Newton as the
-  bridge, (3) what scipy.optimize.minimize needs + method-family table + paths on one
-  landscape, (4) BFGS/L-BFGS one level deeper, (5) the ASE structure -> calculator ->
-  optimizer workflow. The ChatGPT share link in the draft was not carried over.
-- L15 keeps the draft text for 1D -> many dimensions -> compressed spring (x and y moves)
-  -> Hessian -> rotated system (theta = 45°, l0 = 1.2a), then continues into the
-  eigenvalue problem, classification, eigh, the Cholesky link to L13, and clusters.
+Latest instructor-outline revision (October 6, after the earlier Opus sessions)
+----------------------------------------------------------------------------
+The latest draft follows the instructor's full L14-L16 outline. Current details,
+figure provenance, teaching sequence, and checks are in
+planning/L14-L16-draft-review.txt. L14's root call, continuation and chain-limit
+figures are now implemented. F denotes physical net force, so J_F = -H = -K in
+the harmonic limit. L15 now ends the core argument at the saddle point, and the
+rotation example begins L16. The older scope and pending-task lists below are
+historical, not the current task list.
 
-Shared example
---------------
-- The middle atom between two fixed atoms (a = 1, k = 1, l0 = 1.2a) is the L14 minimizer
-  landscape and the L15 saddle example. From (0.3, 0.1), pure Newton converges to the
-  saddle at the origin in 4 steps (from (1.5, 0.05) it converges to (l0, 0)); GD, NM, CG,
-  BFGS and L-BFGS-B reach the minimum (0, 0.6633). This motivates L15 from L14.
+Earlier structure (October 6, supersedes the section moves below)
+------------------------------------------------------------------
+One main idea per lecture, at the pace of L11-L13:
+- L14 · Root-finding for systems of nonlinear equations (force control, Newton + Jacobian).
+- L15 · Energy minimization with many coordinates: force balance -> minimization,
+  Newton with the Hessian, harmonic minimum, cost of Newton, compressed spring (Newton
+  reaches the saddle), minimize + method table + paths notebook, BFGS, ASE relaxation of
+  Ar13 (moved back from L16), then "Did the minimizer find a minimum?": the diagonal
+  Hessian at the saddle, the rotated spring, and the open question (diagonal entries
+  positive at a saddle). Ends there; ~4,000 words of source including code.
+- L16 · How do we know minimization really worked? (the old L15 title): recap of the
+  rotated spring, the eigenvalue problem, eigh, zero modes, the A1 square, the LJ13
+  cuboctahedron -> icosahedron check with vibrational frequencies, a short Unit 3
+  wrap-up. ~2,600 words of source.
+- LJ38 (broadcasting, multistart, funnels, harmonic free energy) is out of the lectures
+  and kept as project material: project/lj38-cluster-draft.txt.
 
-Notebooks and checks
+Files renamed on October 6:
+- activities/l16_ase_relax.edit.py      -> activities/l15_ase_relax.edit.py
+- activities/l15_saddle_eigen.edit.py   -> activities/l16_saddle_eigen.edit.py
+- activities/l15_cluster_check.edit.py  -> activities/l16_cluster_check.edit.py
+- assets/L16-ase-relaxation.png    -> assets/L15-ase-relaxation.png
+- assets/L15-compressed-spring.png -> assets/L16-compressed-spring.png
+- assets/L15-square-eigenvalues.png -> assets/L16-square-eigenvalues.png
+- scripts/l15_figures.py now checks minimizer paths + ASE; scripts/l16_figures.py checks
+  the saddle/eigen and square notebooks plus the LJ cluster notebook (LJ13 figure for L16,
+  LJ38 figures for the project draft).
+
+Still to do in L14 (proposed, not yet written): scipy.optimize.root after the hand-written
+Newton; raising f step by step from the previous solution; smallest Jacobian eigenvalue
+-> 0 at the breaking force; "which bond breaks first" (end bonds). L14 should not use
+the words eigenvalue/Hessian beyond a forward link if the Jacobian-eigenvalue signal is
+kept, or it can use det J / Newton failure instead.
+
+Earlier notes (October 5)
+=========================
+
+Restructure (approved October 2026)
+-----------------------------------
+L14 is now about root-finding for coupled nonlinear equations. Energy minimization,
+the Hessian, and optimizers moved to L15, and the ASE relaxation moved to L16.
+
+Section moves:
+- L14 keeps: springs -> stable structures (intro), gradient/force balance and the nabla
+  notation callout, the LJ pair and r0, the three-atom equations (now with a pull f on
+  the last atom), Newton's method for coupled equations and the Jacobian.
+- L14 adds: "How strong is a chemical bond?" (scalar root V'(r) = f, brentq brackets on
+  either side of r_s), the chain Jacobian assembled like K from local spring constants
+  V''(r), the harmonic solve K u = b as (nearly) the first Newton step, Newton's
+  quadratic convergence, the force-extension curve, and the breaking force of the chain.
+  The word "Hessian" is not used in L14.
+- L15 receives: the minimization statement and relaxation, the harmonic minimum
+  (one linear solve), "for minimization the Jacobian of the gradient is the Hessian",
+  the second-order Taylor expansion, the cost of Newton, the middle-atom saddle
+  (merged with the existing compressed spring section), the minimize syntax, method
+  table, six-path figure and notebook, and a shortened BFGS/L-BFGS section.
+- L16 receives: ASE structure -> calculator -> optimizer, FIRE, and the Ar13 notebook,
+  as a step after the cluster relaxation with minimize.
+- The 1D LJ trimer energy landscape explored in the pairing session was left out.
+
+Files renamed:
+- activities/l14_minimizer_paths.edit.py -> activities/l15_minimizer_paths.edit.py
+- activities/l14_ase_relax.edit.py       -> activities/l16_ase_relax.edit.py
+- assets/L14-minimizer-paths.png -> assets/L15-minimizer-paths.png
+- assets/L14-ase-relaxation.png  -> assets/L16-ase-relaxation.png
+- New: activities/l14_bond_chain.edit.py, assets/L14-bond-strength.png,
+  assets/L14-chain-pull.png (written by scripts/l14_figures.py).
+- scripts/l14_figures.py checks the new notebook. The minimizer-path check moved to
+  scripts/l15_figures.py and the ASE check to scripts/l16_figures.py.
+
+Length target: each lecture page below about 3,500 words of source (wc -w).
+Current: L14 3,470, L15 4,910, L16 3,550. L15 is over the target because it now holds
+the minimization material on top of the Hessian/eigenvalue lecture. Candidates to cut
+if needed: the middle-atom example-code callout, the BFGS section (the notebook and the
+method table already carry the comparison), or moving "The four-atom square from A1" to
+an assignment or to L16 step 4, which repeats the same test on the cuboctahedron.
+
+Page status (October 5)
+-----------------------
+- L14 rewritten as planned. Title changed to "L14 · Root-finding for systems of nonlinear
+  equations" (the draft title was "Root-dinfing and Optimizing large systems of
+  equations"); updated in units/03/index.qmd and units/index.qmd. The instructor's
+  opening paragraphs are kept with typo fixes; the formal question now asks for force
+  balance, and the minimization statement and "This minimization problem is key..."
+  paragraph moved to the L15 opening.
+- L15 keeps its title; subtitle and central question now include minimization.
+  Order: force balance -> minimization, Newton = Hessian + Taylor, harmonic minimum,
+  cost of Newton, compressed spring (Newton -> saddle), minimize/method table/paths
+  notebook/BFGS, then "Did the minimizer find a minimum?" and the existing Hessian,
+  rotation, eigenvalue, and cluster sections. FIRE was dropped from the L15 method
+  table because scipy.optimize.minimize does not offer it; it is introduced in L16.
+- L16: new subsection "The same relaxation in an atomistic package" at the end of
+  step 3, one new learning outcome, one "What to keep" item, and the fmax question
+  from the old L14 as check question 5.
+- temp_example.py (repository root) is the 1D LJ trimer scratch
+  notebook from the pairing session. It was left untouched and is not linked.
+
+Numbers quoted in L14 (LJ reduced units, checked by scripts/l14_figures.py)
+-------------------------------------------------------------------------
+- Pair: r0 = 2^(1/6) = 1.12246, r_s = (26/7)^(1/6) = 1.24446, F_max = V'(r_s) = 2.3964,
+  strain at r_s = 10.9 %. Roots of V'(r) = f: f = 1.0 -> 1.1438 and 1.5382;
+  f = 2.0 -> 1.1829 and 1.3443.
+- Argon (eps = 0.0103 eV, sigma = 3.40 Å): F_max = 0.0073 eV/Å = 12 pN.
+- Chain of N = 6 atoms, atom 0 held, pull f = 2.0 on atom 5: Newton from the unloaded
+  chain converges in 6 iterations (largest net force 2.0, 0.54, 0.098, 5.9e-3, 2.6e-5,
+  5e-10, 1e-14). Bonds 1.1791, 1.1755, 1.1753, 1.1755, 1.1791.
+- First Newton step vs harmonic K u = b (k = V''(r0) = 57.15) at f = 2.0, atoms 1-5:
+  0.0343 0.0680 0.1017 0.1354 0.1697 vs 0.0350 0.0700 0.1050 0.1400 0.1750.
+- Extension ratio LJ/harmonic: 1.01 (f = 0.25), 1.06 (0.5), 1.17 (1.0), 1.63 (2.0).
+- Largest pull with a balanced chain: N = 2: 2.396, N = 3: 2.437, N >= 6: 2.442.
+  End bonds are stretched most (1.242 vs 1.218 in the middle just before failure).
+
+Shared example (L15)
 --------------------
-- activities/l14_minimizer_paths.edit.py, activities/l14_ase_relax.edit.py
-- activities/l15_saddle_eigen.edit.py, activities/l15_cluster_check.edit.py
-- All "Live step" cells are completed; blank them for an in-class scaffold as in L10.
-- scripts/l14_figures.py and scripts/l15_figures.py assert the quoted numbers and write
-  the 300-dpi figures (registered in scripts/render_figures.py).
+- The middle atom between two fixed atoms (a = 1, k = 1, l0 = 1.2a). From (0.3, 0.1),
+  pure Newton converges to the saddle at the origin in 4 steps (from (1.5, 0.05) it
+  converges to (l0, 0)); GD, NM, CG, BFGS and L-BFGS-B reach the minimum (0, 0.6633).
 
-Numbers quoted in the pages
----------------------------
-- ASE, Ar13 displaced by up to 0.3 Å (seed 374), fmax = 1e-3 eV/Å: BFGS 58, LBFGS 58
-  (identical path: default memory exceeds the run), FIRE 63 steps; E = -0.45657 eV.
+Other numbers (unchanged)
+-------------------------
+- ASE 3.29.0, Ar13 displaced by up to 0.3 Å (seed 374), fmax = 1e-3 eV/Å: BFGS 53,
+  LBFGS 53 (identical path: default memory exceeds the run), FIRE 63 steps; final
+  E = -0.45653 eV, within 0.04 meV of the icosahedron (-44.327 eps = -0.45657 eV).
+  Earlier pages quoted 58 BFGS steps; the current lock file gives 53, so L16 and
+  assets/L16-ase-relaxation.png were updated to 53.
 - A1 square (LJ reduced units): BFGS stops at -4.480620 after 5 iterations; eigenvalues
   -7.863 (in-plane shear), -2.218 (out-of-plane fold), six zeros, 130.3-138.2.
   Mode 1 -> rhombus -5.073421 (1 negative) -> tetrahedron -6; mode 2 -> tetrahedron.
 
+Notebooks
+---------
+- activities/l14_bond_chain.edit.py
+- activities/l15_minimizer_paths.edit.py, activities/l15_saddle_eigen.edit.py,
+  activities/l15_cluster_check.edit.py
+- activities/l16_lj_cluster.edit.py, activities/l16_ase_relax.edit.py
+- All "Live step" cells are completed; blank them for an in-class scaffold as in L10.
+
 Things to confirm
 -----------------
-- Bitzek et al. (2006) FIRE reference: PRL 97, 170201, linked by DOI.
+- Bitzek et al. (2006) FIRE reference: PRL 97, 170201, linked by DOI (now in L16).
 - ASE in the browser: the A1 notebook already uses ase + weas-widget in WASM, so the
-  L14 ASE notebook should load the same way, but it has not been tested in Pyodide here.
+  ASE notebook should load the same way, but it has not been tested in Pyodide here.
+- The original rough drafts are in commit 4b08399 (git show 4b08399:units/03/L14/index.qmd).

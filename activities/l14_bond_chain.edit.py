@@ -190,23 +190,26 @@ def controls_display(continuation, f_pull, guess_left, guess_right, iteration, m
 
 
 @app.cell(hide_code=True)
-def visualization(converged, energy, history, iteration, mo, np, plt, solved_load):
+def visualization(converged, energy, history, iteration, mo, np, plt, solved_load, status):
+    mo.stop(not history, mo.callout(status, kind="warn"))
     _m = min(iteration.value, len(history)-1)
     _x, _f, _j, _delta = history[_m]
     _path = np.array([row[0] for row in history])
-    chain_figure, _axes = plt.subplots(1, 2, figsize=(10, 4), layout="constrained")
+    plt.rcParams.update({"font.family": "sans-serif",
+                         "font.sans-serif": ["Arial", "DejaVu Sans"], "font.size": 12})
+    chain_figure, _axes = plt.subplots(1, 2, figsize=(7.1, 3.8), layout="constrained")
     _pos = np.array([_x[0], 0, _x[1]])
     _axes[0].plot(_pos, [0, 0, 0], color="#8a8f98", lw=3, zorder=1)
     _axes[0].scatter(_pos, [0, 0, 0], s=400, c=["#b5473a", "#8a8f98", "#b5473a"], edgecolors="#231f20", zorder=2)
-    for _p, _label in zip(_pos, [f"x₁ = {_x[0]:.4f}", "fixed: 0", f"x₂ = {_x[1]:.4f}"]):
-        _axes[0].text(_p, -0.16, _label, ha="center", fontsize=10)
+    for _p, _label in zip(_pos, [f"$x_1$ = {_x[0]:.4f}", "fixed: 0", f"$x_2$ = {_x[1]:.4f}"]):
+        _axes[0].text(_p, -0.16 if _p != 0 else -0.28, _label, ha="center", fontsize=10)
     for _i, _direction in [(0, -1), (2, 1)]:
         _axes[0].annotate("", xy=(_pos[_i]+_direction*0.55, 0),
                           xytext=(_pos[_i]+_direction*0.12, 0),
                           arrowprops={"arrowstyle": "->", "color": "#b5473a", "lw": 2})
     _axes[0].text(0, 0.22, f"outward load f = {solved_load:.3f}", ha="center")
     _axes[0].set(xlim=(min(-2, _x[0]-0.7), max(2, _x[1]+0.7)), ylim=(-0.4, 0.4),
-                 title=f"Atomic positions at iteration {_m}", xlabel="Position (σ)")
+                 title=f"Positions: iteration {_m}", xlabel="Position (σ)")
     _axes[0].set_yticks([])
     _axes[0].spines[["top", "right", "left"]].set_visible(False)
     _a, _b = np.meshgrid(np.linspace(-1.65, -1.0, 160), np.linspace(1.0, 1.65, 160))
@@ -215,11 +218,15 @@ def visualization(converged, energy, history, iteration, mo, np, plt, solved_loa
     chain_figure.colorbar(_cs, ax=_axes[1], label="Total bond energy E (ε)")
     _axes[1].plot(_path[:, 0], _path[:, 1], ".--", color="#b5473a", ms=6)
     _axes[1].plot(_x[0], _x[1], "o", color="#b5473a", ms=8)
-    _axes[1].set(xlim=(-1.65, -1.0), ylim=(1.0, 1.65), xlabel="x₁ (σ)", ylabel="x₂ (σ)",
-                 title="All three pair energies combined")
+    _axes[1].set(xlim=(-1.65, -1.0), ylim=(1.0, 1.65), xlabel="$x_1$ (σ)", ylabel="$x_2$ (σ)",
+                 title="Internal energy")
+    for _label, _ax in zip("ab", _axes):
+        _ax.text(-0.12, 1.06, _label, transform=_ax.transAxes, weight="bold", fontsize=18)
+        _ax.set_title(_ax.get_title(), fontsize=12)
+        _ax.tick_params(labelsize=10)
     mo.vstack([
         chain_figure,
-        mo.callout("Converged!" if converged else "Not converged",
+        mo.callout(status,
                    kind="success" if converged else "warn"),
     ])
     return (chain_figure,)
@@ -241,6 +248,33 @@ def library_solve(final_start, force, force_jacobian, np, root, solved_load):
     library_result = root(force, final_start, args=(solved_load,), jac=force_jacobian, method="hybr")
     library_residual = np.max(np.abs(force(library_result.x, solved_load)))
     return library_residual, library_result
+
+
+@app.cell(hide_code=True)
+def library_check(library_residual, library_result, mo, np, ordered_trimer, solved_load):
+    library_admissible = bool(
+        np.all(np.isfinite(library_result.x)) and ordered_trimer(library_result.x))
+    library_accepted = bool(
+        library_result.success and library_admissible and library_residual < 1e-9)
+    mo.vstack([
+        mo.md(f"""
+        ### SciPy at the same load and starting point
+
+        Load: **{solved_load:.5f} ε/σ**. Coordinates: **{library_result.x} σ**.
+
+        - Solver success flag: **{bool(library_result.success)}**
+        - Largest net force: **{library_residual:.3e} ε/σ** (target: below 1e-9)
+        - Ordered coordinates with separations above 0.5 σ: **{library_admissible}**
+        """),
+        mo.callout(str(library_result.message),
+                   kind="success" if library_accepted else "warn"),
+        mo.md("""
+        A small residual establishes force balance at these coordinates.
+        At a failed load, reduce the load increment and compare with the
+        force–separation maximum before interpreting the failure as a load limit.
+        """),
+    ])
+    return library_accepted, library_admissible
 
 
 @app.cell
@@ -282,6 +316,68 @@ def general_chain(V, d2V, dV, np):
         return positions, evaluate, valid
 
     return (chain_model,)
+
+
+@app.cell(hide_code=True)
+def seven_atom_text(mo):
+    mo.md(r"""
+    ### Extension: seven atoms
+
+    Hold atom 3 at zero and pull the two ends equally. There are six moving
+    coordinates. The function above adds the energy, equal-and-opposite forces,
+    and Jacobian entries of every pair before selecting the free coordinates.
+
+    **Predict:** will the end bonds and interior bonds stretch equally?
+    Edit `seven_load` in the next cell and compare the bond strains.
+    """)
+    return
+
+
+@app.cell
+def seven_atom_calculation(chain_model, newton_system, np, r0):
+    seven_load = 2.0  # outward force in ε/σ; try 0, 2.43, and 2.45
+    positions7, evaluate7, valid7 = chain_model(7)
+    x7 = r0 * np.array([-3., -2., -1., 1., 2., 3.])
+    rest7, _, rest_ok7, rest_message7 = newton_system(
+        lambda x: evaluate7(x, 0)[1], lambda x: evaluate7(x, 0)[2],
+        x7, valid=valid7)
+    x7 = rest7.copy()
+    ok7, message7 = rest_ok7, rest_message7
+    reached7 = 0.0
+    if rest_ok7:
+        for load7 in np.linspace(0, seven_load, max(2, int(np.ceil(seven_load/0.02))+1)):
+            trial7, history7, ok7, message7 = newton_system(
+                lambda x: evaluate7(x, load7)[1], lambda x: evaluate7(x, load7)[2],
+                x7, valid=valid7)
+            if not ok7:
+                break
+            x7 = trial7
+            reached7 = float(load7)
+    seven_residual = float(np.max(np.abs(evaluate7(x7, reached7)[1])))
+    seven_strains = np.diff(positions7(x7))/np.diff(positions7(rest7))-1
+    return (
+        message7, ok7, reached7, rest_ok7, seven_load, seven_residual, seven_strains,
+    )
+
+
+@app.cell(hide_code=True)
+def seven_atom_result(message7, mo, ok7, reached7, rest_ok7, seven_load, seven_residual, seven_strains):
+    mo.stop(not rest_ok7, mo.callout(message7, kind="warn"))
+    mo.vstack([
+        mo.md(f"""
+        Requested load: **{seven_load:.5f} ε/σ**.
+        Last accepted load: **{reached7:.5f} ε/σ**.
+        Largest force at that accepted state: **{seven_residual:.3e} ε/σ**.
+        """),
+        mo.callout(message7 if ok7 else
+                   "The next load step failed. Results below are for the last accepted load. " + message7,
+                   kind="success" if ok7 else "warn"),
+        mo.ui.table([
+            {"Bond (left to right)": i+1, "Strain (%)": f"{100*strain:.3f}"}
+            for i, strain in enumerate(seven_strains)
+        ], selection=None),
+    ])
+    return
 
 
 if __name__ == "__main__":

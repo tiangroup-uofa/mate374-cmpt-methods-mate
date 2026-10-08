@@ -28,6 +28,7 @@ FIGURE_SCRIPTS = (
     "l15_figures.py",
     "l16_figures.py",
     "s04_figures.py",
+    "s06_figures.py",
     "../activities/a2_q3_figures.py",
 )
 

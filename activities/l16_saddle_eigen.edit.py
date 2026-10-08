@@ -15,14 +15,15 @@ def imports():
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy.linalg import LinAlgError, cho_factor
+    from scipy.optimize import minimize
 
-    return LinAlgError, cho_factor, mo, np, plt
+    return LinAlgError, cho_factor, minimize, mo, np, plt
 
 
 @app.cell(hide_code=True)
 def introduction(mo):
     mo.md(r"""
-    ## L15 · The compressed spring: a saddle point and its Hessian
+    ## L16 · The compressed spring: a saddle point and its Hessian
 
     Two atoms are fixed at $\mp a\,\mathbf n$, where $\mathbf n=(\cos\theta,\sin\theta)$
     is the direction of the line joining them. A middle atom $M=(x,y)$ is joined to each
@@ -30,6 +31,9 @@ def introduction(mo):
     compressed when $M$ sits at the origin. Rotating the system by $\theta$ changes
     nothing physical, but it changes the entries of the Hessian in our fixed $x,y$
     coordinates. We use $a=1$ and $k=1$.
+
+    **Predict:** rotate the geometry from 0° to 45°. Should the minima and eigenvectors
+    rotate? Should the eigenvalues change? Compare both the matrix and energy profiles.
     """)
     return
 
@@ -138,6 +142,21 @@ def analyse(curvature_directions, fixed_atoms, hessian, l0_slider, np, theta_sli
     return H0, H_exact, H_min, fixed, l0, origin, p_min, residual, theta, values, vectors
 
 
+@app.cell
+def rotated_relaxation(energy, fixed, gradient, l0, minimize, mo, np, p_min):
+    # A starting point close to one rotated minimum, with a small perturbation.
+    rotated_result = minimize(energy, p_min + np.array([0.1, 0.07]),
+                              args=(fixed, l0), jac=gradient, method="BFGS",
+                              options={"gtol": 1e-10})
+    mo.md(f"""
+    **Relaxation in the rotated geometry:** position {np.round(rotated_result.x, 6)},
+    energy {rotated_result.fun:.3e}, gradient norm
+    {np.linalg.norm(gradient(rotated_result.x, fixed, l0)):.3e}.
+    Distance from the geometric minimum: {np.linalg.norm(rotated_result.x - p_min):.3e}.
+    """)
+    return (rotated_result,)
+
+
 @app.cell(hide_code=True)
 def show_matrix(H0, H_exact, mo, np, residual, values, vectors):
     def fmt(M):
@@ -207,7 +226,8 @@ def step_three_text(mo):
     In L13, Cholesky factorization $\mathbf H=\mathbf L\mathbf L^{\mathsf T}$ required a
     **positive definite** matrix, one with all eigenvalues positive. Because the outer
     atoms are fixed here, there are no rigid translations or rotations, so a Hessian that
-    passes this test belongs to a minimum. `cho_factor` raises `LinAlgError` otherwise.
+    passes this test at a stationary point establishes a strict local minimum.
+    `cho_factor` raises `LinAlgError` otherwise.
     """)
     return
 

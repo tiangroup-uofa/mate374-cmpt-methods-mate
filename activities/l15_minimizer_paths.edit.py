@@ -22,7 +22,7 @@ def imports():
 @app.cell(hide_code=True)
 def introduction(mo):
     mo.md(r"""
-    ## L14 · How different minimizers walk across one energy landscape
+    ## L15 · How different minimizers walk across one energy landscape
 
     A middle atom $M=(x,y)$ is joined by two harmonic springs to atoms fixed at
     $L=(-a,0)$ and $R=(a,0)$. Each spring has stiffness $k$ and natural length $l_0$:
@@ -237,7 +237,7 @@ def plot_paths(energy, l0, method_table, mo, np, p_start, paths, plt):
     paths_figure = draw()
     mo.vstack([paths_figure, mo.md(method_table), mo.md(
         "A zero gradient only identifies a **stationary point**. The last column uses the "
-        "eigenvalues of the 2×2 Hessian, which L15 explains, to say which kind it is.")])
+        "eigenvalues of the 2×2 Hessian, explained in L16, to say which kind it is.")])
     return (paths_figure,)
 
 

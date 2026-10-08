@@ -133,6 +133,8 @@ website:
             text: "S04 · Interpolation and fitting"
           - href: seminars/S05-matrix-in-python/index.qmd
             text: "S05 · Matrices in Python"
+          - href: seminars/S06-elimination-cholesky/index.qmd
+            text: "S06 · Elimination and Cholesky"
       - href: assignments/index.qmd
         text: Assignments
         contents:

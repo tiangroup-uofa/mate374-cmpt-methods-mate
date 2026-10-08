@@ -97,7 +97,10 @@ def geometry(np, paths, plt, reference_roots):
     _u, _v = np.meshgrid(np.linspace(-5.3, 5.3, 110), np.linspace(-3.3, 4.2, 100))
     _f1 = _v - np.cosh(_u/2)
     _f2 = (9*_u**2 + 25*_v**2 - 225)/75
-    system_figure = plt.figure(figsize=(10, 4.5), layout="constrained")
+    plt.rcParams.update({"font.family": "sans-serif",
+                         "font.sans-serif": ["Arial", "DejaVu Sans"], "font.size": 12})
+    system_figure = plt.figure(figsize=(7.1, 4.7), layout="constrained")
+    system_figure.get_layout_engine().set(wspace=0.18)
     _ax3 = system_figure.add_subplot(121, projection="3d")
     _ax2 = system_figure.add_subplot(122)
     _ax3.plot_surface(_u, _v, _f1, color="#1f77b4", alpha=0.28, linewidth=0)
@@ -105,17 +108,25 @@ def geometry(np, paths, plt, reference_roots):
     _ax3.contour(_u, _v, _f1, levels=[0], colors=["#1f77b4"], linewidths=2)
     _ax3.contour(_u, _v, _f2, levels=[0], colors=["#b5473a"], linewidths=2)
     _ax3.scatter(reference_roots[:, 0], reference_roots[:, 1], [0, 0], c="black", s=35)
-    _ax3.set(xlabel="x₁", ylabel="x₂", zlabel="F₁ or F₂/75", title="Residual surfaces and their zero curves")
+    _ax3.set(xlabel="$x_1$", ylabel="$x_2$", title="Residual surfaces")
+    _ax3.text2D(0.05, 0.88, "Height: $F_1$ or $F_2/75$", transform=_ax3.transAxes, fontsize=11)
     _ax3.view_init(elev=26, azim=-65)
     _ax2.contour(_u, _v, _f1, levels=[0], colors=["#1f77b4"], linewidths=2)
     _ax2.contour(_u, _v, _f2, levels=[0], colors=["#b5473a"], linewidths=2)
-    _ax2.plot([], [], color="#1f77b4", label="F₁ = 0: x₂ = cosh(x₁/2)")
-    _ax2.plot([], [], color="#b5473a", label="F₂ = 0: ellipse")
+    _ax2.plot([], [], color="#1f77b4", label="$F_1 = 0$: cosh curve")
+    _ax2.plot([], [], color="#b5473a", label="$F_2 = 0$: ellipse")
     _ax2.plot(paths[:, 0], paths[:, 1], "o--", color="#231f20", ms=4, label="Newton iterates")
     _ax2.plot(paths[0, 0], paths[0, 1], "s", color="#231f20", ms=7, label="Initial guess")
     _ax2.scatter(reference_roots[:, 0], reference_roots[:, 1], c="black", marker="*", s=100)
-    _ax2.set(xlim=(-5.4, 5.4), ylim=(-3.4, 4.3), xlabel="x₁", ylabel="x₂", title="Projection onto the coordinate plane")
-    _ax2.legend(fontsize=8, loc="lower center")
+    _ax2.set(xlim=(-5.4, 5.4), ylim=(-3.4, 4.3), xlabel="$x_1$", ylabel="$x_2$", title="Zero curves")
+    system_figure.legend(*_ax2.get_legend_handles_labels(), loc="outside lower center",
+                         ncol=2, fontsize=10, frameon=False)
+    for _ax in [_ax3, _ax2]:
+        _ax.tick_params(labelsize=9)
+        _ax.set_title(_ax.get_title(), fontsize=12)
+    _ax3.text2D(0, 1.04, "a", transform=_ax3.transAxes, weight="bold", fontsize=18)
+    _ax2.text(-0.12, 1.04, "b", transform=_ax2.transAxes, weight="bold", fontsize=18)
+    _ax2.spines[["top", "right"]].set_visible(False)
     system_figure
     return (system_figure,)
 
@@ -150,13 +161,14 @@ def iteration_detail(history, iteration, mo, np):
 
 
 @app.cell(hide_code=True)
-def convergence_table(history, mo, np):
-    mo.ui.table([
+def convergence_table(converged, history, mo, np, status):
+    history_output = mo.ui.table([
         {"m": m, "x₁": f"{row[0][0]:.6f}", "x₂": f"{row[0][1]:.6f}",
          "max |Fᵢ|": f"{np.max(np.abs(row[1])):.3e}",
          "max |Δxᵢ|": "—" if row[3] is None else f"{np.max(np.abs(row[3])):.3e}"}
         for m, row in enumerate(history)
     ], selection=None)
+    mo.vstack([mo.callout(status, kind="success" if converged else "warn"), history_output])
     return
 
 

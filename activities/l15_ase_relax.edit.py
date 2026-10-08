@@ -28,7 +28,7 @@ def imports():
 @app.cell(hide_code=True)
 def introduction(mo):
     mo.md(r"""
-    ## L14 · Relaxing a cluster with an atomistic package
+    ## L15 · Relaxing a cluster with an atomistic package
 
     The [Atomic Simulation Environment (ASE)](https://wiki.fysik.dtu.dk/ase/) organizes
     a relaxation into three objects:
@@ -42,7 +42,7 @@ def introduction(mo):
 
     The `Atoms` object stores the elements and coordinates. The calculator returns
     the energy and the force on every atom. The optimizer moves the atoms until the
-    largest force component is below `fmax`. The same optimizer works with any
+    largest atomic force-vector norm is below `fmax`. The same optimizer works with any
     calculator, whether it is a Lennard-Jones pair potential, the effective-medium
     theory (EMT) model for metals used in the L11 copper animation, or a quantum
     mechanical method.
@@ -117,7 +117,7 @@ def step_two_text(mo):
     ```python
     opt = BFGS(atoms, logfile=None)
     opt.attach(record)          # called after every step
-    opt.run(fmax=0.001)         # stop when every |force component| < fmax (eV/Å)
+    opt.run(fmax=0.001)         # stop when every atomic force norm < fmax (eV/Å)
     ```
 
     Docs: [`ase.optimize`](https://wiki.fysik.dtu.dk/ase/ase/optimize.html)
@@ -134,7 +134,7 @@ def live_relax(BFGS, FIRE, LBFGS, np):
         """Relax atoms in place with the named optimizer; return them and (E, max|F|) per step."""
         history = []
         record = lambda: history.append((atoms.get_potential_energy(),
-                                         np.abs(atoms.get_forces()).max()))
+                                         np.linalg.norm(atoms.get_forces(), axis=1).max()))
         opt = OPTIMIZERS[name](atoms, logfile=None)
         opt.attach(record)
         opt.run(fmax=fmax, steps=max_steps)
@@ -169,7 +169,7 @@ def plot_history(E_start, fmax, histories, material, mo, np, plt, seconds):
             ax2.semilogy(steps, h[:, 1], label=name, **styles[name])
         ax2.axhline(fmax.value, color="black", ls="--", lw=0.8, label="fmax")
         ax1.set(xlabel="Optimizer step", ylabel="E − E_final (eV)", title="Energy above the final value")
-        ax2.set(xlabel="Optimizer step", ylabel="Largest |force component| (eV/Å)",
+        ax2.set(xlabel="Optimizer step", ylabel="Largest atomic force norm (eV/Å)",
                 title="Largest force")
         for ax in (ax1, ax2):
             ax.grid(alpha=0.2)

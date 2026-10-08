@@ -81,12 +81,21 @@ def sweep(d, n, stop=2.6):
 def check(simple, d):
     print("Test-function roots:", simple["reference_roots"])
     assert simple["converged"]
+    # Check the displayed L13-style pivot/elimination calculation.
+    x0, f0, j0, delta0 = simple["history"][0]
+    np.testing.assert_allclose(x0, [2, 2])
+    augmented = np.column_stack((j0, -f0))[[1, 0]].copy()
+    augmented[1] -= augmented[1, 0]/augmented[0, 0]*augmented[0]
+    np.testing.assert_allclose(augmented[1], [0, 2.632224, 0.995760], atol=5e-7)
+    np.testing.assert_allclose(delta0, [1.421400, 0.378296], atol=5e-7)
     for x in simple["reference_roots"]:
         np.testing.assert_allclose(simple["residual"](x), 0, atol=1e-8)
         np.testing.assert_allclose(simple["jacobian"](x), numerical_jacobian(simple["residual"], x), atol=1e-6)
     _, _, ok, message = simple["newton_system"](simple["residual"], simple["jacobian"], [0, 2])
     assert not ok and "Singular" in message
-    assert d["converged"] and d["library_result"].success and d["library_residual"] < 1e-8
+    assert d["converged"] and d["library_accepted"] and d["library_residual"] < 1e-9
+    assert d["ok7"] and d["seven_residual"] < 1e-9 and d["reached7"] == 2.0
+    np.testing.assert_allclose(d["seven_strains"], d["seven_strains"][::-1], atol=1e-9)
     for f in (0, 1, 2, 2.43, 2.436):
         x, history, ok, _, _, _ = d["load_trimer"]([-1.12, 1.12], f)
         assert ok, f
@@ -122,8 +131,7 @@ def force_models(d):
     r0 = d["r0"]
     k0 = d["d2V"](r0)
     r = np.linspace(1.0, 1.8, 600)
-    fig, axes = plt.subplots(1, 2, figsize=(9, 4.3), layout="constrained")
-    fig.suptitle("Lennard-Jones energy and force between 2 atoms", fontsize=14)
+    fig, axes = plt.subplots(1, 2, figsize=(7.1, 3.6), layout="constrained")
     axes[0].plot(r, d["V"](r), color="#b5473a", lw=2, label="Lennard–Jones")
     axes[0].plot(r, -1+0.5*k0*(r-r0)**2, "--", color="#231f20", lw=2, label="Harmonic")
     axes[0].set(xlabel="Separation r (σ)", ylabel="Pair energy V (ε)", ylim=(-1.1, 0.7))
@@ -192,13 +200,79 @@ def local_stiffness(d):
     return fig
 
 
+@matplotlib.rc_context({"font.size": 12, "font.family": "Arial"})
+def newton_linearization(simple):
+    """Plot the exact zero curves and the affine equations actually solved."""
+    u, v = np.meshgrid(np.linspace(1.75, 3.8, 300), np.linspace(1.7, 3.35, 260))
+    exact = [v-np.cosh(u/2), 9*u**2+25*v**2-225]
+    fig, axes = plt.subplots(1, 2, figsize=(7.1, 4.0), layout="constrained")
+    for m, ax in enumerate(axes):
+        x, f, J, delta = simple["history"][m]
+        next_x = x+delta
+        for i, color in enumerate(("#1f77b4", "#b5473a")):
+            ax.contour(u, v, exact[i], levels=[0], colors=[color], linewidths=1.8)
+            affine = f[i]+J[i, 0]*(u-x[0])+J[i, 1]*(v-x[1])
+            ax.contour(u, v, affine, levels=[0], colors=[color],
+                       linewidths=1.4, linestyles="--")
+        np.testing.assert_allclose(f+J@delta, 0, atol=1e-12)
+        ax.scatter(*simple["reference_roots"][1], marker="*", s=100, color="#231f20", zorder=5)
+        ax.plot(*x, "o", color="#231f20", ms=5)
+        ax.plot(*next_x, "o", mec="#231f20", mfc="white", ms=6, zorder=6)
+        ax.annotate("", xy=next_x, xytext=x,
+                    arrowprops={"arrowstyle": "->", "color": "#5e5e5e", "lw": 1.3,
+                                "shrinkA": 5, "shrinkB": 5})
+        # Offset labels to keep them clear of both curves and the correction arrow.
+        for point, label, offset in [
+            (x, rf"$\mathbf{{x}}^{{({m})}}$", (0, -24)),
+            (next_x, rf"$\mathbf{{x}}^{{({m+1})}}$", (2, 15)),
+        ]:
+            ax.annotate(label, point, xytext=offset, textcoords="offset points", fontsize=11)
+        ax.set(xlim=(1.75, 3.8), ylim=(1.7, 3.35), xlabel="$x_1$", ylabel="$x_2$")
+        ax.set_title(f"Iteration {m}", fontsize=12)
+        ax.text(-0.19, 1.04, "ab"[m], transform=ax.transAxes, weight="bold", fontsize=18)
+        ax.spines[["top", "right"]].set_visible(False)
+    # The same colours identify the same equations in the surface figure.
+    axes[0].plot([], [], color="#1f77b4", label="$F_1 = 0$")
+    axes[0].plot([], [], color="#b5473a", label="$F_2 = 0$")
+    axes[0].legend(loc="upper left", fontsize=10, frameon=False)
+    return fig
+
+
+@matplotlib.rc_context({"font.size": 12, "font.family": "Arial"})
+def trimer_limit(d, rlim, fmax):
+    fig, axes = plt.subplots(1, 2, figsize=(7.1, 3.8), layout="constrained")
+    r = np.linspace(1.19, 1.31, 500)
+    force = d["dV"](r)+d["dV"](2*r)
+    axes[0].plot(r, force, color="#b5473a", lw=2)
+    axes[0].axhline(2.45, color="#231f20", ls="--", lw=1.2)
+    axes[0].text(1.195, 2.459, "Applied pull: 2.45", fontsize=10)
+    axes[0].plot(rlim, fmax, "o", color="#b5473a", ms=5)
+    axes[0].annotate(f"Maximum: {fmax:.6f}", (rlim, fmax),
+                     xytext=(1.205, 2.32), fontsize=10,
+                     arrowprops={"arrowstyle": "-", "color": "#5e5e5e"})
+    axes[0].set(xlabel="Bond separation r (σ)", ylabel="Outward pull f (ε/σ)",
+                xlim=(1.19, 1.31), ylim=(2.25, 2.48))
+    gap = np.geomspace(1e-1, 1e-6, 400)
+    cond = [np.linalg.cond(d["force_jacobian"]([-s, s])) for s in rlim-gap]
+    axes[1].loglog(gap, cond, color="#b5473a", lw=2)
+    axes[1].set(xlabel="Gap to limiting separation (σ)", ylabel=r"Condition number $\kappa_2(\mathbf{J})$",
+                xlim=(1e-1, 1e-6))
+    axes[1].set_xticks([1e-1, 1e-3, 1e-6])
+    axes[1].text(0.04, 0.88, "Approaching the limit →", transform=axes[1].transAxes, fontsize=10)
+    for label, ax in zip("ab", axes):
+        ax.text(-0.22, 1.04, label, transform=ax.transAxes, weight="bold", fontsize=18)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.tick_params(labelsize=10)
+    return fig
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check-only", action="store_true")
     args = parser.parse_args()
     simple = load("l14_newton_system")
     d = load("l14_bond_chain")
-    _, trimer_max = check(simple, d)
+    trimer_s, trimer_max = check(simple, d)
     results = {n: sweep(d, n) for n in (3, 5, 7, 9)}
     assert abs(results[3][3][-1]-trimer_max) < 3e-5
     assert abs(results[7][3][-1]-2.443) < 1e-3
@@ -209,6 +283,8 @@ def main():
     if not args.check_only:
         figures = {
             "L14-newton-system": simple["system_figure"],
+            "L14-newton-linearization": newton_linearization(simple),
+            "L14-trimer-limit": trimer_limit(d, trimer_s, trimer_max),
             "L14-trimer-newton": d["chain_figure"],
             "L14-force-models": force_models(d),
             "L14-chain-pull": chain_pull(d, results[7]),

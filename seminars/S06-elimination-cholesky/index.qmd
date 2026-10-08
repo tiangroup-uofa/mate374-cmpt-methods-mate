@@ -1,0 +1,255 @@
+---
+title: "S06 · Gaussian elimination and Cholesky factorization"
+subtitle: "Hand elimination and choosing a faster solver for repeated systems"
+body-classes: lecture-page seminar-page
+---
+
+## Learning outcomes
+
+By the end of this seminar, you should be able to:
+
+1. **Solve** a small linear system by Gaussian elimination and back substitution, recording the row operations.
+2. **Apply** partial pivoting to the entire augmented matrix and check the answer in the original equations.
+3. **Compare** the operation counts for repeated elimination, reusable LU, and Cholesky.
+4. **Choose** a solver using a matrix's banded structure and symmetry.
+
+## Connection to the lecture
+
+In [L13](../../units/03/L13/index.qmd), we examined how a direct solver transforms a matrix into forms that are easier to solve. Today we will carry out two Gaussian eliminations by hand, then use the structure of a diffusion problem to solve a system much larger than we could store as a dense array.
+
+For Questions 1 and 2, keep the original matrix and right-hand side beside your working. Write every row operation on the **augmented matrix** $[\mathbf A\mid\mathbf b]$, including changes to the last column. Complete the hand calculation before using the notebook to check it.
+
+## Question 1 · Elimination without row swaps
+
+Solve
+
+$$
+\begin{bmatrix}
+2&1&-1\\
+4&5&0\\
+-2&2&7
+\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\\x_3\end{bmatrix}
+=
+\begin{bmatrix}5\\14\\-5\end{bmatrix}.
+$$
+
+1. Using the first row as the pivot row, eliminate the first-column entries below it. Record both multipliers.
+2. Eliminate the remaining entry below the second pivot. Write the resulting upper-triangular system $\mathbf U\mathbf x=\mathbf c$.
+3. Use back substitution to find $x_3$, then $x_2$, then $x_1$.
+4. Substitute your result into all three **original** equations. What residual do you obtain?
+
+Use the displayed row order for this question. All three pivots are nonzero, and the arithmetic can be kept exact.
+
+::: {.callout-note collapse="true"}
+## Worked elimination and back substitution for Question 1
+
+The first-column multipliers are $m_{21}=4/2=2$ and $m_{31}=-2/2=-1$. Apply
+
+$$
+R_2\leftarrow R_2-2R_1,\qquad R_3\leftarrow R_3+R_1
+$$
+
+to obtain
+
+$$
+\left[\begin{array}{rrr|r}
+2&1&-1&5\\
+0&3&2&4\\
+0&3&6&0
+\end{array}\right].
+$$
+
+Now $m_{32}=3/3=1$, so $R_3\leftarrow R_3-R_2$ gives
+
+$$
+\left[\begin{array}{rrr|r}
+2&1&-1&5\\
+0&3&2&4\\
+0&0&4&-4
+\end{array}\right].
+$$
+
+Back substitution gives
+
+$$
+x_3=-1,\qquad
+x_2=\frac{4-2(-1)}{3}=2,\qquad
+x_1=\frac{5-2+(-1)}{2}=1.
+$$
+
+Thus $\mathbf x=(1,2,-1)^{\mathsf T}$ and $\mathbf A\mathbf x-\mathbf b=\mathbf 0$.
+:::
+
+## Question 2 · Partial pivoting at two stages
+
+Solve the following system using **partial pivoting** at every elimination stage:
+
+$$
+\begin{bmatrix}
+0&2&1\\
+2&1&-1\\
+4&4&1
+\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\\x_3\end{bmatrix}
+=
+\begin{bmatrix}0\\-1\\2\end{bmatrix}.
+$$
+
+Before calculating, consider the zero in the top-left corner. Does it establish that the matrix is singular, or does it only prevent using that entry as the first pivot?
+
+1. In column 1, choose the entry with the largest absolute value among all three rows. Swap its row into the first position, including the right-hand-side entry.
+2. Eliminate below that pivot. Fractions such as $1/2$ can be kept exact.
+3. For the second pivot, compare the remaining entries in column 2 **after elimination**. Is another row swap needed?
+4. Complete the elimination and back substitution. Verify the answer against the original equations.
+5. A classmate swaps the coefficient rows but leaves $\mathbf b$ unchanged. Explain why their answer can solve the transformed equations correctly and still fail the original problem.
+
+::: {.callout-note collapse="true"}
+## Both pivot choices and the solution of Question 2
+
+The largest first-column magnitude is 4. Swap $R_1$ and $R_3$:
+
+$$
+\left[\begin{array}{rrr|r}
+4&4&1&2\\
+2&1&-1&-1\\
+0&2&1&0
+\end{array}\right].
+$$
+
+Apply $R_2\leftarrow R_2-\tfrac12R_1$. The third row already has a zero in column 1:
+
+$$
+\left[\begin{array}{rrr|r}
+4&4&1&2\\
+0&-1&-3/2&-2\\
+0&2&1&0
+\end{array}\right].
+$$
+
+In column 2, $|2|>|-1|$, so swap the current $R_2$ and $R_3$. Then the multiplier is $m_{32}=-1/2$, and $R_3\leftarrow R_3+\tfrac12R_2$ gives
+
+$$
+\left[\begin{array}{rrr|r}
+4&4&1&2\\
+0&2&1&0\\
+0&0&-1&-2
+\end{array}\right].
+$$
+
+Back substitution gives $x_3=2$, $x_2=-1$, and $x_1=1$. The original equations evaluate to $0$, $-1$, and $2$, as required. The nonzero pivots establish that this system has a unique solution despite its original zero diagonal entry.
+
+A row swap exchanges two complete equations. Swapping only the coefficients attaches the wrong right-hand side to each equation and changes the problem.
+:::
+
+### Check your hand calculations
+
+Select the question and enter your computed vector in the editable cell. The checker evaluates the original equations and displays each residual, without repeating the elimination for you.
+
+::: {.quarto-wasm-local notebook="s06_gaussian_check.edit.py" view="edit" title="Check the residuals of the two hand-elimination answers" height="650" loading="lazy" fullscreen="true"}
+Question 1 has solution $(1,2,-1)^{\mathsf T}$ and Question 2 has solution $(1,-1,2)^{\mathsf T}$. Substitution into each original matrix gives its supplied right-hand side exactly. Both residual vectors are zero.
+:::
+
+## Question 3 · Why have so many matrix solvers?
+
+In [L13](../../units/03/L13/index.qmd), we met Gaussian elimination, LU, Cholesky, and banded solvers. Why do we need these different choices? Consider a common matrix from a diffusion calculation:
+
+$$
+\underbrace{\begin{bmatrix}
+2&-1&0&\cdots&0\\
+-1&2&-1&\ddots&\vdots\\
+0&-1&2&\ddots&0\\
+\vdots&\ddots&\ddots&\ddots&-1\\
+0&\cdots&0&-1&2
+\end{bmatrix}}_{\mathbf A}
+\mathbf x=\mathbf b.
+$$
+
+Here $\mathbf x$ contains concentrations at points through a layer. Each point interacts with its two neighbours, giving the three-diagonal pattern. We will develop the diffusion equations when we cover PDEs. For now, take this matrix as given. It is **tridiagonal, symmetric, and positive definite** when the concentrations at the two faces are fixed.
+
+In a simulation, we often solve many systems with the **same matrix** but different source terms or boundary values:
+
+$$
+\mathbf A\mathbf x^{(1)}=\mathbf b^{(1)},\qquad
+\mathbf A\mathbf x^{(2)}=\mathbf b^{(2)},\qquad\ldots
+$$
+
+What work could we avoid repeating?
+
+### Repeated elimination versus reusable LU
+
+Recall the assignment's LU calculation. Once $\mathbf A$ has been factored, each new right-hand side needs only forward and back substitution. For an $n\times n$ dense matrix, L13 gave approximately $\tfrac23n^3$ operations for elimination or LU factorization, and $2n^2$ for the two triangular substitutions.
+
+Suppose we have **1000 unknowns and 10 different right-hand sides**. Estimate the work for these two choices:
+
+| Approach | Approximate total operations for $m$ right-hand sides |
+|---|---:|
+| Start elimination again for every system | $m(\tfrac23n^3+2n^2)$ |
+| Factor once with LU and reuse it | $\tfrac23n^3+2mn^2$ |
+
+**Calculate:** substitute $n=1000$ and $m=10$. Which term dominates each total? How much work does factor reuse save?
+
+::: {.callout-note collapse="true"}
+## Operation counts for 1000 unknowns and 10 right-hand sides
+
+Repeating the elimination costs about **6.69 billion** operations. Reusing LU costs about **687 million**, nearly ten times less. The factorization is the expensive part, and LU lets us keep it.
+
+For one right-hand side, LU has essentially the same work as Gaussian elimination. The saving here comes from reuse. Passing all right-hand sides together as columns of `B` to `np.linalg.solve(A, B)` also shares one factorization.
+:::
+
+Why not calculate $\mathbf A^{-1}$ once and reuse it? Even when $\mathbf A$ is banded, its inverse is generally dense. For this diffusion matrix, storing the inverse would lose the memory saving, and each product $\mathbf A^{-1}\mathbf b$ would take about $2n^2$ operations instead of the linear work of a banded solve. Computing the inverse also adds work and rounding error. If a reliable inverse is already available for a small dense problem, multiplying by it is valid, but for repeated solves we would normally keep the factors instead.
+
+### The banded structure saves more work
+
+Look again at $\mathbf A$: almost every entry is zero. A general dense calculation ignores that advantage. A **banded solver**, such as `scipy.linalg.solve_banded`, stores and works on the few diagonals that contain nonzero entries. For this tridiagonal system, the work grows in proportion to $n$, rather than $n^3$.
+
+**Discuss:** if the number of unknowns doubles, roughly how does the factorization work change for a dense method? For a tridiagonal method?
+
+### Cholesky uses the symmetry as well
+
+There is another useful property: this matrix is symmetric positive definite. Cholesky writes
+
+$$
+\mathbf A=\mathbf L\mathbf L^{\mathsf T}.
+$$
+
+We compute one triangular factor, and its transpose supplies the other. For a **dense** matrix, this reduces the leading factorization cost from $\tfrac23n^3$ for general LU to $\tfrac13n^3$. The two substitutions for each new right-hand side still cost about $2n^2$.
+
+**Calculate:** for the same 1000 unknowns and 10 right-hand sides, estimate
+
+$$
+\frac13n^3+2mn^2.
+$$
+
+The result is about **353 million operations**, compared with 687 million for reusable dense LU. Cholesky saves about half the factorization work while retaining the same benefit of reuse.
+
+We can combine both properties in **banded Cholesky**. For this example, its factor has only two nonzero diagonals:
+
+![Nonzero entries of the diffusion matrix and its Cholesky factor. The narrow band is preserved in the factor.](../../assets/S06-cholesky-pattern.png){#fig-cholesky-pattern width="85%" fig-alt="The matrix A has three nonzero diagonals; its lower Cholesky factor L has two."}
+
+General banded methods and banded Cholesky both have linear cost for this tridiagonal example. The factor-of-two dense estimate does not establish an automatic twofold speedup over a banded solver.
+
+### A short calculation with the same matrix and two sources
+
+The notebook supplies the matrix and two right-hand sides. The first describes uniform production through the layer, and the second describes greater production on the left. Find the factorization call and the solve call:
+
+```python
+factor = cholesky_banded(ab, lower=True)
+solutions = cho_solve_banded((factor, True), B)
+```
+
+Here `ab` stores the matrix's lower band, and the columns of `B` are the two right-hand sides. The matrix is factored once and used for both answers.
+
+::: {.quarto-wasm-local notebook="s06_diffusion_cholesky.edit.py" view="edit" title="One banded Cholesky factor, two diffusion solutions" height="850" loading="lazy" fullscreen="true"}
+The notebook solves the same diffusion matrix for two source profiles and plots the resulting concentrations. It also calculates the operation estimates for repeated dense elimination, reusable dense LU, and reusable dense Cholesky. At $n=1000$ with ten right-hand sides, these are approximately 6.69 billion, 687 million, and 353 million operations. The actual demonstration uses banded Cholesky and can scale up to a million unknowns without constructing a dense matrix.
+:::
+
+![Two concentration profiles calculated with the same matrix factor and different right-hand sides.](../../assets/S06-diffusion-profiles.png){#fig-diffusion-profiles width="85%" fig-alt="Uniform production gives a symmetric concentration profile; left-biased production shifts the maximum left. Both solutions use the same matrix."}
+
+**Try:** start at 1000 unknowns, then increase the size. At a million unknowns, a dense matrix alone would require **8 TB**, whereas the band array and its Cholesky factor require **16 MB each**, plus the solution and working arrays.
+
+## Record and discuss
+
+Keep the row operations and answers for Questions 1 and 2. For Question 3, record the three operation estimates and explain the separate savings from **reusing a factorization**, **working within a narrow band**, and **using symmetry through Cholesky**.
+
+**Before you leave:** if only $\mathbf b$ changes, which part of the calculation must be repeated? If $\mathbf A$ changes, what must be recalculated?

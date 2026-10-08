@@ -1,9 +1,19 @@
 L16 · LJ cluster wrap-up: authoring notes for the instructor
 ============================================================
 
+Latest draft: the instructor's rotation example now opens L16, followed by the
+force-direction interpretation, general eigenproblem, and visible 2x2 worked solve.
+See planning/L14-L16-draft-review.txt for the current revision and validation.
+
+October 6: L16 is now the eigenvalue-problem lecture (see units/03/L14/l14-l15-notes.txt).
+The LJ38 material and activities/l16_lj_cluster.edit.py are no longer used by any page;
+they are kept for a project track (project/lj38-cluster-draft.txt). The notes below
+describe that notebook and remain valid for it.
+
 Status
 ------
-- Lecture page: units/03/L16/index.qmd (trimmed after review; ~3,300 words of source).
+- Lecture page: units/03/L16/index.qmd (~3,550 words of source after the ASE subsection
+  moved here from L14, at the end of step 3; see units/03/L14/l14-l15-notes.txt).
 - Notebook: activities/l16_lj_cluster.edit.py. Every "Live step" cell is COMPLETED.
   To make a student scaffold in the L10 style, copy the file and replace the bodies of
   the five live cells with None placeholders:

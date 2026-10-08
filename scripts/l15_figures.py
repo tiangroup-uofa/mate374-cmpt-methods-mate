@@ -1,4 +1,4 @@
-"""Check the L15 Hessian notebooks and draw the static L15 figures.
+"""Check the L15 minimizer and ASE notebooks and draw the static L15 figures.
 
     uv run --locked python scripts/l15_figures.py [--check-only]
 """
@@ -26,39 +26,45 @@ def load(name):
     return dict(definitions)
 
 
-def check(spring, cluster):
-    # theta = 45°, l0 = 1.2a: H = k [[0.8, 1.2], [1.2, 0.8]], eigenvalues -0.4k and 2k.
-    np.testing.assert_allclose(spring["H0"], [[0.8, 1.2], [1.2, 0.8]], atol=1e-6)
-    np.testing.assert_allclose(spring["values"], [-0.4, 2.0], atol=1e-6)
-    assert not spring["is_positive_definite"](spring["H0"])
-    assert spring["is_positive_definite"](spring["H_min"])
-    # A1 square: two negative modes; following mode 1 passes the rhombus saddle to the tetrahedron.
-    assert cluster["square_counts"] == {"negative": 2, "zero": 6, "positive": 4}
-    energies = [cluster["lj_energy"](X) for X in cluster["follow_path"]]
-    np.testing.assert_allclose(energies, [-4.480620, -5.073421, -6.0], atol=1e-6)
-    print("Square eigenvalues:", np.round(cluster["square_values"], 3))
+def check_paths(d):
+    # Default start (0.3, 0.1), l0 = 1.2a: Newton converges to the saddle, the others to a minimum.
+    paths = d["paths"]
+    assert np.allclose(paths["Newton"][-1], [0, 0], atol=1e-8)
+    for name in ("Gradient descent", "Nelder-Mead", "CG", "BFGS", "L-BFGS-B"):
+        assert np.allclose(paths[name][-1], [0, np.sqrt(1.2**2 - 1)], atol=1e-3), name
+    # From (1.5, 0.05), Newton finds the other stationary point on the axis, (l0, 0).
+    newton = d["newton"](np.array([1.5, 0.05]), 1.2)
+    assert np.allclose(newton[-1], [1.2, 0], atol=1e-8)
+    print("Steps from (0.3, 0.1):", {k: len(v) - 1 for k, v in paths.items()})
 
 
-def spring_figure(spring):
-    energy, fixed_atoms, hessian = spring["energy"], spring["fixed_atoms"], spring["hessian"]
-    fig, axes = plt.subplots(1, 2, figsize=(9, 4.4))
-    xs = np.linspace(-1.5, 1.5, 241)
-    Xg, Yg = np.meshgrid(xs, xs)
-    for ax, theta in zip(axes, (0, 45)):
-        fixed = fixed_atoms(theta)
-        Z = np.array([[energy(np.array([x, y]), fixed, 1.2) for x in xs] for y in xs])
-        ax.contourf(Xg, Yg, np.log10(Z + 1e-3), levels=30, cmap="Greys_r", alpha=0.6)
-        ax.contour(Xg, Yg, Z, levels=np.linspace(0, 1.0, 11), colors="white", linewidths=0.5)
-        ax.plot(*fixed.T, "s", color="black", ms=9)
-        H = hessian(np.zeros(2), fixed, 1.2)
-        values, vectors = np.linalg.eigh(H)
-        for lam, v, colour in zip(values, vectors.T, ["tab:red", "tab:blue"]):
-            ax.annotate("", xy=0.6*v, xytext=(0, 0), arrowprops=dict(arrowstyle="->", color=colour, lw=2.5))
-            ax.plot([], [], color=colour, lw=2.5, label=f"λ = {lam:+.2f}k")
-        title = (f"θ = {theta}°:  H = k[[{H[0, 0]:.1f}, {H[0, 1]:.1f}], [{H[1, 0]:.1f}, {H[1, 1]:.1f}]]")
-        ax.set(xlabel="x / a", ylabel="y / a", aspect="equal", title=title)
-        ax.legend(fontsize=8, loc="lower right")
-    fig.tight_layout()
+def check_ase(d):
+    E = {k: h[-1, 0] for k, h in d["histories"].items()}
+    # 13 argon atoms relax to the icosahedron, -44.3268 eps = -0.456567 eV (rc = 50 Å shift is tiny).
+    assert all(abs(e + 0.456567) < 1e-4 for e in E.values()), E
+    print("Ar13 steps:", {k: len(h) - 1 for k, h in d["histories"].items()})
+
+
+@matplotlib.rc_context({"font.size": 14, "font.family": "Arial"})
+def energy_sections(d):
+    energy = d["energy"]
+    points = np.linspace(-0.85, 0.85, 181)
+    X, Y = np.meshgrid(points, points)
+    Z = np.array([[energy(np.array([x, y]), 1.2) for x in points] for y in points])
+    fig, (ax, cut) = plt.subplots(1, 2, figsize=(9, 4.3), layout="constrained")
+    ax.contour(X, Y, Z, levels=[0.002, 0.01, 0.025, 0.04, 0.08, 0.16, 0.32], colors="#8a8f98")
+    ax.axhline(0, color="#231f20", ls="--")
+    ax.axvline(0, color="#b5473a", ls="--")
+    ax.plot([0, 0], [-np.sqrt(0.44), np.sqrt(0.44)], "o", color="#b5473a")
+    ax.plot(0, 0, "x", color="#231f20", ms=9)
+    ax.set(xlabel="x / a", ylabel="y / a", aspect="equal", title="Energy contours")
+    cut.plot(points, [energy(np.array([s, 0]), 1.2) for s in points],
+             color="#231f20", label="Along x (y = 0)")
+    cut.plot(points, [energy(np.array([0, s]), 1.2) for s in points],
+             color="#b5473a", label="Along y (x = 0)")
+    cut.plot(0, 0.04, "x", color="#231f20", ms=9)
+    cut.set(xlabel="Displacement from origin / a", ylabel="Energy / (k a²)", ylim=(0, 0.22))
+    cut.legend()
     return fig
 
 
@@ -66,11 +72,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check-only", action="store_true")
     args = parser.parse_args()
-    spring, cluster = load("l15_saddle_eigen"), load("l15_cluster_check")
-    check(spring, cluster)
+    paths = load("l15_minimizer_paths")
+    ase_relax = load("l15_ase_relax")
+    check_paths(paths)
+    check_ase(ase_relax)
     if not args.check_only:
-        figures = [(spring_figure(spring), "L15-compressed-spring.png"),
-                   (cluster["square_figure"], "L15-square-eigenvalues.png")]
+        figures = [(energy_sections(paths), "L15-energy-sections.png"),
+                   (paths["paths_figure"], "L15-minimizer-paths.png"),
+                   (ase_relax["history_figure"], "L15-ase-relaxation.png")]
         for fig, name in figures:
             fig.savefig(ASSETS / name, dpi=DPI, bbox_inches="tight", facecolor="white")
             print(f"Saved assets/{name}")
