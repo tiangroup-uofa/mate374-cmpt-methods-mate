@@ -5,7 +5,7 @@ format:
     toc: true
 bibliography: ../../references.bib
 nocite: |
-  @burden2016numerical, @kiusalaas2013, @mmbaga_computational, @hao2026gold, @nelder1965simplex
+  @burden2016numerical, @kiusalaas2013, @mmbaga_computational, @hao2026gold, @nelder1965simplex, @nocedal2006optimization
 ---
 
 ## Bibliography

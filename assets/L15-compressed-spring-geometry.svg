@@ -1,2 +1,305 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="117.705mm" height="49.691mm" viewBox="2.000 3.296 117.705 49.691" version="1.1"><defs><marker style="overflow:visible" id="Triangle" refX="0" refY="0" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt" d="M 5.77,0 -2.88,5 V -5 Z"/></marker></defs><rect x="2.000" y="3.296" width="117.705" height="49.691" fill="#ffffff"/><g id="content"><g transform="translate(8.000,30.000) rotate(0.00) translate(2.205,0) scale(0.8640)"><path style="fill:none;stroke:#ababab;stroke-width:0.4326" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g><g transform="translate(30.000,30.000) rotate(0.00) translate(2.205,0) scale(0.8640)"><path style="fill:none;stroke:#ababab;stroke-width:0.4326" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g><circle style="fill:#939393" cx="8.000" cy="30.000" r="2.705421"/><text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="8.000" y="31.250">L</text><circle style="fill:#939393" cx="52.000" cy="30.000" r="2.705421"/><text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="52.000" y="31.250">R</text><circle style="fill:#d96464" cx="30.000" cy="30.000" r="2.705421"/><text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="30.000" y="31.250">M</text><path style="fill:none;stroke:#15428e;stroke-width:0.5;marker-end:url(#Triangle)" d="M 30.000,30.000 L 38.500,30.000"/><path style="fill:none;stroke:#158e50;stroke-width:0.5;marker-end:url(#Triangle)" d="M 30.000,30.000 L 21.500,30.000"/><path style="fill:none;stroke:#15428e;stroke-width:0.5;marker-end:url(#Triangle)" d="M 28.900,27.695 L 28.900,21.500"/><path style="fill:none;stroke:#158e50;stroke-width:0.5;marker-end:url(#Triangle)" d="M 31.100,27.695 L 31.100,19.000"/><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000" x="8.000" y="25.400">(fixed)</text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000" x="52.000" y="25.400">(fixed)</text><text style="font-size:3.52777px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000" x="19.000" y="26.400"><tspan style="font-style:italic">k</tspan></text><text style="font-size:3.52777px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000" x="41.000" y="26.400"><tspan style="font-style:italic">k</tspan></text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000" x="16.000" y="38.800"><tspan style="font-style:italic">r</tspan> = <tspan style="font-style:italic">a</tspan> &lt; <tspan style="font-style:italic">l</tspan><tspan style="font-size:65%;baseline-shift:sub">0</tspan></text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000" x="40.200" y="34.600"><tspan style="fill:#15428e">δ<tspan style="font-style:italic">x</tspan></tspan>: <tspan style="font-style:italic">E</tspan> rises</text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#158e50" x="23.500" y="34.600"><tspan style="font-style:italic">F</tspan></text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:end;fill:#000000" x="28.000" y="20.000"><tspan style="fill:#15428e">δ<tspan style="font-style:italic">y</tspan></tspan>: <tspan style="font-style:italic">E</tspan> falls</text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#158e50" x="32.800" y="18.500"><tspan style="font-style:italic">F</tspan></text><path style="fill:none;stroke:#c8c8c8;stroke-width:0.373766;stroke-dasharray:1,1" d="M 72.000,30.000 L 94.000,44.593 L 116.000,30.000"/><g transform="translate(72.000,30.000) rotate(-33.56) translate(2.205,0) scale(1.0802)"><path style="fill:none;stroke:#ababab;stroke-width:0.3460" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g><g transform="translate(94.000,15.407) rotate(33.56) translate(2.205,0) scale(1.0802)"><path style="fill:none;stroke:#ababab;stroke-width:0.3460" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g><circle style="fill:#939393" cx="72.000" cy="30.000" r="2.705421"/><text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="72.000" y="31.250">L</text><circle style="fill:#939393" cx="116.000" cy="30.000" r="2.705421"/><text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="116.000" y="31.250">R</text><circle style="fill:#d96464" cx="94.000" cy="15.407" r="2.705421"/><text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="94.000" y="16.657">M</text><circle style="fill:none;stroke:#d96464;stroke-width:0.4;stroke-dasharray:0.9,0.7" cx="94.000" cy="44.593" r="2.505"/><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:end;fill:#000000" x="80.000" y="20.203"><tspan style="font-style:italic">r</tspan> = <tspan style="font-style:italic">l</tspan><tspan style="font-size:65%;baseline-shift:sub">0</tspan></text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000" x="94.000" y="11.207">minimum</text><text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000" x="94.000" y="51.193">mirror minimum</text><text style="font-size:4.23333px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000" x="3.000" y="8.000">(a)</text><text style="font-size:4.23333px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000" x="67.000" y="8.000">(b)</text></g></svg>
+<svg
+   width="117.705mm"
+   height="49.691mm"
+   viewBox="2.000 3.296 117.705 49.691"
+   version="1.1"
+   id="svg33"
+   sodipodi:docname="L15-compressed-spring-geometry.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   inkscape:export-filename="L15-compressed-spring-geometry.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview33"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.70693"
+     inkscape:cx="130.35098"
+     inkscape:cy="134.45191"
+     inkscape:window-width="1920"
+     inkscape:window-height="1022"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="content" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="Triangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path1" />
+    </marker>
+  </defs>
+  <rect
+     x="2.000"
+     y="3.296"
+     width="117.705"
+     height="49.691"
+     fill="#ffffff"
+     id="rect1" />
+  <g
+     id="content">
+    <g
+       transform="translate(8.000,30.000) rotate(0.00) translate(2.205,0) scale(0.8640)"
+       id="g2"
+       style="fill:none;fill-opacity:1;stroke:#ce3a2d;stroke-opacity:1">
+      <path
+         style="fill:none;stroke:#ce3a2d;stroke-width:0.4326;fill-opacity:1;stroke-opacity:1"
+         d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"
+         id="path2" />
+    </g>
+    <g
+       transform="translate(30.000,30.000) rotate(0.00) translate(2.205,0) scale(0.8640)"
+       id="g3"
+       style="fill:none;fill-opacity:1;stroke:#ce3a2d;stroke-opacity:1">
+      <path
+         style="fill:none;stroke:#ce3a2d;stroke-width:0.4326;fill-opacity:1;stroke-opacity:1"
+         d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"
+         id="path3" />
+    </g>
+    <circle
+       style="fill:#939393"
+       cx="8.000"
+       cy="30.000"
+       r="2.705421"
+       id="circle3" />
+    <text
+       style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle"
+       x="8.000"
+       y="31.250"
+       id="text3">L</text>
+    <circle
+       style="fill:#939393"
+       cx="52.000"
+       cy="30.000"
+       r="2.705421"
+       id="circle4" />
+    <text
+       style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle"
+       x="52.000"
+       y="31.250"
+       id="text4">R</text>
+    <circle
+       style="fill:#77aaff;fill-opacity:1"
+       cx="30.000"
+       cy="30.000"
+       r="2.705421"
+       id="circle5" />
+    <text
+       style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle"
+       x="30.000"
+       y="31.250"
+       id="text5">M</text>
+    <path
+       style="fill:none;stroke:#15428e;stroke-width:0.5;marker-end:url(#Triangle)"
+       d="m 30.518565,34.494234 h 8.5"
+       id="path5" />
+    <path
+       style="fill:none;stroke:#15428e;stroke-width:0.5;marker-end:url(#Triangle)"
+       d="m 30.225223,25.275028 v -6.195"
+       id="path7" />
+    <text
+       style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000"
+       x="8.000"
+       y="25.400"
+       id="text8">(fixed)</text>
+    <text
+       style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000"
+       x="52.000"
+       y="25.400"
+       id="text9">(fixed)</text>
+    <text
+       style="font-size:3.52777px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000"
+       x="19.000"
+       y="26.400"
+       id="text10"><tspan
+         style="font-style:italic"
+         id="tspan9">k</tspan></text>
+    <text
+       style="font-size:3.52777px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000"
+       x="41.000"
+       y="26.400"
+       id="text11"><tspan
+         style="font-style:italic"
+         id="tspan10">k</tspan></text>
+    <text
+       style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000"
+       x="16.000"
+       y="38.800"
+       id="text14"><tspan
+   style="font-style:italic"
+   id="tspan11">r</tspan> = <tspan
+   style="font-style:italic"
+   id="tspan12">a</tspan> &lt; <tspan
+   style="font-style:italic"
+   id="tspan13">l</tspan><tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan14">0</tspan></text>
+    <text
+       style="font-size:3.2px;font-family:Arial, 'Liberation Sans', sans-serif;text-anchor:start;fill:#15428e;fill-opacity:1"
+       x="41.352367"
+       y="36.040459"
+       id="text17"><tspan
+   style="fill:#15428e;fill-opacity:1"
+   id="tspan16">δ<tspan
+   style="font-style:italic;fill:#15428e;fill-opacity:1"
+   id="tspan15">x</tspan></tspan>: <tspan
+   style="font-style:italic;fill:#15428e;fill-opacity:1"
+   id="tspan17">E</tspan> rises</text>
+    <text
+       style="font-size:3.2px;font-family:Arial, 'Liberation Sans', sans-serif;text-anchor:end;fill:#15428e;fill-opacity:1"
+       x="42.577454"
+       y="15.563384"
+       id="text21"><tspan
+   style="fill:#15428e;fill-opacity:1"
+   id="tspan20">δ<tspan
+   style="font-style:italic;fill:#15428e;fill-opacity:1"
+   id="tspan19">y</tspan></tspan>: <tspan
+   style="font-style:italic;fill:#15428e;fill-opacity:1"
+   id="tspan21">E</tspan> falls</text>
+    <path
+       style="fill:none;stroke:#c8c8c8;stroke-width:0.373766;stroke-dasharray:1.49506402,1.49506402;stroke-dashoffset:0"
+       d="M 72.000,30.000 L 94.000,44.593 L 116.000,30.000"
+       id="path22" />
+    <g
+       transform="translate(72.000,30.000) rotate(-33.56) translate(2.205,0) scale(1.0802)"
+       id="g23">
+      <path
+         style="fill:none;stroke:#ababab;stroke-width:0.3460"
+         d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"
+         id="path23" />
+    </g>
+    <g
+       transform="translate(94.000,15.407) rotate(33.56) translate(2.205,0) scale(1.0802)"
+       id="g24">
+      <path
+         style="fill:none;stroke:#ababab;stroke-width:0.3460"
+         d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"
+         id="path24" />
+    </g>
+    <circle
+       style="fill:#939393"
+       cx="72.000"
+       cy="30.000"
+       r="2.705421"
+       id="circle24" />
+    <text
+       style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle"
+       x="72.000"
+       y="31.250"
+       id="text24">L</text>
+    <circle
+       style="fill:#939393"
+       cx="116.000"
+       cy="30.000"
+       r="2.705421"
+       id="circle25" />
+    <text
+       style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle"
+       x="116.000"
+       y="31.250"
+       id="text25">R</text>
+    <circle
+       style="fill:#77aaff;fill-opacity:1"
+       cx="94.000"
+       cy="15.407"
+       r="2.705421"
+       id="circle26" />
+    <text
+       style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle"
+       x="94.000"
+       y="16.657"
+       id="text26">M</text>
+    <circle
+       style="fill:none;stroke:#77aaff;stroke-width:0.4;stroke-dasharray:0.9, 0.7;fill-opacity:1;stroke-opacity:1"
+       cx="94.000"
+       cy="44.593"
+       r="2.505"
+       id="circle27" />
+    <text
+       style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:end;fill:#000000"
+       x="80.000"
+       y="20.203"
+       id="text29"><tspan
+   style="font-style:italic"
+   id="tspan27">r</tspan> = <tspan
+   style="font-style:italic"
+   id="tspan28">l</tspan><tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan29">0</tspan></text>
+    <text
+       style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000"
+       x="94.000"
+       y="11.207"
+       id="text30">minimum</text>
+    <text
+       style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000"
+       x="94.000"
+       y="51.193"
+       id="text31">mirror minimum</text>
+    <text
+       style="font-size:4.23333px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000"
+       x="3.000"
+       y="8.000"
+       id="text32">(a)</text>
+    <text
+       style="font-size:4.23333px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000"
+       x="67.000"
+       y="8.000"
+       id="text33">(b)</text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:2.82222px;font-family:Arial;-inkscape-font-specification:'Arial, Bold';writing-mode:lr-tb;direction:ltr;fill:#ce3a2d;fill-opacity:1;stroke:#ce3a2d;stroke-width:0.799999;stroke-opacity:1"
+       x="9.8842907"
+       y="42.30249"
+       id="text34"><tspan
+         sodipodi:role="line"
+         id="tspan33"
+         style="font-size:2.82222px;fill:#ce3a2d;fill-opacity:1;stroke:none;stroke-width:0.8"
+         x="9.8842907"
+         y="42.30249">Initially compressed</tspan></text>
+    <path
+       style="fill:#15428e;fill-opacity:1;stroke:#b6b6b6;stroke-width:0.375;stroke-opacity:1;stroke-dasharray:1.5,0.75;stroke-dashoffset:0"
+       d="M 73.292798,30.155148 H 115.32239"
+       id="path34" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#ff8077;stroke-width:0.4;stroke-dasharray:0.9, 0.7;stroke-opacity:1"
+       cx="94"
+       cy="30.155148"
+       r="2.5050001"
+       id="circle34" />
+  </g>
+  <text
+     xml:space="preserve"
+     style="font-weight:bold;font-size:2.82223px;font-family:Arial;-inkscape-font-specification:'Arial, Bold';writing-mode:lr-tb;direction:ltr;fill:#df4c4c;fill-opacity:1;stroke:#ff8077;stroke-width:0.374999;stroke-dasharray:1.5, 0.750001;stroke-dashoffset:0;stroke-opacity:1"
+     x="85.675797"
+     y="34.974052"
+     id="text35"><tspan
+       sodipodi:role="line"
+       id="tspan34"
+       style="fill:#df4c4c;fill-opacity:1;stroke:none;stroke-width:0.375"
+       x="85.675797"
+       y="34.974052">saddle point</tspan></text>
+</svg>

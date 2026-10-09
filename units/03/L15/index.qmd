@@ -1,6 +1,6 @@
 ---
 title: "L15 · Energy minimization with many coordinates"
-subtitle: "From force balance to the Hessian and numerical optimization"
+subtitle: "From force balance to the Hessian and Newton's method"
 body-classes: lecture-page
 bibliography: ../../../references.bib
 ---
@@ -8,190 +8,307 @@ bibliography: ../../../references.bib
 ::: {.callout-note}
 ## Central question
 
-**Given the energy of an atomic system, how can we calculate a stable structure, and where do matrix solves enter the optimization?**
+**Given the energy of an atomic system, how can we calculate a stable structure, and where do matrix solves enter the calculation?**
 :::
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to:
 
-1. **Derive** the Newton equation $\mathbf H\Delta\mathbf x=-\nabla E$ from force balance and identify the Hessian.
-2. **Compare** the constant Hessian of a quadratic energy with the changing Hessian of a geometrically nonlinear spring system.
-3. **Minimize** a supplied two-coordinate energy with SciPy, choosing the energy and derivative inputs appropriate to the method.
-4. **Distinguish** a local minimum from a saddle point using the energy changes around a converged structure.
+1. **Relate** force relaxation to energy minimization, and explain why a structure with zero force need not be an energy minimum.
+2. **Derive** the Newton equation $\mathbf H\Delta\mathbf x=-\nabla E$ from the force-balance Newton step of L14, and identify the gradient and Hessian of an energy.
+3. **Apply** Newton's method to a supplied two-coordinate atomic energy, and explain how compressed and stretched bonds change its result.
+4. **Choose** a `scipy.optimize.minimize` method according to whether the energy model supplies energies, gradients, or Hessians.
 
 ## From force balance to energy minimization
 
-In L14, we demonstrated how to solve a non-linear system of equations by demonstrating chain of atoms under external force. We're solving a sets of equations
+In [L14](../L14/index.qmd), we pulled a chain of atoms with applied forces and asked where the atoms would come to rest. Atom $i$ feels the applied force $b_i$ and the internal force $-\partial E/\partial x_i$ from its bonds. At equilibrium, every net force vanishes:
 
-F_i (\matbbf) = F_int_i(\mathbf) - f_i = 0
+$$
+F_i(\mathbf x)=b_i-\frac{\partial E}{\partial x_i}=0,\qquad i=1,2,\ldots,n.
+$$
 
-And we showed that using newton's method on high-dimesions, it is possible to convert to a linear matrix solving problem wen updating each step from a guess
+For the nonlinear bond models in L14, these equations are coupled and nonlinear. Newton's method approximated them by a linear system at the current coordinates $\mathbf x^{(m)}$,
 
-xm+1 = x_m + Delta x
-J Delta x = -F(x)
+$$
+\mathbf J(\mathbf x^{(m)})\,\Delta\mathbf x^{(m)}=-\mathbf F(\mathbf x^{(m)}),\qquad
+\mathbf x^{(m+1)}=\mathbf x^{(m)}+\Delta\mathbf x^{(m)},
+$$
 
-Newton's method did this by repeatedly solving a linear system involving the Jacobian of the force. We wanted to note $J$ is the jacobian of the net force, and it needs to be updated everytime. 
+where $\mathbf J$ is the Jacobian of the net force, with entries $J_{ij}=\partial F_i/\partial x_j$. Moving the atoms changes the local stiffness, so the Jacobian has to be evaluated again at every step.
 
-One direct extension to this is when external force f = 0, what do we solve is now essentially the local minimum structure. Since we showed 
+Now remove the applied forces by setting every $b_i=0$. Only the forces from the bonds remain, and equilibrium requires
 
-F_int_i = -\partial E/\partial x_i
+$$
+\frac{\partial E}{\partial x_1}=0,\quad
+\frac{\partial E}{\partial x_2}=0,\quad\ldots,\quad
+\frac{\partial E}{\partial x_n}=0.
+$$
 
-solving F_i = F_int_i = 0 is basically related to solve
+In **structural relaxation**, we move the atoms to lower their energy until the remaining forces are sufficiently small. This is a routine step in atomistic simulation, used to answer questions such as:
 
-partial E/partial x_i = 0
-...
+- **Crystal structure:** What is the equilibrium atomic spacing in an fcc crystal? Here, we also vary the unit-cell size to minimize the energy.
+- **Surface relaxation:** How do the surface atoms rearrange when a metal is cut and their neighbours on one side are removed?
+- **Defect formation:** When one atom is removed from a crystal, how do the surrounding atoms rearrange around the vacancy?
+- **Molecular adsorption:** Where does a gas molecule bind on a catalyst surface, and how does it orient itself?
 
-This is a **relaxation problem**, which is the core to any materials simulations. Relaxing the force of a system, is equivalent to find the **minimization** of the total energy of an atomistic system. 
+![Atomic geometries for four relaxation tasks: (a) an fcc Cu unit cell, (b) a Cu(111) surface slab, (c) a (001) atomic plane through a bulk Cu vacancy, and (d) CO above a Cu(111) surface. These are starting geometries built with ASE. Cu atoms are light gray, C is dark gray, and O is red. The dashed circle marks the missing atom in (c).](../../../assets/L15-relaxation-tasks.png){#fig-relaxation-tasks width=100% fig-alt="Four atomic models in a two-by-two layout: an fcc unit cell, a layered surface slab, an atomic plane with a central vacancy, and a CO molecule above a metal surface."}
 
-<box this -->
+These tasks involve different geometries, but the atomic forces all follow from the same relation, $F_i=-\partial E/\partial x_i$. Searching for a stable arrangement therefore leads us to minimize the smooth energy function $E(x_1,\ldots,x_n)$ over the allowed coordinates:
 
-Relaxation in force <-->  minimize energy
-(second row) Solve \partia E/\partialx  minE
+::: {.callout-tip}
+## Relaxation and minimization
 
-<call-out tip
-Newtonian vs Hamiltonian views (just anecdote)
+|              | Relaxing the forces                                                  | Minimizing the energy                                  |
+|--------------|----------------------------------------------------------------------|--------------------------------------------------------|
+| **Goal**     | Find $\mathbf x$ with $F_i=-\partial E/\partial x_i=0$ for every $i$ | Find the $\mathbf x$ at which $E(\mathbf x)$ is lowest |
+| **Solution** | Solve the $n$ equations $\partial E/\partial x_i=0$                  | Solve $\displaystyle\min_{\mathbf x}E(\mathbf x)$      |
+:::
 
-Historically there are newtonian and hamiltonian ways od describing a many body system; in laymen's words
-- newtonian (force analysis): knowing all the forces in the many bodies
-- hamiltonian (): ...
->
 
-### Recapping local vs global minima
+::: {.callout-tip}
+## Forces and energies: two descriptions of mechanics
 
-We have briefly seen this concept in both lecture 07 and assignment 1. In a many atom / high-dimensional coordination system, solving force = 0 does not necessariely ean we could find the structure with energy lowest from all possible geometries.
+Newton's laws describe a system of particles through forces: once we know the force on every particle, we can follow its motion. In the late 18th and 19th centuries, Lagrange and Hamilton reformulated mechanics around energies. A scalar function of the kinetic and potential energies determines the motion, and the forces follow from derivatives of the potential energy. Our table is a small example of this idea, since one function $E(\mathbf x)$ contains every force as a derivative. Atomistic simulation and quantum chemistry codes work with the energy description throughout.
+:::
 
-- Local minimum: this is a position x_m, that moving any infinitely small displacement Delta x from it, will cause energy to increase.
-  *howver*, local mimimum does not guarenteem there wil be pos, that a large enough displacement  x_m + Delta x will have lower energy
-- Global minimum: lowest energy among all allowed configurations (e.g. search all possible values (x1, x2, ... xN))
+### Local and global minima
 
-For higher dimension structures, it is very likely an initial pos only get to a local minimum. changing a different start point will likely go down to a better minimum, but to trly find the global minimum, is a hard task and beyond this course's context. For interested, please see methods like <basin hopping> <genetic algorithm> <enhanced sampling>.
+We met these terms for one variable in [L07](../../02/L07/index.qmd) and compared candidate structures of a small argon cluster in Assignment 1. With many coordinates, they become:
 
-### Ensuring minimum: second derivative
+- **Local minimum:** a structure $\mathbf x^*$ for which every sufficiently small displacement $\Delta\mathbf x$ raises the energy, $E(\mathbf x^*+\Delta\mathbf x)>E(\mathbf x^*)$. A larger displacement may still reach a lower energy.
+- **Global minimum:** the structure with the lowest energy among all allowed configurations, that is, among all possible values of $(x_1,x_2,\ldots,x_n)$.
 
-From the minimization in 1D, we know that the having f'(x) = 0 is not enough, we have to have f''(x) > 0 to ensure it's indeed a minimum. 
+![Local and global minima on (a) a two-coordinate energy surface and (b) its section at $y=0$, highlighted in red. The shaded balls mark the same two minima in both views. Small displacements from either minimum raise the energy, but the right-hand minimum has the lowest energy over the whole surface.](../../../assets/L15-local-global-minima.png){#fig-local-global-minima width=100% fig-alt="A two-coordinate energy surface above its matching one-dimensional section. A gray ball rests in the shallower left well, a local minimum, and a red ball rests in the deeper right well, the global minimum."}
 
-The same thing occurs for minimization in higher dimension as well. We want the second derivative of energy to be positive in **all directions** to make sure it's minimum. This is a slightly different focus of problem, so we will discuss it in L16 using the concept of eigenvalue analysis.
+A relaxation starts from a guessed structure and moves to a nearby stationary point. A cluster of $N$ atoms has $3N$ coordinates, and its number of local minima grows very rapidly with $N$. Starting from a different structure may lead to a lower minimum, but proving that we have found the global minimum is a much harder search problem, beyond the scope of this course. Three widely used strategies, for those interested, are:
 
-## Minimization of energy: the Newton-Raphson Approach
+- **Basin hopping** repeatedly displaces the atoms at random, relaxes the new structure, and decides whether to keep the new minimum by comparing energies. SciPy provides it as [`scipy.optimize.basinhopping`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.basinhopping.html).
+- **Genetic algorithms** keep a population of relaxed structures, build new candidates by combining parts of low-energy structures and mutating them, and retain the lowest-energy results. [Further reading](https://en.wikipedia.org/wiki/Genetic_algorithm).
+- **Enhanced-sampling molecular dynamics**, such as metadynamics, lets the atoms move at finite temperature and adds a bias energy that discourages them from revisiting configurations, so the system escapes one basin and explores others. [Further reading](https://en.wikipedia.org/wiki/Metadynamics).
 
+### The second-derivative test in many dimensions
 
-For this class, let's consider a slightly more interesting question: 3 atoms in a line, with the end atoms fixed, the middle atom able to move freely in either x- or y- directions. The total energy between the aomts E(x, y) has a generally non-linear form, that we will not reveal first. 
+How can we test whether the solution is a minimum?
 
+- **One variable:** For a scalar function $f(x)$, use the second-derivative test from [L07](../../02/L07/index.qmd). After solving $f'(x)=0$, check whether $f''(x)>0$. If so, the solution is a local minimum.
+- **Several variables:** After finding a point where all first derivatives vanish, check whether the second derivative is positive along **every direction**. If so, the solution is a local minimum.
 
-### 2D system basic concepts
-There are some concepts in the vector calculus that may find useful. Using the 2D coordinate (x, y)
+We will work through this check later in this lecture and follow up in Lecture 16.
 
+## Newton's method for energy minimization
 
-**Gradient**, is basically a vector \nabla E = [\partial E/partial x, \partial E/\partial y]
+Consider an atom that can move freely in the $x$ and $y$ directions, with energy $E(x,y)$.
 
-In the case of 2 free coordinates, the internal force F(x, y) just F(x, y) = -nabla E = [-partal / partial x, -partial / partial y]
+### The gradient and the Hessian
 
-The gradient tells us how large the internal force, and geometrically the local slope of the energy "surface"
+The **gradient** collects the first derivatives of the energy into a vector:
 
-**Hessian matrix**, which is matrix of second derivative with respect to the energy. 
+$$
+\nabla E=\begin{bmatrix}\dfrac{\partial E}{\partial x}\\[2ex]\dfrac{\partial E}{\partial y}\end{bmatrix},
+\qquad
+\mathbf F=-\nabla E=\begin{bmatrix}-\dfrac{\partial E}{\partial x}\\[2ex]-\dfrac{\partial E}{\partial y}\end{bmatrix}.
+$$
 
-H = [partial^2 E/partial x^2, ...;...;;...]
+Its magnitude is the steepest local slope of the energy surface, and it points in the direction in which the energy increases fastest. The internal force on the atom is the negative gradient, so it points downhill.
 
-the hessian matrix tells us about the curvature of the energy surface. Numerically, it is just the negative of the Jacboan matrix of force
+The **Hessian** collects the second derivatives into a matrix:
 
-H = -J_F = ...
+$$
+\mathbf H=\begin{bmatrix}
+\dfrac{\partial^2E}{\partial x^2} & \dfrac{\partial^2E}{\partial x\,\partial y}\\[2ex]
+\dfrac{\partial^2E}{\partial y\,\partial x} & \dfrac{\partial^2E}{\partial y^2}
+\end{bmatrix}.
+$$
 
-we used the notation J_F to say its jacobian of the force, just to be distinct.
+For a smooth energy, the order of differentiation does not matter, so the two off-diagonal entries are equal and $\mathbf H$ is symmetric. With $n$ coordinates, the Hessian is an $n\times n$ matrix with entries $H_{ij}=\partial^2E/\partial x_i\,\partial x_j$.
 
-There are many ways to intuitively understand the hessian, for example
-1. it means how fast the energy will increase in different directions (larger magnitude of hessian --> quicker )
-2. it means the local curvature (how bended) the energy surface is (larger magnitude of hessian --> more bended)
-3. for atomic systems it is related to the local spring constant (larger magnitude of hessian--> stiffer)
+The Hessian is closely related to the Jacobian of L14. Without applied forces, $F_i=-\partial E/\partial x_i$, and differentiating once more gives $\partial F_i/\partial x_j=-\partial^2E/\partial x_j\,\partial x_i$. We write $\mathbf J_F$ for the Jacobian of the force to keep the two matrices distinct:
 
-<callout fold why?
+$$
+\mathbf J_F=\begin{bmatrix}
+\dfrac{\partial F_x}{\partial x} & \dfrac{\partial F_x}{\partial y}\\[2ex]
+\dfrac{\partial F_y}{\partial x} & \dfrac{\partial F_y}{\partial y}
+\end{bmatrix}
+=-\mathbf H.
+$$
 
+The Hessian can be pictured in three equivalent ways:
 
-the energy near **the minimum** can be approximated using the taylor's expansion method
+1. **Change in slope:** It tells us how the energy gradient changes when we move the atom.
+2. **Energy curvature:** It describes how sharply the energy surface bends along different directions. Near a minimum, a direction with larger positive curvature has a more tightly curved energy well.
+3. **Local stiffness:** For atoms, it acts as a matrix of local spring constants, since $-\mathbf H\Delta\mathbf x$ approximates the change in force caused by a small displacement $\Delta\mathbf x$.
 
-E(Delta x, Delta y) = E_min + 1/2Delta x^THDelta x <and in expandedform>
+In @fig-gradient-hessian, the gradient points uphill and the force points downhill. The two energy cuts through the marked atom show how the Hessian describes different stiffnesses along $x$ and $y$.
 
-a higher magnitude <in fact what? norm? determinant? eigenvalue?> will mean the energy increase steep
+![Gradient, force, and curvature for $E(x,y)=\tfrac12x^2+2y^2$, in arbitrary units. (a) At the marked atom $P=(0.8,0.45)$, the gradient $\nabla E$ and force $\mathbf F=-\nabla E$ point in opposite directions. Both arrows use the same display scale. The logarithmic colour scale runs from dark (low energy) to yellow (high energy) and brings out energy differences near the minimum. The dashed cuts pass through $P$. (b) Energy change $\Delta E$ relative to $P$ for a displacement $s$ along each cut. The red point marks the same atom at $s=0$. The $y$ direction has higher curvature ($H_{yy}=4$) than the $x$ direction ($H_{xx}=1$).](../../../assets/L15-gradient-hessian.png){#fig-gradient-hessian width=100% fig-alt="Left: a viridis energy heatmap, dark at the minimum and yellow at high energy, with short opposing gradient and force arrows at atom P. Right: x and y energy cuts through P, marked by a red point at zero displacement and zero energy change. The y cut has higher curvature."}
 
->
+For the harmonic chain in L14, the energy is quadratic in the displacements, $E=\tfrac12\mathbf u^{\mathsf T}\mathbf K\mathbf u$, so the Hessian is the stiffness matrix, $\mathbf H=\mathbf K$, at every position. This is why one Newton correction solved that chain exactly. For general bonds, the Hessian changes as the atoms move.
 
-### Minimization in newton's method
+::: {.callout-tip collapse="true"}
+## Energy increase near a minimum: the quadratic Taylor term
 
-Recall that in newton's method, we need to solve 
+Expand the energy about $(x,y)$ for a small displacement $(\Delta x,\Delta y)$:
 
-J_F \Delta x = -F(x)
+$$
+E(x+\Delta x,\,y+\Delta y)\approx E
++\frac{\partial E}{\partial x}\Delta x+\frac{\partial E}{\partial y}\Delta y
++\frac12\left(\frac{\partial^2E}{\partial x^2}\Delta x^2
++2\frac{\partial^2E}{\partial x\,\partial y}\Delta x\,\Delta y
++\frac{\partial^2E}{\partial y^2}\Delta y^2\right),
+$$
 
-in energy's term, we just write
+with every derivative evaluated at $(x,y)$. In matrix form, with $\Delta\mathbf x=(\Delta x,\Delta y)^{\mathsf T}$,
 
-H \Delta x = \nabla E(x)
+$$
+E(\mathbf x+\Delta\mathbf x)\approx E(\mathbf x)+\nabla E^{\mathsf T}\Delta\mathbf x+\tfrac12\,\Delta\mathbf x^{\mathsf T}\mathbf H\,\Delta\mathbf x .
+$$
 
-and that is all what we need to minimize. in 2D, basically
+At a minimum $\mathbf x_{\min}$, the gradient vanishes and the energy increase is
 
-[2D matrix of hessian] Delta x = [2 row nabla E]
+$$
+E(\mathbf x_{\min}+\Delta\mathbf x)-E_{\min}\approx\tfrac12\,\Delta\mathbf x^{\mathsf T}\mathbf H\,\Delta\mathbf x .
+$$
 
-why bother rewrite the equation again? We can show that it is basically just knowing 
+Move a distance $s$ along a unit direction $\mathbf u$, so that $\Delta\mathbf x=s\mathbf u$. The increase is $\tfrac12(\mathbf u^{\mathsf T}\mathbf H\mathbf u)\,s^2$, a one-dimensional parabola whose curvature $\mathbf u^{\mathsf T}\mathbf H\mathbf u$ plays the role of $f''$ along that direction. The direction $\mathbf u=(1,0)$ gives $\partial^2E/\partial x^2$, and $\mathbf u=(0,1)$ gives $\partial^2E/\partial y^2$. Which directions give the largest and smallest curvatures, and how large are they? These are the eigenvectors and eigenvalues of $\mathbf H$, the subject of L16.
+:::
 
-E(x, y) as a scalar, and then we can minimize everything from this multi-dimensional energy function
+### The Newton step for a stationary point
 
-<call out: relation to 1D newton method
+Substitute $\mathbf F=-\nabla E$ and $\mathbf J_F=-\mathbf H$ into the Newton equation of L14:
 
-in lecture 7 we said newton's method builds on both 1d and 2d derivative f' and f''
+$$
+(-\mathbf H)\,\Delta\mathbf x=-(-\nabla E)
+\quad\Longrightarrow\quad
+\mathbf H\,\Delta\mathbf x=-\nabla E .
+$$
 
-x_m+1 = x_m - f'/f''
+Starting from a guess $\mathbf x^{(0)}$, each Newton step evaluates the derivatives at the current coordinates and solves
 
-analogously in multidim
+$$
+\boxed{\mathbf H(\mathbf x^{(m)})\,\Delta\mathbf x^{(m)}=-\nabla E(\mathbf x^{(m)}),\qquad
+\mathbf x^{(m+1)}=\mathbf x^{(m)}+\Delta\mathbf x^{(m)}.}
+$$
 
-x = xm - H^-1 E
+For the middle atom, each step solves the $2\times2$ linear system
 
-although in fact we do not solve the inverse of hessian
->
+$$
+\begin{bmatrix}
+\dfrac{\partial^2E}{\partial x^2} & \dfrac{\partial^2E}{\partial x\,\partial y}\\[2ex]
+\dfrac{\partial^2E}{\partial x\,\partial y} & \dfrac{\partial^2E}{\partial y^2}
+\end{bmatrix}
+\begin{bmatrix}\Delta x\\ \Delta y\end{bmatrix}
+=-\begin{bmatrix}\dfrac{\partial E}{\partial x}\\[2ex] \dfrac{\partial E}{\partial y}\end{bmatrix},
+$$
 
-## Miniminzation in Numpy library
+with all derivatives evaluated at the current position. Why rewrite the force equation in this form? Every quantity now comes from one scalar function: the first derivatives of $E$ give the right-hand side, and the second derivatives give the matrix. Any energy model that supplies these derivatives can be relaxed with the same loop.
 
-Newton's method is cool, and we can indeed use scipy.optimize.newton  to do it. 
+The Taylor expansion above gives a second view of the same step. Near $\mathbf x^{(m)}$, the energy is approximated by the quadratic model $E+\nabla E^{\mathsf T}\Delta\mathbf x+\tfrac12\Delta\mathbf x^{\mathsf T}\mathbf H\Delta\mathbf x$. Setting the derivative of this model with respect to $\Delta\mathbf x$ to zero gives $\nabla E+\mathbf H\Delta\mathbf x=\mathbf 0$, which is the Newton equation. **Each Newton step jumps to the stationary point of the local quadratic model.** When the model curves upward in every direction, that point is the bottom of a bowl. Otherwise, it can be a saddle or a hilltop of the model, and the step need not lower the energy.
 
-In many cases the gradient and hessian might be difficult to write explicitly, scipy provides many other functions to do this
+::: {.callout-tip}
+## Relation to the one-dimensional Newton minimizer
 
-scipy.optimize.minimize will be very good at it
+In L07, Newton's method for a minimum of $f(x)$ used both derivatives:
 
-You have already use it for minimizing the fitting coefficients in assignemtn 2. to optimize the atomic sturctures, similar can also be used
+$$
+x_{m+1}=x_m-\frac{f'(x_m)}{f''(x_m)}.
+$$
 
-<show minimize and its table usage>
+The many-coordinate version replaces $f'$ by $\nabla E$ and $f''$ by $\mathbf H$, giving $\mathbf x^{(m+1)}=\mathbf x^{(m)}-\mathbf H^{-1}\nabla E$. As in L14, this inverse is notation only. We compute the correction by solving $\mathbf H\Delta\mathbf x=-\nabla E$, for example with `np.linalg.solve`.
+:::
 
+## Minimization with SciPy
 
+The Newton loop needs the full Hessian at every step. For a complicated energy model, the second derivatives can be difficult to derive.
 
+::: {.callout-tip}
+## Numerical derivatives in the next unit
 
-## Demo: One moving atom with two coordinates
+Computing derivatives numerically, including gradients, Hessians, and Jacobians, is the focus of our next unit!
+:::
 
-Let's reveal out toy system!
-<for this system let's don't say which kind of energy E form we would have, even though could use spring>
+For many atoms, the Hessian also becomes large: 1000 freely moving atoms give a $3000\times3000$ matrix to build and solve at every step. SciPy offers two kinds of tools for these problems.
 
-<fix this demo, so that student can artificial make atoms apart, and see how newton try to find the minima>
+### Formulating as multivariable root solving
 
-<the supplied atomic system will use a dropdown to reveal what energy form used, including spring const, LJ, and a cheap morse>
+::: {.callout-note appearance="simple" icon="false"}
+**Key function:** [`scipy.optimize.root`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root.html)
+:::
 
-<we don't show how to minimize a real atom systems yet! no bfgs etcetc>
+The stationary-point conditions $\partial E/\partial x_i=0$ are a system of equations, so `root` from L14 applies directly, with the gradient as the function and the Hessian as its Jacobian:
 
-<for each system, we will provide the function for gradient and hessian>
+```python
+from scipy.optimize import root
 
-Ask students  to predict where the minimum will be, by changing the parameter a (whether initially compressed or stretched, they shall see the diff)
+result = root(gradient, [0.3, 0.1], args=(a,), jac=hessian)
+```
 
+Like our Newton loop, `root` looks for any point where the gradient vanishes, including a saddle.
 
-![The two-coordinate spring system. At the centre, a horizontal displacement raises the energy while a vertical displacement lowers it. Two mirror configurations allow both springs to reach their natural length.](../../../assets/L15-compressed-spring-geometry.png){#fig-spring-geometry width="90%" fig-alt="Two fixed atoms connected by springs to a middle atom. At the origin the springs are compressed. The second panel shows the middle atom above the line at one minimum and a mirror minimum below it."}
+### Formulating as multivariable minimization
 
-For this exercise, take three supplied functions as the model:
+::: {.callout-note appearance="simple" icon="false"}
+**Key function:** [`scipy.optimize.minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html)
+:::
+
+You have seen `scipy.optimize.minimize` in Assignment 2, where it adjusts the LJ parameters to minimize the fitting error. Here the variables are atomic coordinates and the objective is the energy:
+
+```python
+from scipy.optimize import minimize
+
+result = minimize(energy, [0.3, 0.1], args=(a,), jac=gradient, method="BFGS")
+result.x        # final coordinates
+result.fun      # energy at those coordinates
+result.success  # whether the method's stopping criterion was met
+result.message  # explanation of termination
+```
+
+The keyword `jac` supplies the first derivative of the objective. Since the objective is a scalar energy, that derivative is the gradient vector. Methods that use a Hessian receive it through `hess`.
+
+### Why the method name?
+
+The argument `method="BFGS"` selects the algorithm that `minimize` uses. Plain Newton steps can overshoot, approach a saddle, or fail when the Hessian is singular. SciPy offers more flexible methods that control the step length, approximate the curvature from successive gradients, or work with energy values alone. BFGS, for example, builds an approximation to the inverse Hessian and searches along each proposed direction for a step that sufficiently lowers the energy.
+
+| Information supplied | `method=` | How the method chooses its steps | Algorithm reference |
+|---|---|---|---|
+| Energy only | `"Nelder-Mead"` | Compares energies at the corners of a triangle of trial points (in 2D), then reflects, expands, contracts, or shrinks the triangle | [@nelder1965simplex] |
+| Energy and gradient | `"CG"` | Combines the current gradient with the previous search direction, then searches for a downhill step | [Nonlinear conjugate gradient](https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method) |
+| Energy and gradient | `"BFGS"` | Updates an approximate inverse Hessian from changes in position and gradient, then searches for a downhill step | [BFGS](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm) |
+| Energy and gradient, with optional bounds | `"L-BFGS-B"` | Uses a short history of position and gradient changes to avoid storing a dense inverse Hessian, and can keep coordinates within given limits | [Limited-memory BFGS](https://en.wikipedia.org/wiki/Limited-memory_BFGS) |
+| Energy, gradient, and Hessian | `"Newton-CG"`, `"trust-exact"` | Uses curvature with a line search or a limit on step size to seek energy-lowering steps | [@nocedal2006optimization] |
+
+If we omit `jac` for a gradient-based method, SciPy estimates the gradient by finite differences, at the cost of extra energy evaluations. More derivative information usually means fewer steps, while each step costs more to compute. @nocedal2006optimization describe these methods in detail.
+
+## Demo: one moving atom with two coordinates
+
+Now we reveal the toy system. The fixed atoms sit at $L=(-a,0)$ and $R=(a,0)$, and the middle atom is at $M=(x,y)$. The energy is the sum of two pair energies,
+
+$$
+E(x,y)=\phi(r_L)+\phi(r_R),\qquad
+r_L=\sqrt{(x+a)^2+y^2},\quad r_R=\sqrt{(x-a)^2+y^2}.
+$$
+
+The notebook offers three bond models. Each pair energy has its lowest value at the bond length $l_0=1.2$, and all three have the same stiffness there, $\phi''(l_0)=1$, so they agree for small displacements from $l_0$. They differ when a bond is stretched far from $l_0$:
+
+- **Harmonic spring**, $\phi(r)=\tfrac12k(r-l_0)^2$ with $k=1$. The energy keeps rising however far the spring is stretched, so the bond never breaks.
+- **Lennard-Jones**, $\phi(r)=4\varepsilon\left[(\sigma/r)^{12}-(\sigma/r)^6\right]$ with $\varepsilon=0.02$ and $\sigma=l_0/2^{1/6}$. As in L14, the energy levels off at zero once the atoms are far apart, so the bond can break.
+- **Morse**, $\phi(r)=D\left[\left(1-e^{-\alpha(r-l_0)}\right)^2-1\right]$ with well depth $D=0.02$ and range parameter $\alpha=5$. Philip Morse introduced this [exponential form](https://en.wikipedia.org/wiki/Morse_potential) for the bond of a diatomic molecule. Like LJ, it levels off at zero for large separations, and its repulsive wall is softer than the $r^{-12}$ term.
+
+All three functions take the same inputs:
 
 | Function | Input | Output |
 |---|---|---|
-| `energy(p, l0)` | Position `p = [x, y]`, natural length | One energy |
-| `gradient(p, l0)` | The same inputs | Two first derivatives |
-| `hessian(p, l0)` | The same inputs | A $2\times2$ matrix |
+| `energy(p, a)` | Position `p = [x, y]` and half-separation `a` of the fixed atoms | One energy |
+| `gradient(p, a)` | The same inputs | Two first derivatives |
+| `hessian(p, a)` | The same inputs | A $2\times2$ matrix |
 
+**Predict before running:** where should the middle atom settle when the fixed atoms are close together ($a=1.0$, so both bonds are compressed at the origin)? Where should it settle when they are pulled apart ($a=1.25$ or $a=1.6$)? Does your answer depend on the bond model?
 
+### Compressed bonds: two minima from the geometry
 
-### Two minima visible from the geometry
+![The two-coordinate spring system. At the centre, a horizontal displacement raises the energy while a vertical displacement lowers it. Two mirror configurations allow both springs to reach their natural length.](../../../assets/L15-compressed-spring-geometry.png){#fig-spring-geometry width="90%" fig-alt="Two fixed atoms connected by springs to a middle atom. At the origin the springs are compressed. The second panel shows the middle atom above the line at one minimum and a mirror minimum below it."}
 
-The energy is a sum of squares and cannot be negative. It reaches zero if both spring lengths equal $l_0$. Equal distances from $L$ and $R$ require $x=0$, and then
+We will use the spring potential as an example. The springs are initially compressed, so moving the atom away from the origin in the $y$ direction lets them lengthen and lowers the energy. At either minimum, both springs have their natural length $l_0$. These two positions lie on $x=0$, and simple geometry gives
 
 $$
 a^2+y^2=l_0^2
@@ -199,128 +316,73 @@ a^2+y^2=l_0^2
 (x,y)=\left(0,\pm\sqrt{l_0^2-a^2}\right).
 $$
 
-For $a=1$ and $l_0=1.2$, these points are $(0,\pm0.6633)$. They are the two lowest-energy configurations. This geometric answer gives us a reference for the numerical calculation, even though the solver itself will only evaluate the supplied functions.
+![Energy of the middle atom between compressed springs, with $a=1$, $l_0=1.2$, and $k=1$. Left: energy contours with the two true minima and the saddle point at the origin. Right: energy cuts through the saddle. The horizontal cut has a minimum at the origin, while the vertical cut has a maximum there and minima on either side. The diagonal Hessian entries at the origin, $H_{xx}=2$ and $H_{yy}=-0.4$, have the same signs as the curvatures of the two cuts.](../../../assets/L15-energy-sections.png){#fig-energy-sections width="100%" fig-alt="An energy contour map with labelled true minima above and below the origin and a labelled saddle point at the origin, beside energy profiles along the horizontal and vertical axes showing opposite curvatures at the saddle. The Hessian at the origin, with entries 2, 0, 0, and minus 0.4, is printed beside the profiles."}
 
-![Energy contours of the middle atom, with one-dimensional cuts through the central stationary point. The horizontal cut has a minimum at the origin, while the vertical cut has a maximum there and minima above and below it.](../../../assets/L15-energy-sections.png){#fig-energy-sections width="100%" fig-alt="An energy contour map with minima above and below the origin, beside energy profiles along the horizontal and vertical axes showing opposite curvatures at the origin."}
+There is an interesting point to notice at $(0,0)$: Newton's method may stop there because the forces cancel, even though it is not an energy minimum. Its energy is higher than that of the two minima in @fig-energy-sections. The energy cuts along $x$ and $y$ tell different stories: the energy rises along $x$ but falls along $y$! This is a **saddle point**, shaped locally like a saddle or a Pringles chip. We will discuss saddle points in more detail next class.
 
-### Applying the Newton loop
+::: {.callout-tip collapse="true"}
+## Derivation of the Hessian at the origin for any pair energy
 
-Begin at $\mathbf p_0=(0.3,0.1)$. Evaluate the gradient, solve with the current Hessian, and update the position. The editable notebook implements this loop:
+At the origin, both bonds lie along the $x$-axis and have length $a$. Displace the middle atom by a small $\Delta x$. One bond shortens to $a-\Delta x$ and the other lengthens to $a+\Delta x$. Expanding each pair energy to second order, the first-order changes cancel, and
 
-```python
-p = np.array([0.3, 0.1])
-for iteration in range(50):
-    g = gradient(p, l0)
-    if np.linalg.norm(g) < 1e-10:
-        break
-    delta_p = np.linalg.solve(hessian(p, l0), -g)
-    p = p + delta_p
-```
+$$
+\phi(a-\Delta x)+\phi(a+\Delta x)\approx2\phi(a)+\phi''(a)\,\Delta x^2 ,
+$$
 
-The call to `hessian` belongs *inside* the loop because its entries depend on the position. Keeping the initial Hessian would define a different iteration. In either case, check the final gradient and whether the loop reached its iteration limit before accepting the answer.
+so $\partial^2E/\partial x^2=2\phi''(a)$. Now displace it by $\Delta y$. Both bonds lengthen to $\sqrt{a^2+\Delta y^2}\approx a+\Delta y^2/(2a)$, and
 
-For this starting point, Newton approaches $(0,0)$ in four corrections. The forces cancel there, but its energy is $k(a-l_0)^2=0.04$ in units with $a=k=1$. We already found configurations with zero energy. Why has Newton stopped between them?
+$$
+2\,\phi\!\left(a+\frac{\Delta y^2}{2a}\right)\approx2\phi(a)+\frac{\phi'(a)}{a}\,\Delta y^2 ,
+$$
 
-## Minimization with SciPy
+so $\partial^2E/\partial y^2=2\phi'(a)/a$. The energy is unchanged when $x\to-x$ or $y\to-y$, so the mixed derivative vanishes at the origin. For the compressed springs in @fig-energy-sections, $\phi''(a)=k=1$ and $\phi'(a)=k(a-l_0)=-0.2$, which give
 
-<many of this part should be moved above...>
+$$
+\mathbf H(0,0)=\begin{bmatrix}2 & 0\\ 0 & -0.4\end{bmatrix}.
+$$
+:::
 
-The force-balance Newton loop searches for a zero gradient. An optimization method also uses energy values to decide which trial steps to accept. For example, a line search can shorten a proposed step until it gives a sufficient energy decrease. This provides a way to direct the search toward a nearby minimum.
+::: {.callout-tip collapse="true"}
+## Extension: how the nonlinear bond model changes stability
 
-In L07, `minimize_scalar` took one scalar variable. Here the energy still returns one number, but its input is an array of coordinates, so we use [`scipy.optimize.minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html):
+When $a>l_0$, both bonds are stretched at the origin and pull the middle atom outward along the axis. Now $\phi'(a)>0$, so $\partial^2E/\partial y^2=2\phi'(a)/a$ is positive. The sign of $\partial^2E/\partial x^2=2\phi''(a)$ depends on the bond model:
 
-```python
-from scipy.optimize import minimize
+- For the **harmonic spring**, $\phi''=k$ for every separation, so the origin is a minimum whenever $a>l_0$.
+- For **LJ** and **Morse**, $\phi''(r)$ changes sign at an inflection point $r_s$, the separation where the restoring force of a stretched bond is largest (L14). For our parameters, $r_s=(26/7)^{1/6}\sigma\approx1.33$ for LJ and $r_s=l_0+\ln2/\alpha\approx1.34$ for Morse. When $a>r_s$, the energy curves downward along $x$ at the origin, so the origin becomes a saddle.
 
-result = minimize(energy, [0.3, 0.1], args=(l0,),
-                  jac=gradient, method="BFGS")
-result.x       # final coordinates
-result.fun     # energy at those coordinates
-result.success # whether this method's stopping criterion was met
-result.message # explanation of termination
-```
+Combining the two diagonal entries gives the type of the origin for each range of $a$:
 
-The keyword `jac` supplies the first derivative of the objective. Since the objective is a scalar energy, that derivative is the gradient vector. The Hessian would be supplied separately as `hess` for methods that use it. BFGS does not require an explicit Hessian.
-
-### What information do the methods need?
-
-| Method | How it chooses a step | Information supplied |
+| Separation of the fixed atoms | Harmonic springs | LJ and Morse bonds |
 |---|---|---|
-| Nelder–Mead | Compares energies at a triangle of points in 2D, reflecting, expanding, or shrinking it | Energy only |
-| Gradient descent | Moves along $-\nabla E$, with a selected step length | Gradient |
-| Newton stationary-point iteration | Solves $\mathbf H\Delta\mathbf x=-\nabla E$ | Gradient and Hessian |
-| BFGS | Builds a curvature approximation from successive gradients and uses a line search | Energy and gradient |
-| L-BFGS-B | Uses a limited history of gradients and can impose coordinate bounds | Energy and gradient |
-| Nonlinear conjugate gradient (CG) | Combines the current downhill direction with information from the previous direction | Energy and gradient |
+| $a<l_0$ | Saddle, with minima at $\left(0,\pm\sqrt{l_0^2-a^2}\right)$ | Saddle, with the same two minima |
+| $l_0<a<r_s$ | Minimum | Minimum |
+| $a>r_s$ | Minimum | Saddle, with minima on the axis near each fixed atom |
 
-Nelder–Mead provides a derivative-free choice [@nelder1965simplex]. BFGS needs gradient information but can estimate it by finite differences when we omit `jac`. That avoids supplying a derivative function, at the cost of additional energy evaluations. For many atomic coordinates, calculators that provide forces efficiently make gradient-based methods especially useful.
-
-Gradient descent and the plain Newton iteration in the table are handwritten comparisons in our notebook. SciPy's `minimize` offers named Newton-related methods with their own line-search or trust-region procedures, rather than a method named simply `Newton`.
-
-### Six paths on the same landscape
-
-No need here
-
-![Six algorithms started at the same position on the spring energy landscape. Newton reaches the central stationary point, while the other five methods reach the upper minimum for this starting point.](../../../assets/L15-minimizer-paths.png){#fig-minimizer-paths width="95%" fig-alt="Contours of the two-minimum energy landscape with paths for gradient descent, Newton, Nelder-Mead, CG, BFGS and L-BFGS-B. Newton ends at the origin and the other paths end above it."}
-
-The paths in @fig-minimizer-paths show that the method changes both the route and the endpoint. From $(0.3,0.1)$, BFGS reaches approximately $(0,0.6633)$, whereas Newton ends at the origin. Gradient descent takes many smaller steps. A step length small enough to remain controlled across a steep direction can give slow progress along a shallow valley.
-
-::: {.quarto-wasm-local notebook="l15_minimizer_paths.edit.py" view="edit" title="Newton and SciPy minimizers on a two-coordinate atomic energy" height="1000" loading="lazy" fullscreen="true"}
-The notebook supplies the energy, gradient, and Hessian of the middle atom. Handwritten gradient descent and Newton loops are compared with SciPy's Nelder–Mead, CG, BFGS, and L-BFGS-B. With $l_0=1.2a$ and initial position $(0.3a,0.1a)$, Newton reaches the origin in four corrections, while the other methods reach the upper minimum near $(0,0.6633a)$. Changing the starting point reveals the dependence of the final structure on the search path.
+Over most of the range of $a$ in the notebook, the origin of the LJ and Morse systems is a saddle. It holds the atom only when $1.2<a<r_s\approx1.33$. Off-axis minima exist only for compressed bonds. For $a>l_0$, moving the atom off the axis stretches both bonds further, so it cannot lower the energy.
 :::
 
-**In class:** start above the horizontal axis, then below it. Predict which minimum a downhill method will reach. Finally, start exactly at the origin. Does a method supplied with a zero gradient have a direction in which to begin?
-
-### How BFGS approximates curvature
-
-Newton constructs a full Hessian at every position. BFGS instead uses the gradients already calculated along its path. If the last displacement was $\mathbf s=\mathbf x^{(m+1)}-\mathbf x^{(m)}$ and the gradient changed by $\mathbf y=\mathbf g^{(m+1)}-\mathbf g^{(m)}$, an approximate Hessian $\mathbf B$ is updated to satisfy
-
-$$
-\mathbf B\mathbf s=\mathbf y.
-$$
-
-This is the multidimensional counterpart of estimating a derivative from a secant slope. The displacement and gradient change give curvature information along the direction actually travelled. With suitable curvature and line-search conditions, BFGS maintains an approximation that gives downhill search directions. For this example it avoids the saddle reached by the unrestricted Newton step.
-
-A dense Hessian for 1000 freely moving atoms has $3000\times3000$ entries. Constructing and solving with that matrix repeatedly can dominate the calculation. **Limited-memory BFGS** stores a short history of displacements and gradient changes instead of the full matrix. These methods let us extend the same optimization idea to far more coordinates without explicitly building every second derivative.
-
-## The stationary point between the minima
-
-At the origin, the two compressed springs push equally in opposite directions, so the gradient is exactly zero. Move the atom slightly in $x$: one spring becomes more compressed and the other less compressed. Their net force pushes it back, and the energy rises. Move it slightly in $y$: both springs lengthen toward their natural length, lowering the energy and pushing the atom farther from the origin.
-
-The origin is a **saddle point**. A saddle has directions in which the energy rises and directions in which it falls. The two cuts in @fig-energy-sections make that distinction visible even though both first derivatives vanish at their intersection. Newton met its root-finding goal there, but the atom can still reduce its energy by moving vertically.
-
-A minimizer can also stop at a saddle, particularly when an exactly symmetric starting configuration gives no downhill gradient. Its success flag records an algorithmic stopping criterion. Depending on the method, this can involve gradient size, step size, or changes in energy. We must interpret that criterion before drawing a conclusion about structural stability.
-
-## From the middle atom to an atomic cluster
-
-A cluster has more coordinates, but a minimizer still needs the same basic information: an energy, its gradient, and a starting structure. Atomistic packages arrange these through a structure object, an energy-and-force calculator, and an optimizer. The calculator may evaluate a pair potential or a much more detailed electronic-structure model.
-
-The [Atomic Simulation Environment](https://ase-lib.org/) provides these objects. The editable example below starts with 13 argon atoms near an icosahedron, displaces them, and relaxes the cluster with BFGS, LBFGS, and FIRE. **FIRE**, the fast inertial relaxation engine, moves atoms using forces and an adaptive, damped dynamical update. This is an extension of the two-coordinate exercise: the optimizer now moves 39 coordinates, while the LJ calculator supplies energies and forces. ASE's `fmax` criterion uses the largest **force-vector norm on an atom**, in eV/Å.
-
-![Relaxation of a displaced 13-atom argon cluster. The energy and force measures decrease as three ASE optimizers return the atoms to a nearby minimum.](../../../assets/L15-ase-relaxation.png){#fig-ase-relaxation width="100%" fig-alt="Two convergence plots for ASE BFGS, LBFGS and FIRE, showing energy above the final value and the recorded force measure against optimization step."}
-
-::: {.quarto-wasm-local notebook="l15_ase_relax.edit.py" view="edit" title="Extension: relaxing a displaced atomic cluster with ASE" height="950" loading="lazy" fullscreen="true"}
-The notebook combines an atomic structure, an LJ calculator for argon or an EMT calculator for copper, and ASE optimizers. In the supplied 13-atom argon case, all three methods reach approximately $-0.4566$ eV. The optimizer stops when the maximum norm of an atomic force is below $10^{-3}$ eV/Å. The same division between physical model and numerical optimizer applies to larger structures.
+::: {.quarto-wasm-local notebook="l15_newton_relax.edit.py" view="app" title="Newton's method for one atom between two fixed atoms" height="660" loading="lazy" fullscreen="true"}
+The notebook runs Newton's method from a chosen starting point. A step selector highlights the current atom, its Hessian, gradient, and Newton correction, with energy cuts through that position. For compressed harmonic springs, the two minima lie at $x=0$, $y=\pm\sqrt{l_0^2-a^2}$. Newton can also stop at the origin, where the forces vanish but a displacement along $y$ lowers the energy. The notebook also includes LJ and Morse bonds for comparison, and its colour map uses a logarithmic energy scale so that the steep repulsive walls do not wash out the wells. A coloured status line reports whether the run converged to a true minimum (green) or a saddle point (brown), or failed to converge (red).
 :::
 
-The central difficulty now becomes harder to inspect by eye. For the middle atom, two plotted energy cuts revealed the saddle. A cluster can move along combinations of many coordinates, so we need a matrix-based way to find any downhill displacement that remains after relaxation.
+![Newton paths with compressed bonds in all three models: $a=1.0$ and $l_0=1.2$. The same two starting positions are used in each panel. Diamonds mark starts and stars mark stopping points. The red path reaches the saddle at the origin in every model. The blue path reaches the lower minimum for harmonic springs and the upper minimum for LJ and Morse. Colours show the energy above the lowest value on the map on a logarithmic scale, so the steep repulsive walls around the fixed atoms and the shallow wells appear on the same map.](../../../assets/L15-newton-paths.png){#fig-newton-paths width="100%" fig-alt="Three equally sized energy maps for compressed harmonic, Lennard-Jones, and Morse bonds at a equals 1. Each has diamond starting points and star stopping points. Bright yellow discs around the fixed atoms mark the steep repulsive walls for LJ and Morse."}
 
-## What to keep
+## Take-home message
 
-1. The gradient is $\nabla E$, the force is $-\nabla E$, and the force Jacobian is $-\mathbf H$.
-2. Newton's stationary-point equation is $\mathbf H\Delta\mathbf x=-\nabla E$. It reaches the minimum in one step for the supported harmonic chain's quadratic energy.
-3. Harmonic springs can still give a position-dependent Hessian when their lengths depend nonlinearly on Cartesian coordinates.
-4. `minimize` accepts a vector of coordinates and a scalar energy. Methods differ in whether they use energies, gradients, or Hessians.
-5. Zero force establishes a stationary point. Energy changes around that point distinguish a minimum from a saddle.
+1. Relaxing the forces to zero solves $\nabla E=\mathbf 0$. Minima, maxima, and saddle points all satisfy these equations.
+2. The gradient is $\nabla E$, the force is $-\nabla E$, and the Jacobian of the force is $-\mathbf H$.
+3. Newton's step solves $\mathbf H\Delta\mathbf x=-\nabla E$ and jumps to the stationary point of the local quadratic model. For a quadratic energy, such as the harmonic chain of L14, one step gives the exact answer.
+4. Plain Newton steps can end on a saddle point or run away along a flat energy tail. Check the final gradient, the energy, and the curvature around the result.
+5. `minimize` methods differ in whether they use energies, gradients, or Hessians. They accept steps that lower the energy, but their success flag reports only their stopping criterion.
 
-## Check your understanding
+## Before next class
 
-1. Why is the Jacobian of the net force the negative of the Hessian of the energy?
-2. Explain why the two-dimensional spring system needs an updated Hessian even though both spring constants remain fixed.
-3. Find the two zero-energy configurations for $l_0=1.3a$ without running an optimizer.
-4. A calculator supplies only energies. Which method in the table can use them directly, and how could BFGS obtain the gradient information it needs?
-5. Why can Newton converge to the origin of the compressed spring system? What additional observation shows that this point is unstable?
+How do we know whether a stationary point is a saddle or a minimum, and how can we reliably find the directions in which the energy rises or falls? Consider this Hessian:
 
-## Next
+$$
+\mathbf H=\begin{bmatrix}0.8 & 1.2\\ 1.2 & 0.8\end{bmatrix}.
+$$
 
-For one atom moving in a plane, we can draw the energy and find a downhill direction. L16 asks how to make that test using the Hessian, including when the stable and unstable directions no longer line up with the coordinate axes. The resulting eigenvalue problem provides a stability test for high-dimensional structures.
+Every entry is positive, yet the energy surface below has a saddle point at the origin. We will use the Hessian to answer these questions in Lecture 16.
+
+![The tilted saddle $E(x,y)=0.4x^2+1.2xy+0.4y^2$ has all-positive Hessian entries. The energy rises along either coordinate axis but falls along a diagonal direction.](../../../assets/L15-tilted-saddle.png){#fig-tilted-saddle width="100%" fig-alt="A saddle-shaped energy surface rotated relative to the x and y axes, with a marked stationary point at the origin and a downhill diagonal path."}

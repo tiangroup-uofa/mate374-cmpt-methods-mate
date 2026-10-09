@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="130mm" viewBox="0 0 160 130">
+<title>Atomic geometries for structural relaxation</title>
+<desc>ASE-built starting geometries, projected as individually editable vector atoms. Four editable Inkscape layers: fcc unit cell, Cu(111) slab, (001) plane through a bulk vacancy, and CO on Cu(111). Coordinates in atom descriptions are in angstroms. No relaxation results are implied.</desc>
+<defs>
+<radialGradient id="cu" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b3b3b3"/></radialGradient>
+<radialGradient id="c" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#b3b3b3"/><stop offset="1" stop-color="#231f20"/></radialGradient>
+<radialGradient id="o" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b5473a"/></radialGradient>
+</defs>
+<g id="panel-a" inkscape:groupmode="layer" inkscape:label="a — Crystal structure">
+<text id="a-label" x="2.000" y="7.000" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">a</text>
+<text id="a-title" x="11.000" y="7.000" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">Crystal structure</text>
+<path id="a-cell-0" d="M 36.046,51.039 L 36.046,27.678" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-1" d="M 36.046,51.039 L 22.872,43.828" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-3" d="M 36.046,51.039 L 57.128,46.533" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-8" d="M 36.046,27.678 L 22.872,20.467" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-10" d="M 36.046,27.678 L 57.128,23.172" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-13" d="M 22.872,43.828 L 22.872,20.467" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-16" d="M 22.872,43.828 L 43.954,39.322" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-21" d="M 22.872,20.467 L 43.954,15.961" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-22" d="M 57.128,46.533 L 57.128,23.172" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-23" d="M 57.128,46.533 L 43.954,39.322" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-26" d="M 57.128,23.172 L 43.954,15.961" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<path id="a-cell-27" d="M 43.954,39.322 L 43.954,15.961" style="fill:none;stroke:#5e5e5e;stroke-width:0.265"/>
+<circle id="a-atom-12" cx="43.954" cy="39.322" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 3.61000, 0.00000 Å</desc></circle>
+<circle id="a-atom-13" cx="43.954" cy="15.961" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 3.61000, 3.61000 Å</desc></circle>
+<circle id="a-atom-7" cx="33.413" cy="29.895" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.80500, 3.61000, 1.80500 Å</desc></circle>
+<circle id="a-atom-6" cx="22.872" cy="43.828" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 3.61000, 0.00000 Å</desc></circle>
+<circle id="a-atom-10" cx="50.541" cy="31.247" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 1.80500, 1.80500 Å</desc></circle>
+<circle id="a-atom-3" cx="40.000" cy="45.181" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.80500, 1.80500, 0.00000 Å</desc></circle>
+<circle id="a-atom-9" cx="57.128" cy="46.533" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 0.00000, 0.00000 Å</desc></circle>
+<circle id="a-atom-8" cx="22.872" cy="20.467" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 3.61000, 3.61000 Å</desc></circle>
+<circle id="a-atom-5" cx="40.000" cy="21.819" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.80500, 1.80500, 3.61000 Å</desc></circle>
+<circle id="a-atom-1" cx="29.459" cy="35.753" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 1.80500, 1.80500 Å</desc></circle>
+<circle id="a-atom-11" cx="57.128" cy="23.172" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 0.00000, 3.61000 Å</desc></circle>
+<circle id="a-atom-2" cx="46.587" cy="37.105" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.80500, 0.00000, 1.80500 Å</desc></circle>
+<circle id="a-atom-0" cx="36.046" cy="51.039" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 0.00000, 0.00000 Å</desc></circle>
+<circle id="a-atom-4" cx="36.046" cy="27.678" r="2.961" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 0.00000, 3.61000 Å</desc></circle>
+<text id="a-note" x="40.000" y="60.000" style="font-family:Arial;font-size:3.6px;fill:#231f20;text-anchor:middle;font-weight:normal">fcc Cu unit cell</text>
+</g>
+<g id="panel-b" inkscape:groupmode="layer" inkscape:label="b — Surface relaxation">
+<text id="b-label" x="88.000" y="7.000" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">b</text>
+<text id="b-title" x="97.000" y="7.000" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">Surface relaxation</text>
+<circle id="b-atom-31" cx="142.142" cy="23.512" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 8.10577, 8.08423 Å</desc></circle>
+<circle id="b-atom-15" cx="137.816" cy="33.828" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 7.36888, 6.00000 Å</desc></circle>
+<circle id="b-atom-30" cx="131.493" cy="24.974" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 8.10577, 8.08423 Å</desc></circle>
+<circle id="b-atom-14" cx="127.168" cy="35.290" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 7.36888, 6.00000 Å</desc></circle>
+<circle id="b-atom-29" cx="120.845" cy="26.436" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 8.10577, 8.08423 Å</desc></circle>
+<circle id="b-atom-13" cx="116.519" cy="36.752" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 7.36888, 6.00000 Å</desc></circle>
+<circle id="b-atom-11" cx="146.137" cy="36.994" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 5.15822, 6.00000 Å</desc></circle>
+<circle id="b-atom-28" cx="110.196" cy="27.899" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 8.10577, 8.08423 Å</desc></circle>
+<circle id="b-atom-47" cx="144.139" cy="17.825" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 6.63199, 10.16847 Å</desc></circle>
+<circle id="b-atom-12" cx="105.871" cy="38.214" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 7.36888, 6.00000 Å</desc></circle>
+<circle id="b-atom-27" cx="139.814" cy="28.140" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 5.89511, 8.08423 Å</desc></circle>
+<circle id="b-atom-10" cx="135.488" cy="38.456" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 5.15822, 6.00000 Å</desc></circle>
+<circle id="b-atom-46" cx="133.491" cy="19.287" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 6.63199, 10.16847 Å</desc></circle>
+<circle id="b-atom-26" cx="129.165" cy="29.603" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 5.89511, 8.08423 Å</desc></circle>
+<circle id="b-atom-9" cx="124.840" cy="39.918" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 5.15822, 6.00000 Å</desc></circle>
+<circle id="b-atom-45" cx="122.842" cy="20.749" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 6.63199, 10.16847 Å</desc></circle>
+<circle id="b-atom-25" cx="118.517" cy="31.065" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 5.89511, 8.08423 Å</desc></circle>
+<circle id="b-atom-8" cx="114.191" cy="41.380" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 5.15822, 6.00000 Å</desc></circle>
+<circle id="b-atom-23" cx="148.134" cy="31.307" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 3.68444, 8.08423 Å</desc></circle>
+<circle id="b-atom-7" cx="143.809" cy="41.622" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 2.94755, 6.00000 Å</desc></circle>
+<circle id="b-atom-44" cx="112.194" cy="22.212" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 6.63199, 10.16847 Å</desc></circle>
+<circle id="b-atom-24" cx="107.868" cy="32.527" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 5.89511, 8.08423 Å</desc></circle>
+<circle id="b-atom-43" cx="141.811" cy="22.453" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 4.42133, 10.16847 Å</desc></circle>
+<circle id="b-atom-22" cx="137.486" cy="32.769" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 3.68444, 8.08423 Å</desc></circle>
+<circle id="b-atom-6" cx="133.160" cy="43.084" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 2.94755, 6.00000 Å</desc></circle>
+<circle id="b-atom-42" cx="131.163" cy="23.916" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 4.42133, 10.16847 Å</desc></circle>
+<circle id="b-atom-21" cx="126.837" cy="34.231" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 3.68444, 8.08423 Å</desc></circle>
+<circle id="b-atom-5" cx="122.512" cy="44.547" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 2.94755, 6.00000 Å</desc></circle>
+<circle id="b-atom-3" cx="152.129" cy="44.788" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 0.73689, 6.00000 Å</desc></circle>
+<circle id="b-atom-41" cx="120.514" cy="25.378" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 4.42133, 10.16847 Å</desc></circle>
+<circle id="b-atom-20" cx="116.189" cy="35.693" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 3.68444, 8.08423 Å</desc></circle>
+<circle id="b-atom-39" cx="150.132" cy="25.620" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 2.21066, 10.16847 Å</desc></circle>
+<circle id="b-atom-4" cx="111.863" cy="46.009" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 2.94755, 6.00000 Å</desc></circle>
+<circle id="b-atom-19" cx="145.806" cy="35.935" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 1.47378, 8.08423 Å</desc></circle>
+<circle id="b-atom-2" cx="141.481" cy="46.251" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 0.73689, 6.00000 Å</desc></circle>
+<circle id="b-atom-40" cx="109.866" cy="26.840" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 4.42133, 10.16847 Å</desc></circle>
+<circle id="b-atom-38" cx="139.483" cy="27.082" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 2.21066, 10.16847 Å</desc></circle>
+<circle id="b-atom-18" cx="135.158" cy="37.397" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 1.47378, 8.08423 Å</desc></circle>
+<circle id="b-atom-1" cx="130.832" cy="47.713" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 0.73689, 6.00000 Å</desc></circle>
+<circle id="b-atom-37" cx="128.835" cy="28.544" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 2.21066, 10.16847 Å</desc></circle>
+<circle id="b-atom-17" cx="124.509" cy="38.860" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 1.47378, 8.08423 Å</desc></circle>
+<circle id="b-atom-0" cx="120.184" cy="49.175" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 0.73689, 6.00000 Å</desc></circle>
+<circle id="b-atom-36" cx="118.186" cy="30.006" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 2.21066, 10.16847 Å</desc></circle>
+<circle id="b-atom-16" cx="113.861" cy="40.322" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 1.47378, 8.08423 Å</desc></circle>
+<circle id="b-atom-35" cx="147.804" cy="30.248" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 0.00000, 10.16847 Å</desc></circle>
+<circle id="b-atom-34" cx="137.155" cy="31.710" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 0.00000, 10.16847 Å</desc></circle>
+<circle id="b-atom-33" cx="126.507" cy="33.172" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 0.00000, 10.16847 Å</desc></circle>
+<circle id="b-atom-32" cx="115.858" cy="34.635" r="4.825" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 0.00000, 10.16847 Å</desc></circle>
+<text id="b-note" x="129.000" y="60.000" style="font-family:Arial;font-size:3.6px;fill:#231f20;text-anchor:middle;font-weight:normal">Cu(111) surface</text>
+</g>
+<g id="panel-c" inkscape:groupmode="layer" inkscape:label="c — Defect formation">
+<text id="c-label" x="2.000" y="72.000" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">c</text>
+<text id="c-title" x="11.000" y="72.000" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">Defect formation</text>
+<circle id="c-atom-9" cx="48.214" cy="82.072" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.41500, 12.63500, 3.61000 Å</desc></circle>
+<circle id="c-atom-1" cx="22.072" cy="82.072" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 7.22000, 3.61000 Å</desc></circle>
+<circle id="c-atom-2" cx="30.786" cy="82.072" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.80500, 9.02500, 3.61000 Å</desc></circle>
+<circle id="c-atom-8" cx="39.500" cy="82.072" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 10.83000, 3.61000 Å</desc></circle>
+<circle id="c-atom-17" cx="56.928" cy="82.072" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.22000, 14.44000, 3.61000 Å</desc></circle>
+<circle id="c-atom-16" cx="56.928" cy="90.786" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 9.02500, 12.63500, 3.61000 Å</desc></circle>
+<circle id="c-atom-15" cx="48.214" cy="90.786" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.22000, 10.83000, 3.61000 Å</desc></circle>
+<circle id="c-atom-14" cx="48.214" cy="99.500" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 9.02500, 9.02500, 3.61000 Å</desc></circle>
+<circle id="c-atom-13" cx="39.500" cy="108.214" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 9.02500, 5.41500, 3.61000 Å</desc></circle>
+<circle id="c-atom-12" cx="30.786" cy="108.214" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.22000, 3.61000, 3.61000 Å</desc></circle>
+<circle id="c-atom-22" cx="56.928" cy="99.500" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 10.83000, 10.83000, 3.61000 Å</desc></circle>
+<circle id="c-atom-0" cx="22.072" cy="90.786" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.80500, 5.41500, 3.61000 Å</desc></circle>
+<circle id="c-atom-7" cx="39.500" cy="90.786" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.41500, 9.02500, 3.61000 Å</desc></circle>
+<circle id="c-atom-6" cx="30.786" cy="90.786" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 7.22000, 3.61000 Å</desc></circle>
+<circle id="c-atom-5" cx="30.786" cy="99.500" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.41500, 5.41500, 3.61000 Å</desc></circle>
+<circle id="c-atom-4" cx="22.072" cy="99.500" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.61000, 3.61000, 3.61000 Å</desc></circle>
+<circle id="c-atom-3" cx="22.072" cy="108.214" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.41500, 1.80500, 3.61000 Å</desc></circle>
+<circle id="c-atom-21" cx="56.928" cy="108.214" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 12.63500, 9.02500, 3.61000 Å</desc></circle>
+<circle id="c-atom-20" cx="48.214" cy="108.214" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 10.83000, 7.22000, 3.61000 Å</desc></circle>
+<circle id="c-atom-11" cx="30.786" cy="116.928" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 9.02500, 1.80500, 3.61000 Å</desc></circle>
+<circle id="c-atom-18" cx="39.500" cy="116.928" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 10.83000, 3.61000, 3.61000 Å</desc></circle>
+<circle id="c-atom-10" cx="22.072" cy="116.928" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.22000, 0.00000, 3.61000 Å</desc></circle>
+<circle id="c-atom-19" cx="48.214" cy="116.928" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 12.63500, 5.41500, 3.61000 Å</desc></circle>
+<circle id="c-atom-23" cx="56.928" cy="116.928" r="3.072" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 14.44000, 7.22000, 3.61000 Å</desc></circle>
+<circle id="c-vacancy" cx="39.500" cy="99.500" r="3.072" style="fill:none;stroke:#b5473a;stroke-width:0.5;stroke-dasharray:1.5,1"/>
+<text id="c-note" x="40.000" y="127.000" style="font-family:Arial;font-size:3.6px;fill:#231f20;text-anchor:middle;font-weight:normal">Bulk vacancy · (001) plane</text>
+</g>
+<g id="panel-d" inkscape:groupmode="layer" inkscape:label="d — Molecular adsorption">
+<text id="d-label" x="88.000" y="72.000" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">d</text>
+<text id="d-title" x="97.000" y="72.000" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">Molecular adsorption</text>
+<path id="d-co-bond" d="M 131.035,84.778 L 131.035,80.476" style="fill:none;stroke:#231f20;stroke-width:0.9"/>
+<circle id="d-atom-31" cx="141.363" cy="91.317" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 8.10577, 8.08423 Å</desc></circle>
+<circle id="d-atom-15" cx="137.294" cy="101.022" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 7.36888, 6.00000 Å</desc></circle>
+<circle id="d-atom-30" cx="131.345" cy="92.693" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 8.10577, 8.08423 Å</desc></circle>
+<circle id="d-atom-14" cx="127.276" cy="102.398" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 7.36888, 6.00000 Å</desc></circle>
+<circle id="d-atom-29" cx="121.327" cy="94.069" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 8.10577, 8.08423 Å</desc></circle>
+<circle id="d-atom-13" cx="117.258" cy="103.773" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 7.36888, 6.00000 Å</desc></circle>
+<circle id="d-atom-11" cx="145.122" cy="104.001" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 5.15822, 6.00000 Å</desc></circle>
+<circle id="d-atom-28" cx="111.309" cy="95.444" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 8.10577, 8.08423 Å</desc></circle>
+<circle id="d-atom-47" cx="143.243" cy="85.967" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 6.63199, 10.16847 Å</desc></circle>
+<circle id="d-atom-12" cx="107.240" cy="105.149" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 7.36888, 6.00000 Å</desc></circle>
+<circle id="d-atom-27" cx="139.173" cy="95.672" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 5.89511, 8.08423 Å</desc></circle>
+<circle id="d-atom-10" cx="135.104" cy="105.376" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 5.15822, 6.00000 Å</desc></circle>
+<circle id="d-atom-46" cx="133.225" cy="87.342" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 6.63199, 10.16847 Å</desc></circle>
+<circle id="d-atom-26" cx="129.155" cy="97.047" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 5.89511, 8.08423 Å</desc></circle>
+<circle id="d-atom-9" cx="125.086" cy="106.752" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 5.15822, 6.00000 Å</desc></circle>
+<circle id="d-atom-45" cx="123.207" cy="88.718" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 6.63199, 10.16847 Å</desc></circle>
+<circle id="d-atom-25" cx="119.137" cy="98.423" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 5.89511, 8.08423 Å</desc></circle>
+<circle id="d-atom-8" cx="115.068" cy="108.128" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 5.15822, 6.00000 Å</desc></circle>
+<circle id="d-atom-23" cx="147.001" cy="98.650" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 3.68444, 8.08423 Å</desc></circle>
+<circle id="d-atom-7" cx="142.932" cy="108.355" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 2.94755, 6.00000 Å</desc></circle>
+<circle id="d-atom-44" cx="113.189" cy="90.094" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 6.63199, 10.16847 Å</desc></circle>
+<circle id="d-atom-24" cx="109.119" cy="99.799" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 5.89511, 8.08423 Å</desc></circle>
+<circle id="d-atom-43" cx="141.053" cy="90.321" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 4.42133, 10.16847 Å</desc></circle>
+<circle id="d-atom-22" cx="136.983" cy="100.026" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 3.68444, 8.08423 Å</desc></circle>
+<circle id="d-atom-6" cx="132.914" cy="109.731" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 2.94755, 6.00000 Å</desc></circle>
+<circle id="d-atom-42" cx="131.035" cy="91.697" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 4.42133, 10.16847 Å</desc></circle>
+<circle id="d-atom-21" cx="126.965" cy="101.402" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 3.68444, 8.08423 Å</desc></circle>
+<circle id="d-atom-5" cx="122.896" cy="111.106" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 2.94755, 6.00000 Å</desc></circle>
+<circle id="d-atom-3" cx="150.760" cy="111.334" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 0.73689, 6.00000 Å</desc></circle>
+<circle id="d-atom-41" cx="121.017" cy="93.072" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 4.42133, 10.16847 Å</desc></circle>
+<circle id="d-atom-49" cx="131.035" cy="84.778" r="2.270" style="fill:url(#c);stroke:#5e5e5e;stroke-width:0.18"><desc>C at 5.10531, 4.42133, 12.01847 Å</desc></circle>
+<circle id="d-atom-20" cx="116.947" cy="102.777" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 3.68444, 8.08423 Å</desc></circle>
+<circle id="d-atom-39" cx="148.881" cy="93.300" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 8.93429, 2.21066, 10.16847 Å</desc></circle>
+<circle id="d-atom-4" cx="112.878" cy="112.482" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 2.94755, 6.00000 Å</desc></circle>
+<circle id="d-atom-19" cx="144.811" cy="103.005" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 1.47378, 8.08423 Å</desc></circle>
+<circle id="d-atom-2" cx="140.742" cy="112.710" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 0.73689, 6.00000 Å</desc></circle>
+<circle id="d-atom-48" cx="131.035" cy="80.476" r="2.476" style="fill:url(#o);stroke:#5e5e5e;stroke-width:0.18"><desc>O at 5.10531, 4.42133, 13.16881 Å</desc></circle>
+<circle id="d-atom-40" cx="110.999" cy="94.448" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 4.42133, 10.16847 Å</desc></circle>
+<circle id="d-atom-38" cx="138.863" cy="94.676" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 6.38164, 2.21066, 10.16847 Å</desc></circle>
+<circle id="d-atom-18" cx="134.793" cy="104.380" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 1.47378, 8.08423 Å</desc></circle>
+<circle id="d-atom-1" cx="130.724" cy="114.085" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 0.73689, 6.00000 Å</desc></circle>
+<circle id="d-atom-37" cx="128.845" cy="96.051" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 3.82898, 2.21066, 10.16847 Å</desc></circle>
+<circle id="d-atom-17" cx="124.775" cy="105.756" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 1.47378, 8.08423 Å</desc></circle>
+<circle id="d-atom-0" cx="120.706" cy="115.461" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 0.73689, 6.00000 Å</desc></circle>
+<circle id="d-atom-36" cx="118.827" cy="97.427" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 1.27633, 2.21066, 10.16847 Å</desc></circle>
+<circle id="d-atom-16" cx="114.757" cy="107.132" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 1.47378, 8.08423 Å</desc></circle>
+<circle id="d-atom-35" cx="146.691" cy="97.654" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 7.65797, 0.00000, 10.16847 Å</desc></circle>
+<circle id="d-atom-34" cx="136.673" cy="99.030" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 5.10531, 0.00000, 10.16847 Å</desc></circle>
+<circle id="d-atom-33" cx="126.655" cy="100.406" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 2.55266, 0.00000, 10.16847 Å</desc></circle>
+<circle id="d-atom-32" cx="116.637" cy="101.781" r="4.539" style="fill:url(#cu);stroke:#5e5e5e;stroke-width:0.18"><desc>Cu at 0.00000, 0.00000, 10.16847 Å</desc></circle>
+<text id="d-carbon" x="127.035" y="85.978" style="font-family:Arial;font-size:3.6px;fill:#231f20;text-anchor:end;font-weight:normal">C</text>
+<text id="d-oxygen" x="135.035" y="81.676" style="font-family:Arial;font-size:3.6px;fill:#b5473a;text-anchor:start;font-weight:normal">O</text>
+<text id="d-note" x="129.000" y="127.000" style="font-family:Arial;font-size:3.6px;fill:#231f20;text-anchor:middle;font-weight:normal">CO on Cu(111)</text>
+</g></svg>
