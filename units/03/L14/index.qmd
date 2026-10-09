@@ -22,7 +22,7 @@ By the end of this lecture, you should be able to:
 
 ## How far can we pull an atomic chain?
 
-In L11 and L12, we applied forces to atoms connected by springs and calculated their displacements from $\mathbf K\mathbf u=\mathbf b$. L13 showed how elimination and pivoting carry out that linear solve. Let us return to the chain and ask when its constant stiffness matrix stops describing the material. Before doing any numerical calculation, imagine what happens as we pull harder:
+In L11 and L12, we applied forces to atoms connected by springs and calculated their displacements from $\mathbf K\mathbf u=\mathbf b$. Let us return to that chain model. Before doing any numerical calculation, imagine what happens as we pull harder:
 
 - **How will the distances between the atoms change?** In the bead-and-spring model, the extensions increase proportionally to the applied force.
 - **What happens if the force becomes extremely large?** A Hookean spring keeps stretching, with an ever-increasing restoring force.
@@ -37,7 +37,7 @@ From our chemistry and materials perspective, sufficiently strong pulling can br
 
 ![A three-atom model under equal outward pulls, beside an atomic-resolution image of a three-atom gold chain. The central atom in the model is held at the origin. The experimental panel is cropped from Fig. 1C of @hao2026gold, with its original 1 nm scale bar and inset retained. © 2026 American Chemical Society.](../../../assets/L14-chain-experiment.png){#fig-chain-experiment width="100%" fig-alt="Left: three atoms on a horizontal line, the middle atom fixed at zero and the outer atoms pulled outward by equal forces. Right: an AC-HRTEM image of a three-atom gold chain joining two supports, with a 1 nm scale bar."}
 
-Atomic chains can actually be imaged during experiments. @hao2026gold studied stretched gold chains using atomic-resolution electron microscopy. We will return to their observations after working out how to solve the force balance.
+Atomic chains can actually be imaged during experiments. @hao2026gold studied stretched gold chains using state-of-the-art electron microscopy. We will return to their observations after working out how to solve the force balance.
 
 ## From an energy model to coupled force equations
 
@@ -72,7 +72,7 @@ F_n(x_1,x_2,\ldots,x_n)&=b_n-\frac{\partial E}{\partial x_n}=0.
 \end{aligned}
 $$
 
-This is the root-finding problem we saw in Unit 02, extended to a **vector of residuals** $\mathbf F$. The equations are **coupled** because moving one atom can change forces on several atoms. Their dependence on position is nonlinear, so we cannot collect them into one constant matrix and solve the entire problem in one linear solve.
+This is the root-finding problem we saw in Unit 02, extended to a **vector of residuals** $\mathbf F$. The equations are **coupled** because moving one atom can change forces on several atoms. In general, their coefficients depend on the coordinates, so we cannot collect them into one constant matrix and solve the entire nonlinear problem in one linear solve.
 
 ### Two equations for the three-atom model
 
@@ -105,11 +105,9 @@ There is no single positive or negative sign for a vector. Finding a sign change
 
 ## Newton's method: a linear system at each step
 
-Suppose the current coordinates are $x_1$ and $x_2$, giving net forces $F_1$ and $F_2$. Our goal is to bring both forces to zero by moving the atoms through $\Delta x_1$ and $\Delta x_2$. Where should they move? The scalar Newton construction in @fig-newton-tangents gives us a starting point: replace the force curve locally by a straight line and find where that line reaches zero.
+Suppose the current coordinates are $x_1$ and $x_2$, giving net forces $F_1$ and $F_2$. Our goal is to bring both forces to zero by moving the atoms through $\Delta x_1$ and $\Delta x_2$. Where should they move?
 
-![A constant-stiffness force law reaches its root in one Newton correction. For a nonlinear force law, the tangent stiffness changes with position, requiring successive corrections. These scalar plots illustrate one displacement coordinate, with the root labelled $x^*$.](../../../assets/L14-newton-tangents.png){#fig-newton-tangents width="100%" fig-alt="Two panels with a spring and two atoms above force-versus-displacement plots. The linear force law reaches zero in one step, while the nonlinear curve requires a sequence of tangent steps."}
-
-With two moving coordinates, we need a local approximation for each force. We can use a first-order Taylor expansion in two dimensions. Notice that changing **either coordinate can affect both forces**:
+We can use a first-order Taylor expansion in two dimensions. Notice that changing **either coordinate can affect both forces**:
 
 $$
 \begin{aligned}
@@ -141,20 +139,12 @@ $$
 \boxed{\mathbf J(\mathbf x)\,\Delta\mathbf x=-\mathbf F(\mathbf x).}
 $$
 
-The unknown in this linear system is the **correction** $\Delta\mathbf x$. The current coordinates determine the matrix and right-hand side. Thus the calculation has exactly the form used in L13:
-
-| L13 linear solve | This Newton step |
-|---|---|
-| Known matrix $\mathbf A$ | Current Jacobian $\mathbf J(\mathbf x)$ |
-| Unknown vector $\mathbf x$ | Correction $\Delta\mathbf x$ |
-| Known right-hand side $\mathbf b$ | Negative current residual $-\mathbf F(\mathbf x)$ |
+We therefore use the linear algebra tools from L11–L13:
 
 ```python
 Delta_x = np.linalg.solve(J, -F)
 x = x + Delta_x
 ```
-
-Inside `solve`, LU factorization with partial pivoting determines the correction. The surrounding Newton loop is an **iteration for the nonlinear equations**, even though each correction uses a **direct linear solver**. In general, moving the atoms changes $\mathbf J$, so the next correction needs a new factorization. L13's reuse of LU factors applies when the matrix stays fixed.
 
 ### Case 1: constant-stiffness springs
 
@@ -197,6 +187,8 @@ $$
 
 Here $m$ counts iterations, while the subscripts 1 and 2 label coordinates. The local spring constants belong to interactions between atoms and can depend on several coordinates. Off-diagonal entries describe the coupling between coordinates, just as they did in the spring stiffness matrix.
 
+![A constant-stiffness force law reaches its root in one Newton correction. For a nonlinear force law, the tangent stiffness changes with position, requiring successive corrections. These scalar plots illustrate one displacement coordinate, with the root labelled $x^*$.](../../../assets/L14-newton-tangents.png){#fig-newton-tangents width="100%" fig-alt="Two panels with a spring and two atoms above force-versus-displacement plots. The linear force law reaches zero in one step, while the nonlinear curve requires a sequence of tangent steps."}
+
 ::: {.callout-note}
 ## The inverse notation and the actual calculation
 
@@ -217,7 +209,7 @@ The core algorithm can be written before choosing the energy or force model. At 
 5. Otherwise, set $\mathbf x\leftarrow\mathbf x+\Delta\mathbf x$ and repeat, up to a maximum number of steps.
 :::
 
-The following core is implemented as `newton_system` in both editable demos. The notebook versions also return the iteration history, a convergence flag, and a diagnostic message, including singular matrices or inadmissible positions.
+The following core is editable in both demos. The notebook versions also record the iteration history and report singular matrices or inadmissible positions.
 
 ```python
 def newton_raphson_multidim(force, jacobian, x0,
@@ -247,11 +239,7 @@ F_2(x_1,x_2)&=9x_1^2+25x_2^2-225.
 \end{aligned}
 $$
 
-The first equation's zero curve is $x_2=\cosh(x_1/2)$, a U-shaped curve with its lowest point at $(0,1)$. The second is the ellipse $x_1^2/25+x_2^2/9=1$. A simultaneous root lies where these two curves cross. In the surface view, both residuals must meet the coordinate plane at the same point.
-
-![Two simultaneous roots, seen as intersections of zero curves. Panel a shows the residual surfaces, and panel b shows their zero curves and Newton's path from $(2,2)$. The plotted second surface is scaled by $1/75$ for visibility.](../../../assets/L14-newton-system.png){#fig-newton-system width="100%" fig-alt="Blue hyperbolic-cosine and red elliptical zero curves intersect at two points. The Newton path from positive x1 approaches the right-hand root."}
-
-Differentiating gives all four Jacobian entries:
+A simultaneous root is an intersection of the surfaces $F_1$ and $F_2$ at zero height, where $F_1=F_2=0$. Differentiating gives all four Jacobian entries:
 
 $$
 \mathbf J(x_1,x_2)=
@@ -261,34 +249,12 @@ $$
 \end{bmatrix}.
 $$
 
-### A worked Newton correction
-
-Start at $\mathbf x^{(0)}=(2,2)^T$. Substitution gives $\mathbf F\approx(0.456919,-89)^T$, so the first correction solves
-
-$$
-\begin{bmatrix}-0.587601&1\\36&100\end{bmatrix}
-\begin{bmatrix}\Delta x_1\\\Delta x_2\end{bmatrix}
-=\begin{bmatrix}-0.456919\\89\end{bmatrix}.
-$$
-
-As in L13, partial pivoting swaps the rows because $|36|>|-0.587601|$. Elimination then gives the triangular system
-
-$$
-\begin{bmatrix}36&100\\0&2.632224\end{bmatrix}
-\begin{bmatrix}\Delta x_1\\\Delta x_2\end{bmatrix}
-\approx\begin{bmatrix}89\\0.995760\end{bmatrix}.
-$$
-
-Back substitution gives $\Delta\mathbf x\approx(1.421400,0.378296)^T$ and hence $\mathbf x^{(1)}\approx(3.421400,2.378296)^T$. These values solve the **linearized** equations. Substitution into the original functions gives $\mathbf F(\mathbf x^{(1)})\approx(-0.478490,21.761096)^T$, so another correction is needed.
-
-![Two Newton corrections near the right-hand root. Solid curves satisfy the original equations. Dashed lines satisfy their current first-order approximations, and their intersection determines the next iterate. The approximation is rebuilt at the new point in panel b.](../../../assets/L14-newton-linearization.png){#fig-newton-linearization width="100%" fig-alt="Two coordinate-plane plots. At iteration zero the dashed linearized equations intersect beyond the true root. Rebuilding them at iteration one gives an intersection much closer to the root."}
-
-The dashed lines in @fig-newton-linearization come from $F_i(\mathbf x^{(m)})+J_{i1}\Delta x_1+J_{i2}\Delta x_2=0$. They need not pass through the current iterate, where $F_i$ is usually nonzero. As the iterate approaches a root, these lines approach the tangents to the zero curves there.
-
-**Predict:** starting near the right-hand intersection, which root should Newton find? What changes if we reverse the sign of the initial $x_1$? In the notebook, compare the two roots and inspect the matrix equation at successive iterations.
+**Predict:** starting near the right-hand intersection, which root should Newton find? What changes if we reverse the sign of the initial $x_1$? Use the 3D residual surfaces and their zero-curve projection to identify the two roots, then inspect the Newton steps.
 
 ::: {.quarto-wasm-local notebook="l14_newton_system.edit.py" view="app" title="Newton iteration for two nonlinear equations: surfaces, zero curves, and Jacobian steps" height="1050" loading="lazy" fullscreen="true"}
 The two roots are approximately $(x_1,x_2)=(\pm3.03116,2.38587)$. Starting from $(2,2)$ or $(-2,2)$ reaches the corresponding root. At $x_1=0$, the first column of the Jacobian vanishes and the linear solve is singular. The 3D view plots $F_1$ and $F_2/75$ to keep both surfaces visible, while the solver uses the original functions.
+
+![Residual surfaces, their zero curves, and the Newton path from the initial guess (2,2).](../../../assets/L14-newton-system.png){fig-alt="Three-dimensional residual surfaces and a two-dimensional projection showing the two intersections of a hyperbolic cosine curve and an ellipse."}
 :::
 
 The start $(0,2)$ gives a useful failure case: both derivatives with respect to $x_1$ are zero there. The linearized equations cannot determine a unique correction even though the nonlinear system has two roots. This is why the starting point matters.
@@ -352,21 +318,17 @@ Newton needs an initial guess. Placing all atoms at zero would give zero separat
 
 For each increase in force, use the preceding solution as the next initial guess. This procedure is called **continuation**. Small load increments keep the starting point near the branch of solutions already found. The demo lets us compare it with a direct Newton solve from the two typed coordinates.
 
-![The three-atom chain at $f=2\,\varepsilon/\sigma$. The left panel shows the converged coordinates. The right panel shows the internal energy and the Newton path for the final continuation increment. Under load, force balance occurs away from the minimum of internal energy alone.](../../../assets/L14-trimer-newton.png){#fig-trimer-newton width="100%" fig-alt="Fixed centre atom and two equally stretched outer atoms beside an internal-energy contour plot. The last continuation step reaches x1 minus 1.179363 and x2 plus 1.179363."}
-
 ::: {.quarto-wasm-local notebook="l14_bond_chain.edit.py" view="app" title="Centre-fixed three-atom LJ chain: load, atomic positions, total energy, and Newton iterations" height="1150" loading="lazy" fullscreen="true"}
 At $f=2\,\varepsilon/\sigma$, Newton gives $(x_1,x_2)=(-1.179363,1.179363)\sigma$. Both nearest-neighbour bonds have stretched by about 5.2% relative to the unloaded chain. The total internal energy, including the outer pair, is $E=-1.891269\,\varepsilon$. The residual is below $10^{-9}\,\varepsilon/\sigma$. Raising the load toward $2.43683\,\varepsilon/\sigma$ makes the symmetric branch approach its limiting point.
+
+![Three-atom positions and a contour plot of their total internal energy, with the Newton path.](../../../assets/L14-trimer-newton.png){fig-alt="The centre atom is fixed and the outer two atoms move symmetrically under load. A contour plot of the sum of all three pair energies shows the Newton iterates."}
 :::
 
 **In class:** compare $f=0$, $2$, $2.43$, and $2.45$. At each load, inspect the atom positions, the remaining force, and the total bond energy. Turning continuation off makes the effect of the initial guess easier to see. The energy panel shows the total **internal** bond energy $E(x_1,x_2)$. At nonzero load, force balance also includes the work of the applied forces, so the solution shifts away from the minimum of $E$ alone.
 
 ### What happens at a large force?
 
-At symmetric positions $x_1=-r$ and $x_2=r$, either force equation gives $f=V'(r)+V'(2r)$. Plotting this relation lets us see the limiting load independently of Newton's convergence. In @fig-trimer-limit, a horizontal line at $f=2.45$ lies above the force maximum: no symmetric separation can balance that pull.
-
-![The three-atom force maximum and the conditioning of its Jacobian. Panel a shows $V'(r)+V'(2r)$ and its maximum. Panel b approaches the maximum along the short-bond branch: the horizontal axis is the remaining separation gap $r_{\mathrm{lim}}-r$, decreasing to the right.](../../../assets/L14-trimer-limit.png){#fig-trimer-limit width="100%" fig-alt="The symmetric trimer restoring force peaks at 2.436832, below the applied load 2.45. The Jacobian condition number rises sharply only very close to the limiting separation."}
-
-Near the limiting load, the force changes very little along the outward stretching direction. **Can a row swap restore the missing stiffness?** L13's pivoting changes the elimination order, while this softening belongs to the force law itself. Compare the converged Jacobians at two loads, in units of $\varepsilon/\sigma^2$:
+Near the limiting load, Newton's method becomes sensitive because the force changes very little along a particular displacement direction. Compare the converged Jacobians at two loads, in units of $\varepsilon/\sigma^2$:
 
 $$
 \begin{aligned}
@@ -411,13 +373,13 @@ largest_force = np.max(np.abs(force(x, f)))
 | Repeated derivative evaluations are expensive | `broyden1`, which updates a Jacobian approximation from changes in coordinates and residuals |
 | A large system where storing a dense Jacobian is costly | `krylov`, which approximates the action of an inverse Jacobian through iterative linear algebra |
 
-The notebook displays `result.success`, `result.message`, the force residual, and whether the returned coordinates preserve the atom ordering. Compare these with the handwritten Newton result at the same load and starting point. A library success flag must still be checked against the force tolerance required by the calculation. Root finding establishes force balance. Whether that balance is stable will become a central question in L15–L16.
+These methods have different convergence behaviour. There is no universal guarantee from an arbitrary starting point, so inspect `result.success`, `result.message`, the force residual, and the admissibility of the returned coordinates together. Root finding establishes force balance. Whether that balance is stable will become a central question in L15–L16.
 
 ### Extending to seven atoms
 
 With these ingredients, we can build a longer chain. For $N=7$, hold the middle atom and apply equal outward forces to the two ends. Six coordinates remain unknown. Each interacting pair contributes equal and opposite forces, and its derivatives contribute to the Jacobian. After summing those contributions, retain the six rows and columns corresponding to the moving atoms.
 
-The atom notebook includes this general force assembly as `chain_model`, followed by an editable seven-atom calculation. The calculation has the same form:
+The atom notebook includes this general force assembly as `chain_model`. The calculation has the same form:
 
 ```python
 f = 2.0  # force in ε/σ
@@ -430,9 +392,7 @@ jacobian7 = lambda x: evaluate(x, f)[2]
 x, history, ok, message = newton_system(force7, jacobian7, x0, valid=valid)
 ```
 
-For a loading sweep, first solve at zero force and then reuse each converged solution at the next load. The number of equations and matrix size change, while the Newton update stays the same. Because this model includes every pair, its Jacobian is dense. Keeping only nearest-neighbour interactions would recover the narrow matrix structure discussed in L12–L13.
-
-**Predict:** will all six bonds have the same strain? Compare the end bonds with the interior bonds in @fig-chain-pull.
+For a loading sweep, first solve at zero force and then reuse each converged solution at the next load. The number of equations and matrix size change, while the Newton update stays the same.
 
 ![Force–extension curve for seven atoms, with the middle atom fixed and both ends pulled. The dashed line is the harmonic tangent at zero load. The inset shows the last accepted configuration and each bond's strain relative to its unloaded length. The endpoint depends slightly on load-step resolution.](../../../assets/L14-chain-pull.png){#fig-chain-pull width="100%" fig-alt="Seven-atom LJ force-extension curve bending away from its harmonic tangent and approaching a load of 2.44262. An inset shows symmetric bond strains of about 10.9, 9.0, 8.9, 8.9, 9.0, and 10.9 percent."}
 
@@ -484,13 +444,6 @@ Our LJ calculation identifies a force limit for its specified interaction and co
 - The Jacobian tells us how every residual changes with every coordinate. For atomic net forces, it is the negative local stiffness matrix.
 - `scipy.optimize.root` supplies practical solvers for vector equations. Check the residual and the returned configuration.
 - A nonlinear bond can soften and reach a limiting load, which a constant-stiffness harmonic spring cannot describe.
-
-## Check your understanding
-
-1. A Newton step solves its matrix equation to machine precision, but the new force residual is still large. Why is another step needed?
-2. Why can we reuse an LU factorization for several loads in a harmonic chain, but generally need a new factorization at every nonlinear Newton step?
-3. At the trimer's limiting load, multiply the displayed Jacobian by $(-1,1)^T$. What motion does this vector describe, and why would pivoting leave the physical problem unchanged?
-4. A solve at $f=2.45$ fails. What evidence from the force–separation curve would distinguish a poor initial guess from the end of the symmetric branch?
 
 ## Before next lecture
 
