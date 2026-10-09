@@ -11,188 +11,225 @@ app = marimo.App(width="medium")
 
 @app.cell(hide_code=True)
 def imports():
+    import time
     import marimo as mo
     import numpy as np
     import matplotlib.pyplot as plt
-    from scipy.linalg import cholesky_banded, cho_solve_banded
-    return cho_solve_banded, cholesky_banded, mo, np, plt
+    from matplotlib.patches import Rectangle
+    from scipy.fft import dstn, idstn
+    return Rectangle, dstn, idstn, mo, np, plt, time
 
 
 @app.cell(hide_code=True)
 def introduction(mo):
     mo.md(r"""
-    ## S06 · Same matrix, different right-hand sides
+    ## S06 · One 2D diffusion matrix, different source fields
 
-    Take the diffusion matrix with 2 on its diagonal and −1 on the two neighbouring
-    diagonals. The supplied right-hand sides describe two different source profiles
-    in a layer whose face concentrations are fixed at zero.
+    Take the five-point finite-difference matrix for steady diffusion on a square
+    plate with fixed zero concentration on the boundary. Each interior grid point
+    interacts with its left, right, lower, and upper neighbours, so the matrix is
+    sparse, symmetric, and positive definite.
 
-    **Predict:** which part of the calculation can we keep when only the source changes?
-    Compare the dense operation estimates below, then find the two calls that perform
-    the actual **banded Cholesky** calculation.
+    **Predict:** if only the source field changes, which part of a direct solve
+    could be reused? Then compare that idea with a solver that uses the special
+    structure of this rectangular-grid diffusion problem.
     """)
     return
 
 
 @app.cell(hide_code=True)
 def controls(mo):
-    grid_form = mo.ui.dropdown(
-        [10, 100, 1000, 10_000, 100_000, 1_000_000], value=1000,
-        label="Unknowns n",
-    ).form(submit_button_label="Calculate")
-    mo.vstack([grid_form, mo.md(
-        "Start with 1000 unknowns. The million-unknown case is optional and uses "
-        "roughly 150 MB of working arrays, plus browser overhead."
+    side_form = mo.ui.dropdown(
+        [10, 30, 100, 300, 1000], value=100,
+        label="Interior grid points per side s",
+    ).form(submit_button_label="Solve 2D diffusion problem")
+    mo.vstack([side_form, mo.md(
+        "The number of unknowns is n = s². The s = 1000 case has one million "
+        "unknowns and is included to show why a dense matrix is the wrong model."
     )])
-    return (grid_form,)
+    return (side_form,)
 
 
 @app.cell
-def operation_estimates(grid_form):
-    N = int(grid_form.value) if grid_form.value is not None else 1000
-    number_of_rhs = 10  # Change this to compare one system with many systems.
-    elimination_ops = number_of_rhs*((2/3)*N**3 + 2*N**2)
-    lu_ops = (2/3)*N**3 + number_of_rhs*2*N**2
-    cholesky_ops = (1/3)*N**3 + number_of_rhs*2*N**2
-    return N, cholesky_ops, elimination_ops, lu_ops, number_of_rhs
+def grid_size(side_form):
+    side = int(side_form.value) if side_form.value is not None else 100
+    N = side*side
+    number_of_rhs = 2
+    return N, number_of_rhs, side
+
+
+@app.cell
+def operation_estimates(N, np, number_of_rhs, side):
+    dense_repeated_ops = number_of_rhs*((2/3)*N**3 + 2*N**2)
+    dense_lu_ops = (2/3)*N**3 + number_of_rhs*2*N**2
+    dense_cholesky_ops = (1/3)*N**3 + number_of_rhs*2*N**2
+    # A separable rectangular-grid Poisson solve uses sine transforms in both directions.
+    fast_poisson_work = number_of_rhs*N*np.log2(max(side, 2))
+    one_tflop_seconds = {
+        "dense_repeated": dense_repeated_ops/1e12,
+        "dense_lu": dense_lu_ops/1e12,
+        "dense_cholesky": dense_cholesky_ops/1e12,
+        "fast_poisson": fast_poisson_work/1e12,
+    }
+    return dense_cholesky_ops, dense_lu_ops, dense_repeated_ops, fast_poisson_work, one_tflop_seconds
 
 
 @app.cell(hide_code=True)
-def show_estimates(N, cholesky_ops, elimination_ops, lu_ops, mo, number_of_rhs):
+def show_estimates(N, dense_cholesky_ops, dense_lu_ops, dense_repeated_ops, fast_poisson_work, mo, number_of_rhs, one_tflop_seconds, side):
     mo.md(f"""
-    ### Dense operation estimates: {N:,} unknowns, {number_of_rhs} right-hand sides
+    ### Operation estimates: {side:,} × {side:,} grid = {N:,} unknowns
 
-    | Approach | Approximate operations |
-    |---|---:|
-    | Fresh elimination for every system | {elimination_ops:,.0f} |
-    | LU once, then reuse | {lu_ops:,.0f} |
-    | Cholesky once, then reuse | {cholesky_ops:,.0f} |
+    | Approach | Approximate operations | Idealized time at 1 TFLOP/s |
+    |---|---:|---:|
+    | Fresh dense elimination for each source | {dense_repeated_ops:,.2e} | {one_tflop_seconds['dense_repeated']:,.2g} s |
+    | Dense LU once, then reuse | {dense_lu_ops:,.2e} | {one_tflop_seconds['dense_lu']:,.2g} s |
+    | Dense Cholesky once, then reuse | {dense_cholesky_ops:,.2e} | {one_tflop_seconds['dense_cholesky']:,.2g} s |
+    | Optimized 2D diffusion solve used below | about {fast_poisson_work:,.2e} | {one_tflop_seconds['fast_poisson']:,.2g} s |
 
-    These are arithmetic estimates, not timings. They treat the matrix as **dense**.
-    The actual solve below uses its narrow band and performs much less work.
-    Banded LU and banded Cholesky both have linear cost for this tridiagonal matrix.
+    Dense Cholesky is the best dense direct method in this list, but the optimized
+    diffusion solve is in a different scaling class. It uses the grid structure
+    directly instead of building the full dense matrix.
     """)
     return
 
 
 @app.cell(hide_code=True)
-def supplied_data(N, np):
-    thickness = 1e-3
-    diffusivity = 1e-10
-    source_rate = 1e-4
-    h = thickness/(N + 1)
-    x = h*np.arange(1, N + 1)
-    sources = source_rate*np.column_stack([
-        np.ones(N), 1 + 0.5*np.sin(2*np.pi*x/thickness)
-    ])
-    rhs = (h*h/diffusivity)*sources
-    return diffusivity, h, rhs, source_rate, sources, thickness, x
+def supplied_data(np, side):
+    length = 1.0
+    h = length/(side + 1)
+    axis = h*np.arange(1, side + 1)
+    X, Y = np.meshgrid(axis, axis, indexing="ij")
+    sources = np.stack([
+        np.ones_like(X),
+        1.0 + 0.75*np.exp(-((X - 0.30)**2 + (Y - 0.55)**2)/0.015),
+    ], axis=-1)
+    rhs = h*h*sources
+    return X, Y, axis, h, length, rhs, sources
 
 
 @app.cell(hide_code=True)
-def storage_text(mo):
+def solve_text(mo):
     mo.md(r"""
-    ### The actual solve: factor once, solve two right-hand sides
+    ### The actual solve: diagonalize the 2D diffusion operator
 
-    The band array `ab` stores the diagonal in row 0 and the lower neighbouring
-    diagonal in row 1. Symmetry supplies the upper diagonal. The last element of
-    row 1 is unused padding. The two columns of `rhs` contain the supplied sources.
+    For a rectangular grid with fixed boundary values, the sine modes are the
+    eigenvectors of the five-point diffusion matrix. The code below transforms
+    each source field into sine-mode coefficients, divides by the eigenvalues, and
+    transforms back. This is the kind of specialized solver that makes a
+    million-unknown 2D diffusion calculation reasonable.
     """)
     return
 
 
 @app.cell
-def band_storage(N, np):
-    ab = np.zeros((2, N))
-    ab[0, :] = 2.0
-    ab[1, :-1] = -1.0
-    return (ab,)
-
-
-@app.cell
-def factor_once(ab, cholesky_banded):
-    L_band = cholesky_banded(ab, lower=True)
-    return (L_band,)
-
-
-@app.cell
-def solve_profiles(L_band, cho_solve_banded, rhs):
-    concentrations = cho_solve_banded((L_band, True), rhs)
-    return (concentrations,)
+def solve_2d_diffusion(dstn, idstn, np, rhs, side, time):
+    t0 = time.perf_counter()
+    modes = dstn(rhs, type=1, axes=(0, 1), norm="ortho")
+    p = np.arange(1, side + 1)
+    lam1 = 2 - 2*np.cos(np.pi*p/(side + 1))
+    eigenvalues = lam1[:, None] + lam1[None, :]
+    solution_modes = modes/eigenvalues[:, :, None]
+    concentrations = idstn(solution_modes, type=1, axes=(0, 1), norm="ortho")
+    solve_seconds = time.perf_counter() - t0
+    return concentrations, eigenvalues, solve_seconds
 
 
 @app.cell(hide_code=True)
-def check_solution(concentrations, diffusivity, h, np, rhs, source_rate, sources, thickness, x):
-    # Apply the three matrix diagonals directly, without allocating a dense A.
-    stencil_values = 2*concentrations.copy()
-    stencil_values[1:, :] -= concentrations[:-1, :]
-    stencil_values[:-1, :] -= concentrations[1:, :]
-    residuals = stencil_values - rhs
-    scaled_residuals = np.max(np.abs(residuals), axis=0)/(
-        4*np.max(np.abs(concentrations), axis=0) + np.max(np.abs(rhs), axis=0)
-    )
-    reference = source_rate*x*(thickness-x)/(2*diffusivity)
-    reference_peak = source_rate*thickness**2/(8*diffusivity)
-    relative_reference_error = np.max(np.abs(concentrations[:, 0]-reference))/reference_peak
-    outward_flux = diffusivity*(concentrations[0, :] + concentrations[-1, :])/h
-    discrete_generation = h*sources.sum(axis=0)
-    flux_balance_error = np.abs(outward_flux-discrete_generation)/discrete_generation
-    return (flux_balance_error, outward_flux, reference, reference_peak,
-            relative_reference_error, residuals, scaled_residuals)
+def residual_check(concentrations, np, rhs):
+    stencil = 4*concentrations.copy()
+    stencil[1:, :, :] -= concentrations[:-1, :, :]
+    stencil[:-1, :, :] -= concentrations[1:, :, :]
+    stencil[:, 1:, :] -= concentrations[:, :-1, :]
+    stencil[:, :-1, :] -= concentrations[:, 1:, :]
+    residuals = stencil - rhs
+    scaled_residuals = np.max(np.abs(residuals), axis=(0, 1))/(np.max(np.abs(rhs), axis=(0, 1)) + 4*np.max(np.abs(concentrations), axis=(0, 1)))
+    return residuals, scaled_residuals
 
 
 @app.cell(hide_code=True)
-def results(N, ab, L_band, mo, np, residuals):
+def results(N, concentrations, h, mo, np, residuals, rhs, scaled_residuals, side, solve_seconds):
     mo.md(f"""
-    **Largest absolute residual, either source:** {np.max(np.abs(residuals)):.2e} mol/m³.
+    **Actual optimized solve time in this browser/Python session:** {solve_seconds:.3g} s.
+
+    **Largest scaled residual, either source:** {np.max(scaled_residuals):.2e}.
 
     | Storage | Size |
     |---|---:|
     | Dense matrix, if allocated | {8*N*N/1e9:,.3f} GB |
-    | Actual band array | {ab.nbytes/1e6:.3f} MB |
-    | Reusable Cholesky factor | {L_band.nbytes/1e6:.3f} MB |
+    | Two source fields | {rhs.nbytes/1e6:.3f} MB |
+    | Two solution fields | {concentrations.nbytes/1e6:.3f} MB |
 
-    Sizes use decimal MB/GB and exclude solutions and other working arrays.
+    The dense matrix for s = 1000 would require 8 TB before any factorization.
     """)
     return
 
 
 @app.cell(hide_code=True)
-def profile_plot(N, concentrations, mo, np, plt, reference_peak, thickness, x):
-    _indices = np.unique(np.linspace(0, N-1, min(N, 1000), dtype=int))
-    _xp = np.r_[0.0, x[_indices], thickness]*1e3
+def profile_plot(X, Y, concentrations, mo, np, plt, side):
+    mid = side//2
+    _x = X[:, mid]
     with plt.rc_context({"font.size": 13}):
-        profile_figure, _ax = plt.subplots(figsize=(7, 3.8), layout="constrained")
+        profile_figure, _axes = plt.subplots(1, 2, figsize=(8.0, 3.5), layout="constrained")
         for _j, _name, _color in [(0, "Uniform source", "#231f20"),
-                                 (1, "Source biased to left", "#b5473a")]:
-            _ax.plot(_xp, np.r_[0.0, concentrations[_indices, _j], 0.0],
-                     label=_name, color=_color, lw=2)
-        _ax.plot(0.5*thickness*1e3, reference_peak, "o", color="#231f20", ms=5)
-        _ax.set(xlabel="Position through layer (mm)", ylabel="Concentration (mol/m³)")
-        _ax.legend(fontsize=11)
+                                  (1, "Localized stronger source", "#b5473a")]:
+            _axes[0].plot(_x, concentrations[:, mid, _j], label=_name, color=_color, lw=2)
+        _axes[0].set(xlabel="x at mid-height", ylabel="Concentration")
+        _axes[0].legend(fontsize=10)
+        _im = _axes[1].imshow(concentrations[:, :, 1].T, origin="lower", cmap="gray_r",
+                              extent=(0, 1, 0, 1))
+        _axes[1].contour(X, Y, concentrations[:, :, 1], levels=8, colors="#b5473a", linewidths=0.8)
+        _axes[1].set(xlabel="x", ylabel="y", title="Localized source solution")
+        profile_figure.colorbar(_im, ax=_axes[1], shrink=0.85)
     mo.vstack([profile_figure, mo.md(
-        "**Discuss:** the two answers differ, but they used the same factor. "
-        "Which function would you call again for a third right-hand side?"
+        "Both source fields used the same diffusion operator. A direct Cholesky "
+        "method would reuse its factor; the optimized solver reuses the same "
+        "eigenvalue grid."
     )])
     return (profile_figure,)
 
 
 @app.cell(hide_code=True)
-def pattern_plot(np, plt):
-    # Eight-unknown illustration only: no large dense matrices are constructed.
-    A_small = 2*np.eye(8)-np.eye(8, k=1)-np.eye(8, k=-1)
+def pattern_plot(Rectangle, np, plt):
+    # Four-by-four grid illustration only: the real solve never allocates A.
+    s = 4
+    n = s*s
+    A_small = np.zeros((n, n))
+    for i in range(s):
+        for j in range(s):
+            k = i*s + j
+            A_small[k, k] = 4
+            for di, dj in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                ii, jj = i + di, j + dj
+                if 0 <= ii < s and 0 <= jj < s:
+                    A_small[k, ii*s + jj] = -1
     L_small = np.linalg.cholesky(A_small)
-    with plt.rc_context({"font.size": 14}):
-        pattern_figure, _axes = plt.subplots(1, 2, figsize=(7, 3.5), layout="constrained")
-        for _ax, _matrix, _title, _color in zip(
-            _axes, [A_small, L_small], ["A: three diagonals", "L: two diagonals"],
-            ["#231f20", "#b5473a"],
-        ):
-            _rows, _cols = np.nonzero(_matrix)
-            _ax.scatter(_cols, _rows, marker="s", s=180, color=_color)
-            _ax.set(xlim=(-0.5, 7.5), ylim=(7.5, -0.5), aspect="equal",
-                    title=_title, xlabel="Column", ylabel="Row",
-                    xticks=[0, 2, 4, 6], yticks=[0, 2, 4, 6])
+
+    def draw_pattern(ax, matrix, label, color):
+        for row in range(n):
+            for col in range(n):
+                ax.add_patch(Rectangle(
+                    (col - 0.5, row - 0.5), 1, 1,
+                    facecolor=color if abs(matrix[row, col]) > 1e-12 else "white",
+                    edgecolor="#8a8f98", lw=0.35,
+                ))
+        ax.set(xlim=(-0.5, n - 0.5), ylim=(n - 0.5, -0.5), aspect="equal",
+               xticks=[], yticks=[])
+        for spine in ax.spines.values():
+            spine.set_linewidth(1.4)
+            spine.set_color("black")
+        ax.text(0.5, -0.08, label, transform=ax.transAxes,
+                ha="center", va="top", color=color, fontsize=18)
+
+    with plt.rc_context({"font.size": 14, "font.family": "Arial"}):
+        pattern_figure = plt.figure(figsize=(7.0, 2.45))
+        _axes = [pattern_figure.add_axes([left, 0.19, 0.265, 0.757])
+                 for left in [0.01, 0.365, 0.72]]
+        draw_pattern(_axes[0], A_small, r"$\mathbf{A}$", "#8a8f98")
+        # L_small is the lower factor; the page names its transpose L.
+        draw_pattern(_axes[1], L_small, r"$\mathbf{L}^{\mathsf{T}}$", "#b5473a")
+        draw_pattern(_axes[2], L_small.T, r"$\mathbf{L}$", "#b5473a")
+        pattern_figure.text(0.32, 0.57, "=", ha="center", va="center", fontsize=22)
+        pattern_figure.text(0.675, 0.57, "×", ha="center", va="center", fontsize=22)
     return A_small, L_small, pattern_figure
 
 

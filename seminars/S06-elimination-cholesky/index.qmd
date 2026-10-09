@@ -1,5 +1,5 @@
 ---
-title: "S06 · Gaussian elimination and Cholesky factorization"
+title: "S06 · Gaussian elimination hands on"
 subtitle: "Hand elimination and choosing a faster solver for repeated systems"
 body-classes: lecture-page seminar-page
 ---
@@ -150,24 +150,19 @@ Select the question and enter your computed vector in the editable cell. The che
 Question 1 has solution $(1,2,-1)^{\mathsf T}$ and Question 2 has solution $(1,-1,2)^{\mathsf T}$. Substitution into each original matrix gives its supplied right-hand side exactly. Both residual vectors are zero.
 :::
 
-## Question 3 · Why have so many matrix solvers?
+## Question 3 · Why have so many matrix solvers? {.reading-material}
 
-In [L13](../../units/03/L13/index.qmd), we met Gaussian elimination, LU, Cholesky, and banded solvers. Why do we need these different choices? Consider a common matrix from a diffusion calculation:
+Treat this question as reading material after the hand-elimination practice. In [L13](../../units/03/L13/index.qmd), we met Gaussian elimination, LU, Cholesky, and structured solvers. The reason for having so many choices becomes clear in a two-dimensional diffusion calculation.
+
+Imagine steady diffusion on a square grid with fixed boundary concentrations. At each interior point, the five-point finite-difference equation relates that point to its left, right, lower, and upper neighbours:
 
 $$
-\underbrace{\begin{bmatrix}
-2&-1&0&\cdots&0\\
--1&2&-1&\ddots&\vdots\\
-0&-1&2&\ddots&0\\
-\vdots&\ddots&\ddots&\ddots&-1\\
-0&\cdots&0&-1&2
-\end{bmatrix}}_{\mathbf A}
-\mathbf x=\mathbf b.
+4c_{i,j}-c_{i-1,j}-c_{i+1,j}-c_{i,j-1}-c_{i,j+1}=b_{i,j}.
 $$
 
-Here $\mathbf x$ contains concentrations at points through a layer. Each point interacts with its two neighbours, giving the three-diagonal pattern. We will develop the diffusion equations when we cover PDEs. For now, take this matrix as given. It is **tridiagonal, symmetric, and positive definite** when the concentrations at the two faces are fixed.
+After numbering the grid points, these equations form $\mathbf A\mathbf x=\mathbf b$. For a $1000\times1000$ interior grid, $\mathbf x$ contains **one million unknown concentrations**. The matrix is sparse, symmetric, and positive definite, but a dense copy of it would contain $10^{12}$ entries and require about **8 TB** before any factorization.
 
-In a simulation, we often solve many systems with the **same matrix** but different source terms or boundary values:
+In a simulation, we often solve many systems with the **same diffusion matrix** but different source fields:
 
 $$
 \mathbf A\mathbf x^{(1)}=\mathbf b^{(1)},\qquad
@@ -176,80 +171,85 @@ $$
 
 What work could we avoid repeating?
 
-### Repeated elimination versus reusable LU
+### Repeated elimination, reusable LU, and dense Cholesky
 
 Recall the assignment's LU calculation. Once $\mathbf A$ has been factored, each new right-hand side needs only forward and back substitution. For an $n\times n$ dense matrix, L13 gave approximately $\tfrac23n^3$ operations for elimination or LU factorization, and $2n^2$ for the two triangular substitutions.
 
-Suppose we have **1000 unknowns and 10 different right-hand sides**. Estimate the work for these two choices:
+Suppose we first use **1000 unknowns and 10 different right-hand sides** as a hand estimate:
 
 | Approach | Approximate total operations for $m$ right-hand sides |
 |---|---:|
 | Start elimination again for every system | $m(\tfrac23n^3+2n^2)$ |
 | Factor once with LU and reuse it | $\tfrac23n^3+2mn^2$ |
+| Factor once with dense Cholesky and reuse it | $\tfrac13n^3+2mn^2$ |
 
-**Calculate:** substitute $n=1000$ and $m=10$. Which term dominates each total? How much work does factor reuse save?
-
-::: {.callout-note collapse="true"}
-## Operation counts for 1000 unknowns and 10 right-hand sides
-
-Repeating the elimination costs about **6.69 billion** operations. Reusing LU costs about **687 million**, nearly ten times less. The factorization is the expensive part, and LU lets us keep it.
-
-For one right-hand side, LU has essentially the same work as Gaussian elimination. The saving here comes from reuse. Passing all right-hand sides together as columns of `B` to `np.linalg.solve(A, B)` also shares one factorization.
-:::
-
-Why not calculate $\mathbf A^{-1}$ once and reuse it? Even when $\mathbf A$ is banded, its inverse is generally dense. For this diffusion matrix, storing the inverse would lose the memory saving, and each product $\mathbf A^{-1}\mathbf b$ would take about $2n^2$ operations instead of the linear work of a banded solve. Computing the inverse also adds work and rounding error. If a reliable inverse is already available for a small dense problem, multiplying by it is valid, but for repeated solves we would normally keep the factors instead.
-
-### The banded structure saves more work
-
-Look again at $\mathbf A$: almost every entry is zero. A general dense calculation ignores that advantage. A **banded solver**, such as `scipy.linalg.solve_banded`, stores and works on the few diagonals that contain nonzero entries. For this tridiagonal system, the work grows in proportion to $n$, rather than $n^3$.
-
-**Discuss:** if the number of unknowns doubles, roughly how does the factorization work change for a dense method? For a tridiagonal method?
-
-### Cholesky uses the symmetry as well
-
-There is another useful property: this matrix is symmetric positive definite. Cholesky writes
+Substituting $n=1000$ and $m=10$ gives about **6.69 billion**, **687 million**, and **353 million** operations. Reusing a factorization gives the first large saving. Cholesky gives another saving because the diffusion matrix is symmetric positive definite:
 
 $$
-\mathbf A=\mathbf L\mathbf L^{\mathsf T}.
+\mathbf A=\mathbf L^{\mathsf T}\mathbf L.
 $$
 
-We compute one triangular factor, and its transpose supplies the other. For a **dense** matrix, this reduces the leading factorization cost from $\tfrac23n^3$ for general LU to $\tfrac13n^3$. The two substitutions for each new right-hand side still cost about $2n^2$.
-
-**Calculate:** for the same 1000 unknowns and 10 right-hand sides, estimate
+Here we use $\mathbf L$ for the **upper-triangular** Cholesky factor. To see the entries, take a $2\times2$ interior grid and number its four points row by row. Each point has two interior neighbours, while its other two neighbours lie on the fixed boundary. The stencil gives the following factorization, with zero entries left blank and the factor entries rounded to two decimal places:
 
 $$
-\frac13n^3+2mn^2.
+\underbrace{\begin{bmatrix}
+4&-1&-1&\\
+-1&4&&-1\\
+-1&&4&-1\\
+&-1&-1&4
+\end{bmatrix}}_{\mathbf A}
+\approx
+\underbrace{\begin{bmatrix}
+2&&&\\
+-0.5&1.94&&\\
+-0.5&-0.13&1.93&\\
+&-0.52&-0.55&1.85
+\end{bmatrix}}_{\mathbf L^{\mathsf T}}
+\underbrace{\begin{bmatrix}
+2&-0.5&-0.5&\\
+&1.94&-0.13&-0.52\\
+&&1.93&-0.55\\
+&&&1.85
+\end{bmatrix}}_{\mathbf L}.
 $$
 
-The result is about **353 million operations**, compared with 687 million for reusable dense LU. Cholesky saves about half the factorization work while retaining the same benefit of reuse.
+For example, the first diagonal entry of the product is $2^2=4$, and its first off-diagonal entry is $2(-0.5)=-1$. The factor also contains **fill-in**: its entry $L_{23}\approx-0.13$ is nonzero even though $A_{23}=0$. On larger grids these new entries occupy the band between the original stencil diagonals, as shown below.
 
-We can combine both properties in **banded Cholesky**. For this example, its factor has only two nonzero diagonals:
+![Cholesky factorization for a 4 by 4 interior diffusion grid: the original matrix A is grey, and the factors in A equals L transpose times L are red. White cells are zero. Fill-in widens the occupied part of each factor within the original bandwidth.](../../assets/S06-cholesky-pattern.png){#fig-cholesky-pattern width="100%" fig-alt="Three framed matrix grids show grey A equals red lower-triangular L transpose times red upper-triangular L. The factors contain additional nonzero entries inside the band."}
 
-![Nonzero entries of the diffusion matrix and its Cholesky factor. The narrow band is preserved in the factor.](../../assets/S06-cholesky-pattern.png){#fig-cholesky-pattern width="85%" fig-alt="The matrix A has three nonzero diagonals; its lower Cholesky factor L has two."}
+For **one million unknowns**, the dense estimates become large enough that the choice of method dominates everything else:
 
-General banded methods and banded Cholesky both have linear cost for this tridiagonal example. The factor-of-two dense estimate does not establish an automatic twofold speedup over a banded solver.
+| Approach | Approximate operations | Idealized time at 1 TFLOP/s |
+|---|---:|---:|
+| Fresh dense elimination for two source fields | $1.3\times10^{18}$ | 15 days |
+| Dense LU once, then reuse | $6.7\times10^{17}$ | 7.7 days |
+| Dense Cholesky once, then reuse | $3.3\times10^{17}$ | 3.9 days |
+| Optimized 2D diffusion solve | about $2.0\times10^{7}$ | far below a second of arithmetic |
 
-### A short calculation with the same matrix and two sources
+The final line uses the rectangular-grid structure of the diffusion operator. With fixed boundary values, sine modes diagonalize the five-point matrix, so the notebook can solve the two-dimensional problem by transforming the source field, dividing by known eigenvalues, and transforming back.
 
-The notebook supplies the matrix and two right-hand sides. The first describes uniform production through the layer, and the second describes greater production on the left. Find the factorization call and the solve call:
+### A short calculation with the same 2D matrix and two sources
+
+The notebook supplies two source fields on the same square grid. The first source is uniform, and the second has stronger production in one region. Find the transform solve:
 
 ```python
-factor = cholesky_banded(ab, lower=True)
-solutions = cho_solve_banded((factor, True), B)
+modes = dstn(rhs, type=1, axes=(0, 1), norm="ortho")
+solution_modes = modes/eigenvalues[:, :, None]
+concentrations = idstn(solution_modes, type=1, axes=(0, 1), norm="ortho")
 ```
 
-Here `ab` stores the matrix's lower band, and the columns of `B` are the two right-hand sides. The matrix is factored once and used for both answers.
+The same eigenvalue grid is used for both right-hand sides. This is the optimized version of the same reuse idea: the matrix structure is known once, and only the source-field data change.
 
-::: {.quarto-wasm-local notebook="s06_diffusion_cholesky.edit.py" view="edit" title="One banded Cholesky factor, two diffusion solutions" height="850" loading="lazy" fullscreen="true"}
-The notebook solves the same diffusion matrix for two source profiles and plots the resulting concentrations. It also calculates the operation estimates for repeated dense elimination, reusable dense LU, and reusable dense Cholesky. At $n=1000$ with ten right-hand sides, these are approximately 6.69 billion, 687 million, and 353 million operations. The actual demonstration uses banded Cholesky and can scale up to a million unknowns without constructing a dense matrix.
+::: {.quarto-wasm-local notebook="s06_diffusion_cholesky.edit.py" view="edit" title="Two-dimensional diffusion with one reused operator" height="850" loading="lazy" fullscreen="true"}
+The notebook solves a two-dimensional diffusion problem for two source fields and plots the resulting concentrations. It compares repeated dense elimination, reusable dense LU, dense Cholesky, and the optimized rectangular-grid diffusion solve. The million-unknown case corresponds to a 1000 by 1000 interior grid.
 :::
 
-![Two concentration profiles calculated with the same matrix factor and different right-hand sides.](../../assets/S06-diffusion-profiles.png){#fig-diffusion-profiles width="85%" fig-alt="Uniform production gives a symmetric concentration profile; left-biased production shifts the maximum left. Both solutions use the same matrix."}
+![Two concentration profiles and a two-dimensional concentration map calculated with the same diffusion operator.](../../assets/S06-diffusion-profiles.png){#fig-diffusion-profiles width="85%" fig-alt="A line plot compares concentration profiles for a uniform source and a localized stronger source, and a contour image shows the two-dimensional concentration field for the localized source."}
 
-**Try:** start at 1000 unknowns, then increase the size. At a million unknowns, a dense matrix alone would require **8 TB**, whereas the band array and its Cholesky factor require **16 MB each**, plus the solution and working arrays.
+**Try:** start with a small grid, then increase the grid size. At $1000\times1000$ interior points, the dense matrix alone would require **8 TB**, while the optimized solve stores only grid-sized arrays for the source fields, solution fields, and transform workspaces.
 
 ## Record and discuss
 
-Keep the row operations and answers for Questions 1 and 2. For Question 3, record the three operation estimates and explain the separate savings from **reusing a factorization**, **working within a narrow band**, and **using symmetry through Cholesky**.
+Keep the row operations and answers for Questions 1 and 2. For Question 3, record the operation estimates and explain the separate savings from **reusing a factorization**, **using symmetry through Cholesky**, and **using the two-dimensional diffusion structure directly**.
 
 **Before you leave:** if only $\mathbf b$ changes, which part of the calculation must be repeated? If $\mathbf A$ changes, what must be recalculated?
