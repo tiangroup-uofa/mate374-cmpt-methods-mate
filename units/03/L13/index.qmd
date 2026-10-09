@@ -163,6 +163,45 @@ $$
 x_i=\frac{c_i-\sum_{j=i+1}^{n}U_{ij}x_j}{U_{ii}},\qquad i=n,n-1,\ldots,1.
 $$
 
+::: {.callout-tip collapse="true"}
+## Two Python implementations of back substitution
+
+The code mirrors forward substitution with the loop reversed. Python counts rows from 0, so `range(n - 1, -1, -1)` visits $i=n-1,n-2,\ldots,0$. The unknowns already found now lie to the right of the diagonal, so the dot product uses the rest of row $i$, `U[i, i+1:]`, and the matching unknowns, `x[i+1:]`. In the first pass, $i=n-1$, both slices are empty, the dot product is zero, and the update reduces to $x_n=c_n/U_{nn}$.
+
+:::: {.columns}
+::: {.column width="50%"}
+**Explicit inner loop**
+
+```python
+import numpy as np
+
+def back_substitute_loop(U: np.ndarray, c: np.ndarray):
+    n = len(c)
+    x = np.zeros_like(c, dtype=float)
+    for i in range(n - 1, -1, -1):
+        numerator = c[i]
+        for j in range(i + 1, n):
+            numerator -= U[i, j] * x[j]
+        x[i] = numerator / U[i, i]
+    return x
+```
+:::
+
+::: {.column width="50%"}
+**NumPy dot product**
+
+```python
+def back_substitute_numpy(U: np.ndarray, c: np.ndarray):
+    n = len(c)
+    x = np.zeros_like(c, dtype=float)
+    for i in range(n - 1, -1, -1):
+        x[i] = (c[i] - U[i, i+1:] @ x[i+1:]) / U[i, i]
+    return x
+```
+:::
+::::
+:::
+
 Lower-triangular systems are solved by forward substitution and upper-triangular systems by back substitution. Row $i$ needs one multiplication and one subtraction for each unknown already found, so a complete triangular solve takes on the order of $n^2$ arithmetic operations. Most of the work in a direct method lies in transforming the original system into one of these easier forms.
 
 ### Popular direct methods and their final form
