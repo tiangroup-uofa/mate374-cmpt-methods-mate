@@ -32,3 +32,5 @@ toc: false
 14. [L14 · Root-finding for systems of nonlinear equations](03/L14/index.qmd) — the strength of a Lennard–Jones bond, Newton's method and the Jacobian for coupled force balances, and the breaking force of an atomic chain.
 15. [L15 · Energy minimization with many coordinates](03/L15/index.qmd) — relaxation as energy minimization, the gradient and Hessian, Newton's method for one atom moving between two fixed atoms, SciPy minimizers, and the saddle point where the forces vanish.
 16. [L16 · How do we know minimization really worked?](03/L16/index.qmd) — the eigenvalue problem, classifying relaxed clusters by their Hessian eigenvalues, following downhill modes, and vibrational frequencies.
+
+[Unit 03 · Summary and preparation](03/summary.qmd)

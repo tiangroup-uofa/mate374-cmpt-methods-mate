@@ -1,0 +1,117 @@
+---
+title: "Unit 03 · Summary and exam preparation"
+subtitle: "Systems of equations and high-dimensional problems"
+---
+
+How can systems of equations solve problems with many variables? In a material containing many atoms, each atom's force depends on other atoms' positions, so their equilibrium equations are coupled. A simple harmonic bead-and-spring model gives a linear system. More realistic interatomic forces lead to nonlinear systems and energy minimization over many coordinates.
+
+::: {.callout-note .prep-key}
+## How to prepare
+
+- [P · Practice]{.prep-label .prep-practice} **Practice:** Work on paper, with help from the provided functions or widgets when useful.
+- [R · Recall]{.prep-label .prep-recall} **Recall:** Know the concepts clearly and distinguish related ideas.
+- [E · Explain]{.prep-label .prep-explain} **Explain:** Describe the idea in your own words, without memorizing detailed algorithms.
+- [N · Recognize]{.prep-label .prep-recognize} **Recognize:** Know the method names and where to find them in the linked lecture or notebook.
+:::
+
+## [L11 · Matrices and coupled equations](L11/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Use basic NumPy array and matrix operations without SciPy. **Check your understanding:** How do you enter a matrix, access its first-row, first-column element $a_{11}$, and multiply it by a vector?
+- [P · Practice]{.prep-label .prep-practice} Write $\mathbf{A}\mathbf{x}=\mathbf{b}$ from equations such as $a_{11}x_1+a_{12}x_2=b_1$ and $a_{21}x_1+a_{22}x_2=b_2$, or from a description of a bead-and-spring system.
+- [R · Recall]{.prep-label .prep-recall} Identify the output shape of a matrix product: $(m\times n)(n\times p)\to(m\times p)$. What goes wrong when the inner dimensions do not match?
+- [R · Recall]{.prep-label .prep-recall} A linear system with $n$ independent equations and $n$ unknowns has a unique solution.
+- [E · Explain]{.prep-label .prep-explain} What does an inverse matrix mean, and why does $\mathbf{A}^{-1}\mathbf{A}=\mathbf{I}$ give $\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}$?
+- [E · Explain]{.prep-label .prep-explain} Why can we not solve each coupled equation independently, one after another, without accounting for the shared unknowns?
+
+### Python knowledge
+
+Enter a matrix with `np.array`. Python indices start at zero: $a_{11}$ is `A[0, 0]`, while `A[1, 1]` selects the second row and second column. Use `A @ x` for matrix–vector multiplication. The operator `*` multiplies elementwise.
+
+::: {.quarto-wasm-local notebook="u03_summary_arrays.edit.py" view="edit" title="Enter a matrix, select an entry, and multiply by a vector" height="530" loading="lazy" fullscreen="true"}
+For a two-bead spring chain in consistent units, let $\mathbf{A}=\begin{pmatrix}2&-1\\-1&1\end{pmatrix}$ and $\mathbf{x}=(1,2)^T$. `A[0, 0]` gives $2$, and `A @ x` gives the force vector $(0,1)^T$. The matrix has shape `(2, 2)` and the NumPy vector has shape `(2,)`.
+:::
+
+## [L12 · Solving and checking linear systems](L12/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Supply $\mathbf{A}$ and $\mathbf{b}$ to `np.linalg.solve` to solve $\mathbf{A}\mathbf{x}=\mathbf{b}$.
+- [P · Practice]{.prep-label .prep-practice} Check a computed solution $\mathbf{x}^*$ by substituting it into the equations. Calculate the residual $\mathbf{r}=\mathbf{A}\mathbf{x}^*-\mathbf{b}$ and its norm. A small residual measures how closely the equations are satisfied, but can coexist with a large solution error when the system is ill-conditioned.
+- [P · Practice]{.prep-label .prep-practice} Calculate `np.linalg.det(A)` and `np.linalg.cond(A)` to assess singularity and sensitivity. An exactly zero determinant means a square matrix is singular. A large condition number indicates sensitivity to small input changes, while determinant magnitude alone depends on scaling.
+- [R · Recall]{.prep-label .prep-recall} Explain the physical meaning of a singular stiffness matrix: a bead or fragment disconnected from the fixed supports can move without a restoring force.
+- [R · Recall]{.prep-label .prep-recall} State at least three limitations of solving through an explicit inverse: it does not exist for a singular matrix, forming it adds computational expense, and it generally loses useful banded or sparse structure. A singular system also prevents a unique solution with `np.linalg.solve`.
+- [E · Explain]{.prep-label .prep-explain} Why can special solvers use less work and storage for banded or tridiagonal matrices?
+- [N · Recognize]{.prep-label .prep-recognize} Find the banded solver `scipy.linalg.solve_banded` in [L12](L12/index.qmd#from-dense-matrices-to-banded-and-sparse-systems).
+
+### Python knowledge
+
+Use `x = np.linalg.solve(A, b)`, calculate `r = A @ x - b`, and measure the residual with `np.linalg.norm(r)`. Use `np.linalg.det(A)` and `np.linalg.cond(A)` for the matrix checks above.
+
+::: {.quarto-wasm-local notebook="u03_summary_solve.edit.py" view="edit" title="Solve a spring system and calculate its residual" height="600" loading="lazy" fullscreen="true"}
+For $\mathbf{A}=\begin{pmatrix}2&-1\\-1&1\end{pmatrix}$ and $\mathbf{b}=(0,1)^T$, `np.linalg.solve(A, b)` returns displacements $(1,2)^T$. The residual and its norm are zero for these inputs. The determinant is $1$ and the condition number is approximately $6.85$.
+:::
+
+## [L13 · Elimination and solver choice](L13/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Perform Gaussian elimination by hand on the augmented matrix $[\mathbf{A}\,|\,\mathbf{b}]$. Record the row operations and obtain the final solution by back substitution.
+- [P · Practice]{.prep-label .prep-practice} Swap rows when a zero pivot is encountered. Choosing the largest-magnitude available entry in the active column (**partial pivoting**) is optional for hand calculations.
+- [R · Recall]{.prep-label .prep-recall} Follow the [L13 solver-choice chart](L13/index.qmd#fig-solver-cheat-sheet) to identify a suitable algorithm for $\mathbf{A}\mathbf{x}=\mathbf{b}$.
+- [R · Recall]{.prep-label .prep-recall} Why do direct methods transform or factor a matrix into special forms such as lower-triangular $\mathbf{L}$ and upper-triangular $\mathbf{U}$?
+- [R · Recall]{.prep-label .prep-recall} For a general dense $n\times n$ system, elimination or factorization costs roughly $n^3$ arithmetic operations, while forward or back substitution costs roughly $n^2$.
+- [R · Recall]{.prep-label .prep-recall} Why does round-off affect a direct method even when its steps are exact in exact arithmetic? Explain how small pivots amplify errors and how pivoting reduces this risk. Finite-precision round-off remains, and ill-conditioning can amplify its effect.
+- [E · Explain]{.prep-label .prep-explain} Why does reusing an LU factorization save work when the same matrix has several different right-hand sides?
+- [N · Recognize]{.prep-label .prep-recognize} Recognize [iterative methods](L13/index.qmd#advanced-iterative-methods) for large, sparse systems. They typically improve an initial guess for $\mathbf{x}$ through repeated updates, rather than reducing $[\mathbf{A}\,|\,\mathbf{b}]$ by elimination.
+
+### Python knowledge
+
+At recognition level, locate the [forward-substitution](L13/index.qmd#lower-triangular-matrix-forward-substitution) and [back-substitution](L13/index.qmd#upper-triangular-matrix-back-substitution) examples in the class notes. Their code does not need to be memorized.
+
+## [L14 · Nonlinear systems and Newton steps](L14/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Write a nonlinear root-finding problem as $F_1(x_1,\ldots,x_n)=0,\ldots,F_n(x_1,\ldots,x_n)=0$. Write the linear system solved at each Newton–Raphson step: $\mathbf{J}(\mathbf{x})\Delta\mathbf{x}=-\mathbf{F}(\mathbf{x})$, where $J_{ij}=\partial F_i/\partial x_j$.
+- [P · Practice]{.prep-label .prep-practice} Given nonlinear functions, collect their residuals into a vector and use `scipy.optimize.root` with an initial guess.
+- [R · Recall]{.prep-label .prep-recall} Trace the [Newton–Raphson sample code](L14/index.qmd#a-newtonraphson-solver): evaluate $\mathbf{F}$ and $\mathbf{J}$, solve for $\Delta\mathbf{x}$, update $\mathbf{x}\leftarrow\mathbf{x}+\Delta\mathbf{x}$, and check the residual and correction.
+- [R · Recall]{.prep-label .prep-recall} Why does a linear bead-and-spring system with a nonsingular, constant Jacobian reach its solution in one Newton correction, while a general nonlinear system such as an LJ chain usually needs several? What changes in the Jacobian?
+- [E · Explain]{.prep-label .prep-explain} Give at least two limitations of the harmonic bead-and-spring model: constant bond stiffness, no bond-breaking limit, and a symmetric pair-energy curve about equilibrium. Compare these with the asymmetric LJ interaction in [L14, Figure 3](L14/index.qmd#fig-force-models).
+- [N · Recognize]{.prep-label .prep-recognize} Find the [options for `root`](L14/index.qmd#the-library-version-scipy.optimize.root), including the `method` argument and whether a Jacobian is supplied with `jac` or estimated by the solver.
+
+### Python knowledge
+
+Use `root(F, x0)` for a vector-valued residual. With the default `hybr` method, a known Jacobian can be supplied as `jac=J`. Inspect `.x`, `.success`, and the residual at the returned point.
+
+::: {.quarto-wasm-local notebook="u03_summary_roots.edit.py" view="edit" title="Solve two nonlinear equations with an optional Jacobian" height="650" loading="lazy" fullscreen="true"}
+For $F_1=x_1^2+x_2^2-5$ and $F_2=x_1-x_2-1$, the Jacobian is $\begin{pmatrix}2x_1&2x_2\\1&-1\end{pmatrix}$. From $(1.5,0.5)^T$, `root(F, x0, jac=J)` finds $(2,1)^T$, with a residual close to zero. Omitting `jac=J` lets the default method estimate the Jacobian.
+:::
+
+## [L15 · Energy, gradients, and Hessians](L15/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Formulate an energy-minimization problem as $\min_{\mathbf{x}}E(\mathbf{x})$ and write its stationary-point equations $\nabla E(\mathbf{x})=\mathbf{0}$. For a Newton step, write $\mathbf{H}\Delta\mathbf{x}=-\nabla E$, with $\mathbf{H}$ the Jacobian of the gradient.
+- [P · Practice]{.prep-label .prep-practice} Minimize a given energy with `scipy.optimize.minimize`. Also formulate its stationary-point search with `scipy.optimize.root`, supplying the Hessian as the Jacobian of the gradient when available.
+- [R · Recall]{.prep-label .prep-recall} Distinguish the energy gradient $g_i=\partial E/\partial x_i$, the force Jacobian $J_{ij}=\partial F_i/\partial x_j$, and the energy Hessian $H_{ij}=\partial^2 E/\partial x_i\partial x_j$. For conservative forces $\mathbf{F}=-\nabla E$, the force Jacobian is $\mathbf{J}=-\mathbf{H}$.
+- [R · Recall]{.prep-label .prep-recall} A zero gradient establishes a stationary point, which may be a local minimum, local maximum, or saddle. Minimizers seek minima, but a convergence report alone does not establish the type of stationary point reached.
+- [R · Recall]{.prep-label .prep-recall} Why can open-domain searches fail or reach an unintended stationary point? Consider a poor starting guess, attraction to a different minimum or a saddle during root finding, and failure to converge.
+- [E · Explain]{.prep-label .prep-explain} Explain the Hessian in at least two ways: local energy curvature, effective force constants or stiffnesses analogous to local springs, and the energy increase or decrease associated with displacement directions.
+- [N · Recognize]{.prep-label .prep-recognize} Find the [minimization methods and their required information](L15/index.qmd#why-the-method-name): energy only, energy and gradient, or energy, gradient, and Hessian.
+
+### Python knowledge
+
+Use `minimize(E, x0, jac=gradient, method="BFGS")`. Here `jac` is the energy gradient. For `root(gradient, x0, jac=hessian)`, `jac` is the Hessian. Minimization methods that use a supplied Hessian accept it through `hess`.
+
+::: {.quarto-wasm-local notebook="u03_summary_minimize.edit.py" view="edit" title="Minimize an energy and solve its stationary-point equations" height="700" loading="lazy" fullscreen="true"}
+For $E(x_1,x_2)=\tfrac12x_1^2+2x_2^2$ in arbitrary units, the gradient is $(x_1,4x_2)^T$ and the Hessian is $\operatorname{diag}(1,4)$. Both `minimize` applied to the energy and `root` applied to its gradient reach $(0,0)^T$. The positive Hessian eigenvalues establish a minimum for this example.
+:::
+
+## [L16 · Eigenvalues and structural stability](L16/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Find the eigenvalues of a $2\times2$ matrix by solving $\det(\mathbf{A}-\lambda\mathbf{I})=0$. For each eigenvalue, solve $(\mathbf{A}-\lambda\mathbf{I})\mathbf{u}=\mathbf{0}$ for a nonzero eigenvector.
+- [P · Practice]{.prep-label .prep-practice} Use `np.linalg.eig` to obtain eigenvalue–eigenvector pairs. Use `np.linalg.eigh` for a real symmetric matrix, such as an energy Hessian.
+- [R · Recall]{.prep-label .prep-recall} Define a saddle point: a stationary point with both uphill and downhill directions. Relate a first-order saddle, with one unstable direction, to a transition state and an energy barrier in a chemical reaction or materials transformation.
+- [R · Recall]{.prep-label .prep-recall} Near a stationary point, finding the direction of lowest energy curvature is the eigenvalue problem $\mathbf{H}\mathbf{u}=\lambda\mathbf{u}$. The smallest eigenvalue gives the lowest-curvature direction. All positive eigenvalues indicate a local minimum, all negative a local maximum, and mixed signs a saddle. Zero eigenvalues require further interpretation, including possible rigid translations or rotations.
+- [E · Explain]{.prep-label .prep-explain} Given an atomic structure, how would you minimize its energy and check the final structure? Describe the coordinates and constraints, energy and force calculation, convergence checks, and Hessian eigenvalue analysis needed to distinguish a minimum from a saddle or candidate transition state.
+- [N · Recognize]{.prep-label .prep-recognize} Recognize eigenvectors as collective displacement **modes** of a structure. Find examples of unstable modes in the [L16 cluster analysis](L16/index.qmd#advanced-topic-from-one-atom-to-a-cluster).
+
+### Python knowledge
+
+Use `values, vectors = np.linalg.eig(A)`. Column `vectors[:, i]` corresponds to `values[i]`, so check `A @ vectors[:, i]` against `values[i] * vectors[:, i]`. For real symmetric matrices, `np.linalg.eigh` returns real eigenvalues in ascending order.
+
+::: {.quarto-wasm-local notebook="l16_eig_syntax.edit.py" view="edit" title="Compute eigenvalues and their corresponding eigenvectors" height="640" loading="lazy" fullscreen="true"}
+For $\mathbf{H}=\begin{pmatrix}4&6\\6&4\end{pmatrix}$, the eigenvalues are $-2$ and $10$, with eigenvectors proportional to $(-1,1)^T$ and $(1,1)^T$, respectively. The mixed signs identify a saddle at a stationary point. Both `eig` and `eigh` return the eigenvectors as columns, and either sign of an eigenvector is valid.
+:::
