@@ -32,8 +32,8 @@ def load(name="l16_lj_cluster"):
 
 def check(spring, cluster):
     # theta = 45°, l0 = 1.2a: H = k [[0.8, 1.2], [1.2, 0.8]], eigenvalues -0.4k and 2k.
-    np.testing.assert_allclose(spring["H0"], [[0.8, 1.2], [1.2, 0.8]], atol=1e-6)
-    np.testing.assert_allclose(spring["values"], [-0.4, 2.0], atol=1e-6)
+    np.testing.assert_allclose(spring["H0"], [[4.0, 6.0], [6.0, 4.0]], atol=1e-6)
+    np.testing.assert_allclose(spring["values"], [-2.0, 10.0], atol=1e-6)
     assert not spring["is_positive_definite"](spring["H0"])
     assert spring["is_positive_definite"](spring["H_min"])
     # A1 square: two negative modes; following mode 1 passes the rhombus saddle to the tetrahedron.
@@ -54,7 +54,7 @@ def spring_figure(spring):
         ax.contourf(Xg, Yg, np.log10(Z + 1e-3), levels=30, cmap="Greys_r", alpha=0.6)
         ax.contour(Xg, Yg, Z, levels=np.linspace(0, 1.0, 11), colors="white", linewidths=0.5)
         ax.plot(*fixed.T, "s", color="black", ms=9)
-        H = hessian(np.zeros(2), fixed, 1.2)
+        H = hessian(np.zeros(2), fixed, 1.2)/5.0  # report H/k as in the caption
         values, vectors = np.linalg.eigh(H)
         for lam, v, colour in zip(values, vectors.T, ["tab:red", "tab:blue"]):
             ax.annotate("", xy=0.6*v, xytext=(0, 0), arrowprops=dict(arrowstyle="->", color=colour, lw=2.5))

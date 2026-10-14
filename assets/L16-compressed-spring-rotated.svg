@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="131.0mm" height="56.0mm" viewBox="0 0 131.0 56.0" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker style="overflow:visible" id="Triangle" refX="0" refY="0" orient="auto-start-reverse"
+            markerWidth="1" markerHeight="1" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid">
+      <path transform="scale(0.5)" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+            d="M 5.77,0 -2.88,5 V -5 Z"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="131.0" height="56.0" fill="#ffffff"/>
+  <g id="content">
+    <path style="fill:none;stroke:#c8c8c8;stroke-width:0.374;stroke-dasharray:1.5,1.5" d="M 20.444,48.556 L 39.444,48.556"/>
+    <path style="fill:none;stroke:#555555;stroke-width:0.35" d="M 28.444,48.556 A 8.0,8.0 0 0 0 26.101,42.899"/>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#333333;" x="31.161" y="45.217">45°</text>
+    <g transform="translate(20.444,48.556) rotate(-45.00) translate(2.205,0) scale(0.8641)"><path style="fill:none;stroke:#ce3a2d;stroke-width:0.5007" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g>
+    <g transform="translate(36.000,33.000) rotate(-45.00) translate(2.205,0) scale(0.8641)"><path style="fill:none;stroke:#ce3a2d;stroke-width:0.5007" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g>
+    <circle style="fill:#939393" cx="20.444" cy="48.556" r="2.705421"/>
+    <text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="20.444" y="49.806">L</text>
+    <circle style="fill:#939393" cx="51.556" cy="17.444" r="2.705421"/>
+    <text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="51.556" y="18.694">R</text>
+    <circle style="fill:#77aaff" cx="36.000" cy="33.000" r="2.705421"/>
+    <text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="36.000" y="34.250">M</text>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:end;fill:#000000;" x="16.644" y="49.656">(fixed)</text>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000;" x="55.356" y="18.544">(fixed)</text>
+    <text style="font-size:3.52777px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000;" x="25.676" y="39.433"><tspan style="font-style:italic">k</tspan></text>
+    <text style="font-size:3.52777px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000;" x="41.233" y="23.876"><tspan style="font-style:italic">k</tspan></text>
+    <path style="fill:none;stroke:#15428e;stroke-width:0.5;marker-end:url(#Triangle)" d="M 37.556,37.384 L 43.212,31.727"/>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#15428e;" x="44.612" y="34.927">δ<tspan style="font-size:65%;baseline-shift:sub">∥</tspan>: <tspan style="font-style:italic">E</tspan> rises</text>
+    <path style="fill:none;stroke:#15428e;stroke-width:0.5;marker-end:url(#Triangle)" d="M 33.667,30.667 L 28.929,25.929"/>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:end;fill:#15428e;" x="27.929" y="25.129">δ<tspan style="font-size:65%;baseline-shift:sub">⊥</tspan>: <tspan style="font-style:italic">E</tspan> falls</text>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000;" x="45.000" y="44.500"><tspan style="font-style:italic">r</tspan> = <tspan style="font-style:italic">a</tspan> &lt; <tspan style="font-style:italic">l</tspan><tspan style="font-size:65%;baseline-shift:sub">0</tspan></text>
+    <text style="font-weight:bold;font-size:2.82222px;font-family:Arial,sans-serif;text-anchor:start;fill:#ce3a2d" x="45.000" y="48.700">Initially compressed</text>
+    <path style="fill:none;stroke:#000000;stroke-width:0.5;marker-end:url(#Triangle)" d="M 6.000,41.000 L 12.500,41.000"/>
+    <path style="fill:none;stroke:#000000;stroke-width:0.5;marker-end:url(#Triangle)" d="M 6.000,41.000 L 6.000,34.500"/>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000;" x="14.600" y="42.100"><tspan style="font-style:italic">x</tspan></text>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000;" x="6.000" y="32.400"><tspan style="font-style:italic">y</tspan></text>
+    <path style="fill:none;stroke:#c8c8c8;stroke-width:0.374;stroke-dasharray:1.5,1.5" d="M 88.444,48.556 L 114.319,43.319 L 119.556,17.444"/>
+    <path style="fill:none;stroke:#b6b6b6;stroke-width:0.374;stroke-dasharray:1.5,1.5" d="M 88.444,48.556 L 119.556,17.444"/>
+    <circle style="fill:none;stroke:#ff8077;stroke-width:0.4;stroke-dasharray:0.9,0.7" cx="104.000" cy="33.000" r="2.505"/>
+    <g transform="translate(88.444,48.556) rotate(-78.56) translate(2.205,0) scale(1.0802)"><path style="fill:none;stroke:#ababab;stroke-width:0.3203" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g>
+    <g transform="translate(93.681,22.681) rotate(-11.44) translate(2.205,0) scale(1.0802)"><path style="fill:none;stroke:#ababab;stroke-width:0.3203" d="m 0,0 1.316032,-0.0019 1.299165,1.046678 1.402923,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 1.402922,2.373415 1.452059,-2.373414 1.402921,2.373415 1.402922,-2.373415 1.402921,2.373415 1.402922,-2.373415 0.772267,1.306495 1.488466,0.03755"/></g>
+    <circle style="fill:#939393" cx="88.444" cy="48.556" r="2.705421"/>
+    <text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="88.444" y="49.806">L</text>
+    <circle style="fill:#939393" cx="119.556" cy="17.444" r="2.705421"/>
+    <text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="119.556" y="18.694">R</text>
+    <circle style="fill:#77aaff" cx="93.681" cy="22.681" r="2.705421"/>
+    <text style="font-size:3.52778px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle" x="93.681" y="23.931">M</text>
+    <circle style="fill:none;stroke:#77aaff;stroke-width:0.4;stroke-dasharray:0.9,0.7" cx="114.319" cy="43.319" r="2.505"/>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000;" x="93.681" y="18.481">minimum</text>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:middle;fill:#000000;" x="115.319" y="49.719">mirror minimum</text>
+    <text style="font-size:3.2px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:end;fill:#000000;" x="87.662" y="36.819"><tspan style="font-style:italic">r</tspan> = <tspan style="font-style:italic">l</tspan><tspan style="font-size:65%;baseline-shift:sub">0</tspan></text>
+    <text style="font-weight:bold;font-size:2.82223px;font-family:Arial,sans-serif;text-anchor:middle;fill:#df4c4c;paint-order:stroke;stroke:#ffffff;stroke-width:0.9;stroke-linejoin:round" x="104.400" y="39.300">saddle point</text>
+    <text style="font-size:4.23333px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000;" x="3.000" y="8.000">(a)</text>
+    <text style="font-size:4.23333px;font-family:Arial,'Liberation Sans',sans-serif;text-anchor:start;fill:#000000;" x="72.000" y="8.000">(b)</text>
+  </g>
+</svg>

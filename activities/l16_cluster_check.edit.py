@@ -97,8 +97,8 @@ def show_square(E_square, mo, square_gradient, square_result):
     mo.md(f"""
     ### The minimizer's report
 
-    BFGS stops after {square_result.nit} iterations at **E = {E_square:.6f} ε** with
-    `success = {square_result.success}` and largest gradient entry {square_gradient:.1e}.
+    The minimizer meets its stopping criterion at **E = {E_square:.6f} ε**,
+    with largest gradient entry {square_gradient:.1e}.
     The structure is still a flat square. By symmetry, every force lies in the plane,
     so nothing pushes an atom out of it.
     """)
@@ -146,7 +146,7 @@ def show_square_modes(X_square, classify, mo, np, plt):
     square_values, square_vectors, square_counts = classify(X_square)
 
     def draw():
-        fig, ax = plt.subplots(figsize=(7, 3.2))
+        fig, ax = plt.subplots(figsize=(8, 3.8))
         colours = np.where(square_values < -1e-3, "tab:red",
                            np.where(np.abs(square_values) <= 1e-3, "tab:gray", "tab:blue"))
         ax.bar(np.arange(12), square_values, color=colours)
@@ -154,6 +154,19 @@ def show_square_modes(X_square, classify, mo, np, plt):
         ax.set(xlabel="Mode index (ascending)", ylabel="Eigenvalue (ε/σ²)",
                title="Hessian eigenvalues of the relaxed square")
         ax.grid(alpha=0.2)
+        inset = ax.inset_axes([0.12, 0.40, 0.27, 0.48])
+        square_xy = X_square[:, :2] - X_square[:, :2].mean(axis=0)
+        closed_xy = np.vstack([square_xy, square_xy[0]])
+        inset.plot(*closed_xy.T, color="#5e5e5e", lw=2)
+        inset.scatter(*square_xy.T, s=150, color="#e4e4e4",
+                      edgecolor="#231f20", zorder=3)
+        for index, xy in enumerate(square_xy):
+            inset.text(*xy, str(index + 1), ha="center", va="center", fontsize=9)
+        inset.set_aspect("equal")
+        inset.set_xlim(-0.85, 0.85)
+        inset.set_ylim(-0.85, 0.85)
+        inset.set_title("Relaxed square", fontsize=11)
+        inset.axis("off")
         fig.tight_layout()
         return fig
 

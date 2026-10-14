@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="164mm" height="110mm" viewBox="0 0 164 110"><desc>Relaxed LJ13 cuboctahedron and icosahedron computed with the pairwise Lennard-Jones potential. All thirteen atoms are drawn. The red atom is the central atom; dashed spokes join it to its twelve neighbours. Gray solid lines join nearby shell atoms. Same camera and scale in both panels.</desc><defs><marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+<radialGradient id="gray" cx=".5" cy=".5" r=".5" fx=".35" fy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#8a8f98"/></radialGradient>
+<radialGradient id="red" cx=".5" cy=".5" r=".5" fx=".35" fy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b5473a"/></radialGradient>
+</defs>
+<g id="cubo" inkscape:groupmode="layer" inkscape:label="Cuboctahedron">
+<text x="2" y="7" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">a</text>
+<text x="12" y="7" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">Cuboctahedron</text>
+<text x="42" y="16" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1 centre + 12 neighbours</text>
+<path d="M 42.000,49.000 L 19.228,53.534" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 24.813,63.453" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 24.813,30.183" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 30.397,40.102" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 36.415,72.351" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 36.415,39.080" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 47.585,58.920" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 47.585,25.649" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 53.603,57.898" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 59.187,67.817" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 59.187,34.547" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 42.000,49.000 L 64.772,44.466" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 19.228,53.534 L 24.813,63.453" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 19.228,53.534 L 24.813,30.183" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 19.228,53.534 L 36.415,72.351" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 19.228,53.534 L 36.415,39.080" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 24.813,63.453 L 30.397,40.102" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 24.813,63.453 L 36.415,72.351" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 24.813,63.453 L 47.585,58.920" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 24.813,30.183 L 30.397,40.102" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 24.813,30.183 L 36.415,39.080" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 24.813,30.183 L 47.585,25.649" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 30.397,40.102 L 47.585,58.920" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 30.397,40.102 L 47.585,25.649" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 36.415,72.351 L 53.603,57.898" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 36.415,72.351 L 59.187,67.817" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 36.415,39.080 L 53.603,57.898" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 36.415,39.080 L 59.187,34.547" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 47.585,58.920 L 59.187,67.817" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 47.585,58.920 L 64.772,44.466" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 47.585,25.649 L 59.187,34.547" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 47.585,25.649 L 64.772,44.466" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 53.603,57.898 L 59.187,67.817" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 53.603,57.898 L 59.187,34.547" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 59.187,67.817 L 64.772,44.466" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 59.187,34.547 L 64.772,44.466" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<circle cx="47.585" cy="58.920" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="30.397" cy="40.102" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="24.813" cy="63.453" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="64.772" cy="44.466" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="47.585" cy="25.649" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="59.187" cy="67.817" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="42.000" cy="49.000" r="2.4" style="fill:url(#red);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="24.813" cy="30.183" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="36.415" cy="72.351" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="19.228" cy="53.534" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="59.187" cy="34.547" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="53.603" cy="57.898" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="36.415" cy="39.080" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="42" y="82" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">E = −40.8845 ε</text>
+<text x="42" y="90" style="font-family:Arial;font-size:4.23px;fill:#b5473a;text-anchor:middle;font-weight:bold">Saddle point</text>
+<text x="42" y="98" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1 negative, 6 zero, 32 positive</text>
+</g>
+<g id="ico" inkscape:groupmode="layer" inkscape:label="Icosahedron">
+<text x="94" y="7" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">b</text>
+<text x="104" y="7" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">Icosahedron</text>
+<text x="134" y="16" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1 centre + 12 neighbours</text>
+<path d="M 134.000,49.000 L 109.827,51.305" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 121.559,66.904" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 121.559,27.937" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 117.912,41.583" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 127.459,68.907" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 127.459,44.824" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 140.541,53.176" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 140.541,29.093" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 150.088,56.417" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 146.441,70.063" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 146.441,31.096" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 134.000,49.000 L 158.173,46.695" style="fill:none;stroke:#8a8f98;stroke-width:0.45;stroke-dasharray:1.5,1;"/>
+<path d="M 109.827,51.305 L 121.559,66.904" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 109.827,51.305 L 121.559,27.937" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 109.827,51.305 L 117.912,41.583" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 109.827,51.305 L 127.459,68.907" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 109.827,51.305 L 127.459,44.824" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,66.904 L 117.912,41.583" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,66.904 L 127.459,68.907" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,66.904 L 140.541,53.176" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,66.904 L 146.441,70.063" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,27.937 L 117.912,41.583" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,27.937 L 127.459,44.824" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,27.937 L 140.541,29.093" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 121.559,27.937 L 146.441,31.096" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 117.912,41.583 L 140.541,53.176" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 117.912,41.583 L 140.541,29.093" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 127.459,68.907 L 127.459,44.824" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 127.459,68.907 L 150.088,56.417" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 127.459,68.907 L 146.441,70.063" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 127.459,44.824 L 150.088,56.417" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 127.459,44.824 L 146.441,31.096" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 140.541,53.176 L 140.541,29.093" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 140.541,53.176 L 146.441,70.063" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 140.541,53.176 L 158.173,46.695" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 140.541,29.093 L 146.441,31.096" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 140.541,29.093 L 158.173,46.695" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 150.088,56.417 L 146.441,70.063" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 150.088,56.417 L 146.441,31.096" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 150.088,56.417 L 158.173,46.695" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 146.441,70.063 L 158.173,46.695" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 146.441,31.096 L 158.173,46.695" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<circle cx="140.541" cy="53.176" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="117.912" cy="41.583" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="140.541" cy="29.093" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="121.559" cy="66.904" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="158.173" cy="46.695" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="146.441" cy="70.063" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="134.000" cy="49.000" r="2.4" style="fill:url(#red);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="121.559" cy="27.937" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="109.827" cy="51.305" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="146.441" cy="31.096" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="127.459" cy="68.907" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="150.088" cy="56.417" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<circle cx="127.459" cy="44.824" r="2.4" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="134" y="82" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">E = −44.3268 ε</text>
+<text x="134" y="90" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:bold">Local minimum</text>
+<text x="134" y="98" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">0 negative, 6 zero, 33 positive</text>
+</g>
+<path d="M 79.000,49.000 L 95.000,49.000" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri);"/>
+<text x="88" y="107" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">Follow the negative mode and relax</text>
+</svg>

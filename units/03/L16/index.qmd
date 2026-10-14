@@ -19,35 +19,146 @@ By the end of this lecture, you should be able to:
 3. **Classify** a relaxed atomic structure from the signs of its Hessian eigenvalues, accounting for rigid translations and rotations.
 4. **Lower** the energy of a structure stuck on a saddle point by following the eigenvector of a negative eigenvalue and relaxing again.
 
-## The question left open in L15
+## Recap: minimization in higher dimensions
 
-In [L15](../L15/index.qmd), one atom moved between two fixed atoms joined to it by compressed springs. Newton's method reached the origin, where the forces cancel. The energy rose for a horizontal displacement but fell for a vertical one, so that stationary point was a saddle. Two mirror minima lay above and below the line of the fixed atoms.
-
-The Hessian records those curvatures. With fixed atoms at $(-a,0)$ and $(a,0)$, its value at the origin is
+In [L14](../L14/index.qmd) and [L15](../L15/index.qmd), we turned the search for a stable structure into a system of equations. At force balance, every first derivative of the energy $E(\mathbf x)$ with respect to a free atomic coordinate vanishes. These derivatives are the components of the gradient:
 
 $$
-\mathbf H_0=\begin{bmatrix}2k&0\\0&2k(1-l_0/a)\end{bmatrix}
-=k\begin{bmatrix}2&0\\0&-0.4\end{bmatrix}
-\qquad (l_0=1.2a).
+\nabla E(\mathbf x)=\begin{bmatrix}\partial E/\partial x_1\\ \partial E/\partial x_2\\ \vdots\\ \partial E/\partial x_n\end{bmatrix}=\mathbf 0 .
 $$
 
-The positive entry describes the restoring response along the springs. The negative entry describes the energy decrease across them. Because this matrix is diagonal, the two directions are easy to read. The difficulty begins when the coordinates are coupled.
+Newton's method solves these nonlinear equations one linear system at a time:
+
+$$
+\boxed{\mathbf H\,\Delta\mathbf x=-\nabla E.}
+$$
+
+This is the force-balance step $\mathbf J_F\Delta\mathbf x=-\mathbf F$ rewritten with $\mathbf F=-\nabla E$ and $\mathbf J_F=-\mathbf H$. All derivatives are evaluated at the current coordinates, and $\Delta\mathbf x$ is the proposed change in those coordinates.
+
+::: {.callout-tip collapse="true"}
+## Recap: the Jacobian and Hessian matrices
+
+The **Jacobian** contains the first partial derivatives of a vector field. For $\mathbf F=(F_1,\ldots,F_n)^{\mathsf T}$, each row describes how one force component changes as the coordinates vary:
+
+$$
+\mathbf J_F=
+\begin{bmatrix}
+\dfrac{\partial F_1}{\partial x_1} & \cdots & \dfrac{\partial F_1}{\partial x_n}\\
+\vdots & \ddots & \vdots\\
+\dfrac{\partial F_n}{\partial x_1} & \cdots & \dfrac{\partial F_n}{\partial x_n}
+\end{bmatrix}.
+$$
+
+The **Hessian** contains the second partial derivatives of a scalar field, here the energy:
+
+$$
+\mathbf H=
+\begin{bmatrix}
+\dfrac{\partial^2 E}{\partial x_1^2} & \cdots & \dfrac{\partial^2 E}{\partial x_1\,\partial x_n}\\
+\vdots & \ddots & \vdots\\
+\dfrac{\partial^2 E}{\partial x_n\,\partial x_1} & \cdots & \dfrac{\partial^2 E}{\partial x_n^2}
+\end{bmatrix}.
+$$
+
+Thus $\mathbf H$ is the Jacobian of $\nabla E$. Since force is the negative energy gradient, $\mathbf J_F=-\mathbf H$. For a smooth energy with continuous second derivatives, $\mathbf H$ is symmetric.
+:::
+
+### Saddle points: from mountain passes to catalysts
+
+By the end of L15, we had seen two ways in which the search for a minimum can go wrong:
+
+1. **A poor starting guess.** Newton steps can overshoot, run away along a flat energy tail, or stop without converging.
+2. **A stationary point that is not a minimum.** In the compressed-spring model, the moving atom lies between two fixed atoms. At the midpoint, the forces cancel, even though a vertical displacement lowers the energy. A stopping test based only on the gradient can accept this saddle point.
+
+The second outcome is easy to miss because the force residual can be essentially zero. Yet saddle points also describe physically important routes between stable states. Think of crossing a mountain ridge through a **mountain pass**, such as Rogers Pass in British Columbia (@fig-pass-catalyst). In an idealized smooth landscape, the pass is a high point along the route from one valley to the other, but a low point along the ridge. From the pass, walking toward either valley takes you downhill, while walking along the ridge takes you uphill. A route through the pass avoids climbing to a nearby summit.
+
+The same geometry appears on an atomic energy surface. For example, one step in the **hydrogen evolution reaction (HER)** is the combination of two hydrogen atoms adsorbed on a catalyst into an $\mathrm H_2$ molecule. As the atoms approach each other and detach from the surface, the system passes through a **transition state**: a saddle point with a downhill direction toward the reactants and another toward the products along the same reaction path. Small displacements perpendicular to that path raise the energy. The transition state is the barrier configuration, whereas a reaction intermediate occupies a local minimum.
+
+![**(a)** An example of a mountain pass: Rogers Pass. **(b)** The energy landscape of a hydrogen evolution reaction on an electrode.](../../../assets/L16-pass-catalyst.svg){#fig-pass-catalyst width="100%" fig-alt="Left: Rogers Pass with schematic elevation cuts along the ridge and crossing route. Right: hydrogen atoms combine on a catalyst surface and cross a transition-state energy barrier."}
+
+Photo: [Michael Rogers, Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Rogers_pass.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Elevation and energy profiles are schematic. The symbol $*$ denotes an adsorption site.
+
+The energy difference between the initial and final states describes their relative energetic stability. The barrier between them helps determine how quickly the reaction can occur. A catalyst provides a reaction pathway with a lower activation barrier while leaving the overall reaction free-energy change unchanged. At finite temperature, reaction rates depend on the activation **free energy**, which includes entropic contributions as well as energy.
+
+Saddle points therefore connect the stability question to reaction kinetics. To decide whether a force-balanced structure is a minimum or a transition-state candidate, we need the energy curvature along possible atomic displacements. The Hessian contains this information. We will first read it for the moving atom connected by two springs, then extend the reasoning to structures with many coordinates.
+
+## What the Hessian tells us about a two-coordinate atom
+
+Return to the atom that moves freely in $x$ and $y$. Its Hessian collects the four second derivatives of the energy:
+
+$$
+\mathbf H=\begin{bmatrix}H_{11}&H_{12}\\H_{21}&H_{22}\end{bmatrix}
+=\begin{bmatrix}
+\dfrac{\partial^2E}{\partial x^2} & \dfrac{\partial^2E}{\partial x\,\partial y}\\[2ex]
+\dfrac{\partial^2E}{\partial y\,\partial x} & \dfrac{\partial^2E}{\partial y^2}
+\end{bmatrix}.
+$$
+
+The two kinds of entry describe different features of the energy surface:
+
+- **Diagonal entries.** $H_{11}=\partial^2E/\partial x^2$ and $H_{22}=\partial^2E/\partial y^2$ are the curvatures of the energy along the $x$- and $y$-axes. Each is the second derivative we would obtain by cutting the surface along one axis and treating the cut as a function of one variable, as in [L07](../../02/L07/index.qmd).
+- **Off-diagonal entries.** $H_{12}=\partial^2E/\partial x\,\partial y$ couples the two coordinates. Reading it as $\partial(\partial E/\partial x)/\partial y$, it measures how the slope along $x$, and therefore the force $F_x=-\partial E/\partial x$, changes when the atom moves in $y$. For a smooth energy the order of differentiation does not matter, so $H_{21}=H_{12}$: a move in $x$ changes $F_y$ by the same amount.
+
+When the off-diagonal entries are zero, the matrix can be read at a glance. The Hessian
+
+$$
+\mathbf H=\begin{bmatrix}4&0\\0&2\end{bmatrix}
+$$
+
+describes an energy that bends more sharply along $x$ than along $y$. In the local-stiffness picture of L15, the atom sits in a spring of constant 4 for motion along $x$ and a spring of constant 2 for motion along $y$, so it is held twice as stiffly in $x$.
+
+::: {.quarto-wasm-local notebook="l16_diagonal_hessian.edit.py" view="app" title="Energy surfaces with a diagonal Hessian: a minimum and a saddle" height="640" loading="lazy" fullscreen="true"}
+The notebook draws two energy surfaces with a stationary point at the origin. The minimum $E=2x^2+y^2$ has $\mathbf H=\begin{bmatrix}4&0\\0&2\end{bmatrix}$, and its cuts along both axes are upward parabolas. The saddle $E=2x^2-y^2$ has $\mathbf H=\begin{bmatrix}4&0\\0&-2\end{bmatrix}$. Its cut along $x$ curves upward and its cut along $y$ curves downward. In both cases, each diagonal entry is the curvature of one cut.
+:::
+
+### Energy change near a stationary point
+
+The Taylor expansion (which we will revisit in Unit 4) connects these entries to the stability of a structure. For a small displacement $\Delta\mathbf x$ from a point $\mathbf x$,
+
+$$
+E(\mathbf x+\Delta\mathbf x)\approx E(\mathbf x)+\nabla E^{\mathsf T}\Delta\mathbf x+\tfrac12\,\Delta\mathbf x^{\mathsf T}\mathbf H\,\Delta\mathbf x .
+$$
+
+At a stationary point, $\nabla E=\mathbf 0$ removes the middle term, and the energy change is
+
+$$
+\Delta E=E(\mathbf x+\Delta\mathbf x)-E(\mathbf x)\approx\tfrac12\,\Delta\mathbf x^{\mathsf T}\mathbf H\,\Delta\mathbf x .
+$$
+
+For two coordinates, $\Delta\mathbf x=(\Delta x,\Delta y)^{\mathsf T}$. Multiplying out the matrix product and using $H_{21}=H_{12}$ gives
+
+$$
+\begin{aligned}
+\Delta E &\approx \tfrac12\left(H_{11}\Delta x^2+H_{12}\Delta x\,\Delta y+H_{21}\Delta y\,\Delta x+H_{22}\Delta y^2\right)\\
+&= \tfrac12\left(H_{11}\Delta x^2+2H_{12}\Delta x\,\Delta y+H_{22}\Delta y^2\right).
+\end{aligned}
+$$
+
+With a diagonal Hessian, the cross term vanishes and $\Delta E\approx\tfrac12\left(H_{11}\Delta x^2+H_{22}\Delta y^2\right)$. The signs of the two diagonal entries then decide what kind of stationary point we have:
+
+- **Case 1, a local minimum:** $H_{11}>0$ and $H_{22}>0$, as in $\begin{bmatrix}4&0\\0&2\end{bmatrix}$. Both terms are positive for any nonzero displacement, so every small move raises the energy, which is the definition of a local minimum from L15.
+- **Case 2, a saddle point:** $H_{11}$ and $H_{22}$ have opposite signs, as in $\begin{bmatrix}4&0\\0&-2\end{bmatrix}$. A move along $x$ alone raises the energy, but a move along $y$ alone lowers it by $\tfrac12|H_{22}|\,\Delta y^2$. Like the hiker on the pass, the atom sits at the top of one path and the bottom of another.
+
+The compressed springs of L15 are an example of case 2. With the fixed atoms at $(\pm a,0)$ and natural length $l_0=1.2a$, the Hessian at the origin is $k\begin{bmatrix}2&0\\0&-0.4\end{bmatrix}$. The positive entry is the restoring response along the springs, and the negative entry is the energy decrease across them.
 
 ## Rotate the geometry, keeping the axes fixed
 
-Rotate the two fixed atoms by $45^\circ$ about the origin while keeping the laboratory $x$- and $y$-axes unchanged. The moving atom still has two coordinates, and the springs have the same stiffness and natural length. Before calculating anything, predict where the two minima will move.
+What if we keep the same spring system ($l_0=1.2a$), but rotate it $45^\circ$ counterclockwise? **Where will the stationary points be, and how can we tell whether they are minima or saddle points?**
 
-![The compressed spring system rotated by $45^\circ$. Motion parallel to the springs raises the energy near the origin, while perpendicular motion lowers it. The two minima rotate with the fixed atoms.](../../../assets/L15-compressed-spring-rotated.png){#fig-spring-rotated width="90%" fig-alt="Two fixed atoms on a diagonal joined by compressed springs to a middle atom. Displacement along their diagonal is restoring, while displacement across it is unstable. A second panel shows the two rotated minima."}
+![The compressed spring system of L15 rotated by $45^\circ$ counterclockwise, with the $x$- and $y$-axes unchanged. (a) At the origin, motion parallel to the springs ($\delta_\parallel$) raises the energy, while perpendicular motion ($\delta_\perp$) lowers it. (b) The two minima, where both springs reach their natural length $l_0$, rotate with the fixed atoms.](../../../assets/L16-compressed-spring-rotated.png){#fig-spring-rotated width="90%" fig-alt="Panel a: two fixed atoms on a line 45 degrees above the x-axis, joined by compressed red springs to a middle atom at the origin. A blue arrow along the springs is labelled E rises, a blue arrow perpendicular to them is labelled E falls, and fixed x and y axes are drawn at the left. Panel b: the middle atom at the upper-left minimum with both grey springs at their natural length, the saddle point at the origin, and a dashed mirror minimum at the lower right."}
 
-Rotation carries the old minima $(0,\pm0.6633a)$ to approximately $(-0.4690a,0.4690a)$ and $(0.4690a,-0.4690a)$. A numerical minimizer supplied with the rotated energy still finds these positions. The geometry changes the function being evaluated, but the optimization algorithm needs no new instructions.
+From the physical model, we know that the stationary points rotate by $45^\circ$ as well (@fig-spring-rotated). The two minima move with the geometry, and $(0,0)$ remains a stationary point.
 
-At the origin, however, the Hessian now reads
+- **No change in the numerical task.** With suitable starting guesses, `scipy.optimize.minimize` finds the rotated minima, while `scipy.optimize.root` applied to $\nabla E=\mathbf 0$ finds stationary points, including the saddle. We use the same solvers with the rotated energy and gradient.
+- **Cannot tell from the diagonal entries alone.** At the origin, the Hessian is now
 
-$$
-\mathbf H=k\begin{bmatrix}0.8 & 1.2\\1.2 & 0.8\end{bmatrix}.
-$$
+  $$
+  \mathbf H=k\begin{bmatrix}0.8 & 1.2\\1.2 & 0.8\end{bmatrix}.
+  $$
 
-Both diagonal entries are positive. Moving along the $x$-axis alone raises the energy, and moving along the $y$-axis alone does too. Yet the origin is the same saddle, so there must be a combined displacement that lowers the energy. The off-diagonal entries describe precisely this coupling: moving in $x$ changes the force in $y$, and conversely.
+  Both diagonal entries are positive, so moving along either coordinate axis raises the energy. Yet the origin remains a saddle point. How can we read the downhill direction from the full Hessian?
+
+The downhill direction hides in the off-diagonal entries. With $H_{12}=1.2k$, a move in $x$ changes the force in $y$, and a move in $y$ changes the force in $x$. In the energy change, the cross term $2H_{12}\Delta x\,\Delta y$ is negative whenever $\Delta x$ and $\Delta y$ have opposite signs, so a combined displacement can lower the energy even though neither coordinate can do so alone.
 
 ::: {.callout-tip collapse="true"}
 ## Derivation of the spring Hessian and its rotation
@@ -71,44 +182,92 @@ $$
 Setting $\theta=0$ gives the diagonal matrix. At $45^\circ$, $\sin^2\theta=\cos^2\theta=1/2$, giving the matrix with entries $0.8k$ and $1.2k$.
 :::
 
+::: {.callout-tip collapse="true"}
+## Rotating the coordinates back
+
+One fix seems obvious. We rotated the atoms by $45^\circ$, so we could measure displacements along axes rotated by the same angle. Let $q_\parallel$ be the displacement along the springs, in the direction $\hat{\mathbf n}=(1,1)/\sqrt2$, and $q_\perp$ the displacement across them, in the direction $\hat{\mathbf n}_\perp=(-1,1)/\sqrt2$. A displacement in the laboratory coordinates is then
+
+$$
+\Delta\mathbf x=q_\parallel\hat{\mathbf n}+q_\perp\hat{\mathbf n}_\perp=\mathbf R\mathbf q,
+\qquad
+\mathbf R=\frac1{\sqrt2}\begin{bmatrix}1&-1\\1&1\end{bmatrix},
+\qquad
+\mathbf q=\begin{bmatrix}q_\parallel\\ q_\perp\end{bmatrix},
+$$
+
+where the columns of the rotation matrix $\mathbf R$ are the two new directions. Substituting into the energy change gives $\Delta E\approx\tfrac12\,\mathbf q^{\mathsf T}\left(\mathbf R^{\mathsf T}\mathbf H\mathbf R\right)\mathbf q$, with
+
+$$
+\mathbf R^{\mathsf T}\mathbf H\mathbf R
+=\frac k2\begin{bmatrix}1&1\\-1&1\end{bmatrix}
+\begin{bmatrix}0.8&1.2\\1.2&0.8\end{bmatrix}
+\begin{bmatrix}1&-1\\1&1\end{bmatrix}
+=k\begin{bmatrix}2&0\\0&-0.4\end{bmatrix}.
+$$
+
+The diagonal Hessian has returned, and we can again read case 2 from it: the energy rises along the springs and falls across them. The rotation worked because we built the system ourselves and knew the angle. For the 13-atom cluster at the end of this lecture, the Hessian is $39\times39$, and nothing tells us in advance which combinations of the 39 coordinates remove the coupling. We need a method that finds these directions from the matrix itself, and that method is the eigenvalue problem.
+
+:::
+
 ## The eigenvalue problem
 
 ### Curvature along any direction
 
-Near a stationary point $\mathbf x^*$, the gradient term of the Taylor expansion vanishes, and a small displacement $\delta\mathbf x$ changes the energy by
+Let's set the spring stiffness to $k=5$ in the previous example so that the Hessian is easier to write:
 
 $$
-E(\mathbf x^*+\delta\mathbf x)-E(\mathbf x^*)\approx\tfrac12\,\delta\mathbf x^{\mathsf T}\mathbf H\,\delta\mathbf x .
+\mathbf H=\begin{bmatrix}4&6\\6&4\end{bmatrix}.
 $$
 
-For a unit direction $\mathbf d$, the curvature along that direction is $\mathbf d^{\mathsf T}\mathbf H\mathbf d$. Choosing $\mathbf d=(1,0)$ picks out $H_{xx}$, and $\mathbf d=(0,1)$ picks out $H_{yy}$. For the rotated spring, the direction $\mathbf d=(1,-1)/\sqrt2$ gives
+Starting at the stationary point $\mathbf x^*=(0,0)$, take a displacement $\delta\mathbf x=q\mathbf u$, where $\mathbf u$ is a unit vector in any direction and $q$ is the signed distance along it. We use $q$ for the displacement amplitude because $k$ already denotes the spring stiffness. **From our physical intuition, which direction should we choose to lower the energy most for the same displacement distance?**
+
+Write $\mathbf u=(\cos\theta,\sin\theta)^{\mathsf T}$. Substituting $\delta\mathbf x=q\mathbf u$ into the quadratic energy change gives
 
 $$
-\mathbf d^{\mathsf T}\mathbf H\mathbf d=\tfrac12\,k\,(0.8-1.2-1.2+0.8)=-0.4k<0,
+\Delta E\approx \frac12 q^2\,\mathbf u^{\mathsf T}\mathbf H\mathbf u.
 $$
 
-which reveals the downhill direction that the diagonal entries hide. Strictly positive curvature in **every** nonzero direction is sufficient to establish a strict local minimum. A negative curvature proves that a downhill direction remains. Zero curvature requires more care, since higher-order terms can then decide the behaviour. We need a systematic way to find the largest and smallest curvatures instead of testing directions individually.
+For a fixed distance $|q|$, the quantity $\mathbf u^{\mathsf T}\mathbf H\mathbf u$ determines how much the energy rises or falls. It is the **curvature along $\mathbf u$**. In the demo, rotate $\mathbf u$ in $5^\circ$ steps and compare the energy along the line through $\pm\mathbf u$. The surface is the local quadratic model $\Delta E=2x^2+6xy+2y^2$.
+
+::: {.quarto-wasm-local notebook="l16_direction_scan.edit.py" view="app" title="Rotate a displacement direction through the saddle-point energy surface" height="760" loading="lazy" fullscreen="true"}
+![The local quadratic energy surface and its cut along the downhill direction at $135^\circ$.](../../../assets/L16-direction-scan.png){width="100%"}
+
+At $0^\circ$, $\mathbf u=(1,0)^{\mathsf T}$ and the curvature is $4$, so $\Delta E=2q^2$. At $135^\circ$, $\mathbf u=(-1,1)^{\mathsf T}/\sqrt2$ and the curvature is $-2$, so $\Delta E=-q^2$. Both signs of $q$ lower the energy. The gradient at the displaced point $q=0.10$ points back toward the saddle, so the force points away from it.
+:::
+
+Imagine climbing through this energy landscape from the saddle point. For the same displacement distance, we find two lines along which the energy rises or falls most:
+
+- **$45^\circ$ or $225^\circ$: the largest energy rise.** The curvature is $\mathbf u^{\mathsf T}\mathbf H\mathbf u=10$, giving $\Delta E=5q^2$. At a point displaced along $\mathbf u$, the **gradient aligns with $\mathbf u$**.
+- **$135^\circ$ or $315^\circ$: the largest energy decrease.** The curvature is $\mathbf u^{\mathsf T}\mathbf H\mathbf u=-2$, giving $\Delta E=-q^2$. At a point displaced along $\mathbf u$, the **gradient points opposite to $\mathbf u$**.
+
+Intuitively, we have found a geometric way to solve the problem by identifying these special directions. In linear algebra, finding the directions and their associated curvatures is an **eigenvalue–eigenvector problem**. The German word *eigen* means “own”: these are directions intrinsic to the matrix.
 
 ### Eigenvectors and eigenvalues
 
-Near a force-balanced structure, the linearized force is
+We can generalize the search for special directions by finding nonzero vectors $\mathbf u$ that satisfy
 
 $$
-\mathbf F(\mathbf x^*+\delta\mathbf x)\approx-\mathbf H\delta\mathbf x.
+\boxed{\mathbf H\mathbf u=\lambda\mathbf u.}
 $$
 
-A general displacement can produce a force pointing along a different line. We seek special displacement directions along which the force remains parallel or antiparallel to the displacement. Write $\delta\mathbf x=q\mathbf u$, with $q$ the displacement amplitude and $\mathbf u$ a unit direction. If
+If this holds, moving from the stationary point by $\delta\mathbf x=q\mathbf u$ produces an approximate force
 
 $$
-\boxed{\mathbf H\mathbf u=\lambda\mathbf u,}
+\mathbf F\approx-\mathbf H\delta\mathbf x=-\lambda q\mathbf u,
 $$
 
-then $\mathbf F\approx-\lambda q\mathbf u$. Along that direction, the whole matrix acts like a single spring constant $\lambda$. A positive $\lambda$ gives a restoring force. A negative $\lambda$ gives a force that amplifies the displacement.
+along the same line as the displacement.
 
-- An **eigenvector** $\mathbf u\ne\mathbf 0$ specifies a direction whose line is preserved by the matrix. Multiplying it by any nonzero number gives another eigenvector for the same direction.
-- The associated **eigenvalue** $\lambda$ is the multiplier in $\mathbf H\mathbf u=\lambda\mathbf u$. A negative multiplier reverses the vector, and a zero multiplier maps it to zero.
+- An **eigenvector** $\mathbf u$ is a nonzero vector that becomes a scalar multiple of itself when multiplied by $\mathbf H$.
+- The **eigenvalue** $\lambda$ is the corresponding multiplier. For this Hessian, it gives the curvature along the unit eigenvector: positive for a restoring force and negative for a force that drives the atom farther from the stationary point.
 
-For a unit eigenvector, $\mathbf u^{\mathsf T}\mathbf H\mathbf u=\lambda\mathbf u^{\mathsf T}\mathbf u=\lambda$. Thus the eigenvalue is also the energy curvature along that direction, and the energy change is approximately $\tfrac12\lambda q^2$. We have recovered both the local spring law and its quadratic energy.
+::: {.callout-tip}
+## How many eigenvalues and eigenvectors?
+
+An $n\times n$ real symmetric matrix has $n$ real eigenvalues, counting repeated values, and we can choose $n$ mutually perpendicular unit eigenvectors. These provide $n$ independent directions.
+
+The matrix fixes its eigenvalues, but the eigenvectors have a scaling freedom: if $\mathbf u$ is an eigenvector, any nonzero multiple $c\mathbf u$ is also an eigenvector with the same eigenvalue. When an eigenvalue repeats, the choice of directions within its eigenspace is also nonunique.
+:::
 
 ### The general matrix problem
 
@@ -134,32 +293,81 @@ $$
 =\lambda^2-(a+d)\lambda+(ad-bc)=0.
 $$
 
-We first solve this quadratic for the eigenvalues. For each one, substitute it back into $(\mathbf A-\lambda\mathbf I)\mathbf u=\mathbf 0$ and find a nonzero vector. The determinant of an $n\times n$ matrix gives a degree-$n$ polynomial in $\lambda$. It has $n$ roots over the complex numbers counting multiplicities, although there can be fewer distinct eigenvalues. A general real matrix can have complex eigenvalues. The real symmetric Hessian has real eigenvalues, which is why they can serve as signed curvatures.
+We have a quadratic equation $\lambda^2+A\lambda+B=0$, with coefficients $A=-(a+d)$ and $B=ad-bc$. The quadratic formula gives
+
+$$
+\lambda_{1,2}=\frac{-A\pm\sqrt{A^2-4B}}{2}
+=\frac{a+d\pm\sqrt{(a+d)^2-4(ad-bc)}}{2}.
+$$
 
 ### Worked example: the rotated spring Hessian
 
-With $\mathbf H=k\begin{bmatrix}0.8&1.2\\1.2&0.8\end{bmatrix}$ and $\lambda$ measured in units of $k$,
+Continue with $\mathbf H=\begin{bmatrix}4&6\\6&4\end{bmatrix}$.
+
+**Step 1: solve for the eigenvalues.** The determinant equation is
 
 $$
-\det\begin{bmatrix}0.8-\lambda & 1.2\\ 1.2 & 0.8-\lambda\end{bmatrix}
-=(0.8-\lambda)^2-1.2^2=0
-\quad\Rightarrow\quad
-\lambda=0.8\pm1.2 .
+\begin{aligned}
+\det(\mathbf H-\lambda\mathbf I)
+&=\det\begin{bmatrix}4-\lambda&6\\6&4-\lambda\end{bmatrix}\\
+&=(4-\lambda)^2-36
+=\lambda^2-8\lambda-20=0.
+\end{aligned}
 $$
 
-The eigenvalues are $\lambda_1=-0.4k$ and $\lambda_2=2.0k$, the same as for the unrotated system. Write their unit eigenvectors as $\mathbf v_1$ and $\mathbf v_2$. For $\lambda_1$, the first row of $(\mathbf H-\lambda_1\mathbf I)\mathbf v=\mathbf 0$ reads $1.2v_x+1.2v_y=0$, so $\mathbf v_1=(-1,1)/\sqrt2$. For $\lambda_2$, it reads $-1.2v_x+1.2v_y=0$, so $\mathbf v_2=(1,1)/\sqrt2$. The stable direction $\mathbf v_2$ lies along the spring axis $\mathbf n=(1,1)/\sqrt2$, and the unstable direction $\mathbf v_1$ is perpendicular to it. Either sign of each eigenvector describes the same line. Normalizing the vector to length one fixes its magnitude, but still leaves this sign freedom.
-
-The eigenvalues did not change when we rotated the system. Only the eigenvectors turned with it. The eigenvalues describe the physics, while the matrix entries also depend on our choice of axes.
-
-### Why the eigenvectors answer the question
-
-For a real symmetric matrix such as $\mathbf H$, we can choose a complete set of mutually perpendicular unit eigenvectors, including when eigenvalues repeat. They form a new set of axes. Measured along those axes, with coordinates $q_1,q_2,\ldots$, the coupling disappears and the energy change becomes a sum of independent terms:
+Here $A=-8$ and $B=-20$, so
 
 $$
-\tfrac12\,\delta\mathbf x^{\mathsf T}\mathbf H\,\delta\mathbf x=\tfrac12\left(\lambda_1q_1^2+\lambda_2q_2^2+\cdots+\lambda_nq_n^2\right).
+\lambda_{1,2}=\frac{8\pm\sqrt{64+80}}{2}
+=\frac{8\pm12}{2},
+\qquad
+\boxed{\lambda_1=-2,\quad\lambda_2=10.}
 $$
 
-This is the diagonal case we could read at a glance, recovered for any Hessian. The rule for classifying a stationary point follows directly:
+**Step 2: solve for the corresponding eigenvectors.** Substitute each eigenvalue into $(\mathbf H-\lambda\mathbf I)\mathbf u=\mathbf 0$:
+
+$$
+\begin{aligned}
+\lambda_1=-2:\quad&
+\begin{bmatrix}6&6\\6&6\end{bmatrix}
+\begin{bmatrix}u_x\\u_y\end{bmatrix}
+=\begin{bmatrix}0\\0\end{bmatrix}
+&&\Longrightarrow\quad u_y=-u_x,\\[1ex]
+\lambda_2=10:\quad&
+\begin{bmatrix}-6&6\\6&-6\end{bmatrix}
+\begin{bmatrix}u_x\\u_y\end{bmatrix}
+=\begin{bmatrix}0\\0\end{bmatrix}
+&&\Longrightarrow\quad u_y=u_x.
+\end{aligned}
+$$
+
+Each matrix has rank 1: its two rows give the same equation. We cannot use `np.linalg.solve`, which requires an invertible coefficient matrix. Instead, we obtain two families of nonzero solutions,
+
+$$
+\mathbf u_1=c_1\begin{bmatrix}-1\\1\end{bmatrix},
+\qquad
+\mathbf u_2=c_2\begin{bmatrix}1\\1\end{bmatrix},
+\qquad c_1,c_2\ne0.
+$$
+
+Choosing unit length gives $\mathbf u_1=(-1,1)^{\mathsf T}/\sqrt2$ and $\mathbf u_2=(1,1)^{\mathsf T}/\sqrt2$. The first points across the springs, where the energy falls, and the second points along them, where the energy rises. These are the same directions we found by rotating the slider.
+
+### Use eigenvalues and eigenvectors to tell saddle points from minima
+
+For an $n\times n$ symmetric Hessian $\mathbf H$, we can calculate $n$ mutually perpendicular unit eigenvectors $\mathbf u_1,\ldots,\mathbf u_n$. They work as new axes for the energy landscape. Any displacement can be written as
+
+$$
+\delta\mathbf x=q_1\mathbf u_1+q_2\mathbf u_2+\cdots+q_n\mathbf u_n,
+$$
+
+where $q_i$ is the displacement along axis $\mathbf u_i$. Near the stationary point, the energy change is
+
+$$
+\Delta E\approx\tfrac12\,\delta\mathbf x^{\mathsf T}\mathbf H\,\delta\mathbf x
+=\tfrac12\left(\lambda_1q_1^2+\lambda_2q_2^2+\cdots+\lambda_nq_n^2\right).
+$$
+
+Each eigenvalue tells us whether the energy rises or falls along its eigenvector. Since every $q_i^2$ is nonnegative, we can classify the stationary point from the signs:
 
 | Eigenvalues of $\mathbf H$ | Energy near the point | Stationary point |
 |---|---|---|
@@ -167,49 +375,40 @@ This is the diagonal case we could read at a glance, recovered for any Hessian. 
 | Some positive, some negative | Rises in some directions and falls in others | Saddle point |
 | All negative | Falls in every direction | Local maximum |
 
-A matrix whose eigenvalues are all positive is called **positive definite**, the property that Cholesky factorization required in L13. For the spring system, `cho_factor` fails at the origin and succeeds at either minimum.
-
 ![The compressed spring system with $l_0=1.2a$, unrotated (left) and rotated by $45^\circ$ (right). Arrows show the Hessian eigenvectors at the origin: red for $\lambda=-0.4k$, blue for $\lambda=2.0k$. The matrix entries change with rotation, but the eigenvalues do not.](../../../assets/L16-compressed-spring.png){#fig-compressed-spring fig-alt="Two contour plots of the middle-atom energy. Left, fixed atoms on the x-axis, minima above and below the origin, a red arrow pointing up and a blue arrow pointing right. Right, the same landscape rotated by 45 degrees, with fixed atoms on the diagonal, minima on the other diagonal, and the arrows rotated with them." width="90%"}
 
 ### Computing eigenvalues in practice
 
 For a $2\times2$ matrix, $\det(\mathbf H-\lambda\mathbf I)=0$ is a quadratic equation that we can solve by hand. For the $3N\times3N$ Hessian of a cluster, we use a library routine.
 
-::: {.callout-note}
-## Syntax: Eigenvalues of a symmetric matrix with `np.linalg.eigh`
+- **General square matrix: `np.linalg.eig(A)`.** It returns the eigenvalues and the corresponding eigenvectors as columns. The results can be complex and are not sorted. In our real symmetric example the imaginary parts vanish, so we can use `values.real` and `vectors.real`. For a general matrix, check the imaginary parts before taking only the real part.
+- **Real symmetric matrix: `np.linalg.eigh(H)`.** This routine returns real eigenvalues in ascending order and mutually perpendicular unit eigenvectors as columns. It is the natural choice for a Hessian.
 
-```python
-values, vectors = np.linalg.eigh(H)   # H must be symmetric
-values           # eigenvalues in ascending order
-vectors[:, 0]    # unit eigenvector for values[0]: the eigenvectors are COLUMNS
-```
-
-[`np.linalg.eigh`](https://numpy.org/doc/stable/reference/generated/numpy.linalg.eigh.html) is designed for symmetric (Hermitian) matrices and guarantees real eigenvalues and perpendicular eigenvectors. The general `np.linalg.eig` also works for nonsymmetric matrices, but it does not sort its output and may return complex numbers.
+::: {.quarto-wasm-local notebook="l16_eig_syntax.edit.py" view="edit" title="Compute eigenvalues and eigenvectors with NumPy eig and eigh" height="640" loading="lazy" fullscreen="true"}
+For $\mathbf H=\begin{bmatrix}4&6\\6&4\end{bmatrix}$, both routines give eigenvalues $-2$ and $10$. The columns of the returned eigenvector array give the corresponding directions. The `eigh` result puts $-2$ first, with an eigenvector proportional to $(-1,1)^{\mathsf T}$, followed by $10$, with an eigenvector proportional to $(1,1)^{\mathsf T}$. Either sign of each vector is valid.
 :::
 
-The determinant equation explains the eigenvalue problem, but numerical libraries use matrix algorithms rather than expanding a large characteristic polynomial. After computing a pair $(\lambda,\mathbf u)$, check it by evaluating $\mathbf H\mathbf u-\lambda\mathbf u$.
-
-A finite-difference Hessian can have small asymmetries from truncation and rounding. Check that they shrink appropriately when changing the difference step. Averaging $\mathbf H$ with its transpose then removes that small numerical asymmetry before `eigh`. A large asymmetry can indicate an incorrect gradient or derivative calculation and needs investigation.
+## (Reading material): how to implement the saddle-point solver
 
 ::: {.quarto-wasm-local notebook="l16_saddle_eigen.edit.py" view="edit" title="Hessian, eigenvectors, and a Cholesky test for the compressed spring" height="1000" loading="lazy" fullscreen="true"}
-The notebook builds the $2\times2$ Hessian of the compressed spring system by central differences, compares it with the analytical matrix, and diagonalizes it with `np.linalg.eigh`. At $\theta=45^\circ$ and $l_0=1.2a$, it gives $\mathbf H=k\begin{bmatrix}0.8&1.2\\1.2&0.8\end{bmatrix}$ with eigenvalues $-0.4k$ and $2.0k$, and eigenvectors perpendicular and parallel to the spring axis. Energy profiles along the $x$- and $y$-axes rise in both directions, while the profile along the first eigenvector falls. Cholesky factorization fails at the origin and succeeds at the minimum.
+The notebook builds the $2\times2$ Hessian of the compressed spring system by central differences, compares it with the analytical matrix, and diagonalizes it with `np.linalg.eigh`. At $\theta=45^\circ$, $l_0=1.2a$, and $k=5.0$, it gives $\mathbf H=\begin{bmatrix}4&6\\6&4\end{bmatrix}$ with eigenvalues $-2$ and $10$, and eigenvectors perpendicular and parallel to the spring axis. Energy profiles along the $x$- and $y$-axes rise in both directions, while the profile along the first eigenvector falls. Cholesky factorization fails at the origin and succeeds at the minimum.
 :::
 
-## From one atom to a cluster
+## Advanced topic: from one atom to a cluster
 
 For a cluster of $N$ atoms, the Hessian is $3N\times3N$, and the same rule applies with one adjustment. If we translate the whole cluster or rotate it rigidly, no distance between atoms changes, and neither does the energy. At a stationary configuration, an isolated nonlinear cluster therefore has three translational and three rotational zero modes, giving six zero eigenvalues. (A linear molecule has only two distinct rotations, and therefore five.) In the spring system, the fixed atoms removed these motions, which is why every eigenvalue there was nonzero.
 
 A relaxed cluster is a local minimum when, apart from the six zero eigenvalues, all $3N-6$ remaining eigenvalues are positive. In floating-point arithmetic the "zero" eigenvalues come out as small numbers such as $10^{-6}$, so in practice we use a tolerance appropriate to the stiffness scale and derivative accuracy. Additional zero modes can represent internal flexibility. Their stability needs higher-order information or direct energy tests.
 
-### The four-atom square from A1
+### Four-atom LJ clusters: are they really minima?
 
-In Assignment 1, the tetrahedron was the lowest of three four-atom argon shapes. What happens if we hand a perfect square to a minimizer? Using LJ reduced units, with energies in $\varepsilon$ and lengths in $\sigma$, BFGS stops after five iterations at $E=-4.480620\,\varepsilon$, with a gradient below $10^{-8}$ and `success = True`. The structure is still a flat square. By symmetry, every force lies in the plane of the square, so nothing pushes any atom out of it, and the minimizer only adjusts the side length.
+In Assignment 1, the tetrahedron was the lowest of three four-atom argon shapes. What happens if we hand a perfect square to a minimizer? Using LJ reduced units, with energies in $\varepsilon$ and lengths in $\sigma$, the minimizer correctly meets its gradient-based stopping criterion at $E=-4.480620\,\varepsilon$, with a gradient below $10^{-8}$. The structure is still a flat square. By symmetry, every force lies in the plane of the square, so nothing pushes any atom out of it, and the minimizer only adjusts the side length.
 
 The $12\times12$ Hessian tells a different story:
 
-![Hessian eigenvalues of the relaxed four-atom square in LJ reduced units: two negative (red), six zero (grey), and four positive (blue).](../../../assets/L16-square-eigenvalues.png){#fig-square-eigenvalues fig-alt="Bar chart of twelve eigenvalues in ascending order: two negative bars near minus 7.9 and minus 2.2, six bars at zero, and four positive bars between 130 and 138." width="70%"}
+![The relaxed four-atom square and its Hessian eigenvalues: two negative (red), six zero (grey), and four positive (blue).](../../../assets/L16-square-eigenvalues.png){#fig-square-eigenvalues fig-alt="Inset: four numbered atoms forming a square. Bar chart of twelve eigenvalues in ascending order: two negative bars near minus 7.9 and minus 2.2, six bars at zero, and four positive bars between 130 and 138." width="70%"}
 
-Two eigenvalues are negative, $\lambda_1=-7.86$ and $\lambda_2=-2.22\,\varepsilon/\sigma^2$, so the square is a saddle point with two independent downhill directions. Their eigenvectors show what they are:
+**Two eigenvalues are negative!** Their values are $\lambda_1=-7.86$ and $\lambda_2=-2.22\,\varepsilon/\sigma^2$. The square is therefore a saddle point with two independent downhill directions. Their eigenvectors show what they are:
 
 - **Mode 1** keeps the atoms in the plane and shears the square into a rhombus.
 - **Mode 2** moves the atoms perpendicular to the plane: two opposite corners rise while the other two sink, folding the square.
@@ -221,25 +420,37 @@ Displacing the atoms a short distance along an eigenvector and relaxing again fo
 | Follow mode 1 | $-4.4806\ \rightarrow\ -5.0734\ \rightarrow\ -6.0000$ | Square → flat rhombus (a saddle with one negative eigenvalue) → tetrahedron |
 | Follow mode 2 | $-4.4806\ \rightarrow\ -6.0000$ | Square → tetrahedron |
 
+![Two routes from the square to the tetrahedron. Red arrows show the atomic displacements of the negative mode followed at each saddle. Atom numbers are preserved along each path.](../../../assets/L16-lj4-mode-paths.svg){#fig-lj4-mode-paths width="100%" fig-alt="Path a: the square at minus 4.4806 epsilon shears into a flat rhombus at minus 5.0734 epsilon, then folds out of plane into a tetrahedron at minus 6 epsilon. Path b: opposite corners of the square move up and down, reaching a tetrahedron directly. Red arrows show each atom's displacement along the selected eigenvector."}
+
 Both paths end at the tetrahedron, with all six pair distances equal to $2^{1/6}\sigma$ and a Hessian with six zero and six positive eigenvalues. On the first path, the flat rhombus is another saddle, so we repeat the eigenvalue test after every relaxation.
 
+:::: {.callout-tip collapse="true"}
+## Code: follow the two negative modes of the four-atom square
+
 ::: {.quarto-wasm-local notebook="l16_cluster_check.edit.py" view="edit" title="Checking a relaxed four-atom cluster with Hessian eigenvalues" height="1000" loading="lazy" fullscreen="true"}
-The notebook relaxes a perfect four-atom square with BFGS, which stops at $-4.480620\,\varepsilon$ with `success = True`. Its $12\times12$ finite-difference Hessian has two negative, six zero, and four positive eigenvalues. Following the in-plane mode passes through a flat rhombus at $-5.073421\,\varepsilon$, which still has one negative eigenvalue, and reaches the tetrahedron at $-6\,\varepsilon$. Following the out-of-plane mode reaches the tetrahedron directly.
+The notebook relaxes a perfect four-atom square to $-4.480620\,\varepsilon$. Its $12\times12$ finite-difference Hessian has two negative, six zero, and four positive eigenvalues. Following the in-plane mode passes through a flat rhombus at $-5.073421\,\varepsilon$, which still has one negative eigenvalue, and reaches the tetrahedron at $-6\,\varepsilon$. Following the out-of-plane mode reaches the tetrahedron directly.
 :::
 
-## Thirteen argon atoms: a stationary point that is not a minimum
+::::
 
-For the four-atom square, we could still guess the downhill motions by eye. In larger clusters we cannot, and the eigenvalue test becomes the reliable check. In L15, ASE relaxed 13 randomly displaced argon atoms to the icosahedron. A natural alternative starting guess is a piece of the argon crystal itself: the face-centred cubic (fcc) lattice. One atom and its 12 nearest neighbours in fcc form a **cuboctahedron**, a shape with square and triangular faces.
+### Thirteen argon atoms: when appearances deceive
 
-By symmetry, every force in the perfect cuboctahedron points along a line through the central atom, so a minimizer only changes the size of the cluster. In LJ reduced units, it stops at $E=-40.884494\,\varepsilon$ with a tiny gradient and `success = True`. The Hessian is $39\times39$, and it is built column by column from central differences of the gradient, as in the notebooks above. Its eigenvalues are
+One more example comes from the 13-atom Lennard-Jones cluster. We can construct two highly symmetric arrangements, each with a central atom and 12 neighbours:
 
-- one negative eigenvalue, $\lambda_1=-10.99\,\varepsilon/\sigma^2$;
+- **Cuboctahedron:** take one atom and its 12 nearest neighbours from the usual face-centred cubic (fcc) lattice. The outer shell has square and triangular faces.
+- **Icosahedron:** arrange the 12 neighbours in a shell with 20 triangular faces. This is the structure found by relaxation in L15.
+
+Both look orderly, but do both sit at energy minima? By symmetry, every force in the perfect cuboctahedron points along a line through the central atom, so a minimizer only changes the size of the cluster. It stops at $E=-40.884494\,\varepsilon$ with a tiny gradient. Its $39\times39$ Hessian has
+
+- **one negative eigenvalue**, $\lambda_1=-10.99\,\varepsilon/\sigma^2$;
 - six zero eigenvalues, from rigid translation and rotation;
 - 32 positive eigenvalues.
 
-The cuboctahedron is therefore a saddle point. Displacing the atoms along the eigenvector of $\lambda_1$, by $0.1\sigma$ in total, and relaxing again leads to the **icosahedron** at $-44.326801\,\varepsilon$, the structure ASE found in L15. Its Hessian has six zero and 33 positive eigenvalues, so it is a minimum.
+The cuboctahedron is therefore a saddle point. Displacing the atoms along the negative mode by $0.1\sigma$ in total and relaxing again gives the **icosahedron**, with $E=-44.326801\,\varepsilon$. Its Hessian has six zero and 33 positive eigenvalues, so it is a minimum.
 
-![The cuboctahedron cut from the fcc crystal is a stationary point of the LJ$_{13}$ energy, but one Hessian eigenvalue is negative. Following that mode leads to the icosahedron, whose $3N-6=33$ vibrational eigenvalues are all positive.](../../../assets/L16-lj13-hessian.png){#fig-lj13-hessian fig-alt="Left, a 13-atom cuboctahedron. Centre, a 13-atom icosahedron. Right, the 39 Hessian eigenvalues of each in ascending order: the cuboctahedron has one negative value, six near zero, and the rest positive. The icosahedron has six near zero and the rest positive." width="100%"}
+![The fcc cuboctahedron relaxes into an icosahedron after a displacement along its negative mode. Red marks the central atom, surrounded by 12 grey atoms.](../../../assets/L16-lj13-structures.svg){#fig-lj13-structures width="100%" fig-alt="A cuboctahedron at minus 40.8845 epsilon with one negative mode transforms into an icosahedron at minus 44.3268 epsilon with no negative modes. Both clusters show a red central atom and twelve grey neighbours. Dashed spokes connect the centre to the shell."}
+
+![Hessian eigenvalues of the cuboctahedron and icosahedron. Only the cuboctahedron has a negative eigenvalue.](../../../assets/L16-lj13-eigenvalues.png){#fig-lj13-eigenvalues width="65%" fig-alt="The 39 sorted Hessian eigenvalues for both clusters. The cuboctahedron has one negative eigenvalue, six zero eigenvalues, and 32 positive eigenvalues. The icosahedron has six zero eigenvalues and 33 positive eigenvalues."}
 
 The positive eigenvalues carry more information than their signs. Each one measures the stiffness of the structure along its eigenvector. For small displacements from a minimum, Newton's second law reads $m\,\ddot{\delta\mathbf x}=-\mathbf H\,\delta\mathbf x$, and along each eigenvector the atoms oscillate on their own, like a single mass on a spring of stiffness $\lambda_k$, with angular frequency
 
@@ -261,22 +472,6 @@ $$
 \;\rightarrow\; \text{minimum, or a downhill mode to follow}.
 $$
 
-## What to keep
-
-1. Positive curvature in every nonzero direction establishes a strict local minimum. A negative direction rules one out, while zero curvature can require higher-order analysis.
-2. The eigenvectors of $\mathbf H$ are the directions in which the energy curves without coupling, and each eigenvalue is the curvature along its eigenvector. The eigenvalues do not depend on the choice of axes.
-3. All eigenvalues positive means a minimum (a positive definite Hessian, which Cholesky can test). Mixed signs mean a saddle point, and the eigenvector of a negative eigenvalue points downhill.
-4. At a stationary isolated nonlinear cluster, six rigid-motion modes have zero eigenvalues. Positive curvatures in the remaining directions establish a local minimum apart from those rigid motions.
-5. A minimizer that reports success may still have stopped on a saddle point. Following a negative mode and relaxing again lowers the energy, and the test is repeated after each relaxation.
-
-## Check your understanding
-
-1. Find the eigenvalues of $\mathbf H$ for $\theta=30^\circ$ and $l_0=1.2a$ without calculating the matrix entries. Then use the notebook to check your answer and the directions of the eigenvectors.
-2. A relaxed cluster of 20 atoms has a Hessian with 6 eigenvalues of magnitude below $10^{-5}$, one eigenvalue of $-0.02$, and 53 positive eigenvalues. What would you report, and what would you do next?
-3. The cuboctahedron relaxation reports `success = True` and a tiny gradient. What additional calculation shows that it is not a stable structure, and how does the result tell you to lower the energy?
-4. Why does the flat rhombus on the path from the square to the tetrahedron need its own eigenvalue test, even though it was reached by following a downhill mode?
-5. A linear molecule such as CO$_2$ has five rigid-motion zero modes instead of six. Which rotation produces no atomic displacement, and therefore adds no independent mode?
-
 ## Next
 
-The vibrations at the end of this lecture came from Newton's second law, $m\,\ddot{\mathbf x}_i=\mathbf F_i$, with the forces we have been sending to zero. Instead of moving the atoms downhill until the forces vanish, we can let them move under those forces and watch a structure vibrate, cross barriers, and change shape. Unit 4 turns to how materials change with time, which leads us to ordinary differential equations.
+Unit 4 begins with **numerical differentiation and integration**. We will calculate derivatives from sampled values and approximate integrals from discrete data, examining how the spacing of the data and the choice of method affect accuracy.

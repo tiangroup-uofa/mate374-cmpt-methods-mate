@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="166mm" height="143mm" viewBox="0 0 166 143"><desc>Two checked LJ4 relaxation paths. Numbered atoms retain identity. Red arrows are projected negative Hessian eigenvectors, with a common display scale at each structure. Energies are in epsilon. All structures share a camera and coordinate scale.</desc><defs><marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+<radialGradient id="gray" cx=".5" cy=".5" r=".5" fx=".35" fy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#8a8f98"/></radialGradient>
+<radialGradient id="red" cx=".5" cy=".5" r=".5" fx=".35" fy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b5473a"/></radialGradient>
+</defs>
+<g id="path-1" inkscape:groupmode="layer" inkscape:label="In-plane shear, then out-of-plane fold">
+<text x="2" y="7" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">a</text>
+<text x="12" y="7" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">In-plane shear, then out-of-plane fold</text>
+<path d="M 12.953,37.932 L 32.113,43.057" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 12.953,37.932 L 21.887,26.943" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 32.113,43.057 L 41.047,32.068" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 41.047,32.068 L 21.887,26.943" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<circle cx="21.887" cy="26.943" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="21.88745566246496" y="28.14320115840756" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">4</text>
+<circle cx="41.047" cy="32.068" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="41.04660012333811" y="33.267565038189936" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">3</text>
+<circle cx="12.953" cy="37.932" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="12.953399876661889" y="39.13243496181007" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1</text>
+<circle cx="32.113" cy="43.057" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="32.11254433753504" y="44.25679884159244" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">2</text>
+<path d="M 9.821,38.586 L 4.437,39.710" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 30.398,40.355 L 28.438,37.267" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 44.179,31.414 L 49.563,30.290" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 23.602,29.645 L 25.562,32.733" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<text x="27" y="16" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">Square</text>
+<text x="27" y="61" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">E = −4.4806 ε</text>
+<text x="27" y="68" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">2 negative modes</text>
+<path d="M 70.702,38.611 L 91.655,40.759" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 70.702,38.611 L 84.345,29.241" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 91.655,40.759 L 105.298,31.389" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 91.655,40.759 L 84.345,29.241" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 105.298,31.389 L 84.345,29.241" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<circle cx="84.345" cy="29.241" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="84.34530935135734" y="30.440615740708633" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">4</text>
+<circle cx="105.298" cy="31.389" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="105.29757212959706" y="32.58887668012361" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">3</text>
+<circle cx="70.702" cy="38.611" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="70.7024278704094" y="39.81112331988392" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1</text>
+<circle cx="91.655" cy="40.759" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="91.6546906486362" y="41.95938425928384" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">2</text>
+<path d="M 70.702,41.811 L 70.702,47.311" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 91.655,37.559 L 91.655,32.059" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 105.298,34.589 L 105.298,40.089" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 84.345,26.041 L 84.345,20.541" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<text x="88" y="16" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">Rhombus</text>
+<text x="88" y="61" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">E = −5.0734 ε</text>
+<text x="88" y="68" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1 negative mode</text>
+<path d="M 51.000,35.000 L 61.000,35.000" style="fill:none;stroke:#231f20;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 113.000,35.000 L 123.000,35.000" style="fill:none;stroke:#231f20;stroke-width:0.4;marker-end:url(#tri);"/>
+<text x="57" y="23" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">Relax</text>
+<text x="118" y="23" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">Relax</text>
+<path d="M 138.257,42.177 L 152.609,35.814" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 138.257,42.177 L 158.631,39.470" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 138.257,42.177 L 146.503,22.539" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 152.609,35.814 L 158.631,39.470" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 152.609,35.814 L 146.503,22.539" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 158.631,39.470 L 146.503,22.539" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<circle cx="158.631" cy="39.470" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="158.63089454158086" y="40.670151639697195" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">3</text>
+<circle cx="146.503" cy="22.539" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="146.50329373369644" y="23.739437643444564" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">4</text>
+<circle cx="138.257" cy="42.177" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="138.2572610661388" y="43.37675748483177" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1</text>
+<circle cx="152.609" cy="35.814" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="152.6085506585839" y="37.01365323202648" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">2</text>
+<text x="149" y="16" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">Tetrahedron</text>
+<text x="149" y="61" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">E = −6.0000 ε</text>
+<text x="149" y="68" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">No negative modes</text>
+</g>
+<g id="path-2" inkscape:groupmode="layer" inkscape:label="Out-of-plane fold">
+<text x="2" y="79" style="font-family:Arial;font-size:6.35px;fill:#231f20;text-anchor:start;font-weight:bold">b</text>
+<text x="12" y="79" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:start;font-weight:bold">Out-of-plane fold</text>
+<path d="M 12.953,109.932 L 32.113,115.057" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 12.953,109.932 L 21.887,98.943" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 32.113,115.057 L 41.047,104.068" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 41.047,104.068 L 21.887,98.943" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<circle cx="21.887" cy="98.943" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="21.88745566246496" y="100.14320115840756" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">4</text>
+<circle cx="41.047" cy="104.068" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="41.04660012333811" y="105.26756503818994" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">3</text>
+<circle cx="12.953" cy="109.932" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="12.953399876661889" y="111.13243496181008" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1</text>
+<circle cx="32.113" cy="115.057" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="32.11254433753504" y="116.25679884159244" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">2</text>
+<path d="M 12.953,106.732 L 12.953,101.232" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 32.113,118.257 L 32.113,123.757" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 41.047,100.868 L 41.047,95.368" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<path d="M 21.887,102.143 L 21.887,107.643" style="fill:none;stroke:#b5473a;stroke-width:0.4;marker-end:url(#tri);"/>
+<text x="27" y="88" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">Square</text>
+<text x="27" y="133" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">E = −4.4806 ε</text>
+<text x="27" y="140" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">2 negative modes</text>
+<path d="M 54.000,107.000 L 120.000,107.000" style="fill:none;stroke:#231f20;stroke-width:0.4;marker-end:url(#tri);"/>
+<text x="87" y="100" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">Displace and relax</text>
+<path d="M 138.103,102.517 L 152.386,118.354" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 138.103,102.517 L 158.629,98.330" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 138.103,102.517 L 146.881,108.799" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 152.386,118.354 L 158.629,98.330" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 152.386,118.354 L 146.881,108.799" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<path d="M 158.629,98.330 L 146.881,108.799" style="fill:none;stroke:#8a8f98;stroke-width:0.45;"/>
+<circle cx="146.881" cy="108.799" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="146.88135377167677" y="109.9986712513134" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">4</text>
+<circle cx="158.629" cy="98.330" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="158.6290168153651" y="99.52982320276007" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">3</text>
+<circle cx="152.386" cy="118.354" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="152.3864633136676" y="119.55407871049188" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">2</text>
+<circle cx="138.103" cy="102.517" r="2.6" style="fill:url(#gray);stroke:#5e5e5e;stroke-width:0.265"/>
+<text x="138.10316609929052" y="103.71742683543467" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">1</text>
+<text x="149" y="88" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">Tetrahedron</text>
+<text x="149" y="133" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:normal">E = −6.0000 ε</text>
+<text x="149" y="140" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-weight:normal">No negative modes</text>
+</g>
+</svg>

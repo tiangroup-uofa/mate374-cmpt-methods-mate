@@ -1,0 +1,10 @@
+L16-pass-catalyst.svg
+
+Photograph: Rogers pass.jpg, Michael Rogers.
+Source: https://commons.wikimedia.org/wiki/File:Rogers_pass.jpg
+Original: https://upload.wikimedia.org/wikipedia/commons/a/ad/Rogers_pass.jpg
+License verified on the Commons file description page: Creative Commons Attribution-ShareAlike 3.0 Unported (also offered under GFDL).
+License: https://creativecommons.org/licenses/by-sa/3.0/
+The original 640 x 247 JPEG is embedded unchanged, scaled for display without cropping or recoloring.
+
+The accompanying vector diagrams and composite figure are also distributed under CC BY-SA 3.0. The elevation cuts are qualitative, not surveyed Rogers Pass profiles. The hydrogen recombination states and energy profile are schematic, not a calculation for a particular catalyst. Red identifies the crossing/reaction direction and the reacting hydrogen atoms. Gray spheres represent the catalyst surface.

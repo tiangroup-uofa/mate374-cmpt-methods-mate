@@ -30,7 +30,7 @@ def introduction(mo):
     by a spring of stiffness $k$ and natural length $l_0>a$, so both springs are
     compressed when $M$ sits at the origin. Rotating the system by $\theta$ changes
     nothing physical, but it changes the entries of the Hessian in our fixed $x,y$
-    coordinates. We use $a=1$ and $k=1$.
+    coordinates. We use $a=1$ and $k=5.0$.
 
     **Predict:** rotate the geometry from 0° to 45°. Should the minima and eigenvectors
     rotate? Should the eigenvalues change? Compare both the matrix and energy profiles.
@@ -53,11 +53,11 @@ def supplied_springs(np):
         n = np.array([np.cos(np.radians(theta_deg)), np.sin(np.radians(theta_deg))])
         return np.array([-a*n, a*n])
 
-    def energy(p, fixed, l0, k=1.0):
+    def energy(p, fixed, l0, k=5.0):
         r = np.linalg.norm(p - fixed, axis=1)
         return 0.5*k*np.sum((r - l0)**2)
 
-    def gradient(p, fixed, l0, k=1.0):
+    def gradient(p, fixed, l0, k=5.0):
         d = p - fixed
         r = np.linalg.norm(d, axis=1)
         return np.sum((k*(r - l0)/r)[:, None]*d, axis=0)
@@ -134,7 +134,7 @@ def analyse(curvature_directions, fixed_atoms, hessian, l0_slider, np, theta_sli
     origin = np.zeros(2)
     H0 = hessian(origin, fixed, l0)
     n_vec = fixed[1]
-    H_exact = 2*((1 - l0)*np.eye(2) + l0*np.outer(n_vec, n_vec))
+    H_exact = 2*5.0*((1 - l0)*np.eye(2) + l0*np.outer(n_vec, n_vec))
     values, vectors = curvature_directions(H0)
     residual = np.abs(H0 @ vectors - vectors*values).max()
     p_min = np.sqrt(l0**2 - 1)*np.array([-n_vec[1], n_vec[0]])   # one of the two minima
