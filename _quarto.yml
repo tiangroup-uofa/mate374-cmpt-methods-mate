@@ -24,6 +24,7 @@ project:
     - "introduction/**/*.qmd"
     - "units/**/*.qmd"
     - "assignments/**/*.qmd"
+    - "exams/**/*.qmd"
     - "!assignments/A2/q3-lj-estimation-backup.qmd"
     - "project/**/*.qmd"
     - "seminars/**/*.qmd"
@@ -55,6 +56,8 @@ website:
         text: Assignments
       - href: project/index.qmd
         text: Project
+      - href: exams/midterm-prep-1.qmd
+        text: Exams info
   sidebar:
     style: docked
     search: true
@@ -146,8 +149,14 @@ website:
             text: "A1 · Answers"
           - href: assignments/A2/index.qmd
             text: "A2 · Working with functions"
+          - href: assignments/A2/answers.qmd
+            text: "A2 · Answers"
           - href: assignments/A3/index.qmd
             text: "A3 · Systems of equations"
+      - section: "Exams info"
+        contents:
+          - href: exams/midterm-prep-1.qmd
+            text: "Midterm prep (I)"
       - href: project/index.qmd
         text: Project
 

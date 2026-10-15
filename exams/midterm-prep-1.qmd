@@ -1,0 +1,636 @@
+---
+title: "Midterm prep (I)"
+subtitle: "Exam information and review of Units 1–3"
+body-classes: lecture-page
+---
+
+## Exam information
+
+|  | Details |
+|---|---|
+| **Date and time** | Friday, October 30, 2026 · 12:00–12:50 pm |
+| **Location** | Same classroom as the lecture |
+| **Course weight** | 20%, as listed in the [syllabus](../syllabus/index.qmd#assessment) |
+| **Format** | Open book, with answers written on the answer sheet |
+
+You may use Canvas materials, the course website, course notes, notebooks, assignment solutions, and official Python/API documentation. **Generative AI and communication with other people are not permitted during the exam.**
+
+### What to bring
+
+- A personal electronic device, preferably a laptop.
+- A pen or pencil.
+- A calculator, if you wish.
+- Any printed materials you wish to consult, including your own formula sheet.
+
+### What will be graded
+
+**Only the answers written on the answer sheet will be graded.** Include your method, calculations, results, units, and any assumptions needed to understand your answer. A final answer without supporting steps or explanation may lose marks.
+
+If you use code, upload it through Canvas. If you cannot upload it, write the key code on the answer sheet. Uploaded code is retained for record keeping, and **code quality is not graded**. Your answer sheet must contain the reasoning and results even when you upload code.
+
+### Permitted solution methods
+
+Follow any method specified in the question, such as “solve manually by Gaussian elimination.” Otherwise, choose a suitable approach:
+
+1. **Pen and paper:** show the equations and solution steps.
+2. **Calculator-assisted calculation:** record the algorithm's steps and intermediate values. You may use Python as a calculator.
+3. **Python code:** identify the numerical method and the functions used, whether from NumPy, SciPy, or your own implementation. Record the relevant inputs, results, and checks on the answer sheet.
+
+### Formula sheets, searches, and interpretation
+
+- There will be **no official formula sheet**.
+- You may **bring your own formula sheet**.
+- You can find formulas using the **course website's search tool**.
+- **Search engines are permitted** for finding code documentation or debugging information.
+- **Generative AI is forbidden**, including when searching or debugging. Do not use Gemini, ChatGPT, or coding agents to solve questions or write code.
+
+If a question is unclear, **state your assumptions or interpretation on the answer sheet and proceed on that basis**. Do not ask anyone, including the instructor, for clarification of exam questions during the exam.
+
+## Exam questions
+
+The exam has **three questions**.
+
+| Question | Focus | Points |
+|---|---|---:|
+| **Q1** | Two theoretical questions. Answer concisely. | **20** |
+| **Q2** | A numerical problem involving root finding, minimization, interpolation, or fitting. | **40** |
+| **Q3** | A numerical matrix problem. | **40** |
+
+For Q2 and Q3, you may choose any suitable method unless the question specifies one. Any required iteration count, tolerance, or reporting precision will be stated in the question.
+
+## Topics covered
+
+The exam covers the **first three units**.
+
+| Unit | Topics | Preparation page |
+|---|---|---|
+| [Unit 1 · Numerical thinking](../units/01/index.qmd) | Introduction to numerical methods, errors, and number representation. | [Summary and preparation](../units/01/summary.qmd) |
+| [Unit 2 · Working with functions](../units/02/index.qmd) | Root finding, minimization, interpolation, and fitting. | [Summary and preparation](../units/02/summary.qmd) |
+| [Unit 3 · Systems of equations](../units/03/index.qmd) | Linear and nonlinear systems, matrix operations, multidimensional optimization, and eigenvalues. | [Summary and preparation](../units/03/summary.qmd) |
+
+[Assignment 1](../assignments/A1/index.qmd), [Assignment 2](../assignments/A2/index.qmd), and [Assignment 3](../assignments/A3/index.qmd) provide further practice. **Assignment solutions are permitted during the exam.**
+
+## Example short-answer questions
+
+We will discuss a brief Wooclap questionnaire during class, followed by examples from the 2025 midterm. Prepare a concise written explanation or a labelled sketch for each question.
+
+### **Question 1: Reducing truncation error**
+
+How can we reduce truncation error? Give one approach and identify a numerical calculation where it applies.
+
+::: {.callout-note collapse="true"}
+## **Example answer and rubric: Truncation error**
+
+**Example answer:** Truncation error arises when a numerical approximation retains only a finite number of terms or uses a finite step size. For example, retaining more terms in a Taylor expansion can reduce the truncation error.
+
+**Accepted approaches:** Any of the following is acceptable when paired with a suitable example:
+
+- **Include more terms:** increase $n$ in the $\pi$ estimation or retain higher-order terms in a Taylor expansion.
+- **Use a finer step size:** reduce the step size in numerical integration or differentiation.
+- **Use a faster-converging approximation:** choose a model or numerical method that reaches the desired accuracy with fewer terms or steps.
+
+**Grading note:** You do **not** need to discuss competition with round-off error for this question.
+:::
+
+### **Question 2: Fixed-point convergence**
+
+For fixed-point iteration $x_{n+1}=g(x_n)$, state a sufficient condition for local convergence to a fixed point $x_s$, where $x_s=g(x_s)$. Assume $g$ is continuously differentiable near $x_s$ and the starting point is sufficiently close.
+
+::: {.callout-note collapse="true"}
+## **Example answer and rubric: Fixed-point convergence**
+
+**Example answer:** A sufficient condition for local convergence is
+
+$$
+|g'(x_s)|<1.
+$$
+
+Under the stated assumptions, this makes $g$ a contraction in a sufficiently small neighbourhood of the fixed point, so nearby iterates approach $x_s$.
+
+**Accepted graphical answer:** A cobweb sketch is also acceptable if it shows the correct shape of $g(x)$ relative to $y=x$ and successive iterates approaching their intersection.
+:::
+
+## Example long-form questions
+
+The following questions are adapted from past exams. Each example includes a sample solution and code. We will discuss the solutions using live demonstrations and whiteboard calculations.
+
+For each problem, work through the following questions:
+
+- **What are the known quantities and unknowns?**
+- **What are the governing equations?**
+- **Which numerical topic does the problem involve?**
+- **Which method would I choose, and why?**
+- **How can I check the result against the equations or data?**
+- **What are the potential caveats or limitations?**
+
+### Example 1: Root finding for open-channel flow
+
+Water flows through a rectangular channel of width $b$ over a small bump of height $H$. Bernoulli's equation gives
+
+$$
+\frac{Q^2}{2gb^2h_0^2}+h_0
+=
+\frac{Q^2}{2gb^2h^2}+h+H,
+$$
+
+where $h_0$ is the upstream water depth and $h$ is the depth measured from the top of the bump to the water surface.
+
+![Open-channel flow over a bump, showing the upstream depth, bump height, and water depth above the bump.](midterm-channel-flow.png){#fig-channel-flow width=75% fig-alt="Side view of water flowing to the right over a bump. h0 is measured from the upstream bed to the water surface, H from the upstream bed to the bump crest, and h from the crest to the water surface."}
+
+| Quantity | Volume flow rate, $Q$ | Gravitational acceleration, $g$ | Channel width, $b$ | Upstream depth, $h_0$ | Bump height, $H$ |
+|---|---|---|---|---|---|
+| Value | $1.2\ \mathrm{m^3\,s^{-1}}$ | $9.81\ \mathrm{m\,s^{-2}}$ | $1.8\ \mathrm{m}$ | $0.6\ \mathrm{m}$ | $0.075\ \mathrm{m}$ |
+
+Find the root for $h$ in the interval $[0.1,\,0.4]\ \mathrm{m}$ using any suitable root-finding method. This interval specifies which root to seek.
+
+- **By hand or calculator:** show three iterations, including your starting value or bracket and the values needed for each update. Report the resulting estimate to four decimal places.
+- **With Python:** solve to an absolute tolerance in $h$ of $10^{-6}\ \mathrm{m}$ or smaller, then report $h$ to four decimal places. Record your starting value or bracket and check the residual in Bernoulli's equation.
+
+Keep extra digits during calculations. For the three-iteration route, four decimal places specify how to display the estimate, not a guarantee of four-decimal-place accuracy.
+
+::: {.callout-note collapse="true"}
+## **Example 1: Sample solution and Python code**
+
+**1. Governing equation and unknown**
+
+The unknown is the water depth $h$. With the other quantities fixed, write Bernoulli's equation as a residual:
+
+$$
+F(h)=\frac{Q^2}{2gb^2h_0^2}+h_0
+-\frac{Q^2}{2gb^2h^2}-h-H=0.
+$$
+
+**2. Numerical method**
+
+This is a nonlinear root-finding problem. Use **bisection** on the specified interval $[0.1,0.4]\ \mathrm{m}$. The residual is continuous on this interval and changes sign between its endpoints.
+
+**3. Sample Python code**
+
+The code below uses SciPy's bisection solver with its default tolerances, which are tighter than the requested $10^{-6}\ \mathrm{m}$.
+
+```python
+import scipy as sp
+
+Q = 1.2
+g = 9.81
+b = 1.8
+h0 = 0.6
+H = 0.075
+
+def residual(h):
+    lhs = Q**2 / (2 * g * b**2 * h0**2) + h0
+    rhs = Q**2 / (2 * g * b**2 * h**2) + h + H
+    return lhs - rhs
+
+solution = sp.optimize.root_scalar(
+    residual, bracket=[0.1, 0.4], method="bisect"
+)
+
+print(solution)
+print("Residual (m):", residual(solution.root))
+```
+
+**4. Result and residual check**
+
+The solver reports convergence after **38 iterations**, giving
+
+$$
+h=0.2647552633901796\ \mathrm{m}
+\quad\Rightarrow\quad
+\boxed{h=0.2648\ \mathrm{m}}.
+$$
+
+At the unrounded root, $F(h)\approx3.95\times10^{-13}\ \mathrm{m}$, so the two sides of Bernoulli's equation agree to the solver's numerical accuracy.
+
+**5. Physical interpretation**
+
+The specified bracket selects the shallower, supercritical root. The equation also has a subcritical root near $0.4958\ \mathrm{m}$, which is consistent with the smooth flow over the bump shown in the sketch. Selecting the physically appropriate branch requires considering the upstream flow conditions as well as solving the equation.
+:::
+
+### Example 2: Newton–Raphson for a pressure–volume relation
+
+Nitrogen at $T=300\ \mathrm{K}$ is stored in a vessel. For this exercise, use the supplied pressure–volume model
+
+$$
+P=\frac{0.5T}{V+0.1}-\frac{5}{V^2},
+$$
+
+with $P$ in atmospheres and $V$ in litres. The constants carry the units needed for these inputs: $0.5\ \mathrm{atm\,L\,K^{-1}}$, $0.1\ \mathrm{L}$, and $5\ \mathrm{atm\,L^2}$.
+
+Find the volume at $P=50\ \mathrm{atm}$ using **Newton–Raphson**, starting from $V_0=1\ \mathrm{L}$.
+
+- **By hand or calculator:** write the residual equation and its derivative, then show three updates to obtain $V_1$, $V_2$, and $V_3$. Report $V_3$ to four decimal places.
+- **With Python:** use Newton–Raphson with the derivative. Continue until both $|V_{n+1}-V_n|<10^{-6}\ \mathrm{L}$ and the absolute pressure residual is below $10^{-6}\ \mathrm{atm}$. Report the converged volume to four decimal places.
+
+Keep extra digits during the updates. Check that the returned volume is positive and that the model is defined at every iterate.
+
+::: {.callout-note collapse="true"}
+## **Example 2: Sample solution and Python code**
+
+**1. Governing equation and unknown**
+
+The unknown is the volume $V$. Substitute $T=300\ \mathrm{K}$ and $P=50\ \mathrm{atm}$ into the supplied model and form the pressure residual:
+
+$$
+F(V)=\frac{150}{V+0.1}-\frac{5}{V^2}-50=0.
+$$
+
+**2. Numerical method**
+
+Use **Newton–Raphson**, as required. Differentiate the residual:
+
+$$
+F'(V)=-\frac{150}{(V+0.1)^2}+\frac{10}{V^3}.
+$$
+
+Starting from $V_0=1\ \mathrm{L}$, calculate successive volumes using
+
+$$
+V_{n+1}=V_n-\frac{F(V_n)}{F'(V_n)}.
+$$
+
+**3. Three updates by hand or calculator**
+
+The values below are displayed to four decimal places. Keep extra digits when calculating each update.
+
+| Step $n$ | 0 | 1 | 2 | 3 |
+|---|---:|---:|---:|---:|
+| $V_n$ (L) | 1.0000 | 1.7139 | 2.4247 | 2.7997 |
+| $F(V_n)$ (atm) | 81.3636 | 30.9916 | 8.5624 | 1.0909 |
+| $F'(V_n)$ (atm/L) | -113.9669 | -43.6021 | -22.8311 | -17.3835 |
+
+For example, the first update is
+
+$$
+V_1=1-\frac{81.363636\ldots}{-113.966942\ldots}
+=1.713923\ldots\ \mathrm{L}.
+$$
+
+After three updates, **$V_3=2.7997\ \mathrm{L}$**. The remaining pressure residual is about $1.09\ \mathrm{atm}$, so further updates are needed for the converged Python result.
+
+**4. Sample Python code**
+
+```python
+import scipy as sp
+
+T = 300.0
+P = 50.0
+
+def F(V):
+    return 0.5 * T / (V + 0.1) - 5 / V**2 - P
+
+def F_prime(V):
+    return -0.5 * T / (V + 0.1)**2 + 10 / V**3
+
+solution = sp.optimize.root_scalar(
+    F, x0=1.0, fprime=F_prime, method="newton"
+)
+
+print(solution)
+print("Residual (atm):", F(solution.root))
+```
+
+**5. Converged result and checks**
+
+With SciPy's default tolerances, the solver converges after **7 iterations**:
+
+$$
+V=2.8638628691278303\ \mathrm{L}
+\quad\Rightarrow\quad
+\boxed{V=2.8639\ \mathrm{L}}.
+$$
+
+The default step tolerance is tighter than $10^{-6}\ \mathrm{L}$, and the residual evaluated at the unrounded root is **$0.0\ \mathrm{atm}$** in this floating-point calculation. All iterates remain positive and avoid the model's singularities at $V=0$ and $V=-0.1$.
+:::
+
+### Example 3: Interpolation or polynomial fitting
+
+The electrical power generated by a wind turbine was measured at five wind speeds:
+
+| Wind speed (mph) | 12 | 20 | 28 | 36 | 44 |
+|---|---|---|---|---|---|
+| Electrical power (W) | 320 | 490 | 540 | 500 | 480 |
+
+Estimate the power at a wind speed of **30 mph** using either an interpolation method or a polynomial least-squares fit.
+
+State the method, including the polynomial degree if relevant, and which data points you use. Show enough working or function inputs to reproduce your estimate. Explain one limitation of the estimate and whether your chosen curve must pass through the measurements.
+
+::: {.callout-note collapse="true"}
+## **Example 3: Sample answer and Python code**
+
+```python
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+
+# Given data: wind speed in mph and electrical power in W.
+v = np.array([12, 20, 28, 36, 44])
+P = np.array([320, 490, 540, 500, 480])
+v_target = 30.0
+v_plot = np.linspace(v.min(), v.max(), 300)
+
+# 1. Inspect the data. Power rises and then falls, suggesting curvature.
+plt.figure()
+plt.scatter(v, P)
+plt.xlabel("Wind speed (mph)")
+plt.ylabel("Electrical power (W)")
+plt.title("Measured wind-turbine power")
+plt.show()
+
+# 2. Linear interpolation by hand uses the two neighbouring points.
+# At 28 mph, P = 540 W; at 36 mph, P = 500 W.
+# P(30) = 540 + (30 - 28) / (36 - 28) * (500 - 540) = 530 W.
+P_hand = 540 + (v_target - 28) / (36 - 28) * (500 - 540)
+print(f"Linear interpolation by hand: {P_hand:.4f} W")
+
+# 3. Compare interpolation methods using the supplied data.
+# CubicSpline uses its default not-a-knot boundary conditions.
+# PCHIP preserves monotonicity within each rising or falling data segment.
+spline = sp.interpolate.CubicSpline(v, P)
+pchip = sp.interpolate.PchipInterpolator(v, P)
+
+print(f"Linear interpolation: {np.interp(v_target, v, P):.4f} W")
+print(f"Cubic spline:         {spline(v_target):.4f} W")
+print(f"PCHIP:                {pchip(v_target):.4f} W")
+# Expected values: 530.0000 W, 535.2344 W, and 535.0000 W.
+
+plt.figure()
+plt.scatter(v, P, color="black", label="Measurements")
+plt.plot(v_plot, np.interp(v_plot, v, P), label="Linear")
+plt.plot(v_plot, spline(v_plot), label="Cubic spline")
+plt.plot(v_plot, pchip(v_plot), label="PCHIP")
+plt.axvline(v_target, color="grey", linestyle=":", label="30 mph")
+plt.xlabel("Wind speed (mph)")
+plt.ylabel("Electrical power (W)")
+plt.legend()
+plt.show()
+
+# 4. Fit polynomials of degrees 2, 3, and 4 to all five points.
+# SSE is the sum of squared power residuals, with units W^2.
+# convert().coef gives coefficients in increasing powers of v:
+# constant, v, v^2, ...
+plt.figure()
+plt.scatter(v, P, color="black", label="Measurements")
+
+for degree in (2, 3, 4):
+    fit = np.polynomial.Polynomial.fit(v, P, deg=degree)
+    residuals = fit(v) - P
+    sse = np.sum(residuals**2)
+    print(f"Degree {degree}: P(30) = {fit(v_target):.4f} W, "
+          f"SSE = {sse:.6g} W^2")
+    print("Coefficients:", fit.convert().coef)
+    plt.plot(v_plot, fit(v_plot), label=f"Degree {degree}")
+
+plt.axvline(v_target, color="grey", linestyle=":", label="30 mph")
+plt.xlabel("Wind speed (mph)")
+plt.ylabel("Electrical power (W)")
+plt.legend()
+plt.show()
+
+# Degree 2: P(30) = 539.2946 W, SSE = 2051.4286 W^2.
+# Degree 3: P(30) = 529.5603 W, SSE = 91.4286 W^2.
+# Degree 4: P(30) = 535.5078 W, SSE is approximately zero.
+#
+# The quadratic in ordinary powers is
+# P(v) = 6.392857 + 33.5*v - 0.52455357*v**2.
+#
+# Interpolants pass through every measurement. The degree-2 and degree-3
+# least-squares fits need not. A degree-4 polynomial has five coefficients
+# and can pass through all five points, up to floating-point error.
+# Zero fitting error does not establish accuracy between measurements.
+# A high-degree interpolant can also follow measurement noise.
+#
+# One acceptable answer is 530 W using local linear interpolation.
+# It assumes a straight-line variation between 28 and 36 mph.
+# The curved interpolants give different estimates because they make
+# different assumptions about the variation between measurements.
+```
+:::
+
+### Example 4: Fitting a growth-rate model
+
+An experiment measured bacterial growth rate $k$ at three oxygen concentrations $c$:
+
+| Oxygen concentration, $c$ | 0.5 | 1.5 | 2.5 |
+|---|---|---|---|
+| Growth rate, $k$ | 1.085 | 3.572 | 4.400 |
+
+Use the model
+
+$$
+k(c)=\frac{k_{\max}c^2}{c_s+c^2},
+$$
+
+where $k_{\max}$ and $c_s$ are positive parameters. Use the numerical scales in the table. The parameter $k_{\max}$ has the same units as $k$, and $c_s$ has the units of $c^2$.
+
+Determine $k_{\max}$ and $c_s$ using either of these approaches:
+
+- **By hand or calculator:** rearrange the model into a straight-line relation, perform linear least-squares fitting on the transformed data, and recover the original parameters.
+- **With Python:** use `scipy.optimize.curve_fit` or `scipy.optimize.minimize` to minimize the sum of squared differences between the predicted and measured growth rates. State your starting parameter values and how you keep the parameters positive.
+
+State which residuals your fit minimizes. The two approaches minimize errors on different scales and can give different parameter estimates. Retain at least four decimal places during hand calculations, and report the fitted parameters and predicted growth rates at the three measured concentrations.
+
+
+::: {.callout-note collapse="true"}
+## **Example 4: Sample answer and Python code**
+
+```python
+import numpy as np
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+
+# Given concentrations and measured growth rates.
+c = np.array([0.5, 1.5, 2.5])
+k = np.array([1.085, 3.572, 4.400])
+
+# Unknown parameters: k_max and c_s.
+def growth_rate(c, k_max, c_s):
+    return k_max * c**2 / (c_s + c**2)
+
+# Direct nonlinear least squares using all three measurements.
+# Start from k_max = 5 and c_s = 1.
+# Bounds restrict the parameters to nonnegative values;
+# the fitted values below are strictly positive.
+parameters, covariance = curve_fit(
+    growth_rate, c, k, p0=[5.0, 1.0], bounds=(0, np.inf)
+)
+k_max, c_s = parameters
+predicted = growth_rate(c, k_max, c_s)
+residuals = predicted - k
+
+print(f"k_max = {k_max:.6f}, c_s = {c_s:.6f}")
+print("Predicted growth rates:", predicted)
+print("Residuals (predicted - measured):", residuals)
+print("Sum of squared residuals:", np.sum(residuals**2))
+# k_max = 5.041045, c_s = 0.918408.
+# Predicted rates: approximately [1.078614, 3.579827, 4.395192].
+# SSE = approximately 0.000125151, in squared growth-rate units.
+
+# Alternative hand/calculator route: transform to a straight line.
+# 1/k = 1/k_max + (c_s/k_max) * (1/c^2).
+# Set X = 1/c^2 and Y = 1/k, then fit Y = intercept + slope*X.
+X = 1 / c**2
+Y = 1 / k
+n = len(X)
+slope = (n * np.sum(X * Y) - np.sum(X) * np.sum(Y)) / (
+    n * np.sum(X**2) - np.sum(X)**2
+)
+intercept = (np.sum(Y) - slope * np.sum(X)) / n
+k_max_linear = 1 / intercept
+c_s_linear = slope / intercept
+
+print("Transformed-fit k_max:", k_max_linear)
+print("Transformed-fit c_s:", c_s_linear)
+print("Transformed-fit predictions:",
+      growth_rate(c, k_max_linear, c_s_linear))
+# k_max = 5.025548, c_s = 0.908023.
+# Predicted rates: approximately [1.084942, 3.580558, 4.388038].
+# This route minimizes squared errors in 1/k, whereas curve_fit
+# minimizes squared errors in k. Their answers can therefore differ.
+
+c_plot = np.linspace(0, 3, 300)
+plt.scatter(c, k, color="black", label="Measurements")
+plt.plot(c_plot, growth_rate(c_plot, k_max, c_s),
+         label="Direct fit with curve_fit")
+plt.plot(c_plot, growth_rate(c_plot, k_max_linear, c_s_linear),
+         "--", label="Transformed linear fit")
+plt.xlabel("Oxygen concentration, c (supplied scale)")
+plt.ylabel("Growth rate, k (supplied scale)")
+plt.legend()
+plt.show()
+
+# k_max has the same units as k; c_s has the units of c^2.
+# Three measurements provide limited evidence for extrapolation.
+```
+:::
+
+### Example 5: A linear system for circuit currents
+
+Four loop currents $i_1$, $i_2$, $i_3$, and $i_4$ in a resistor network satisfy
+
+$$
+\begin{pmatrix}
+r_1+r_2+r_4 & -r_2 & 0 & -r_4\\
+-r_2 & r_2+r_3+r_5 & -r_5 & 0\\
+0 & -r_5 & r_5+r_6+r_7 & -r_6\\
+-r_4 & 0 & -r_6 & r_4+r_8+r_6
+\end{pmatrix}
+\begin{pmatrix}i_1\\i_2\\i_3\\i_4\end{pmatrix}
+=
+\begin{pmatrix}V_1\\0\\-V_2\\0\end{pmatrix}.
+$$
+
+Use $V_1=15\ \mathrm{V}$, $V_2=45\ \mathrm{V}$, and the following resistances:
+
+| Resistance | $r_1$ | $r_2$ | $r_3$ | $r_4$ | $r_5$ | $r_6$ | $r_7$ | $r_8$ |
+|---|---|---|---|---|---|---|---|---|
+| Value ($\Omega$) | 5 | 10 | 4 | 6 | 7 | 9 | 17 | 65 |
+
+Determine the four currents using any suitable method. Write the numerical matrix and right-hand-side vector, identify your solution method, and report the currents in amperes. Verify your result by substituting it into the system. A negative current indicates flow opposite to the reference direction used in the equations.
+
+
+::: {.callout-note collapse="true"}
+## **Example 5: Sample answer and Python code**
+
+```python
+import numpy as np
+
+# Given resistances in ohms and voltages in volts.
+r1, r2, r3, r4 = 5, 10, 4, 6
+r5, r6, r7, r8 = 7, 9, 17, 65
+V1, V2 = 15, 45
+
+# Unknown vector: currents = [i1, i2, i3, i4], in amperes.
+# Assemble A * currents = b from the supplied equations.
+A = np.array([
+    [r1 + r2 + r4, -r2, 0, -r4],
+    [-r2, r2 + r3 + r5, -r5, 0],
+    [0, -r5, r5 + r6 + r7, -r6],
+    [-r4, 0, -r6, r4 + r8 + r6]
+], dtype=float)
+b = np.array([V1, 0, -V2, 0], dtype=float)
+
+print("Coefficient matrix (ohms):")
+print(A)
+print("Right-hand side (V):", b)
+# A = [[21, -10,   0, -6],
+#      [-10, 21,  -7,  0],
+#      [  0, -7,  33, -9],
+#      [ -6,  0,  -9, 80]]
+# b = [15, 0, -45, 0].
+
+# Solve the linear system directly using NumPy's LU-based solver.
+currents = np.linalg.solve(A, b)
+for number, current in enumerate(currents, start=1):
+    print(f"i{number} = {current:.6f} A")
+
+# i1 =  0.584889 A
+# i2 = -0.200960 A
+# i3 = -1.438434 A
+# i4 = -0.117957 A
+# Negative values indicate flow opposite to the reference direction.
+
+# Substitute the unrounded solution into all four equations.
+residuals = A @ currents - b
+print("Residuals (V):", residuals)
+print("Largest absolute residual (V):", np.max(np.abs(residuals)))
+# Residuals are approximately zero (about 1e-14 V or smaller).
+```
+:::
+
+### Example 6: A nonlinear system
+
+Solve the coupled equations
+
+$$
+\begin{aligned}
+f_1(x,y)&=x^2+2x+2y^2-25=0,\\
+f_2(x,y)&=2x^3-y^2+4y-20=0.
+\end{aligned}
+$$
+
+Use the starting point $(x_0,y_0)=(1,1)$. You may use a library solver or your own implementation of a suitable nonlinear-system method.
+
+State the method and starting point, report the computed solution, and evaluate both residuals at the unrounded solution. Require $|f_1|<10^{-6}$ and $|f_2|<10^{-6}$ before rounding the reported coordinates to four decimal places.
+
+For discussion: how might a different starting point affect the result? What would you examine if the solver reported failure or returned a point with a large residual?
+
+::: {.callout-note collapse="true"}
+## **Example 6: Sample answer and Python code**
+
+```python
+import numpy as np
+from scipy.optimize import root
+
+# Unknowns: x and y. Return both equation residuals.
+def residuals(values):
+    x, y = values
+    f1 = x**2 + 2*x + 2*y**2 - 25
+    f2 = 2*x**3 - y**2 + 4*y - 20
+    return np.array([f1, f2])
+
+# Use SciPy's modified Powell hybrid method from the specified start.
+# It combines Newton-type steps with safeguards on the step size.
+start = [1.0, 1.0]
+solution = root(residuals, start, method="hybr")
+
+print("Solver success:", solution.success)
+print("Solver message:", solution.message)
+print("Unrounded solution:", solution.x)
+
+# Evaluate both residuals before rounding the coordinates.
+errors = residuals(solution.x)
+print("Residuals:", errors)
+print("Largest absolute residual:", np.max(np.abs(errors)))
+print("Both residuals below 1e-6:", np.all(np.abs(errors) < 1e-6))
+
+x, y = solution.x
+print(f"x = {x:.4f}, y = {y:.4f}")
+# x = 2.0331, y = 2.8983.
+# Both residuals are about 1e-11, satisfying the requested tolerance.
+
+# A different starting point may lead to another root or fail to converge.
+# If the solver fails or residuals remain large, inspect the equations,
+# variable scales, and starting point before interpreting the result.
+```
+:::
