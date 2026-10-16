@@ -1,0 +1,607 @@
+---
+title: "Midterm prep (II)"
+subtitle: "Python snippets and common pitfalls"
+body-classes: lecture-page
+---
+
+This page collects the Python patterns from Units 1–3 in one place. Each section gives a working snippet you can copy, followed by a small notebook containing a broken version of the same code. The broken notebooks are optional practice: run each one, read the output or error message, and find the line to change before opening the fix. For exam rules and worked problems, see [Midterm prep (I)](midterm-prep-1.qmd).
+
+All snippets assume these imports:
+
+```python
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+```
+
+## Python and NumPy basics
+
+### Integers and floats
+
+A NumPy array stores all its entries with one data type, chosen from the input. `np.array([1, 2, 3])` is an integer array, and a float stored into it later is truncated toward zero without any warning. Type a decimal point in measured data, or set the data type explicitly:
+
+```python
+x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+x = np.array([1, 2, 3, 4, 5], dtype=float)   # same array
+x.dtype                                      # float64, not int64
+```
+
+**What can go wrong:** the notebook below should store $\sqrt{1},\ldots,\sqrt{5}$ in `y`. Note that `np.zeros_like(x)` copies the data type of `x`.
+
+::: {.quarto-wasm-local notebook="mp2_integer_array.edit.py" view="edit" title="Square roots stored in an integer array" height="380" loading="lazy" fullscreen="true"}
+**Static fallback.** `x = np.array([1, 2, 3, 4, 5])` has data type `int64`, so `y = np.zeros_like(x)` is an integer array too. Filling it with square roots gives `[1 1 1 2 2]` instead of $[1, 1.414, 1.732, 2, 2.236]$.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: store the positions as floats**
+Write `x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])`. Then `zeros_like` creates a float array. Alternatively, `y = np.zeros(x.size)` works because `np.zeros` uses floats by default.
+:::
+
+### Careful with casual errors
+
+A single mistyped character can produce valid Python that means something else. For example, `P = 2,5` creates the tuple `(2, 5)`, and nothing fails on that line. The error appears only when a function uses `P`, so the traceback points inside the function instead of at the typo.
+
+**What can go wrong:** the notebook should solve $x^2-2.5=0$, giving $x=1.5811$.
+
+::: {.quarto-wasm-local notebook="mp2_comma_decimal.edit.py" view="edit" title="A tuple passed where a decimal number was intended" height="460" loading="lazy" fullscreen="true"}
+**Static fallback.** With `P = 2,5`, the solver stops with `TypeError: unsupported operand type(s) for -: 'float' and 'tuple'`, raised in the line `return x**2 - P`.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: type the decimal point**
+Change `P = 2,5` to `P = 2.5`. When a traceback mentions a `tuple` where you expected a number, print the inputs of the failing line.
+:::
+
+### Powers use `**`
+
+```python
+x ** 2      # square
+x ** 0.5    # square root, same as np.sqrt(x)
+```
+
+In Python, `^` is the bitwise XOR operator. For integer arrays it returns a different number without any error.
+
+**What can go wrong:** the notebook should return the squares of $1, 2, 3, 4$.
+
+::: {.quarto-wasm-local notebook="mp2_power_operator.edit.py" view="edit" title="The caret operator used as a power" height="360" loading="lazy" fullscreen="true"}
+**Static fallback.** `np.array([1, 2, 3, 4]) ^ 2` returns `[3 0 1 6]` without an error.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: replace the caret by the power operator**
+Write `x ** 2`, which returns `[1 4 9 16]`.
+:::
+
+### Vectors and matrices
+
+```python
+c = np.array([0.5, 1.0, 1.5, 2.0])           # vector, shape (4,)
+A = np.array([[4.0, -1.0, 0.0],              # matrix, one inner list per row
+              [-1.0, 4.0, -1.0],
+              [0.0, -1.0, 4.0]])             # shape (3, 3)
+c.shape, A.shape
+```
+
+Check `.shape` against the number of values you meant to type.
+
+**What can go wrong:** the notebook should store four concentrations, $0.5, 1.0, 1.5, 2.0\ \mathrm{mol\,L^{-1}}$, and multiply them by four volumes.
+
+::: {.quarto-wasm-local notebook="mp2_array_typo.edit.py" view="edit" title="A comma typed for a decimal point inside an array" height="460" loading="lazy" fullscreen="true"}
+**Static fallback.** `np.array([0.5, 1.0, 1,5, 2.0])` has five entries and shape `(5,)`. Multiplying it by a four-entry array raises `ValueError: operands could not be broadcast together with shapes (5,) (4,)`.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: correct `1,5` to `1.5`**
+With `1.5`, the array has shape `(4,)` and the product gives `[0.5, 2.0, 4.5, 8.0]`.
+:::
+
+### Element-wise `*` and matrix `@`
+
+Addition and subtraction act entry by entry. Multiplication has two meanings, and the size of the output tells them apart:
+
+| Product | Code | $\mathbf a=(1,2,3)$, $\mathbf b=(4,5,6)$ | Output size |
+|---|---|---|---|
+| Element-wise (Hadamard) | `a * b` | $(4, 10, 18)$ | Same shape as the inputs |
+| Vector or matrix product | `a @ b` | $1\cdot4+2\cdot5+3\cdot6=32$ | A number for two vectors, a vector for a matrix times a vector |
+
+```python
+a = np.array([1.0, 2.0, 3.0])
+b = np.array([4.0, 5.0, 6.0])
+a * b         # array([ 4., 10., 18.])
+a @ b         # 32.0
+
+A @ x         # matrix-vector product
+A @ x - b     # residual of A x = b: every entry should be close to zero
+```
+
+**What can go wrong:** the notebook solves $\mathbf A\mathbf x=\mathbf b$ and then checks the residual.
+
+::: {.quarto-wasm-local notebook="mp2_matmul_check.edit.py" view="edit" title="Checking a linear solve with the wrong product" height="420" loading="lazy" fullscreen="true"}
+**Static fallback.** `A * x - b` multiplies each row of `A` entry by entry with `x` and returns a $3\times3$ array of nonzero values, although the solution is correct.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: use `@` for the matrix-vector product**
+`A @ x - b` returns a vector with three entries, all zero here.
+:::
+
+### Expressing residuals and errors in NumPy
+
+Compare computed values $x_{\text{calc},i}$ with reference values $x_{\text{true},i}$, for $i=1,\ldots,n$:
+
+- **Residual** (one value per entry): $e_i=x_{\text{calc},i}-x_{\text{true},i}$.
+- **Sum of squared errors (SSE)**, the quantity least squares minimizes: $\text{SSE}=e_1^2+e_2^2+\cdots+e_n^2$.
+- **Root-mean-square error (RMSE)**, a typical error size in the units of $x$: $\text{RMSE}=\sqrt{\text{SSE}/n}=\|\mathbf e\|_2/\sqrt n$.
+
+```python
+e = x_calc - x_true              # residual vector
+e.shape                          # same shape as x_true
+sse = np.sum(e**2)               # the quantity least squares minimizes
+rmse = np.sqrt(np.mean(e**2))    # same as np.linalg.norm(e) / np.sqrt(e.size)
+```
+
+`np.linalg.norm(e)` alone gives $\sqrt{\text{SSE}}$. Divide it by $\sqrt n$ to obtain the RMSE.
+
+::: {.callout-note collapse="true"}
+## **The sum of squared errors written as a loop**
+```python
+sse = 0.0
+for i in range(e.size):
+    sse = sse + e[i]**2
+```
+`np.sum(e**2)` gives the same number in one line and runs much faster for large arrays.
+:::
+
+### Indexing and slicing
+
+Indexing selects individual entries of an array, and slicing selects a range of them.
+
+- **Python counts from 0.** The first entry is `x[0]`, so the mathematical entry $a_{23}$ is `A[1, 2]`.
+- **Row first, then column.** `A[i, j]` is row `i`, column `j`.
+- **Negative indices count from the end.** `x[-1]` is the last entry and `x[-2]` the second to last.
+- **A colon selects a range.** `A[:, 0]` is the first column, and `x[1:4]` holds entries 1, 2, and 3. The stop index is excluded.
+
+```python
+A = np.array([[1, 2, 3],
+              [4, 5, 6],
+              [7, 8, 9]])
+A[0, 2]     # 3, the entry a_13
+A[-1]       # array([7, 8, 9]), the last row
+A[:, 1]     # array([2, 5, 8]), the second column
+```
+
+**What can go wrong:** the notebook should return $a_{23}=6$.
+
+::: {.quarto-wasm-local notebook="mp2_indexing.edit.py" view="edit" title="Mathematical indices used as Python indices" height="400" loading="lazy" fullscreen="true"}
+**Static fallback.** `A[2, 3]` raises `IndexError: index 3 is out of bounds for axis 1 with size 3`.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: subtract one from each mathematical index**
+$a_{23}$ is `A[1, 2]`, which returns 6.
+:::
+
+## Writing and passing functions
+
+Before coding, write the chain of dependencies on paper: which quantity depends on which, and which one is unknown. For example, the diffusion length of carbon in FCC iron after carburizing for a time $t$ is
+
+$$
+L(T,t)=\sqrt{D(T)\,t},\qquad D(T)=D_0\exp\!\left(-\frac{Q}{RT}\right),
+$$
+
+with $D_0=2.3\times10^{-5}\ \mathrm{m^2\,s^{-1}}$ and $Q=148\ \mathrm{kJ\,mol^{-1}}$. Since $L$ depends on $T$ through $D$, write one function for each relation and let the outer function call the inner one:
+
+```python
+D0 = 2.3e-5      # m^2/s
+Q = 148e3        # J/mol
+R = 8.314        # J/(mol K)
+
+def diffusivity(T):
+    return D0 * np.exp(-Q / (R * T))
+
+def diffusion_length(T, t):
+    return np.sqrt(diffusivity(T) * t)
+
+diffusion_length(1200.0, 3600.0)   # 1.73e-4 m
+```
+
+A function can also receive another function as an input. Pass its name without parentheses:
+
+```python
+def diffusion_length(T, t, D_func):
+    return np.sqrt(D_func(T) * t)
+
+diffusion_length(1200.0, 3600.0, diffusivity)           # passes the function
+diffusion_length(1200.0, 3600.0, diffusivity(1200.0))   # passes a number: TypeError
+```
+
+The SciPy solvers `root_scalar`, `root`, `minimize_scalar`, `minimize`, and `curve_fit` work the same way. Their first input is a function that the solver calls many times at different values of the unknown.
+
+**What can go wrong:** the notebook should find the temperature at which $L=0.5\ \mathrm{mm}$ after $1\ \mathrm{h}$.
+
+::: {.quarto-wasm-local notebook="mp2_function_argument.edit.py" view="edit" title="A function value passed to root_scalar instead of the function" height="560" loading="lazy" fullscreen="true"}
+**Static fallback.** `root_scalar(residual(1200.0, t, L_target), ...)` evaluates the residual once and passes the resulting number. The solver stops with `TypeError: 'numpy.float64' object is not callable`.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: pass the residual function and its fixed inputs**
+Write `sp.optimize.root_scalar(residual, args=(t, L_target), bracket=[1000.0, 1600.0], method="bisect")`. The root is $T=1400.5\ \mathrm{K}$.
+:::
+
+## Snippet 1: Root finding for one equation
+
+### Bracketing methods
+
+Write the problem as a residual that is zero at the answer. The unknown comes first, and `args` supplies the remaining inputs in order:
+
+```python
+def residual(T, t, L_target):
+    return diffusion_length(T, t) - L_target
+
+residual(1000.0, 3600.0, 0.5e-3), residual(1600.0, 3600.0, 0.5e-3)   # opposite signs
+
+solution = sp.optimize.root_scalar(
+    residual, args=(3600.0, 0.5e-3), bracket=[1000.0, 1600.0], method="bisect"
+)
+solution.root, solution.converged   # 1400.52 K, True
+```
+
+The bracket must contain a sign change, $F(a)\,F(b)<0$. `method="brentq"` uses the same bracket and needs 10 iterations here instead of 48.
+
+**What can go wrong:** the notebook uses the bracket $[1000, 1300]\ \mathrm{K}$.
+
+::: {.quarto-wasm-local notebook="mp2_bracket.edit.py" view="edit" title="A bisection bracket without a sign change" height="560" loading="lazy" fullscreen="true"}
+**Static fallback.** The solver stops with `ValueError: f(a) and f(b) must have different signs`.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: evaluate the residual at both ends of the bracket**
+The residual is negative at both 1000 K and 1300 K, so the diffusion length is still too short at 1300 K. Raising the upper end to 1600 K, where the residual is positive, gives a valid bracket.
+:::
+
+### Newton–Raphson
+
+Newton–Raphson needs a starting value `x0` and the derivative. Using the pressure–volume model of Example 2 in [Midterm prep (I)](midterm-prep-1.qmd):
+
+$$
+F(V)=\frac{0.5T}{V+0.1}-\frac{5}{V^2}-P=0,\qquad
+F'(V)=-\frac{0.5T}{(V+0.1)^2}+\frac{10}{V^3}.
+$$
+
+```python
+T = 300.0   # K
+P = 50.0    # atm
+
+def F(V):
+    return 0.5 * T / (V + 0.1) - 5 / V**2 - P
+
+def F_prime(V):
+    return -0.5 * T / (V + 0.1)**2 + 10 / V**3
+
+solution = sp.optimize.root_scalar(F, x0=1.0, fprime=F_prime, method="newton")
+solution.root, solution.converged   # 2.8639 L, True
+```
+
+Without `fprime`, `method="newton"` switches to the secant method without telling you.
+
+**What can go wrong:** the notebook starts from $V_0=10\ \mathrm{L}$, then from $V_0=0.1\ \mathrm{L}$.
+
+::: {.quarto-wasm-local notebook="mp2_newton_start.edit.py" view="edit" title="Newton–Raphson from two poor starting volumes" height="620" loading="lazy" fullscreen="true"}
+**Static fallback.** From $V_0=10\ \mathrm{L}$, the iterates diverge. `solution.root` still holds a number, $-1.3\times10^{193}$, but `converged` is `False`. From $V_0=0.1\ \mathrm{L}$, the solver converges to $V=0.0799\ \mathrm{L}$, which is also a root of the model.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: check convergence and start from an ideal-gas estimate**
+Always print `solution.converged` before using `solution.root`. For the starting value, the first term of the model gives the ideal-gas estimate $V\approx0.5T/P=3\ \mathrm{L}$. From `x0=3.0`, Newton–Raphson converges to $2.8639\ \mathrm{L}$ in 4 iterations.
+:::
+
+## Snippet 2: Root finding for a system of equations
+
+Using Example 6 of [Midterm prep (I)](midterm-prep-1.qmd), solve
+
+$$
+\begin{aligned}
+f_1(x,y)&=x^2+2x+2y^2-25=0,\\
+f_2(x,y)&=2x^3-y^2+4y-20=0,
+\end{aligned}
+\qquad
+\mathbf J=\begin{pmatrix}
+\partial f_1/\partial x & \partial f_1/\partial y\\
+\partial f_2/\partial x & \partial f_2/\partial y
+\end{pmatrix}
+=\begin{pmatrix}
+2x+2 & 4y\\
+6x^2 & -2y+4
+\end{pmatrix}.
+$$
+
+The solver passes all unknowns to the residual function as **one array** with $n$ entries, and expects $n$ residuals back:
+
+```python
+def F(v):
+    x, y = v                       # unpack the array of unknowns
+    return [x**2 + 2*x + 2*y**2 - 25,
+            2*x**3 - y**2 + 4*y - 20]
+
+solution = sp.optimize.root(F, [1.0, 1.0])
+solution.x, solution.success       # [2.0331, 2.8983], True
+F(solution.x)                      # both residuals close to zero
+```
+
+If you know the Jacobian, pass it with `jac`. Row $i$ holds the derivatives of $f_i$:
+
+```python
+def J(v):
+    x, y = v
+    return np.array([[2*x + 2, 4*y],
+                     [6*x**2, -2*y + 4]])
+
+solution = sp.optimize.root(F, [1.0, 1.0], jac=J)
+```
+
+**What can go wrong:** the residual function in the notebook takes `x` and `y` as two separate inputs.
+
+::: {.quarto-wasm-local notebook="mp2_system_signature.edit.py" view="edit" title="A system residual written with two separate inputs" height="520" loading="lazy" fullscreen="true"}
+**Static fallback.** With `def F(x, y)`, the solver stops with `TypeError: F() missing 1 required positional argument: 'y'`.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: take one array and unpack it**
+Write `def F(v):` followed by `x, y = v`. The solver then returns $(2.0331, 2.8983)$.
+:::
+
+## Snippet 3: Minimization in one variable
+
+The energy $E(x)=x^4-3x^2+x$ has two minima. Either of these approaches finds one:
+
+```python
+def E(x):
+    return x**4 - 3*x**2 + x
+
+# Method 1: minimize E directly within bounds
+result = sp.optimize.minimize_scalar(E, bounds=(-2.0, 2.0), method="bounded")
+result.x, result.fun                     # -1.3008, -3.5139
+
+# Method 2: solve E'(x) = 0 with Newton, then check E''(x) > 0
+def E_prime(x):
+    return 4*x**3 - 6*x + 1
+
+def E_second(x):
+    return 12*x**2 - 6
+
+solution = sp.optimize.root_scalar(E_prime, x0=-1.0, fprime=E_second, method="newton")
+solution.root, E_second(solution.root)   # -1.3008, 14.31 > 0: a minimum
+```
+
+Both methods return a *local* minimum. Without bounds, `minimize_scalar(E)` returns the other, higher minimum at $x=1.1309$, $E=-1.0702$. Plot $E$ first.
+
+**What can go wrong:** the notebook applies Method 2 from `x0=0.0`, a common default guess. The solver reports convergence, but what kind of point has it found?
+
+::: {.quarto-wasm-local notebook="mp2_stationary_point.edit.py" view="edit" title="Newton–Raphson on the derivative finds a maximum" height="520" loading="lazy" fullscreen="true"}
+**Static fallback.** The solver reports convergence to $x=0.1699$, where $E'(x)=0$ and $E(x)=0.0841$.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: check the second derivative, because this point is a maximum**
+$E''(0.1699)=-5.65<0$, so the stationary point is a maximum. A root of $E'$ can be a minimum, a maximum, or an inflection point. Check $E''(x)>0$, and start near a minimum seen on the plot: `x0=-1.0` gives $x=-1.3008$, and `x0=1.0` gives $x=1.1309$.
+:::
+
+## Snippet 4: Minimization in several variables
+
+`minimize` needs an objective function that takes all parameters as one array and returns **one number**, usually the sum of squared errors. For a first-order decay $c(t)=c_0e^{-kt}$:
+
+| Time, $t$ (h) | 0 | 1 | 2 | 3 | 4 |
+|---|---|---|---|---|---|
+| Concentration, $c$ (mol/L) | 2.0 | 1.2 | 0.75 | 0.42 | 0.26 |
+
+```python
+t = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+c = np.array([2.0, 1.2, 0.75, 0.42, 0.26])
+
+def model(t, c0, k):
+    return c0 * np.exp(-k * t)
+
+def objective(params):
+    c0, k = params
+    return np.sum((model(t, c0, k) - c)**2)
+
+fit = sp.optimize.minimize(objective, x0=[1.0, 1.0])
+fit.x, fit.success                 # [2.0008, 0.5065], True
+```
+
+**What can go wrong:** the objective function in the notebook returns the residuals themselves.
+
+::: {.quarto-wasm-local notebook="mp2_objective_scalar.edit.py" view="edit" title="An objective function that returns a vector" height="560" loading="lazy" fullscreen="true"}
+**Static fallback.** `minimize` stops with `ValueError: The user-provided objective function must return a scalar value.`
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: sum the squared residuals**
+Return `np.sum((model(t, c0, k) - c)**2)`.
+:::
+
+## Snippet 5: Interpolation
+
+Each SciPy interpolator returns a new function. Call it at the new $x$ values. The data $x$ must be strictly increasing. Using the wind-turbine data of Example 3 in [Midterm prep (I)](midterm-prep-1.qmd):
+
+```python
+v = np.array([12.0, 20.0, 28.0, 36.0, 44.0])       # mph
+P = np.array([320.0, 490.0, 540.0, 500.0, 480.0])  # W
+
+spline = sp.interpolate.CubicSpline(v, P)
+pchip = sp.interpolate.PchipInterpolator(v, P)
+linear = sp.interpolate.interp1d(v, P)             # piecewise linear
+
+spline(30.0), pchip(30.0), linear(30.0)            # 535.23, 535.0, 530.0 W
+```
+
+**What can go wrong:** the notebook estimates the power at 60 mph.
+
+::: {.quarto-wasm-local notebook="mp2_extrapolation.edit.py" view="edit" title="Interpolators evaluated beyond the measured wind speeds" height="420" loading="lazy" fullscreen="true"}
+**Static fallback.** Without any warning, the cubic spline gives $1020\ \mathrm{W}$ and PCHIP gives $540\ \mathrm{W}$. The two curves extend different assumed shapes beyond the last measurement at 44 mph.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: estimate only between the measured wind speeds**
+Interpolation is supported only for $12\le v\le44\ \mathrm{mph}$. Outside this range, the value reflects the curve's assumed shape rather than the measurements. `interp1d` raises a `ValueError` for such inputs by default.
+:::
+
+## Snippet 6: Nonlinear curve fitting
+
+`curve_fit` builds the sum of squared errors for you. The model function takes the independent variable **first**, followed by the parameters. Naming the data in the call, as in `xdata=t, ydata=c`, makes clear which array is which:
+
+```python
+def model(t, c0, k):
+    return c0 * np.exp(-k * t)
+
+params, cov = sp.optimize.curve_fit(model, xdata=t, ydata=c, p0=[1.0, 1.0])
+params                     # [2.0008, 0.5065], same as minimize above
+np.sqrt(np.diag(cov))      # standard errors: [0.0165, 0.0081]
+```
+
+**What can go wrong:** the model function in the notebook lists the parameters before `t`.
+
+::: {.quarto-wasm-local notebook="mp2_curve_fit_order.edit.py" view="edit" title="A curve_fit model with its inputs in the wrong order" height="460" loading="lazy" fullscreen="true"}
+**Static fallback.** With `def model(c0, k, t)`, `curve_fit` returns $c_0=1.649$ and $k=1.086$ without an error. The standard errors are about $10^{16}$.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: put the independent variable first**
+Write `def model(t, c0, k)`. Huge standard errors are a warning sign that the fitted parameters are meaningless.
+:::
+
+## Snippet 7: Polynomial fitting
+
+Choose a low degree, often 1 to 3, by looking at a plot of the data.
+
+```python
+poly = np.polynomial.Polynomial.fit(v, P, deg=2)
+print(poly)                    # written in a rescaled variable, not in v
+poly.convert().coef            # [6.393, 33.5, -0.5246]: P = 6.393 + 33.5 v - 0.5246 v^2
+poly(30.0)                     # prediction: 539.29 W
+np.sum((poly(v) - P)**2)       # SSE at the data points: 2051.4 W^2
+```
+
+`Polynomial.fit` maps the data range onto $[-1,1]$ for numerical stability, so `print(poly)` shows terms such as $(-1.75+0.0625x)$. Use `.convert().coef` for coefficients in the original variable. Calling `poly(x)` needs no conversion.
+
+**What can go wrong:** the notebook fits a degree-7 polynomial to eight measured points. Change `deg` and compare the curves.
+
+::: {.quarto-wasm-local notebook="mp2_polynomial_degree.edit.py" view="edit" title="Polynomial degree and wiggles in a fit to eight points" height="640" loading="lazy" fullscreen="true"}
+**Static fallback.** A degree-7 polynomial passes through all eight points, so its SSE is essentially zero. Between the points, it swings away from the smooth trend, for example to $y=0.20$ at $x=0.5$, where a quadratic fit gives $y=1.38$.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: choose the degree from the trend in the data**
+These data follow a curved trend that a quadratic describes well. Degree 2 gives $\text{SSE}=0.249$, compared with $15.0$ for a straight line, and degree 3 barely improves on it ($0.245$). Zero error at the data points means the curve also follows the measurement noise.
+:::
+
+## Snippet 8: Linearized least squares
+
+Taking logarithms turns $c=c_0e^{-kt}$ into a straight line:
+
+$$
+\ln c=\ln c_0-kt\quad\Longrightarrow\quad Y=a+bX,\qquad X=t,\ Y=\ln c,\ a=\ln c_0,\ b=-k.
+$$
+
+| $t$ (h) | 0 | 1 | 2 | 3 | 4 |
+|---|---:|---:|---:|---:|---:|
+| $c$ (mol/L) | 2.0 | 1.2 | 0.75 | 0.42 | 0.26 |
+| $X=t$ | 0 | 1 | 2 | 3 | 4 |
+| $Y=\ln c$ | 0.693147 | 0.182322 | -0.287682 | -0.867501 | -1.347074 |
+
+By hand, with $S_X=\sum X_i$, $S_Y=\sum Y_i$, $S_{XX}=\sum X_i^2$, and $S_{XY}=\sum X_iY_i$ over $n$ points,
+
+$$
+b=\frac{nS_{XY}-S_XS_Y}{nS_{XX}-S_X^2},\qquad a=\frac{S_Y-bS_X}{n}.
+$$
+
+Then convert back to the original parameters: $c_0=e^{a}$ and $k=-b$. In Python:
+
+```python
+line = np.polynomial.Polynomial.fit(t, np.log(c), deg=1)
+a, b = line.convert().coef     # intercept and slope of ln c against t
+c0 = np.exp(a)                 # 2.0152 mol/L
+k = -b                         # 0.5130 1/h
+```
+
+These values differ from the direct fit, $(2.0008, 0.5065)$, because the linearized fit minimizes squared errors in $\ln c$ instead of in $c$.
+
+**What can go wrong:** the notebook reads `line.coef` directly as $c_0$ and $-k$.
+
+::: {.quarto-wasm-local notebook="mp2_linearized_coef.edit.py" view="edit" title="Linearized fit coefficients used without conversion" height="440" loading="lazy" fullscreen="true"}
+**Static fallback.** `line.coef` holds coefficients in the rescaled variable, and its intercept is still $\ln c_0$. The notebook reports $c_0=-0.325$ and negative predicted concentrations.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: convert the coefficients and exponentiate the intercept**
+Write `a, b = line.convert().coef`, then `c0 = np.exp(a)` and `k = -b`.
+:::
+
+## Snippet 9: Linear systems
+
+```python
+A = np.array([[4.0, -1.0, 0.0],
+              [-1.0, 4.0, -1.0],
+              [0.0, -1.0, 4.0]])
+b = np.array([1.0, 2.0, 3.0])
+
+x = np.linalg.solve(A, b)      # [0.4643, 0.8571, 0.9643]
+A @ x - b                      # residual check
+```
+
+Use `np.linalg.solve(A, b)` rather than `np.linalg.inv(A) @ b`. It gives the same answer with less work and smaller round-off error.
+
+**What can go wrong:** the third row of the notebook's matrix should be $[0, -1, 4]$.
+
+::: {.quarto-wasm-local notebook="mp2_singular_matrix.edit.py" view="edit" title="A copied row that makes the matrix singular" height="440" loading="lazy" fullscreen="true"}
+**Static fallback.** The third row repeats the first, so two equations have the same left-hand side and no unique solution exists. `np.linalg.solve` raises `LinAlgError: Singular matrix`.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: correct the matrix entries row by row**
+Change the third row to `[0.0, -1.0, 4.0]`. If `np.linalg.cond(A)` returns a huge number, $10^{16}$ or larger, compare each row with the equations before solving.
+:::
+
+## Snippet 10: Norms, condition number, and inverse
+
+```python
+np.linalg.norm(x)       # vector 2-norm: sqrt(x1^2 + ... + xn^2)
+np.linalg.norm(A)       # matrix Frobenius norm (default for a matrix)
+np.linalg.norm(A, 2)    # matrix 2-norm
+np.linalg.cond(A)       # condition number in the 2-norm: 2.094
+np.linalg.inv(A)        # inverse matrix
+```
+
+**What can go wrong (optional for this course):** computing a condition number from its definition is beyond what we need, but in case you try it, the notebook computes $\kappa(\mathbf A)=\|\mathbf A\|\,\|\mathbf A^{-1}\|$ and compares it with `np.linalg.cond`.
+
+::: {.quarto-wasm-local notebook="mp2_norm_cond.edit.py" view="edit" title="A condition number computed from two different matrix norms" height="400" loading="lazy" fullscreen="true"}
+**Static fallback.** `norm(A) * norm(inv(A))` gives 3.578, while `np.linalg.cond(A)` gives 2.094.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: use the same norm in both calculations**
+`np.linalg.norm` uses the Frobenius norm for a matrix, and `np.linalg.cond` uses the 2-norm. `np.linalg.norm(A, 2) * np.linalg.norm(A_inv, 2)` gives 2.094, and `np.linalg.cond(A, "fro")` gives 3.578.
+:::
+
+## Snippet 11: Eigenvalues and eigenvectors
+
+```python
+values, vectors = np.linalg.eig(H)    # general square matrix
+values, vectors = np.linalg.eigh(H)   # symmetric matrix, such as a Hessian
+
+v0 = vectors[:, 0]                    # the eigenvector of values[0] is a column
+H @ v0 - values[0] * v0               # check: close to zero
+```
+
+`eig` may return complex numbers even when every imaginary part is zero, for example `10.+0.j`. If all imaginary parts are zero, continue with `values.real`. `eigh` returns real eigenvalues in ascending order.
+
+**What can go wrong:** the notebook checks $\mathbf H\mathbf v=\lambda\mathbf v$ for the first eigenvalue.
+
+::: {.quarto-wasm-local notebook="mp2_eigenvector_column.edit.py" view="edit" title="An eigenvector taken from a row instead of a column" height="420" loading="lazy" fullscreen="true"}
+**Static fallback.** `vectors[0]` is the first row of the eigenvector array. For $\lambda=0.5858$, the check gives $\mathbf H\mathbf v-\lambda\mathbf v=(1.414, -1, 0)$ instead of zero.
+:::
+
+::: {.callout-note collapse="true"}
+## **Fix: take the eigenvector as a column**
+Write `v = vectors[:, 0]`. The check then returns entries of order $10^{-16}$.
+:::

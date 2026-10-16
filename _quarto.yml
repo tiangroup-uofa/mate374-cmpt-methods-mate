@@ -157,6 +157,8 @@ website:
         contents:
           - href: exams/midterm-prep-1.qmd
             text: "Midterm prep (I)"
+          - href: exams/midterm-prep-2.qmd
+            text: "Midterm prep (II)"
       - href: project/index.qmd
         text: Project
 

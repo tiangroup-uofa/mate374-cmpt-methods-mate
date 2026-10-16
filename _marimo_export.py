@@ -26,6 +26,7 @@ FULL_SITE_QMD_DIRS = (
     "introduction",
     "units",
     "assignments",
+    "exams",
     "project",
     "seminars",
 )
