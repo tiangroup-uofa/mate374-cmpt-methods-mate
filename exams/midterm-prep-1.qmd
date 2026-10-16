@@ -316,95 +316,68 @@ Estimate the power at a wind speed of **30 mph** using either an interpolation m
 State the method, including the polynomial degree if relevant, and which data points you use. Show enough working or function inputs to reproduce your estimate. Explain one limitation of the estimate and whether your chosen curve must pass through the measurements.
 
 ::: {.callout-note collapse="true"}
-## **Example 3: Sample answer and Python code**
+## **Example 3: Worked solution**
+
+**1. Unknown and governing relation**
+
+The unknown is the power $P$ at $v=30\ \mathrm{mph}$. We have five measured pairs $(v,P)$ rather than a governing equation. Power rises and then falls, so a single straight line through the full dataset would miss the curvature.
+
+**2. Which method or model?**
+
+- **Interpolation:** use linear interpolation, a cubic spline, or PCHIP. PCHIP uses piecewise cubic curves that preserve the rising or falling trend between neighbouring measurements.
+- **Polynomial fitting:** choose a model such as $P(v)=a_0+a_1v+a_2v^2$ and fit its coefficients to all five points by least squares.
+
+**3. Hand solution: Linear interpolation**
+
+Use the two neighbouring points $(28,540)$ and $(36,500)$. Equal slopes along the straight line give
+
+$$
+\frac{P(30)-540}{30-28}=\frac{500-540}{36-28}.
+$$
+
+Therefore,
+
+$$
+P(30)=540+\frac{30-28}{36-28}(500-540)
+=\boxed{530\ \mathrm{W}}.
+$$
+
+This assumes a linear variation in power between 28 and 36 mph.
+
+**4. Python solution: Interpolation or polynomial fitting**
 
 ```python
 import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
 
-# Given data: wind speed in mph and electrical power in W.
 v = np.array([12, 20, 28, 36, 44])
 P = np.array([320, 490, 540, 500, 480])
-v_target = 30.0
-v_plot = np.linspace(v.min(), v.max(), 300)
 
-# 1. Inspect the data. Power rises and then falls, suggesting curvature.
-plt.figure()
-plt.scatter(v, P)
-plt.xlabel("Wind speed (mph)")
-plt.ylabel("Electrical power (W)")
-plt.title("Measured wind-turbine power")
-plt.show()
+interp = sp.interpolate.PchipInterpolator(v, P)
+interp(30.0)
 
-# 2. Linear interpolation by hand uses the two neighbouring points.
-# At 28 mph, P = 540 W; at 36 mph, P = 500 W.
-# P(30) = 540 + (30 - 28) / (36 - 28) * (500 - 540) = 530 W.
-P_hand = 540 + (v_target - 28) / (36 - 28) * (500 - 540)
-print(f"Linear interpolation by hand: {P_hand:.4f} W")
-
-# 3. Compare interpolation methods using the supplied data.
-# CubicSpline uses its default not-a-knot boundary conditions.
-# PCHIP preserves monotonicity within each rising or falling data segment.
-spline = sp.interpolate.CubicSpline(v, P)
-pchip = sp.interpolate.PchipInterpolator(v, P)
-
-print(f"Linear interpolation: {np.interp(v_target, v, P):.4f} W")
-print(f"Cubic spline:         {spline(v_target):.4f} W")
-print(f"PCHIP:                {pchip(v_target):.4f} W")
-# Expected values: 530.0000 W, 535.2344 W, and 535.0000 W.
-
-plt.figure()
-plt.scatter(v, P, color="black", label="Measurements")
-plt.plot(v_plot, np.interp(v_plot, v, P), label="Linear")
-plt.plot(v_plot, spline(v_plot), label="Cubic spline")
-plt.plot(v_plot, pchip(v_plot), label="PCHIP")
-plt.axvline(v_target, color="grey", linestyle=":", label="30 mph")
-plt.xlabel("Wind speed (mph)")
-plt.ylabel("Electrical power (W)")
-plt.legend()
-plt.show()
-
-# 4. Fit polynomials of degrees 2, 3, and 4 to all five points.
-# SSE is the sum of squared power residuals, with units W^2.
-# convert().coef gives coefficients in increasing powers of v:
-# constant, v, v^2, ...
-plt.figure()
-plt.scatter(v, P, color="black", label="Measurements")
-
-for degree in (2, 3, 4):
-    fit = np.polynomial.Polynomial.fit(v, P, deg=degree)
-    residuals = fit(v) - P
-    sse = np.sum(residuals**2)
-    print(f"Degree {degree}: P(30) = {fit(v_target):.4f} W, "
-          f"SSE = {sse:.6g} W^2")
-    print("Coefficients:", fit.convert().coef)
-    plt.plot(v_plot, fit(v_plot), label=f"Degree {degree}")
-
-plt.axvline(v_target, color="grey", linestyle=":", label="30 mph")
-plt.xlabel("Wind speed (mph)")
-plt.ylabel("Electrical power (W)")
-plt.legend()
-plt.show()
-
-# Degree 2: P(30) = 539.2946 W, SSE = 2051.4286 W^2.
-# Degree 3: P(30) = 529.5603 W, SSE = 91.4286 W^2.
-# Degree 4: P(30) = 535.5078 W, SSE is approximately zero.
-#
-# The quadratic in ordinary powers is
-# P(v) = 6.392857 + 33.5*v - 0.52455357*v**2.
-#
-# Interpolants pass through every measurement. The degree-2 and degree-3
-# least-squares fits need not. A degree-4 polynomial has five coefficients
-# and can pass through all five points, up to floating-point error.
-# Zero fitting error does not establish accuracy between measurements.
-# A high-degree interpolant can also follow measurement noise.
-#
-# One acceptable answer is 530 W using local linear interpolation.
-# It assumes a straight-line variation between 28 and 36 mph.
-# The curved interpolants give different estimates because they make
-# different assumptions about the variation between measurements.
+pow_fit = np.polynomial.Polynomial.fit(v, P, deg=2)
+pow_fit(30.0), np.sum((pow_fit(v) - P)**2)
 ```
+
+PCHIP gives **$P(30)=535.0\ \mathrm{W}$**. Replacing PchipInterpolator with CubicSpline, using its default boundary conditions, gives **$535.2344\ \mathrm{W}$**.
+
+The quadratic fit is
+
+$$
+P(v)=6.392857+33.5v-0.52455357v^2,
+$$
+
+giving **$P(30)=539.2946\ \mathrm{W}$**. Changing the polynomial degree gives:
+
+| Polynomial degree | 2 | 3 | 4 |
+|---|---:|---:|---:|
+| $P(30)$ (W) | 539.2946 | 529.5603 | 535.5078 |
+| Sum of squared residuals ($\mathrm{W^2}$) | 2051.4286 | 91.4286 | $\approx0$ |
+
+**5. Interpretation**
+
+The interpolants pass through the measurements. The quadratic and cubic least-squares fits need not. A degree-4 polynomial has five coefficients and can pass through all five points, but its nearly zero fitting error does not establish accuracy between them. It may also follow measurement noise. State which method you used because the estimates depend on the assumed curve.
 :::
 
 ### Example 4: Fitting a growth-rate model
@@ -432,76 +405,99 @@ State which residuals your fit minimizes. The two approaches minimize errors on 
 
 
 ::: {.callout-note collapse="true"}
-## **Example 4: Sample answer and Python code**
+## **Example 4: Worked solution**
+
+**1. Unknowns and governing model**
+
+The concentrations $c$ and growth rates $k$ are known. The unknown parameters are **$k_{\max}$ and $c_s$** in
+
+$$
+k(c)=\frac{k_{\max}c^2}{c_s+c^2}.
+$$
+
+**2. Which method?**
+
+This is a **curve-fitting problem**. We can transform the model into a straight line for a hand calculation, or fit the original model directly using **curve_fit** or **minimize**.
+
+**3. Hand solution: Transform to a straight line**
+
+Taking reciprocals gives
+
+$$
+\frac{1}{k}=\frac{c_s+c^2}{k_{\max}c^2}
+=\frac{1}{k_{\max}}+\frac{c_s}{k_{\max}}\frac{1}{c^2}.
+$$
+
+Set $X=1/c^2$ and $Y=1/k$. Then $Y=a+bX$, where
+
+$$
+a=\frac{1}{k_{\max}},\qquad b=\frac{c_s}{k_{\max}}.
+$$
+
+| $c$ | 0.5 | 1.5 | 2.5 |
+|---|---:|---:|---:|
+| $X=1/c^2$ | 4.000000 | 0.444444 | 0.160000 |
+| $Y=1/k$ | 0.921659 | 0.279955 | 0.227273 |
+
+For the three points, define $S_X=X_1+X_2+X_3$, $S_Y=Y_1+Y_2+Y_3$, $S_{XX}=X_1^2+X_2^2+X_3^2$, and $S_{XY}=X_1Y_1+X_2Y_2+X_3Y_3$. Using unrounded data,
+
+$$
+S_X=4.604444\ldots,\quad S_Y=1.428887\ldots,\quad
+S_{XX}=16.223131\ldots,\quad S_{XY}=3.847424\ldots.
+$$
+
+The least-squares slope and intercept are
+
+$$
+b=\frac{3S_{XY}-S_XS_Y}{3S_{XX}-S_X^2}
+=0.18068132\ldots,\qquad
+a=\frac{S_Y-bS_X}{3}=0.19898328\ldots.
+$$
+
+Recover the parameters:
+
+$$
+\boxed{k_{\max}=\frac{1}{a}=5.025548,\qquad
+c_s=\frac{b}{a}=0.908023.}
+$$
+
+**4. Python solution: Fit the original model**
+
+Use **curve_fit** with starting values $(k_{\max},c_s)=(5,1)$. Nonnegative bounds restrict the search, and the fitted values are strictly positive.
 
 ```python
 import numpy as np
-from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
+import scipy as sp
 
-# Given concentrations and measured growth rates.
 c = np.array([0.5, 1.5, 2.5])
 k = np.array([1.085, 3.572, 4.400])
 
-# Unknown parameters: k_max and c_s.
-def growth_rate(c, k_max, c_s):
-    return k_max * c**2 / (c_s + c**2)
+def model(c, kmax, cs):
+    return kmax * c**2 / (cs + c**2)
 
-# Direct nonlinear least squares using all three measurements.
-# Start from k_max = 5 and c_s = 1.
-# Bounds restrict the parameters to nonnegative values;
-# the fitted values below are strictly positive.
-parameters, covariance = curve_fit(
-    growth_rate, c, k, p0=[5.0, 1.0], bounds=(0, np.inf)
+params, cov = sp.optimize.curve_fit(
+    model, c, k, p0=[5, 1], bounds=(0, np.inf)
 )
-k_max, c_s = parameters
-predicted = growth_rate(c, k_max, c_s)
-residuals = predicted - k
 
-print(f"k_max = {k_max:.6f}, c_s = {c_s:.6f}")
-print("Predicted growth rates:", predicted)
-print("Residuals (predicted - measured):", residuals)
-print("Sum of squared residuals:", np.sum(residuals**2))
-# k_max = 5.041045, c_s = 0.918408.
-# Predicted rates: approximately [1.078614, 3.579827, 4.395192].
-# SSE = approximately 0.000125151, in squared growth-rate units.
-
-# Alternative hand/calculator route: transform to a straight line.
-# 1/k = 1/k_max + (c_s/k_max) * (1/c^2).
-# Set X = 1/c^2 and Y = 1/k, then fit Y = intercept + slope*X.
-X = 1 / c**2
-Y = 1 / k
-n = len(X)
-slope = (n * np.sum(X * Y) - np.sum(X) * np.sum(Y)) / (
-    n * np.sum(X**2) - np.sum(X)**2
-)
-intercept = (np.sum(Y) - slope * np.sum(X)) / n
-k_max_linear = 1 / intercept
-c_s_linear = slope / intercept
-
-print("Transformed-fit k_max:", k_max_linear)
-print("Transformed-fit c_s:", c_s_linear)
-print("Transformed-fit predictions:",
-      growth_rate(c, k_max_linear, c_s_linear))
-# k_max = 5.025548, c_s = 0.908023.
-# Predicted rates: approximately [1.084942, 3.580558, 4.388038].
-# This route minimizes squared errors in 1/k, whereas curve_fit
-# minimizes squared errors in k. Their answers can therefore differ.
-
-c_plot = np.linspace(0, 3, 300)
-plt.scatter(c, k, color="black", label="Measurements")
-plt.plot(c_plot, growth_rate(c_plot, k_max, c_s),
-         label="Direct fit with curve_fit")
-plt.plot(c_plot, growth_rate(c_plot, k_max_linear, c_s_linear),
-         "--", label="Transformed linear fit")
-plt.xlabel("Oxygen concentration, c (supplied scale)")
-plt.ylabel("Growth rate, k (supplied scale)")
-plt.legend()
-plt.show()
-
-# k_max has the same units as k; c_s has the units of c^2.
-# Three measurements provide limited evidence for extrapolation.
+params
+model(c, *params)
 ```
+
+The direct fit gives
+
+$$
+\boxed{k_{\max}=5.041045,\qquad c_s=0.918408.}
+$$
+
+**5. Predicted growth rates**
+
+| $c$ | 0.5 | 1.5 | 2.5 |
+|---|---:|---:|---:|
+| Measured $k$ | 1.085000 | 3.572000 | 4.400000 |
+| Transformed linear fit | 1.084942 | 3.580558 | 4.388038 |
+| Direct fit | 1.078614 | 3.579827 | 4.395192 |
+
+The hand calculation minimizes squared residuals in **$1/k$**, while the direct fit minimizes squared residuals in **$k$**. These different objectives explain the different parameter estimates. The units of $k_{\max}$ are those of $k$, and the units of $c_s$ are those of $c^2$.
 :::
 
 ### Example 5: A linear system for circuit currents
@@ -530,52 +526,59 @@ Determine the four currents using any suitable method. Write the numerical matri
 
 
 ::: {.callout-note collapse="true"}
-## **Example 5: Sample answer and Python code**
+## **Example 5: Worked solution**
+
+**1. Unknowns and governing equations**
+
+The unknowns are the four currents **$i_1,i_2,i_3,i_4$**. Substitute the resistances and voltages into the supplied equations:
+
+$$
+\underbrace{\begin{pmatrix}
+21&-10&0&-6\\
+-10&21&-7&0\\
+0&-7&33&-9\\
+-6&0&-9&80
+\end{pmatrix}}_{\mathbf A}
+\underbrace{\begin{pmatrix}i_1\\i_2\\i_3\\i_4\end{pmatrix}}_{\mathbf i}
+=
+\underbrace{\begin{pmatrix}15\\0\\-45\\0\end{pmatrix}}_{\mathbf b}.
+$$
+
+**2. Which method?**
+
+This is a **linear system**, $\mathbf A\mathbf i=\mathbf b$. Gaussian elimination or LU decomposition can solve it. Here, use NumPy's **linalg.solve**, an LU-based direct solver.
+
+**3. Python solution**
 
 ```python
 import numpy as np
 
-# Given resistances in ohms and voltages in volts.
-r1, r2, r3, r4 = 5, 10, 4, 6
-r5, r6, r7, r8 = 7, 9, 17, 65
-V1, V2 = 15, 45
-
-# Unknown vector: currents = [i1, i2, i3, i4], in amperes.
-# Assemble A * currents = b from the supplied equations.
 A = np.array([
-    [r1 + r2 + r4, -r2, 0, -r4],
-    [-r2, r2 + r3 + r5, -r5, 0],
-    [0, -r5, r5 + r6 + r7, -r6],
-    [-r4, 0, -r6, r4 + r8 + r6]
+    [21, -10, 0, -6],
+    [-10, 21, -7, 0],
+    [0, -7, 33, -9],
+    [-6, 0, -9, 80]
 ], dtype=float)
-b = np.array([V1, 0, -V2, 0], dtype=float)
+b = np.array([15, 0, -45, 0], dtype=float)
 
-print("Coefficient matrix (ohms):")
-print(A)
-print("Right-hand side (V):", b)
-# A = [[21, -10,   0, -6],
-#      [-10, 21,  -7,  0],
-#      [  0, -7,  33, -9],
-#      [ -6,  0,  -9, 80]]
-# b = [15, 0, -45, 0].
-
-# Solve the linear system directly using NumPy's LU-based solver.
-currents = np.linalg.solve(A, b)
-for number, current in enumerate(currents, start=1):
-    print(f"i{number} = {current:.6f} A")
-
-# i1 =  0.584889 A
-# i2 = -0.200960 A
-# i3 = -1.438434 A
-# i4 = -0.117957 A
-# Negative values indicate flow opposite to the reference direction.
-
-# Substitute the unrounded solution into all four equations.
-residuals = A @ currents - b
-print("Residuals (V):", residuals)
-print("Largest absolute residual (V):", np.max(np.abs(residuals)))
-# Residuals are approximately zero (about 1e-14 V or smaller).
+i = np.linalg.solve(A, b)
+i
+A @ i - b
 ```
+
+**4. Result and substitution check**
+
+$$
+\boxed{\mathbf i=
+\begin{pmatrix}
+0.584889\\
+-0.200960\\
+-1.438434\\
+-0.117957
+\end{pmatrix}\ \mathrm{A}.}
+$$
+
+Using the unrounded currents, every component of $\mathbf A\mathbf i-\mathbf b$ is below $10^{-14}\ \mathrm{V}$ in magnitude. The negative values of $i_2,i_3,i_4$ indicate flow opposite to their reference directions.
 :::
 
 ### Example 6: A nonlinear system
@@ -596,41 +599,56 @@ State the method and starting point, report the computed solution, and evaluate 
 For discussion: how might a different starting point affect the result? What would you examine if the solver reported failure or returned a point with a large residual?
 
 ::: {.callout-note collapse="true"}
-## **Example 6: Sample answer and Python code**
+## **Example 6: Worked solution**
+
+**1. Unknowns and governing equations**
+
+The unknowns are **$x$ and $y$**, which must satisfy both equations simultaneously:
+
+$$
+\begin{aligned}
+f_1(x,y)&=x^2+2x+2y^2-25=0,\\
+f_2(x,y)&=2x^3-y^2+4y-20=0.
+\end{aligned}
+$$
+
+**2. Which method?**
+
+This is a **nonlinear system**. Use SciPy's **root** solver with the starting point $(1,1)$. Its hybrid method combines Newton-type steps with controls on the step size. The function supplied to the solver returns both residuals.
+
+**3. Python solution**
 
 ```python
-import numpy as np
-from scipy.optimize import root
+import scipy as sp
 
-# Unknowns: x and y. Return both equation residuals.
-def residuals(values):
+def F(values):
     x, y = values
-    f1 = x**2 + 2*x + 2*y**2 - 25
-    f2 = 2*x**3 - y**2 + 4*y - 20
-    return np.array([f1, f2])
+    return [
+        x**2 + 2*x + 2*y**2 - 25,
+        2*x**3 - y**2 + 4*y - 20
+    ]
 
-# Use SciPy's modified Powell hybrid method from the specified start.
-# It combines Newton-type steps with safeguards on the step size.
-start = [1.0, 1.0]
-solution = root(residuals, start, method="hybr")
-
-print("Solver success:", solution.success)
-print("Solver message:", solution.message)
-print("Unrounded solution:", solution.x)
-
-# Evaluate both residuals before rounding the coordinates.
-errors = residuals(solution.x)
-print("Residuals:", errors)
-print("Largest absolute residual:", np.max(np.abs(errors)))
-print("Both residuals below 1e-6:", np.all(np.abs(errors) < 1e-6))
-
-x, y = solution.x
-print(f"x = {x:.4f}, y = {y:.4f}")
-# x = 2.0331, y = 2.8983.
-# Both residuals are about 1e-11, satisfying the requested tolerance.
-
-# A different starting point may lead to another root or fail to converge.
-# If the solver fails or residuals remain large, inspect the equations,
-# variable scales, and starting point before interpreting the result.
+solution = sp.optimize.root(F, [1, 1], method="hybr")
+solution
+F(solution.x)
 ```
+
+**4. Result and residual check**
+
+The solver reports convergence to
+
+$$
+\boxed{x=2.0331,\qquad y=2.8983.}
+$$
+
+At the unrounded solution,
+
+$$
+f_1\approx1.07\times10^{-11},\qquad
+f_2\approx1.02\times10^{-11},
+$$
+
+so both residuals satisfy the $10^{-6}$ requirement.
+
+A different starting point may lead to another root or fail to converge. If residuals remain large, check the equations entered, the starting point, and the relative scales of the variables before interpreting the returned values.
 :::
