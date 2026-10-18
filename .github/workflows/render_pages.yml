@@ -70,6 +70,9 @@ jobs:
       - name: Render complete Quarto site (HTML and PDF)
         run: quarto render --profile full
 
+      - name: Check examination publication boundaries
+        run: python scripts/check_exam_publication.py
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
