@@ -21,14 +21,6 @@ WASM_MANIFEST_VERSION = 2
 AUTO_RUN_OPT_OUT = "mate374: auto-run = false"
 BUILD_EXECUTION_OPT_OUT = "mate374: build-execute = false"
 NON_RENDERED_QMD_SOURCES = {"assignments/A2/q3-lj-estimation-backup.qmd", "exams/midterm-exam.qmd"}
-# Public starter notebooks intentionally have no student-facing page or links.
-# Never add exam papers or answer keys to this allowlist.
-UNLINKED_PUBLIC_NOTEBOOKS = (
-    "midterm_real_blank_q2.edit.py",
-    "midterm_real_blank_q3.edit.py",
-    "midterm_mock_blank_q2.edit.py",
-    "midterm_mock_blank_q3.edit.py",
-)
 FULL_SITE_QMD_DIRS = (
     "syllabus",
     "introduction",
@@ -506,7 +498,6 @@ def main() -> None:
     referenced_paths, linked_html_stems = page_export_requirements(
         project_root, source_dir, input_qmd_sources(project_root)
     )
-    referenced_paths.update((source_dir / name).resolve() for name in UNLINKED_PUBLIC_NOTEBOOKS)
     candidates_by_path = {path.resolve(): path for path in candidates}
     missing_sources = referenced_paths - candidates_by_path.keys()
     if missing_sources:
@@ -536,8 +527,7 @@ def main() -> None:
 
     # Keep cached exports for every notebook any course page still uses, even
     # when this render covers only some pages.
-    site_paths = {(source_dir / name).resolve() for name in UNLINKED_PUBLIC_NOTEBOOKS}
-    site_html_stems = set()
+    site_paths, site_html_stems = set(), set()
     for page in rendered_qmd_sources(project_root):
         try:
             sources, stems = page_notebook_references(page, project_root, source_dir)
