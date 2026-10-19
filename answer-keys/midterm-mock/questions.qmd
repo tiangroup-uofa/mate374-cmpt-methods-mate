@@ -1,0 +1,125 @@
+---
+title: "Mock midterm examination"
+format:
+  pdf:
+    toc: false
+    mainfont: "TeX Gyre Heros"
+    sansfont: "TeX Gyre Heros"
+    fontsize: 11pt
+    documentclass: scrartcl
+    papersize: letter
+    geometry:
+      - margin=0.8in
+    template-partials:
+      - before-body.tex
+---
+
+~~~{=latex}
+\begin{center}
+{\Large University of Alberta}\\[0.15cm]
+{\large Chemical and Materials Engineering}\\[0.6cm]
+{\Large\bfseries MAT E 374}\\[0.2cm]
+{\large Computational Methods in Materials Engineering}\\[0.6cm]
+{\Large\bfseries Mock midterm examination}\\[0.3cm]
+Practice examination · 100 points\\[0.3cm]
+Suggested duration: 50 minutes\\
+Same rules as the midterm examination\\[0.7cm]
+\end{center}
+\noindent Name: \hrulefill\quad Student ID: \hrulefill
+\vspace{0.5cm}
+~~~
+
+## Instructions
+
+- This examination has **three questions worth 100 points**: Q1 (20), Q2 (40), and Q3 (40). The duration is **50 minutes**.
+- The examination is **open book**. You may consult printed materials, course materials, notebooks, assignment solutions, and Python/API documentation. Search engines may be used to find documentation or debugging information.
+- **Generative AI and communication with other people are prohibited**, including AI assistance in searches, debugging, or writing code.
+- Unless a question specifies a method, you may use pen and paper, calculator-assisted calculations (including Python as a calculator), or Python code. Show the method, intermediate steps, and results.
+- **Only answers on the answer sheet will be marked.** Include units and supporting calculations. If using Python, identify the method and functions used.
+- Upload any code through Canvas for record keeping. If uploading fails, write the key code on the answer sheet. Code quality is not graded.
+- No official formula sheet is provided. You may bring your own.
+- If a question is unclear, state your interpretation or assumptions and proceed. Do not ask for clarification of examination questions. Ask for technical help if you cannot access the coding environment.
+
+{{< pagebreak >}}
+
+## Q1 · Short answers (20 points)
+
+Answer each part concisely.
+
+**(a) Accuracy and speed (10 points)**
+
+You are given a Python program that simulates the tensile response of a metal. You want to use AI to modify it to run faster on a machine with multiple CPUs. How would you check that the modified program is both accurate and faster?
+
+**(b) Direct methods (10 points)**
+
+A student argues that direct methods such as Gaussian elimination and Gauss–Jordan elimination give exact solutions to $\mathbf A\mathbf x=\mathbf b$, so there are no numerical errors. Do you agree? Give **one** reason or example.
+
+{{< pagebreak >}}
+
+## Q2 · The van der Waals equation (40 points)
+
+The van der Waals equation relates pressure $P$, total volume $V$, and temperature $T$ for $n$ moles of gas:
+$$
+P=\frac{nRT}{V-nb}-\frac{n^2a}{V^2}.
+$$
+Find the volume of **3 moles of ammonia** at $T=380$ K and $P=85$ atm, using:
+
+| Parameter | Value |
+|---|---|
+| $a$ | $4.7\ \mathrm{L^2\,atm\,mol^{-2}}$ |
+| $b$ | $0.0371\ \mathrm{L\,mol^{-1}}$ |
+| $R$ | $0.08206\ \mathrm{L\,atm\,mol^{-1}\,K^{-1}}$ |
+
+The physical domain is $V>nb$.
+
+**(a) Residual function (5 points)**
+
+Write a residual function $F(V)=0$ for numerical root finding and identify the unknown and its units.
+
+**(b) A valid bracket (5 points)**
+
+Implement $F$. Evaluate it at $V=0.05,\ 0.10,\ 0.15,\ 0.20,\ 0.25$ L, and select a valid root bracket. Your interval must lie in the physical domain and must not cross a singularity.
+
+**(c) Bisection (20 points)**
+
+Use your bracket and bisection to find the root. You may use `root_scalar` with `method="bisect"` and `xtol=1e-10`. Report the volume to at least five significant figures and check the pressure calculated from the EOS. For a hand calculation, give three bisection updates and the resulting bracket.
+
+**(d) Newton–Raphson (10 points)**
+
+Starting from $V_0=0.20$ L, apply Newton–Raphson using the derivative of your residual. Does it converge to the same root? Show the first update and support your conclusion with the subsequent numerical result. Use `xtol=1e-10` if using SciPy.
+
+{{< pagebreak >}}
+
+## Q3 · Fitting a growth-rate model (40 points)
+
+Experiments give the following growth rates $\mu$ as a function of substrate concentration $C$ in a biological treatment reactor:
+
+| $C$ ($\mathrm{g\,L^{-1}}$) | 0.7 | 0.9 | 1.2 | 1.4 |
+|---|---:|---:|---:|---:|
+| $\mu$ ($\mathrm{h^{-1}}$) | 1.0 | 2.0 | 3.0 | 4.0 |
+
+Fit the proposed model
+$$
+\mu=\frac{\mu_{\max}C^2}{k_m+k_1C^2},
+\qquad \mu_{\max}=2.1\ \mathrm{h^{-1}}.
+$$
+
+**(a) Unknown parameters (5 points)**
+
+Identify the two unknown model parameters.
+
+**(b) Linearization (5 points)**
+
+Transform the model into
+$$
+\frac{1}{\mu}=A\frac{1}{C^2}+B.
+$$
+Express $A$ and $B$ in terms of the model parameters.
+
+**(c) Linear regression (20 points)**
+
+Use linear least squares on the transformed data to find $A$ and $B$, then calculate $k_m$ and $k_1$. You may use `np.polynomial.Polynomial.fit` or a matrix least-squares formulation. Include the units of the fitted model parameters.
+
+**(d) Concentration (10 points)**
+
+Using your fitted model, find the positive concentration $C$ corresponding to $\mu=2.5\ \mathrm{h^{-1}}$.

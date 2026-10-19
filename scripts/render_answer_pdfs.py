@@ -23,6 +23,13 @@ def main():
             raise FileNotFoundError(f"Answer PDF was not produced: {source}")
         shutil.copy2(source, target)
         print(f"Staged {target.relative_to(ROOT)}")
+    for name, target_name in (("questions", "midterm-mock.pdf"), ("answers", "midterm-mock-solutions.pdf")):
+        source = ROOT / f"answer-keys/render/midterm-mock/{name}.pdf"
+        target = ROOT / f"exams/{target_name}"
+        if not source.is_file():
+            raise FileNotFoundError(f"Mock midterm PDF was not produced: {source}")
+        shutil.copy2(source, target)
+        print(f"Staged {target.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

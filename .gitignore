@@ -3,6 +3,9 @@
 /wasm-local/
 /.venv/
 /instructor-private/
+/exams/midterm-exam.qmd
+/exams/midterm-mock.pdf
+/exams/midterm-mock-solutions.pdf
 /answer-keys/.quarto/
 /answer-keys/render/
 /assignments/A1/A1-answers.pdf

@@ -1,0 +1,18 @@
+---
+title: "Mock midterm examination"
+format: html
+---
+
+The mock examination uses the same rules, question structure, and 50-minute duration as the midterm. Attempt it under examination conditions and record your answers on paper.
+
+- [Question paper (PDF)](midterm-mock.pdf)
+- [Q2 · van der Waals equation (editable notebook)](../wasm-local/midterm_mock_q2.html){target="_blank"}
+- [Q3 · Growth-rate fitting (editable notebook)](../wasm-local/midterm_mock_q3.html){target="_blank"}
+
+Each notebook contains the given constants or data and placeholders for the labelled parts. Use **Save** or Ctrl+S / Cmd+S to download your edited notebook, as you will during the midterm.
+
+::: {.callout-note collapse="true"}
+## Sample solutions with Python code
+
+[Mock midterm sample solutions (PDF)](midterm-mock-solutions.pdf)
+:::

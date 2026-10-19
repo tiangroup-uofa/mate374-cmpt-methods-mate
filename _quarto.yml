@@ -25,6 +25,8 @@ project:
     - "units/**/*.qmd"
     - "assignments/**/*.qmd"
     - "exams/**/*.qmd"
+    - "!exams/midterm-exam.qmd"
+    - "!instructor-private/**"
     - "!assignments/A2/q3-lj-estimation-backup.qmd"
     - "project/**/*.qmd"
     - "seminars/**/*.qmd"
@@ -159,6 +161,8 @@ website:
             text: "Midterm prep (I)"
           - href: exams/midterm-prep-2.qmd
             text: "Midterm prep (II)"
+          - href: exams/midterm-mock.qmd
+            text: "Mock midterm"
       - href: project/index.qmd
         text: Project
 

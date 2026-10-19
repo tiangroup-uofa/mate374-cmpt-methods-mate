@@ -1,0 +1,192 @@
+---
+title: "Mock midterm · Sample solutions"
+format:
+  pdf:
+    toc: false
+    mainfont: "TeX Gyre Heros"
+    sansfont: "TeX Gyre Heros"
+    fontsize: 11pt
+    papersize: letter
+    geometry:
+      - margin=0.8in
+---
+
+## Q1 · Short answers
+
+### (a) Accuracy and speed
+
+Compare the modified program with the original on identical inputs, including simple cases with known results and representative tensile simulations. Check the stress–strain curves and any relevant physical checks within a stated numerical tolerance. Small differences can arise when parallel execution changes the order of floating-point operations.
+
+Measure wall-clock time on the same machine for the same problem sizes and CPU settings. Repeat the timings, separate initialization from the main calculation, and include parallelization overhead in the comparison. Report the speedup as the original runtime divided by the modified runtime. A program that uses more CPUs is faster only if the measured runtime decreases.
+
+### (b) Direct methods
+
+No. Floating-point arithmetic introduces rounding errors during elimination and back substitution. A direct method takes a finite sequence of operations, but those operations need not be exact.
+
+## Q2 · The van der Waals equation
+
+### (a) Residual function
+
+One choice is
+$$
+F(V)=\frac{nRT}{V-nb}-\frac{n^2a}{V^2}-P
+=\frac{93.5484}{V-0.1113}-\frac{42.3}{V^2}-85.
+$$
+The unknown is the total volume $V$ in litres. With the supplied units, $F$ is in atm. Reversing the sign of the residual gives the same roots.
+
+~~~python
+import numpy as np
+from scipy.optimize import root_scalar
+
+n, T, P = 3.0, 380.0, 85.0
+a, b, R = 4.7, 0.0371, 0.08206
+
+def F(V):
+    return n*R*T/(V - n*b) - n**2*a/V**2 - P
+~~~
+
+### (b) A valid bracket
+
+| $V$ (L) | $F(V)$ (atm) |
+|---:|---:|
+| 0.05 | −18531.07504 |
+| 0.10 | −12593.61947 |
+| 0.15 | 452.27132 |
+| 0.20 | −87.83935 |
+| 0.25 | −87.33425 |
+
+~~~python
+volumes = np.array([0.05, 0.10, 0.15, 0.20, 0.25])
+residuals = np.array([F(v_) for v_ in volumes])
+for v_, r_ in zip(volumes, residuals):
+    print(v_, r_)
+~~~
+
+The interval **$[0.15,0.20]$ L** brackets a root and lies entirely above $nb=0.1113$ L. The sign change between 0.10 and 0.15 L crosses the pole at $nb$ and is not a valid root bracket. The first two trial volumes also lie outside the physical domain.
+
+### (c) Bisection
+
+Bisection gives
+$$
+\boxed{V=0.17532703784\ \mathrm L}.
+$$
+Substitution into the original EOS gives $P_{\mathrm{calc}}\approx85.000000$ atm.
+
+~~~python
+bisect_result = root_scalar(F, bracket=[0.15, 0.20], method="bisect", xtol=1e-10)
+V = bisect_result.root
+P_calc = n*R*T/(V - n*b) - n**2*a/V**2
+print(V, P_calc, F(V))
+~~~
+
+With `xtol=1e-10` L, the residual is about $-6\times10^{-7}$ atm because $|F'(V)|$ is several thousand atm/L near the root. Compare the residual with a pressure tolerance such as $10^{-4}$ atm, rather than with NumPy's default absolute tolerance of $10^{-8}$.
+
+For the hand-calculation route:
+
+| Update | Midpoint (L) | Residual (atm) | New bracket (L) |
+|---:|---:|---:|---|
+| 1 | 0.175000 | 2.35322 | $[0.175000,0.200000]$ |
+| 2 | 0.187500 | −60.53071 | $[0.175000,0.187500]$ |
+| 3 | 0.181250 | −35.24902 | $[0.175000,0.181250]$ |
+
+Three updates give this interval rather than a five-significant-figure root.
+
+### (d) Newton–Raphson
+
+The derivative is
+$$
+F'(V)=-\frac{nRT}{(V-nb)^2}+\frac{2n^2a}{V^3}.
+$$
+The update is $V_{j+1}=V_j-F(V_j)/F'(V_j)$. Starting at 0.20 L gives
+$$
+V_1=0.13321212671\ \mathrm L.
+$$
+
+~~~python
+def dF(V):
+    return -n*R*T/(V - n*b)**2 + 2*n**2*a/V**3
+
+V1 = 0.20 - F(0.20)/dF(0.20)
+newton_result = root_scalar(F, x0=0.20, fprime=dF, method="newton", xtol=1e-10)
+print(V1, newton_result.root, newton_result.iterations)
+~~~
+The next values are approximately
+$$
+0.144533,\quad 0.156971,\quad 0.167703,\quad
+0.173766,\quad 0.175253,\quad 0.175327\ \mathrm L.
+$$
+The method converges to the same root, $0.17532703784$ L. The first update increases the residual magnitude, so that first step alone is insufficient to decide whether the iteration converges.
+
+## Q3 · Fitting a growth-rate model
+
+### (a) Unknown parameters
+
+The unknowns are $k_m$ and $k_1$. The supplied value of $\mu_{\max}$ is fixed.
+
+### (b) Linearization
+
+Taking the reciprocal gives
+$$
+\frac1\mu
+=\frac{k_m+k_1C^2}{\mu_{\max}C^2}
+=\frac{k_m}{\mu_{\max}}\frac1{C^2}
++\frac{k_1}{\mu_{\max}}.
+$$
+Thus $A=k_m/\mu_{\max}$ and $B=k_1/\mu_{\max}$. Fit $y=1/\mu$ against $x=1/C^2$.
+
+### (c) Linear regression
+
+The transformed least-squares fit gives
+$$
+A=0.4835880189\ \mathrm{h\,g^2\,L^{-2}},
+\qquad B=-0.02078920767\ \mathrm h.
+$$
+~~~python
+import numpy as np
+from numpy.polynomial import Polynomial
+
+C = np.array([0.7, 0.9, 1.2, 1.4])
+mu = np.array([1.0, 2.0, 3.0, 4.0])
+mu_max, mu_target = 2.1, 2.5
+
+x = 1/C**2
+y = 1/mu
+fit = Polynomial.fit(x, y, deg=1).convert()
+B, A = fit.coef
+k_m = mu_max*A
+k_1 = mu_max*B
+print(A, B, k_m, k_1)
+~~~
+
+If using NumPy's polynomial fit, convert the fitted polynomial to ordinary powers before reading its coefficients. The coefficient order is intercept $B$, then slope $A$.
+
+Recover the model parameters:
+$$
+\boxed{k_m=\mu_{\max}A=1.0155348397\ \mathrm{g^2\,L^{-2}}},
+\qquad
+\boxed{k_1=\mu_{\max}B=-0.04365733610}.
+$$
+The parameter $k_1$ is dimensionless.
+
+The supplied data yield a negative $k_1$. This is the unconstrained fit requested in the question. Its denominator eventually reaches zero at about $C=4.82$ g/L, so the model cannot represent growth over an unlimited concentration range. Also, with this fitted parameterization, the symbol $\mu_{\max}$ does not give an upper bound on the fitted growth rate.
+
+### (d) Concentration
+
+From $1/\mu=A/C^2+B$,
+$$
+C=\sqrt{\frac{A}{1/\mu-B}}.
+$$
+At $\mu=2.5\ \mathrm{h^{-1}}$,
+$$
+\boxed{C=1.072026374\ \mathrm{g\,L^{-1}}}.
+$$
+
+~~~python
+def mu_model(C, k_m, k_1):
+    return mu_max*C**2/(k_m + k_1*C**2)
+
+C_target = np.sqrt(A/(1/mu_target - B))
+mu_check = mu_model(C_target, k_m=k_m, k_1=k_1)
+print(C_target, mu_check)
+~~~
+This concentration lies within the measured range.
