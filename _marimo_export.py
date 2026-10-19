@@ -498,6 +498,9 @@ def main() -> None:
     referenced_paths, linked_html_stems = page_export_requirements(
         project_root, source_dir, input_qmd_sources(project_root)
     )
+    # Public, unlisted exam playgrounds distributed through Canvas.
+    canvas_notebook_stems = {"midterm_real_q2", "midterm_real_q3"}
+    linked_html_stems.update(canvas_notebook_stems)
     candidates_by_path = {path.resolve(): path for path in candidates}
     missing_sources = referenced_paths - candidates_by_path.keys()
     if missing_sources:
@@ -536,7 +539,7 @@ def main() -> None:
         site_paths.update(sources)
         site_html_stems.update(stems)
     keep_html = {f"{export_mode_and_outstem(path)[1]}.html" for path in site_paths}
-    keep_html.update(f"{stem}.html" for stem in site_html_stems)
+    keep_html.update(f"{stem}.html" for stem in site_html_stems | canvas_notebook_stems)
 
     # Export into a generated source resource. Quarto copies this directory to
     # the output site after pre-render, so preview knows how to serve every
