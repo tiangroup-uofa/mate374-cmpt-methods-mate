@@ -11,6 +11,11 @@ format:
       - margin=0.8in
 ---
 
+## Completed reference notebooks
+
+- [Q2 · The van der Waals equation](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/midterm_mock_q2_completed.html)
+- [Q3 · Fitting a growth-rate model](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/midterm_mock_q3_completed.html)
+
 ## Q1 · Short answers
 
 ### (a) Accuracy and speed
