@@ -33,6 +33,16 @@
   color: var(--uofa-gold);
 }
 
+/* Cosmo compiles dark navbar icons; keep search and colour-mode icons white on evergreen. */
+#quarto-header #quarto-search .aa-SubmitIcon,
+#quarto-header #quarto-search .aa-DetachedSearchButtonIcon {
+  color: white;
+}
+
+#quarto-header .quarto-color-scheme-toggle .bi::before {
+  filter: brightness(0) invert(1);
+}
+
 .navbar-title,
 h1,
 h2 {
