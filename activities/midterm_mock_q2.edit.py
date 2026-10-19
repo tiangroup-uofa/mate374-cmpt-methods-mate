@@ -3,6 +3,8 @@
 # dependencies = ["marimo>=0.24.0", "numpy", "scipy", "matplotlib"]
 # ///
 
+# mate374: build-execute = false
+
 import marimo
 
 __generated_with = "0.24.0"
