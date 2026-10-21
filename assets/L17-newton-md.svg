@@ -1,43 +1,509 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="64mm" viewBox="0 0 160 64">
-<title>Newton's second law combines differentiation and integration in molecular dynamics</title>
-<desc>Left: F = m a. The force is the negative gradient of the energy (differentiation, red). The acceleration is the first time derivative of velocity and the second of position, so positions follow by integration (green). Right: atoms with force arrows and dashed recent paths, repeated every time step in molecular dynamics.</desc>
-<defs>
-<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
-<radialGradient id="ball-gray" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#8a8f98"/></radialGradient>
-</defs>
-<rect id="background" width="160" height="64" style="fill:#ffffff"/>
-<g id="newton" inkscape:groupmode="layer" inkscape:label="Newton's second law">
-<rect x="1.5" y="1.5" width="98" height="61" ry="5" style="fill:none;stroke:#676767;stroke-width:0.5"/>
-<text x="6.00" y="9.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Newton’s second law</text>
-<text x="50" y="22" style="font-family:Arial;font-size:7.06px;fill:#231f20;text-anchor:middle"><tspan style="font-weight:bold">F</tspan> = <tspan style="font-style:italic">m</tspan> <tspan style="font-weight:bold">a</tspan></text>
-<path d="M 39.500,24.500 L 25.000,33.500" style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<ellipse cx="22" cy="40.3" rx="15.5" ry="5.4" style="fill:#f5d9d9;stroke:#b5473a;stroke-width:0.4"/>
-<text x="22" y="42" style="font-family:Arial;font-size:4.94px;fill:#231f20;text-anchor:middle"><tspan style="font-weight:bold">F</tspan> = −∇<tspan style="font-style:italic">E</tspan></text>
-<text x="22.00" y="52.00" style="font-family:Arial;font-size:4.23px;fill:#b5473a;font-weight:bold;font-style:normal;text-anchor:middle">Differentiation</text>
-<text x="22.00" y="57.50" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">energy → force</text>
-<path d="M 60.500,24.500 L 69.000,33.500" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<ellipse cx="72" cy="40.3" rx="24" ry="5.4" style="fill:#cfedcd;stroke:#2ca02c;stroke-width:0.4"/>
-<text x="72" y="42" style="font-family:Arial;font-size:4.94px;fill:#231f20;text-anchor:middle"><tspan style="font-weight:bold">a</tspan> = d<tspan style="font-weight:bold">v</tspan>/d<tspan style="font-style:italic">t</tspan> = d²<tspan style="font-weight:bold">x</tspan>/d<tspan style="font-style:italic">t</tspan>²</text>
-<text x="72.00" y="52.00" style="font-family:Arial;font-size:4.23px;fill:#2ca02c;font-weight:bold;font-style:normal;text-anchor:middle">Integration</text>
-<text x="72.00" y="57.50" style="font-family:Arial;font-size:3.53px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:middle">acceleration → velocity → position</text>
-<path d="M 102.500,32.000 L 110.500,32.000" style="fill:none;stroke:#231f20;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-</g>
-<g id="md" inkscape:groupmode="layer" inkscape:label="Molecular dynamics">
-<text x="115.00" y="9.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Molecular dynamics</text>
-<path d="M 115.20,31.30 Q 119.20,26.80 124.00,25.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
-<path d="M 142.40,31.30 Q 139.40,24.30 140.00,21.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
-<path d="M 144.60,28.90 Q 147.10,30.90 151.00,33.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
-<path d="M 140.00,36.70 Q 133.50,38.20 132.00,40.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
-<circle cx="124" cy="25" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
-<path d="M 127.160,23.276 L 132.660,20.276" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<circle cx="140" cy="21" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
-<path d="M 139.053,17.527 L 137.553,12.027" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<circle cx="151" cy="33" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
-<path d="M 153.709,35.371 L 157.709,38.871" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<circle cx="132" cy="40" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
-<path d="M 128.913,41.852 L 123.913,44.852" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<text x="136.00" y="53.00" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">forces → accelerations →</text>
-<text x="136.00" y="58.00" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">new positions, every time step</text>
-</g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="160mm"
+   height="64mm"
+   viewBox="0 0 160 64"
+   version="1.1"
+   id="svg23"
+   sodipodi:docname="L17-newton-md.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview23"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.078576"
+     inkscape:cx="268.40946"
+     inkscape:cy="25.49658"
+     inkscape:window-width="1899"
+     inkscape:window-height="1022"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="md" />
+  <title
+     id="title1">Newton's second law combines differentiation and integration in molecular dynamics</title>
+  <desc
+     id="desc1">Left: F = m a. The force is the negative gradient of the energy (differentiation, red). The acceleration is the first time derivative of velocity and the second of position, so positions follow by integration (green). Right: atoms with force arrows and dashed recent paths, repeated every time step in molecular dynamics.</desc>
+  <defs
+     id="defs2">
+    <radialGradient
+       id="radialGradient33"
+       cx="124"
+       cy="25"
+       r="3.4"
+       fx="122.98"
+       fy="23.776"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-3.5195608,1.9031297)">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         id="stop32"
+         style="stop-color:#ffffff;stop-opacity:0.0015949;" />
+      <stop
+         offset="1"
+         stop-color="#8a8f98"
+         id="stop33" />
+    </radialGradient>
+    <radialGradient
+       id="radialGradient31"
+       cx="124"
+       cy="25"
+       r="3.4"
+       fx="122.98"
+       fy="23.776"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-3.5195608,1.9031297)">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         id="stop30"
+         style="stop-color:#ffffff;stop-opacity:0.19617225;" />
+      <stop
+         offset="1"
+         stop-color="#8a8f98"
+         id="stop31" />
+    </radialGradient>
+    <marker
+       id="tri"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       refX="0"
+       refY="0"
+       style="overflow:visible"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         id="path1" />
+    </marker>
+    <radialGradient
+       id="ball-gray"
+       cx="0.5"
+       cy="0.5"
+       r="0.5"
+       fx="0.35"
+       fy="0.32">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         id="stop1" />
+      <stop
+         offset="1"
+         stop-color="#8a8f98"
+         id="stop2" />
+    </radialGradient>
+    <radialGradient
+       id="ball-gray-3"
+       cx="124"
+       cy="25"
+       r="3.4"
+       fx="122.98"
+       fy="23.776"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-3.5195608,1.9031297)">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         id="stop1-8" />
+      <stop
+         offset="1"
+         stop-color="#8a8f98"
+         id="stop2-0" />
+    </radialGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#ball-gray-3"
+       id="radialGradient23"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-5.6362273,3.4906298)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#radialGradient31"
+       id="radialGradient24"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-7.2237274,5.0781299)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#radialGradient33"
+       id="radialGradient27"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-115.9915,120.62232)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#ball-gray-3"
+       id="radialGradient28"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-114.404,119.03482)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#ball-gray-3"
+       id="radialGradient29"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-112.28733,117.44732)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#radialGradient33"
+       id="radialGradient35"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(15.393302,-47.003166)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#ball-gray-3"
+       id="radialGradient36"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(16.980802,-48.590666)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#ball-gray-3"
+       id="radialGradient37"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(19.097472,-50.178166)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#radialGradient33"
+       id="radialGradient39"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(4.0826084,61.025507)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#ball-gray-3"
+       id="radialGradient40"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(5.6701084,59.438007)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#ball-gray-3"
+       id="radialGradient41"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(7.7867784,57.850507)"
+       cx="124"
+       cy="25"
+       fx="122.98"
+       fy="23.776"
+       r="3.4" />
+  </defs>
+  <g
+     id="newton"
+     inkscape:groupmode="layer"
+     inkscape:label="Newton's second law">
+    <rect
+       x="1.5"
+       y="1.5"
+       width="98"
+       height="61"
+       ry="5"
+       style="fill:none;stroke:#676767;stroke-width:0.5"
+       id="rect2" />
+    <text
+       x="6.00"
+       y="9.00"
+       style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start"
+       id="text2">Newton’s second law</text>
+    <text
+       x="50"
+       y="22"
+       style="font-family:Arial;font-size:7.06px;fill:#231f20;text-anchor:middle"
+       id="text4"><tspan
+   style="font-weight:bold"
+   id="tspan2">F</tspan> = <tspan
+   style="font-style:italic"
+   id="tspan3">m</tspan><tspan
+   style="font-weight:bold"
+   id="tspan4">a</tspan></text>
+    <path
+       d="M 39.500,24.500 L 25.000,33.500"
+       style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path4" />
+    <ellipse
+       cx="22"
+       cy="40.3"
+       rx="15.5"
+       ry="5.4"
+       style="fill:#f5d9d9;stroke:#b5473a;stroke-width:0.4"
+       id="ellipse4" />
+    <text
+       x="22"
+       y="42"
+       style="font-family:Arial;font-size:4.94px;fill:#231f20;text-anchor:middle"
+       id="text6"><tspan
+   style="font-weight:bold"
+   id="tspan5">F</tspan> = −∇<tspan
+   style="font-style:italic"
+   id="tspan6">E</tspan></text>
+    <text
+       x="22.00"
+       y="52.00"
+       style="font-family:Arial;font-size:4.23px;fill:#b5473a;font-weight:bold;font-style:normal;text-anchor:middle"
+       id="text7">Differentiation</text>
+    <text
+       x="22.00"
+       y="57.50"
+       style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text8">energy → force</text>
+    <path
+       d="M 60.500,24.500 L 69.000,33.500"
+       style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path8" />
+    <ellipse
+       cx="72"
+       cy="40.3"
+       rx="24"
+       ry="5.4"
+       style="fill:#cfedcd;stroke:#2ca02c;stroke-width:0.4"
+       id="ellipse8" />
+    <text
+       x="72"
+       y="42"
+       style="font-family:Arial;font-size:4.94px;fill:#231f20;text-anchor:middle"
+       id="text12"><tspan
+   style="font-weight:bold"
+   id="tspan8">a</tspan> = d<tspan
+   style="font-weight:bold"
+   id="tspan9">v</tspan>/d<tspan
+   style="font-style:italic"
+   id="tspan10">t</tspan> = d²<tspan
+   style="font-weight:bold"
+   id="tspan11">x</tspan>/d<tspan
+   style="font-style:italic"
+   id="tspan12">t</tspan>²</text>
+    <text
+       x="72.00"
+       y="52.00"
+       style="font-family:Arial;font-size:4.23px;fill:#2ca02c;font-weight:bold;font-style:normal;text-anchor:middle"
+       id="text13">Integration</text>
+    <text
+       x="72.00"
+       y="57.50"
+       style="font-family:Arial;font-size:3.53px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text14">acceleration → velocity → position</text>
+    <path
+       d="M 102.500,32.000 L 110.500,32.000"
+       style="fill:none;stroke:#231f20;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path14" />
+  </g>
+  <g
+     id="md"
+     inkscape:groupmode="layer"
+     inkscape:label="Molecular dynamics">
+    <text
+       x="115.00"
+       y="9.00"
+       style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start"
+       id="text15">Molecular dynamics</text>
+    <path
+       d="M 115.20,31.30 Q 119.20,26.80 124.00,25.00"
+       style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"
+       id="path15" />
+    <path
+       d="M 142.40,31.30 Q 139.40,24.30 140.00,21.00"
+       style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"
+       id="path16" />
+    <path
+       d="M 140.58612,35.747549 C 136.25279,34.842647 133,38.8 132,40"
+       style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2, 0.8"
+       id="path18"
+       sodipodi:nodetypes="cc" />
+    <circle
+       cx="124"
+       cy="25"
+       r="3.3"
+       style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle18" />
+    <circle
+       cx="120.48043"
+       cy="26.90313"
+       r="3.3"
+       style="fill:url(#ball-gray-3);stroke:#5e5e5e;stroke-width:0.2;opacity:0.4"
+       id="circle18-4" />
+    <path
+       d="M 127.160,23.276 L 132.660,20.276"
+       style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path19" />
+    <circle
+       cx="140"
+       cy="21"
+       r="3.3"
+       style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle19" />
+    <path
+       d="M 139.053,17.527 L 137.553,12.027"
+       style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path20" />
+    <circle
+       cx="151"
+       cy="33"
+       r="3.3"
+       style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle20" />
+    <path
+       d="m 151.62325,36.413875 1.99447,3.901106"
+       style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path21"
+       sodipodi:nodetypes="cc" />
+    <circle
+       cx="132"
+       cy="40"
+       r="3.3"
+       style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle21" />
+    <path
+       d="M 128.913,41.852 L 123.913,44.852"
+       style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path22" />
+    <text
+       x="136.00"
+       y="53.00"
+       style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text22">forces → accelerations →</text>
+    <text
+       x="136.00"
+       y="58.00"
+       style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text23">new positions, every time step</text>
+    <circle
+       cx="118.36377"
+       cy="28.490631"
+       r="3.3"
+       style="fill:url(#radialGradient23);stroke:#5e5e5e;stroke-width:0.2;opacity:0.4"
+       id="circle23" />
+    <circle
+       cx="116.77628"
+       cy="30.078133"
+       r="3.3"
+       style="fill:url(#radialGradient24);stroke:#5e5e5e;stroke-width:0.2;opacity:0.4"
+       id="circle24" />
+    <circle
+       cx="11.712668"
+       cy="142.44733"
+       r="3.3"
+       style="fill:url(#radialGradient29);stroke:#5e5e5e;stroke-width:0.2;opacity:0.4"
+       id="circle25"
+       transform="rotate(-75.057786)" />
+    <circle
+       cx="9.5959997"
+       cy="144.03482"
+       r="3.3"
+       style="fill:url(#radialGradient28);stroke:#5e5e5e;stroke-width:0.2;opacity:0.4"
+       id="circle26"
+       transform="rotate(-75.057786)" />
+    <circle
+       cx="8.0085211"
+       cy="145.62233"
+       r="3.3"
+       style="fill:url(#radialGradient27);stroke:#5e5e5e;stroke-width:0.2;opacity:0.4"
+       id="circle27"
+       transform="rotate(-75.057786)" />
+    <circle
+       cx="143.09746"
+       cy="-25.178165"
+       r="3.3"
+       style="opacity:0.4;fill:url(#radialGradient37);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle33"
+       transform="rotate(24.572741)" />
+    <circle
+       cx="140.98079"
+       cy="-23.590672"
+       r="3.3"
+       style="opacity:0.4;fill:url(#radialGradient36);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle34"
+       transform="rotate(24.572741)" />
+    <circle
+       cx="139.39331"
+       cy="-22.003162"
+       r="3.3"
+       style="opacity:0.4;fill:url(#radialGradient35);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle35"
+       transform="rotate(24.572741)" />
+    <path
+       d="m 153.41139,21.672347 c -3.54815,2.647117 -2.73785,7.705249 -2.50118,9.249266"
+       style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2, 0.8"
+       id="path37"
+       sodipodi:nodetypes="cc" />
+    <circle
+       cx="131.78677"
+       cy="82.85051"
+       r="3.3"
+       style="opacity:0.4;fill:url(#radialGradient41);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle37"
+       transform="rotate(-23.947455)" />
+    <circle
+       cx="129.6701"
+       cy="84.438004"
+       r="3.3"
+       style="opacity:0.4;fill:url(#radialGradient40);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle38"
+       transform="rotate(-23.947455)" />
+    <circle
+       cx="128.08263"
+       cy="86.025513"
+       r="3.3"
+       style="opacity:0.4;fill:url(#radialGradient39);stroke:#5e5e5e;stroke-width:0.2"
+       id="circle39"
+       transform="rotate(-23.947455)" />
+  </g>
 </svg>

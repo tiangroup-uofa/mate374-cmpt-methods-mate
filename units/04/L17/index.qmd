@@ -195,6 +195,12 @@ $$
 
 For smooth data at the same spacing, the central difference generally gives a smaller truncation error. When function values require new calculations, we must also compare evaluation cost and numerical precision, as we will in L18.
 
+::: {.callout-important}
+## Choose at least $O(h^2)$ whenever possible
+
+On a table of values, an $O(h^2)$ formula needs no extra data: the central difference uses the same neighbouring values as the forward and backward differences. Treat the $O(h)$ formulas as a fallback, and keep $O(h^2)$ accuracy even at the ends of the data, as the next section shows.
+:::
+
 ## Keeping $O(h^2)$ accuracy at the ends of the data
 
 If central differences are better, why not use them everywhere? On a set of samples $x_0, x_1, \ldots, x_{n-1}$, every interior point has a neighbour on both sides. The first point has no left neighbour and the last point has no right one (@fig-endpoints). Two-point forward and backward differences at the ends would bring back $O(h)$ errors, and the derivative of the whole data set would be only as accurate as its worst points.

@@ -30,7 +30,7 @@
 <path d="M 124.895,15.444 L 124.895,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
 <circle cx="124.895" cy="15.444" r="1.1" style="fill:#b5473a;stroke:#b5473a;stroke-width:0.3"/>
 <circle cx="13.505" cy="44.000" r="1.1" style="fill:#ffffff;stroke:#b5473a;stroke-width:0.3;stroke-dasharray:0.8,0.5"/>
-<text x="13.50" y="41.00" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">no data</text>
+<text x="10.00" y="41.00" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:start">no data</text>
 <circle cx="138.819" cy="44.000" r="1.1" style="fill:#ffffff;stroke:#b5473a;stroke-width:0.3;stroke-dasharray:0.8,0.5"/>
 <text x="138.82" y="41.00" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">no data</text>
 <text x="27.43" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">0</tspan><tspan dy="-1.1"> </tspan></text>

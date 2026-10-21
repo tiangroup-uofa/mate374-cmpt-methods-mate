@@ -1,33 +1,250 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="86mm" height="62mm" viewBox="0 0 86 62">
-<title>The central second difference compares f(x) with the average of its neighbours</title>
-<desc>On a concave curve, the midpoint of the chord joining (x-h, f(x-h)) and (x+h, f(x+h)) lies below f(x). The numerator f(x-h) - 2f(x) + f(x+h) is twice the signed gap and is negative, matching a negative f''(x).</desc>
-<defs>
-<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
-
-</defs>
-<rect id="background" width="86" height="62" style="fill:#ffffff"/>
-<g id="second" inkscape:groupmode="layer" inkscape:label="second derivative">
-<path d="M 8.000,47.000 L 81.500,47.000" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<path d="M 8.000,47.000 L 8.000,5.500" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
-<text x="82.50" y="48.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">x</tspan></text>
-<text x="10.00" y="6.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">f(x)</tspan></text>
-<path d="M 9.346,42.248 L 9.758,41.651 L 10.171,41.067 L 10.583,40.494 L 10.995,39.933 L 11.407,39.383 L 11.820,38.845 L 12.232,38.318 L 12.644,37.801 L 13.056,37.295 L 13.469,36.799 L 13.881,36.314 L 14.293,35.838 L 14.706,35.373 L 15.118,34.916 L 15.530,34.469 L 15.942,34.032 L 16.355,33.603 L 16.767,33.183 L 17.179,32.771 L 17.591,32.368 L 18.004,31.973 L 18.416,31.587 L 18.828,31.208 L 19.240,30.837 L 19.653,30.473 L 20.065,30.117 L 20.477,29.769 L 20.889,29.427 L 21.302,29.092 L 21.714,28.765 L 22.126,28.443 L 22.538,28.129 L 22.951,27.821 L 23.363,27.519 L 23.775,27.223 L 24.188,26.934 L 24.600,26.650 L 25.012,26.373 L 25.424,26.100 L 25.837,25.834 L 26.249,25.573 L 26.661,25.317 L 27.073,25.066 L 27.486,24.821 L 27.898,24.581 L 28.310,24.345 L 28.722,24.114 L 29.135,23.889 L 29.547,23.667 L 29.959,23.450 L 30.371,23.238 L 30.784,23.030 L 31.196,22.826 L 31.608,22.627 L 32.020,22.431 L 32.433,22.240 L 32.845,22.052 L 33.257,21.868 L 33.669,21.688 L 34.082,21.512 L 34.494,21.339 L 34.906,21.170 L 35.319,21.005 L 35.731,20.842 L 36.143,20.683 L 36.555,20.528 L 36.968,20.375 L 37.380,20.226 L 37.792,20.079 L 38.204,19.936 L 38.617,19.795 L 39.029,19.658 L 39.441,19.523 L 39.853,19.391 L 40.266,19.262 L 40.678,19.135 L 41.090,19.011 L 41.502,18.890 L 41.915,18.770 L 42.327,18.654 L 42.739,18.540 L 43.151,18.428 L 43.564,18.318 L 43.976,18.211 L 44.388,18.106 L 44.800,18.003 L 45.213,17.902 L 45.625,17.803 L 46.037,17.706 L 46.450,17.611 L 46.862,17.518 L 47.274,17.427 L 47.686,17.338 L 48.099,17.251 L 48.511,17.166 L 48.923,17.082 L 49.335,17.000 L 49.748,16.919 L 50.160,16.841 L 50.572,16.764 L 50.984,16.688 L 51.397,16.614 L 51.809,16.541 L 52.221,16.470 L 52.633,16.401 L 53.046,16.333 L 53.458,16.266 L 53.870,16.201 L 54.282,16.137 L 54.695,16.074 L 55.107,16.013 L 55.519,15.952 L 55.931,15.893 L 56.344,15.836 L 56.756,15.779 L 57.168,15.724 L 57.581,15.669 L 57.993,15.616 L 58.405,15.564 L 58.817,15.513 L 59.230,15.463 L 59.642,15.414 L 60.054,15.366 L 60.466,15.319 L 60.879,15.273 L 61.291,15.228 L 61.703,15.184 L 62.115,15.141 L 62.528,15.099 L 62.940,15.057 L 63.352,15.017 L 63.764,14.977 L 64.177,14.938 L 64.589,14.900 L 65.001,14.862 L 65.413,14.826 L 65.826,14.790 L 66.238,14.755 L 66.650,14.720 L 67.062,14.686 L 67.475,14.653 L 67.887,14.621 L 68.299,14.589 L 68.712,14.558 L 69.124,14.528 L 69.536,14.498 L 69.948,14.469 L 70.361,14.440 L 70.773,14.412 L 71.185,14.385 L 71.597,14.358 L 72.010,14.332 L 72.422,14.306 L 72.834,14.281 L 73.246,14.256 L 73.659,14.232 L 74.071,14.208 L 74.483,14.185 L 74.895,14.162 L 75.308,14.140" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round"/>
-<path d="M 14.731,35.344 L 55.115,16.011" style="fill:none;stroke:#5e5e5e;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
-<path d="M 14.731,35.344 L 14.731,47.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
-<circle cx="14.731" cy="35.344" r="1.1" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
-<path d="M 34.923,21.163 L 34.923,47.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
-<circle cx="34.923" cy="21.163" r="1.1" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
-<path d="M 55.115,16.011 L 55.115,47.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
-<circle cx="55.115" cy="16.011" r="1.1" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
-<circle cx="34.923" cy="25.678" r="0.9" style="fill:#ffffff;stroke:#5e5e5e;stroke-width:0.3"/>
-<path d="M 36.523,21.463 L 37.523,21.463 L 37.523,25.378 L 36.523,25.378" style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round"/>
-<text x="38.52" y="24.62" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:start">gap</text>
-<text x="56.12" y="22.01" style="font-family:Arial;font-size:3.53px;fill:#5e5e5e;font-weight:normal;font-style:normal;text-anchor:start">chord</text>
-<text x="14.73" y="51.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan> − <tspan style="font-style:italic">h</tspan></text>
-<text x="34.92" y="51.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan></text>
-<text x="55.12" y="51.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan> + <tspan style="font-style:italic">h</tspan></text>
-<text x="43.00" y="56.00" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">chord midpoint below <tspan style="font-style:italic">f</tspan>(<tspan style="font-style:italic">x</tspan>)</text>
-<text x="43.00" y="60.50" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">→ bent downward, <tspan style="font-style:italic">f</tspan>″(<tspan style="font-style:italic">x</tspan>) &lt; 0</text>
-</g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="86mm"
+   height="74mm"
+   viewBox="0 0 86 74"
+   version="1.1"
+   id="svg18"
+   sodipodi:docname="L17-second-derivative.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview18"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.6269455"
+     inkscape:cx="140.75456"
+     inkscape:cy="102.33902"
+     inkscape:window-width="1920"
+     inkscape:window-height="1012"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="central-second-difference" />
+  <title
+     id="title1">The central second difference compares f(x) with the average of its neighbours</title>
+  <desc
+     id="desc1">On a concave curve, the midpoint of the chord joining (x-h, f(x-h)) and (x+h, f(x+h)) lies below f(x). The numerator f(x-h) - 2f(x) + f(x+h) is twice the signed gap and is negative, matching a negative f''(x).</desc>
+  <defs
+     id="defs1">
+    <marker
+       id="tri"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       refX="0"
+       refY="0"
+       style="overflow:visible"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         id="path1" />
+    </marker>
+  </defs>
+  <g
+     id="second"
+     inkscape:groupmode="layer"
+     inkscape:label="second derivative">
+    <path
+       d="M 8.000,47.000 L 81.500,47.000"
+       style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path2" />
+    <path
+       d="M 8.000,47.000 L 8.000,5.500"
+       style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"
+       id="path3" />
+    <text
+       x="82.50"
+       y="48.50"
+       style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"
+       id="text3"><tspan
+         style="font-style:italic"
+         id="tspan3">x</tspan></text>
+    <text
+       x="10.00"
+       y="6.50"
+       style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"
+       id="text4"><tspan
+         style="font-style:italic"
+         id="tspan4">f(x)</tspan></text>
+    <path
+       d="M 9.346,42.248 L 9.758,41.651 L 10.171,41.067 L 10.583,40.494 L 10.995,39.933 L 11.407,39.383 L 11.820,38.845 L 12.232,38.318 L 12.644,37.801 L 13.056,37.295 L 13.469,36.799 L 13.881,36.314 L 14.293,35.838 L 14.706,35.373 L 15.118,34.916 L 15.530,34.469 L 15.942,34.032 L 16.355,33.603 L 16.767,33.183 L 17.179,32.771 L 17.591,32.368 L 18.004,31.973 L 18.416,31.587 L 18.828,31.208 L 19.240,30.837 L 19.653,30.473 L 20.065,30.117 L 20.477,29.769 L 20.889,29.427 L 21.302,29.092 L 21.714,28.765 L 22.126,28.443 L 22.538,28.129 L 22.951,27.821 L 23.363,27.519 L 23.775,27.223 L 24.188,26.934 L 24.600,26.650 L 25.012,26.373 L 25.424,26.100 L 25.837,25.834 L 26.249,25.573 L 26.661,25.317 L 27.073,25.066 L 27.486,24.821 L 27.898,24.581 L 28.310,24.345 L 28.722,24.114 L 29.135,23.889 L 29.547,23.667 L 29.959,23.450 L 30.371,23.238 L 30.784,23.030 L 31.196,22.826 L 31.608,22.627 L 32.020,22.431 L 32.433,22.240 L 32.845,22.052 L 33.257,21.868 L 33.669,21.688 L 34.082,21.512 L 34.494,21.339 L 34.906,21.170 L 35.319,21.005 L 35.731,20.842 L 36.143,20.683 L 36.555,20.528 L 36.968,20.375 L 37.380,20.226 L 37.792,20.079 L 38.204,19.936 L 38.617,19.795 L 39.029,19.658 L 39.441,19.523 L 39.853,19.391 L 40.266,19.262 L 40.678,19.135 L 41.090,19.011 L 41.502,18.890 L 41.915,18.770 L 42.327,18.654 L 42.739,18.540 L 43.151,18.428 L 43.564,18.318 L 43.976,18.211 L 44.388,18.106 L 44.800,18.003 L 45.213,17.902 L 45.625,17.803 L 46.037,17.706 L 46.450,17.611 L 46.862,17.518 L 47.274,17.427 L 47.686,17.338 L 48.099,17.251 L 48.511,17.166 L 48.923,17.082 L 49.335,17.000 L 49.748,16.919 L 50.160,16.841 L 50.572,16.764 L 50.984,16.688 L 51.397,16.614 L 51.809,16.541 L 52.221,16.470 L 52.633,16.401 L 53.046,16.333 L 53.458,16.266 L 53.870,16.201 L 54.282,16.137 L 54.695,16.074 L 55.107,16.013 L 55.519,15.952 L 55.931,15.893 L 56.344,15.836 L 56.756,15.779 L 57.168,15.724 L 57.581,15.669 L 57.993,15.616 L 58.405,15.564 L 58.817,15.513 L 59.230,15.463 L 59.642,15.414 L 60.054,15.366 L 60.466,15.319 L 60.879,15.273 L 61.291,15.228 L 61.703,15.184 L 62.115,15.141 L 62.528,15.099 L 62.940,15.057 L 63.352,15.017 L 63.764,14.977 L 64.177,14.938 L 64.589,14.900 L 65.001,14.862 L 65.413,14.826 L 65.826,14.790 L 66.238,14.755 L 66.650,14.720 L 67.062,14.686 L 67.475,14.653 L 67.887,14.621 L 68.299,14.589 L 68.712,14.558 L 69.124,14.528 L 69.536,14.498 L 69.948,14.469 L 70.361,14.440 L 70.773,14.412 L 71.185,14.385 L 71.597,14.358 L 72.010,14.332 L 72.422,14.306 L 72.834,14.281 L 73.246,14.256 L 73.659,14.232 L 74.071,14.208 L 74.483,14.185 L 74.895,14.162 L 75.308,14.140"
+       style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round"
+       id="path4" />
+    <path
+       d="M 14.731,35.344 L 55.115,16.011"
+       style="fill:none;stroke:#5e5e5e;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"
+       id="path5" />
+    <path
+       d="M 14.731,35.344 L 14.731,47.000"
+       style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"
+       id="path6" />
+    <circle
+       cx="14.731"
+       cy="35.344"
+       r="1.1"
+       style="fill:#231f20;stroke:#231f20;stroke-width:0.3"
+       id="circle6" />
+    <path
+       d="M 34.923,21.163 L 34.923,47.000"
+       style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"
+       id="path7" />
+    <circle
+       cx="34.923"
+       cy="21.163"
+       r="1.1"
+       style="fill:#b5473a;stroke:#231f20;stroke-width:0.3;fill-opacity:1"
+       id="circle7" />
+    <path
+       d="M 55.115,16.011 L 55.115,47.000"
+       style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"
+       id="path8" />
+    <circle
+       cx="55.115"
+       cy="16.011"
+       r="1.1"
+       style="fill:#231f20;stroke:#231f20;stroke-width:0.3"
+       id="circle8" />
+    <circle
+       cx="34.923"
+       cy="25.678"
+       r="0.9"
+       style="fill:#ffffff;stroke:#5e5e5e;stroke-width:0.3"
+       id="circle9" />
+    <path
+       d="M 36.523,21.463 L 37.523,21.463 L 37.523,25.378 L 36.523,25.378"
+       style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round"
+       id="path9" />
+    <text
+       x="38.52"
+       y="24.62"
+       style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:start"
+       id="text9">gap</text>
+    <text
+       x="46.508015"
+       y="22.562412"
+       style="font-style:normal;font-weight:normal;font-size:3.53px;font-family:Arial;text-anchor:start;fill:#5e5e5e"
+       id="text10">chord</text>
+    <text
+       x="14.73"
+       y="51.50"
+       style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text11"><tspan
+   style="font-style:italic"
+   id="tspan10">x</tspan> − <tspan
+   style="font-style:italic"
+   id="tspan11">h</tspan></text>
+    <text
+       x="34.92"
+       y="51.50"
+       style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text12"><tspan
+         style="font-style:italic"
+         id="tspan12">x</tspan></text>
+    <text
+       x="55.12"
+       y="51.50"
+       style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text14"><tspan
+   style="font-style:italic"
+   id="tspan13">x</tspan> + <tspan
+   style="font-style:italic"
+   id="tspan14">h</tspan></text>
+    <text
+       x="43.00"
+       y="56.00"
+       style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text16">chord midpoint below <tspan
+   style="font-style:italic"
+   id="tspan15">f</tspan>(<tspan
+   style="font-style:italic"
+   id="tspan16">x</tspan>)</text>
+    <text
+       x="43.00"
+       y="60.50"
+       style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle"
+       id="text18">→ bent downward, <tspan
+   style="font-style:italic"
+   id="tspan17">f</tspan>″(<tspan
+   style="font-style:italic"
+   id="tspan18">x</tspan>) &lt; 0</text>
+    <g
+       id="central-second-difference"
+       inkscape:label="central second difference formula"
+       transform="translate(-5.8555761,-55.572732)">
+      <text
+         x="28.5"
+         y="68.599998"
+         style="font-style:normal;font-weight:normal;font-size:3.53px;font-family:Arial;text-anchor:end;fill:#000000;fill-opacity:1"
+         id="text-f2"><tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan1">f</tspan>″(<tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan2">x</tspan>) ≈</text>
+      <text
+         x="49.5"
+         y="66"
+         style="font-style:normal;font-weight:normal;font-size:3.53px;font-family:Arial;text-anchor:middle;fill:#000000;fill-opacity:1"
+         id="text-f2-num"><tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan5">f</tspan>(<tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan6">x</tspan> − <tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan7">h</tspan>) − 2<tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan8">f</tspan>(<tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan9">x</tspan>) + <tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan19">f</tspan>(<tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan20">x</tspan> + <tspan
+   style="font-style:italic;fill:#000000;fill-opacity:1"
+   id="tspan21">h</tspan>)</text>
+      <path
+         style="fill:#000000;stroke:#000000;stroke-width:0.375;fill-opacity:1;stroke-opacity:1"
+         d="M 30,67.4 H 69"
+         id="path-f2-bar" />
+      <text
+         x="49.5"
+         y="71.099998"
+         style="font-style:normal;font-weight:normal;font-size:3.53px;font-family:Arial;text-anchor:middle;fill:#000000;stroke:none;stroke-opacity:1;fill-opacity:1"
+         id="text-f2-den"><tspan
+   style="font-style:italic;stroke:none;stroke-opacity:1;fill:#000000;fill-opacity:1"
+   id="tspan22">h</tspan>²</text>
+      <text
+         x="47.978779"
+         y="65.993279"
+         style="font-style:normal;font-weight:normal;font-size:3.53px;font-family:Arial;text-anchor:middle;fill:#b5473a;fill-opacity:1"
+         id="text31">− 2<tspan
+   style="font-style:italic;fill:#b5473a;fill-opacity:1"
+   id="tspan27">f</tspan>(<tspan
+   style="font-style:italic;fill:#b5473a;fill-opacity:1"
+   id="tspan28">x</tspan>)</text>
+    </g>
+  </g>
+  <text
+     xml:space="preserve"
+     style="font-weight:bold;font-size:2.82223px;font-family:Arial;-inkscape-font-specification:'Arial, Bold';writing-mode:lr-tb;direction:ltr;opacity:0.4;fill:#4a3ab5;stroke:#b5473a;stroke-width:0.374999;stroke-dasharray:0.374999, 0.749999, 0.374999, 1.5"
+     x="23.864235"
+     y="11.048257"
+     id="text19"><tspan
+       sodipodi:role="line"
+       id="tspan23"
+       style="stroke-width:0.375"
+       x="23.864235"
+       y="11.048257" /></text>
 </svg>

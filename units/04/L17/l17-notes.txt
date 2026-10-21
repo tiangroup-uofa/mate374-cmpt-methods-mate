@@ -22,8 +22,8 @@ Decisions to confirm
   of L17 ("Unit 4: how do atoms move?").
 - The O(h^2) tables cover central, forward, and backward formulas up to the 4th
   derivative. Coefficients were derived with exact fractions and checked.
-- Citation: "@kiusalaas2013 [ch. 5]" assumes Chapter 5 is Numerical
-  Differentiation in the 3rd edition. Please confirm the chapter number.
+- Citation: [@kiusalaas2013, ch. 5]. The instructor confirmed that Chapter 5 is
+  Numerical Differentiation.
 - The round-off question is only posed in "Next" (central difference of x^3:
   h = 1e-5 gives an error of 2e-10, h = 1e-13 gives 26.965). The explanation
   and the V-shaped error plot are left for L18, as is "accuracy vs fitting".
@@ -77,3 +77,16 @@ October 21 revision (instructor comments)
   display") and in templates/lecture-note.qmd.template.
 
 Length: about 3,350 words of prose, roughly 17 minutes at 200 words/minute.
+
+October 21, second revision
+---------------------------
+- The instructor fixed label alignment in seven SVGs in Inkscape. All nine
+  L17 SVGs were re-exported to 300-dpi PNGs.
+- L17-second-derivative.svg: added the central-second-difference fraction in
+  the style of L17-central.svg (red numerator / rule / denominator). The page
+  is now 74 mm tall. A backup of the instructor's version before this edit
+  was kept outside the repo.
+- L17-endpoints.svg: the left "no data" label no longer overlaps the y-axis.
+- New callout "Choose at least O(h^2) whenever possible" before the end-point
+  section. It is worded as a default for tabulated data, so it stays
+  consistent with L18's cost argument for forward gradients.
