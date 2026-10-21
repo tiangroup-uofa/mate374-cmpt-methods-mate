@@ -127,6 +127,13 @@ website:
                 text: "Summary and preparation"
               - href: units/03/references.qmd
                 text: "References"
+          - section: "04 · Numerical differentiation and integration"
+            href: units/04/index.qmd
+            contents:
+              - href: units/04/L17/index.qmd
+                text: "Lecture 17"
+              - href: units/04/references.qmd
+                text: "References"
       - href: seminars/index.qmd
         text: "Seminar materials"
         contents:

@@ -1,0 +1,14 @@
+---
+title: "Unit 04 · References"
+format:
+  html:
+    toc: true
+bibliography: ../../references.bib
+nocite: |
+  @kiusalaas2013, @harris2020numpy, @virtanen2020scipy
+---
+
+## Bibliography
+
+::: {#refs}
+:::

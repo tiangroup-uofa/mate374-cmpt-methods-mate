@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="64mm" viewBox="0 0 160 64">
+<title>Newton's second law combines differentiation and integration in molecular dynamics</title>
+<desc>Left: F = m a. The force is the negative gradient of the energy (differentiation, red). The acceleration is the first time derivative of velocity and the second of position, so positions follow by integration (green). Right: atoms with force arrows and dashed recent paths, repeated every time step in molecular dynamics.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+<radialGradient id="ball-gray" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#8a8f98"/></radialGradient>
+</defs>
+<rect id="background" width="160" height="64" style="fill:#ffffff"/>
+<g id="newton" inkscape:groupmode="layer" inkscape:label="Newton's second law">
+<rect x="1.5" y="1.5" width="98" height="61" ry="5" style="fill:none;stroke:#676767;stroke-width:0.5"/>
+<text x="6.00" y="9.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Newton’s second law</text>
+<text x="50" y="22" style="font-family:Arial;font-size:7.06px;fill:#231f20;text-anchor:middle"><tspan style="font-weight:bold">F</tspan> = <tspan style="font-style:italic">m</tspan> <tspan style="font-weight:bold">a</tspan></text>
+<path d="M 39.500,24.500 L 25.000,33.500" style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<ellipse cx="22" cy="40.3" rx="15.5" ry="5.4" style="fill:#f5d9d9;stroke:#b5473a;stroke-width:0.4"/>
+<text x="22" y="42" style="font-family:Arial;font-size:4.94px;fill:#231f20;text-anchor:middle"><tspan style="font-weight:bold">F</tspan> = −∇<tspan style="font-style:italic">E</tspan></text>
+<text x="22.00" y="52.00" style="font-family:Arial;font-size:4.23px;fill:#b5473a;font-weight:bold;font-style:normal;text-anchor:middle">Differentiation</text>
+<text x="22.00" y="57.50" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">energy → force</text>
+<path d="M 60.500,24.500 L 69.000,33.500" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<ellipse cx="72" cy="40.3" rx="24" ry="5.4" style="fill:#cfedcd;stroke:#2ca02c;stroke-width:0.4"/>
+<text x="72" y="42" style="font-family:Arial;font-size:4.94px;fill:#231f20;text-anchor:middle"><tspan style="font-weight:bold">a</tspan> = d<tspan style="font-weight:bold">v</tspan>/d<tspan style="font-style:italic">t</tspan> = d²<tspan style="font-weight:bold">x</tspan>/d<tspan style="font-style:italic">t</tspan>²</text>
+<text x="72.00" y="52.00" style="font-family:Arial;font-size:4.23px;fill:#2ca02c;font-weight:bold;font-style:normal;text-anchor:middle">Integration</text>
+<text x="72.00" y="57.50" style="font-family:Arial;font-size:3.53px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:middle">acceleration → velocity → position</text>
+<path d="M 102.500,32.000 L 110.500,32.000" style="fill:none;stroke:#231f20;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+</g>
+<g id="md" inkscape:groupmode="layer" inkscape:label="Molecular dynamics">
+<text x="115.00" y="9.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Molecular dynamics</text>
+<path d="M 115.20,31.30 Q 119.20,26.80 124.00,25.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
+<path d="M 142.40,31.30 Q 139.40,24.30 140.00,21.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
+<path d="M 144.60,28.90 Q 147.10,30.90 151.00,33.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
+<path d="M 140.00,36.70 Q 133.50,38.20 132.00,40.00" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-dasharray:1.2,0.8"/>
+<circle cx="124" cy="25" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 127.160,23.276 L 132.660,20.276" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<circle cx="140" cy="21" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 139.053,17.527 L 137.553,12.027" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<circle cx="151" cy="33" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 153.709,35.371 L 157.709,38.871" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<circle cx="132" cy="40" r="3.3" style="fill:url(#ball-gray);stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 128.913,41.852 L 123.913,44.852" style="fill:none;stroke:#b5473a;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<text x="136.00" y="53.00" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">forces → accelerations →</text>
+<text x="136.00" y="58.00" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">new positions, every time step</text>
+</g>
+</svg>

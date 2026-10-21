@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="69mm" viewBox="0 0 160 69">
+<title>Central differences need a neighbour on both sides, so the end points need one-sided formulas</title>
+<desc>Samples x_0 to x_(n-1) on a curve. Interior points (green) have neighbours on both sides and use central differences. The end points (red) lack a neighbour outside the data and use three-point forward or backward formulas.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+
+</defs>
+<rect id="background" width="160" height="69" style="fill:#ffffff"/>
+<g id="endpoints" inkscape:groupmode="layer" inkscape:label="end points">
+<path d="M 8.000,44.000 L 147.500,44.000" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 8.000,44.000 L 8.000,6.500" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<text x="148.50" y="45.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">x</tspan></text>
+<text x="10.00" y="7.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">f(x)</tspan></text>
+<path d="M 25.810,40.342 L 26.457,39.668 L 27.105,39.012 L 27.752,38.374 L 28.400,37.752 L 29.048,37.147 L 29.695,36.558 L 30.343,35.985 L 30.990,35.426 L 31.638,34.883 L 32.286,34.355 L 32.933,33.840 L 33.581,33.339 L 34.229,32.852 L 34.876,32.377 L 35.524,31.915 L 36.171,31.466 L 36.819,31.028 L 37.467,30.602 L 38.114,30.187 L 38.762,29.784 L 39.410,29.391 L 40.057,29.009 L 40.705,28.636 L 41.352,28.274 L 42.000,27.921 L 42.648,27.578 L 43.295,27.244 L 43.943,26.919 L 44.590,26.602 L 45.238,26.294 L 45.886,25.994 L 46.533,25.703 L 47.181,25.418 L 47.829,25.142 L 48.476,24.873 L 49.124,24.611 L 49.771,24.356 L 50.419,24.107 L 51.067,23.866 L 51.714,23.631 L 52.362,23.402 L 53.010,23.179 L 53.657,22.962 L 54.305,22.751 L 54.952,22.545 L 55.600,22.345 L 56.248,22.151 L 56.895,21.961 L 57.543,21.777 L 58.190,21.597 L 58.838,21.422 L 59.486,21.252 L 60.133,21.087 L 60.781,20.926 L 61.429,20.769 L 62.076,20.616 L 62.724,20.467 L 63.371,20.323 L 64.019,20.182 L 64.667,20.045 L 65.314,19.912 L 65.962,19.782 L 66.610,19.655 L 67.257,19.532 L 67.905,19.413 L 68.552,19.296 L 69.200,19.183 L 69.848,19.072 L 70.495,18.965 L 71.143,18.860 L 71.790,18.758 L 72.438,18.659 L 73.086,18.563 L 73.733,18.469 L 74.381,18.377 L 75.029,18.288 L 75.676,18.202 L 76.324,18.117 L 76.971,18.035 L 77.619,17.955 L 78.267,17.878 L 78.914,17.802 L 79.562,17.728 L 80.210,17.657 L 80.857,17.587 L 81.505,17.519 L 82.152,17.453 L 82.800,17.388 L 83.448,17.326 L 84.095,17.265 L 84.743,17.205 L 85.390,17.148 L 86.038,17.092 L 86.686,17.037 L 87.333,16.984 L 87.981,16.932 L 88.629,16.881 L 89.276,16.832 L 89.924,16.784 L 90.571,16.738 L 91.219,16.692 L 91.867,16.648 L 92.514,16.605 L 93.162,16.564 L 93.810,16.523 L 94.457,16.483 L 95.105,16.445 L 95.752,16.407 L 96.400,16.371 L 97.048,16.335 L 97.695,16.301 L 98.343,16.267 L 98.990,16.234 L 99.638,16.202 L 100.286,16.171 L 100.933,16.141 L 101.581,16.112 L 102.229,16.083 L 102.876,16.055 L 103.524,16.028 L 104.171,16.002 L 104.819,15.976 L 105.467,15.951 L 106.114,15.927 L 106.762,15.903 L 107.410,15.880 L 108.057,15.857 L 108.705,15.836 L 109.352,15.814 L 110.000,15.794 L 110.648,15.773 L 111.295,15.754 L 111.943,15.735 L 112.590,15.716 L 113.238,15.698 L 113.886,15.680 L 114.533,15.663 L 115.181,15.647 L 115.829,15.630 L 116.476,15.615 L 117.124,15.599 L 117.771,15.584 L 118.419,15.570 L 119.067,15.555 L 119.714,15.542 L 120.362,15.528 L 121.010,15.515 L 121.657,15.502 L 122.305,15.490 L 122.952,15.478 L 123.600,15.466 L 124.248,15.455 L 124.895,15.444 L 125.543,15.433 L 126.190,15.422 L 126.838,15.412 L 127.486,15.402 L 128.133,15.392 L 128.781,15.383 L 129.429,15.374" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round"/>
+<path d="M 27.429,38.691 L 27.429,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="27.429" cy="38.691" r="1.1" style="fill:#b5473a;stroke:#b5473a;stroke-width:0.3"/>
+<path d="M 41.352,28.274 L 41.352,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="41.352" cy="28.274" r="1.1" style="fill:#2ca02c;stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 55.276,22.445 L 55.276,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="55.276" cy="22.445" r="1.1" style="fill:#2ca02c;stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 69.200,19.183 L 69.200,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="69.200" cy="19.183" r="1.1" style="fill:#2ca02c;stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 83.124,17.357 L 83.124,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="83.124" cy="17.357" r="1.1" style="fill:#2ca02c;stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 97.048,16.335 L 97.048,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="97.048" cy="16.335" r="1.1" style="fill:#2ca02c;stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 110.971,15.764 L 110.971,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="110.971" cy="15.764" r="1.1" style="fill:#2ca02c;stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 124.895,15.444 L 124.895,44.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="124.895" cy="15.444" r="1.1" style="fill:#b5473a;stroke:#b5473a;stroke-width:0.3"/>
+<circle cx="13.505" cy="44.000" r="1.1" style="fill:#ffffff;stroke:#b5473a;stroke-width:0.3;stroke-dasharray:0.8,0.5"/>
+<text x="13.50" y="41.00" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">no data</text>
+<circle cx="138.819" cy="44.000" r="1.1" style="fill:#ffffff;stroke:#b5473a;stroke-width:0.3;stroke-dasharray:0.8,0.5"/>
+<text x="138.82" y="41.00" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">no data</text>
+<text x="27.43" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">0</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="41.35" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">1</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="55.28" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">2</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="97.05" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">n−3</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="110.97" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">n−2</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="124.90" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">n−1</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="76.16" y="48.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">…</text>
+<path d="M 27.429,50.500 L 27.429,52.000 L 55.276,52.000 L 55.276,50.500" style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="41.35" y="56.50" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">3-point forward</text>
+<path d="M 97.048,50.500 L 97.048,52.000 L 124.895,52.000 L 124.895,50.500" style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="110.97" y="56.50" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">3-point backward</text>
+<path d="M 41.352,58.500 L 41.352,60.000 L 110.971,60.000 L 110.971,58.500" style="fill:none;stroke:#2ca02c;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="76.16" y="64.50" style="font-family:Arial;font-size:3.53px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:middle">central at every interior point</text>
+</g>
+</svg>

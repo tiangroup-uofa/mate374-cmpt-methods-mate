@@ -34,3 +34,7 @@ toc: false
 16. [L16 · How do we know minimization really worked?](03/L16/index.qmd) — the eigenvalue problem, classifying relaxed clusters by their Hessian eigenvalues, following downhill modes, and vibrational frequencies.
 
 [Unit 03 · Summary and preparation](03/summary.qmd)
+
+## [04 · Numerical differentiation and integration](04/index.qmd)
+
+17. [L17 · Finite differences: calculating derivatives in a computer](04/L17/index.qmd) — Newton's second law as differentiation and integration, forward, backward, and central differences, truncation error from Taylor series, three-point end formulas, and `np.gradient`.

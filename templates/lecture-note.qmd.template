@@ -13,6 +13,12 @@ Preserve the instructor's draft sequence and scope, including fuller autosave
 copies when present. Calibrate depth against existing lectures: typically
 14–19 minutes by Quarto's reading-time estimate, with a median of 17 minutes
 for L01–L10. Use worked explanations to support the scope, not word-count padding.
+Pages are read at home and projected in class: itemize applications,
+correspondences (first derivative <-> force), worked-example setups (given,
+exact answer, question), how-to-read interpretations, procedures, and quick
+checks. Keep derivations in prose. Summarize key formulas under a heading with
+a centred boxed equation that includes its leading error. See AGENTS.md,
+"Itemize for reading and in-class display".
 -->
 
 ::: {.callout-note}
@@ -45,6 +51,10 @@ $$
 Use a small number of broad sections to develop the argument. Add a subsection when it helps compare distinct cases or methods.
 
 ### A worked case
+
+- **Given:** the function, data, or model.
+- **Exact answer or reference:** when one exists.
+- **Question:** what the calculation should determine.
 
 Show enough intermediate reasoning for students to follow how the data and assumptions become a calculation. Keep the physical meaning close to the equations.
 

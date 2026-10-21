@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="66mm" viewBox="0 0 160 66">
+<title>Two numerical routes to a derivative from sampled data</title>
+<desc>Panel a: the slope at x_i is estimated from the neighbouring samples x_(i-1) and x_(i+1) by a finite difference. Panel b: a smooth function is fitted to scattered samples and its analytical derivative gives the slope at x_i.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+
+</defs>
+<rect id="background" width="160" height="66" style="fill:#ffffff"/>
+<g id="fd" inkscape:groupmode="layer" inkscape:label="a — finite difference">
+<text x="2.00" y="7.00" style="font-family:Arial;font-size:6.35px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">a</text>
+<path d="M 7.000,55.000 L 72.500,55.000" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 7.000,55.000 L 7.000,9.500" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<text x="73.50" y="56.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">x</tspan></text>
+<text x="9.00" y="10.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">f(x)</tspan></text>
+<text x="10.00" y="7.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Finite difference from samples</text>
+<path d="M 16.415,45.338 L 52.007,19.735" style="fill:none;stroke:#b5473a;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round"/>
+<path d="M 26.289,38.397 L 26.289,55.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<path d="M 40.985,27.825 L 40.985,55.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="11.593" cy="45.128" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="18.941" cy="42.607" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="26.289" cy="38.397" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="33.637" cy="32.949" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="40.985" cy="27.825" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="48.333" cy="24.265" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="55.681" cy="22.278" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="63.030" cy="21.304" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<text x="26.29" y="60.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">i−1</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="33.64" y="60.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">i</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="40.99" y="60.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">i+1</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="76.00" y="64.50" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:end">slope from neighbouring values</text>
+</g>
+<g id="fit" inkscape:groupmode="layer" inkscape:label="b — fitted function">
+<text x="84.00" y="7.00" style="font-family:Arial;font-size:6.35px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">b</text>
+<path d="M 89.000,55.000 L 154.500,55.000" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 89.000,55.000 L 89.000,9.500" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<text x="155.50" y="56.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">x</tspan></text>
+<text x="91.00" y="10.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">f(x)</tspan></text>
+<text x="92.00" y="7.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Derivative of a fitted function</text>
+<path d="M 90.148,45.847 L 90.514,45.781 L 90.880,45.714 L 91.246,45.643 L 91.612,45.570 L 91.978,45.495 L 92.344,45.416 L 92.710,45.335 L 93.076,45.251 L 93.442,45.164 L 93.808,45.074 L 94.174,44.981 L 94.540,44.885 L 94.906,44.786 L 95.272,44.683 L 95.638,44.576 L 96.004,44.467 L 96.370,44.353 L 96.736,44.236 L 97.102,44.115 L 97.468,43.991 L 97.834,43.862 L 98.200,43.730 L 98.566,43.594 L 98.931,43.453 L 99.297,43.308 L 99.663,43.160 L 100.029,43.007 L 100.395,42.849 L 100.761,42.688 L 101.127,42.521 L 101.493,42.351 L 101.859,42.176 L 102.225,41.997 L 102.591,41.813 L 102.957,41.625 L 103.323,41.432 L 103.689,41.235 L 104.055,41.033 L 104.421,40.827 L 104.787,40.617 L 105.153,40.402 L 105.519,40.183 L 105.885,39.960 L 106.251,39.733 L 106.617,39.502 L 106.983,39.267 L 107.349,39.028 L 107.715,38.785 L 108.081,38.538 L 108.447,38.289 L 108.813,38.036 L 109.179,37.779 L 109.545,37.520 L 109.911,37.258 L 110.277,36.993 L 110.643,36.726 L 111.009,36.457 L 111.375,36.185 L 111.741,35.912 L 112.106,35.637 L 112.472,35.361 L 112.838,35.084 L 113.204,34.805 L 113.570,34.526 L 113.936,34.247 L 114.302,33.967 L 114.668,33.687 L 115.034,33.408 L 115.400,33.129 L 115.766,32.851 L 116.132,32.574 L 116.498,32.298 L 116.864,32.023 L 117.230,31.751 L 117.596,31.480 L 117.962,31.211 L 118.328,30.944 L 118.694,30.680 L 119.060,30.419 L 119.426,30.160 L 119.792,29.905 L 120.158,29.652 L 120.524,29.403 L 120.890,29.158 L 121.256,28.916 L 121.622,28.678 L 121.988,28.443 L 122.354,28.213 L 122.720,27.987 L 123.086,27.765 L 123.452,27.547 L 123.818,27.333 L 124.184,27.124 L 124.550,26.919 L 124.916,26.718 L 125.281,26.522 L 125.647,26.331 L 126.013,26.143 L 126.379,25.961 L 126.745,25.782 L 127.111,25.609 L 127.477,25.439 L 127.843,25.274 L 128.209,25.113 L 128.575,24.957 L 128.941,24.805 L 129.307,24.657 L 129.673,24.513 L 130.039,24.374 L 130.405,24.238 L 130.771,24.107 L 131.137,23.979 L 131.503,23.856 L 131.869,23.736 L 132.235,23.620 L 132.601,23.507 L 132.967,23.398 L 133.333,23.293 L 133.699,23.191 L 134.065,23.092 L 134.431,22.996 L 134.797,22.904 L 135.163,22.815 L 135.529,22.729 L 135.895,22.645 L 136.261,22.565 L 136.627,22.487 L 136.993,22.412 L 137.359,22.340 L 137.725,22.270 L 138.091,22.203 L 138.456,22.138 L 138.822,22.075 L 139.188,22.015 L 139.554,21.957 L 139.920,21.901 L 140.286,21.847 L 140.652,21.795 L 141.018,21.745 L 141.384,21.696 L 141.750,21.650 L 142.116,21.605 L 142.482,21.562 L 142.848,21.521 L 143.214,21.481 L 143.580,21.442 L 143.946,21.405 L 144.312,21.370 L 144.678,21.335 L 145.044,21.303 L 145.410,21.271 L 145.776,21.240 L 146.142,21.211 L 146.508,21.183 L 146.874,21.156 L 147.240,21.130 L 147.606,21.105 L 147.972,21.081 L 148.338,21.058 L 148.704,21.036" style="fill:none;stroke:#1f77b4;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round"/>
+<path d="M 103.007,42.543 L 128.267,23.355" style="fill:none;stroke:#b5473a;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round"/>
+<path d="M 115.637,32.949 L 115.637,55.000" style="fill:none;stroke:#8a8f98;stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.5,1"/>
+<circle cx="93.593" cy="43.628" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="100.941" cy="44.707" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="108.289" cy="35.697" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="115.637" cy="34.749" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="122.985" cy="25.725" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="130.333" cy="26.665" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="137.681" cy="20.478" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<circle cx="145.030" cy="22.804" r="1.0" style="fill:#231f20;stroke:#231f20;stroke-width:0.3"/>
+<text x="115.64" y="60.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle"><tspan style="font-style:italic">x</tspan><tspan style="font-size:2.9px" dy="1.1">i</tspan><tspan dy="-1.1"> </tspan></text>
+<text x="149.16" y="26.51" style="font-family:Arial;font-size:3.53px;fill:#1f77b4;font-weight:normal;font-style:normal;text-anchor:end">fitted curve</text>
+<text x="158.00" y="64.50" style="font-family:Arial;font-size:3.53px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:end">slope of the fitted curve</text>
+</g>
+</svg>

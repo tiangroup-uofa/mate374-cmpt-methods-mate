@@ -73,6 +73,26 @@ When the user asks for writing refinement, use two passes. The first pass may be
 
 Avoid filler and defensive contrast patterns such as “this is X, not Y” or “this demo is only for X, not a real Y.” State the useful point directly. Preserve the user’s intended meaning, tone, and edits rather than replacing them with generic polished prose.
 
+### Itemize for reading and in-class display
+
+Lecture pages are both read at home and projected in class, so information students scan or compare should be itemized for visual clarity. Keep derivations and the reasoning that connects ideas in prose, and use bullet points for:
+
+- **Lists of examples or applications**, such as what MD simulations study.
+- **Correspondences**, even when they seem obvious: first derivative ↔ force and velocity, second derivative ↔ stiffness and acceleration.
+- **Worked-example setups:** the given function, the exact answer, and the question asked (“what happens with $h=1$?”), before the calculation.
+- **How to read a formula or figure:** e.g. curve bends downward → centre point above the chord → negative second derivative.
+- **Procedures and quick checks**, such as how to use a coefficient table or how to verify a copied formula.
+- **Tool descriptions** with several properties (inputs, defaults, outputs, limitations), using nested bullets.
+
+Related display conventions:
+
+- Summarize key formulas under a heading with a centred boxed equation (an `aligned` block for several results), not inside a callout. Put the leading error inside the box, e.g. `+O(h^2)`, with no trailing text after the box.
+- Put interpretive remarks after a boxed summary as normal prose, outside callouts.
+- End a caution callout with a **bold** sentence that states the practical consequence, when there is one.
+- Give coefficient tables explicit leading columns (for example **Derivative | Denominator | coefficients…**) separated by vertical rules (`: Caption {#tbl-id .fd-table}`).
+- In interactive examples, prefer a slider or dropdown over editing a variable, without extra explanatory text inside the notebook.
+- Cite sources parenthetically at the end of a clause, `[@key, ch. 5]`, unless the author is the grammatical subject.
+
 ### Mandatory post-generation cleanup
 
 Treat these as general failure patterns to find throughout a draft, not a blacklist of individual sentences. After drafting, read every sentence in its paragraph and every paragraph in the teaching sequence. Revise any passage that sounds like generic assistant advice rather than an instructor explaining the material to MSE students.

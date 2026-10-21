@@ -474,4 +474,4 @@ $$
 
 ## Next
 
-Unit 4 begins with **numerical differentiation and integration**. We will calculate derivatives from sampled values and approximate integrals from discrete data, examining how the spacing of the data and the choice of method affect accuracy.
+Unit 4 begins with **numerical differentiation and integration** in [L17](../../04/L17/index.qmd). We will calculate derivatives from sampled values and approximate integrals from discrete data, examining how the spacing of the data and the choice of method affect accuracy.

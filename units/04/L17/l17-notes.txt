@@ -1,0 +1,79 @@
+L17 · authoring notes for the instructor
+========================================
+
+October 21: first full draft of L17 and the Unit 04 landing page.
+
+Sources
+-------
+- Instructor's typed outline (chat, Oct 20) and tldraw board Page 2 (the
+  "Lecture 17 teaching" column). The board was condensed. Its sequence was kept.
+- Older MATE 374 slides (five clipboard images): FD vs function approximation,
+  scatter data, forward/backward/central figures, and the x^3 at x = 3 example.
+  The figures were redrawn in the course SVG style with the x, x+h, x+2h
+  convention. The x^3 example (37 / 19 / 28 vs 27) is reused unchanged.
+
+Decisions to confirm
+--------------------
+- Title. The typed outline began "lecture 17: numerical integration". The
+  content is differentiation, so the title follows main_idea.txt:
+  "Finite differences: calculating derivatives in a computer".
+- Unit 04 landing page has no question list or big picture, as requested. It
+  has one sentence plus the L17 link. The big picture is the opening section
+  of L17 ("Unit 4: how do atoms move?").
+- The O(h^2) tables cover central, forward, and backward formulas up to the 4th
+  derivative. Coefficients were derived with exact fractions and checked.
+- Citation: "@kiusalaas2013 [ch. 5]" assumes Chapter 5 is Numerical
+  Differentiation in the 3rd edition. Please confirm the chapter number.
+- The round-off question is only posed in "Next" (central difference of x^3:
+  h = 1e-5 gives an error of 2e-10, h = 1e-13 gives 26.965). The explanation
+  and the V-shaped error plot are left for L18, as is "accuracy vs fitting".
+- L16 "Next" now links to L17 (one-word edit).
+
+Corrections to the board
+------------------------
+- f''(x) central formula: the denominator is h^2. The board has 2h.
+- f(x-2h) expansion: the cubic term is -(2h)^3/3! f'''. The board shows +.
+- 3-point forward: the board's result, f' - (h^2/3) f''', is correct. The page
+  writes it with the numerator -3f(x) + 4f(x+h) - f(x+2h) over 2h. That is
+  the same formula, with the sign moved from the denominator.
+
+Figures (9 in total, each SVG source beside its 300-dpi PNG)
+-----------------------------------------------------
+L17-newton-md, L17-secant-tangent, L17-abs-x (inside the caution callout),
+L17-derivative-routes (FD vs fitted function, adapted from the old slides),
+L17-stencil (used once for all the Taylor series), L17-forward-backward,
+L17-central, L17-endpoints, L17-second-derivative.
+The SVGs were generated once and are meant for editing in Inkscape. No
+generator script was kept. Re-export with:
+  inkscape FIG.svg --export-type=png --export-filename=FIG.png -d 300
+
+Notebooks
+---------
+- activities/l17_fd_formulas.edit.py: x^3 forward/backward/central, h chosen
+  with a mo.ui.slider (1, 0.5, 0.25, 0.1, 0.05, 0.01).
+- activities/l17_fd_stencil.edit.py: the stencil written as a loop and with
+  array slicing (plus the sliced second difference).
+- activities/l17_fd_library.edit.py: np.diff, np.gradient (uniform and uneven),
+  scipy.differentiate.derivative.
+- l17_fd_python.edit.py was split into the last two and removed.
+- All pass `marimo check` and run natively. The slider and scipy.differentiate
+  notebooks were run in the browser (Pyodide 314.0.0, SciPy 1.17.1).
+
+October 21 revision (instructor comments)
+-----------------------------------------
+- Itemized: MD applications, first/second-derivative correspondences, the
+  worked-example setup, how to read the second difference, table usage and
+  quick checks, and the NumPy/SciPy tool descriptions.
+- |x| callout ends with a bold sentence on squared vs absolute error.
+- The first-derivative callout became a heading with a boxed aligned summary.
+  The cost/precision sentence follows it as prose.
+- f'' box contains +O(h^2) and is centred. The leading error is in the text.
+- Tables rebuilt with Derivative | Denominator | coefficient columns, vertical
+  rules (styles.css, table.fd-table), and captions tbl-central/forward/backward.
+- Kiusalaas cited parenthetically.
+- Python split into "Using the finite-difference formulas in Python" (loop vs
+  slicing) and "Using stock functions in NumPy and SciPy".
+- The rule set is recorded in AGENTS.md ("Itemize for reading and in-class
+  display") and in templates/lecture-note.qmd.template.
+
+Length: about 3,350 words of prose, roughly 17 minutes at 200 words/minute.

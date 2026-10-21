@@ -406,3 +406,12 @@ body.class-view #quarto-document-content h3 {
     display: none !important;
   }
 }
+
+/* Finite-difference coefficient tables: separate the derivative and
+   denominator columns from the coefficients with vertical rules. */
+table.fd-table th:nth-child(1),
+table.fd-table td:nth-child(1),
+table.fd-table th:nth-child(2),
+table.fd-table td:nth-child(2) {
+  border-right: 1px solid #8a8f98;
+}
