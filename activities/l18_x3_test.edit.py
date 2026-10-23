@@ -28,13 +28,16 @@ def _(mo):
 
 @app.cell
 def _(h_choice, mo):
+    def central(f, x, h):
+        return (f(x + h) - f(x - h)) / (2 * h)
+
+
     def f(x):
         return x**3
 
 
-    x = 3.0
     h = float(h_choice.value)
-    central = (f(x + h) - f(x - h)) / (2 * h)
+    estimate = central(f, 3.0, h)
 
     mo.hstack(
         [
@@ -43,8 +46,8 @@ def _(h_choice, mo):
                 f"""
     | | value |
     |---|---|
-    | central difference | `{central!r}` |
-    | error | `{central - 27:.3e}` |
+    | central difference | `{estimate!r}` |
+    | error | `{estimate - 27:.3e}` |
     | predicted $h^2$ | `{h**2:.3e}` |
     """
             ),

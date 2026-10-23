@@ -23,7 +23,7 @@ def _():
 @app.cell
 def _(mo):
     n_slider = mo.ui.slider(steps=[6, 11, 21, 41, 81], value=21, label="points", show_value=True)
-    sigma_slider = mo.ui.slider(steps=[0.0, 0.05, 0.1, 0.2, 0.5], value=0.1, label="noise σ", show_value=True)
+    sigma_slider = mo.ui.slider(steps=[0.0, 0.05, 0.1, 0.2, 0.5, 1.0], value=0.1, label="noise σ", show_value=True)
     return n_slider, sigma_slider
 
 

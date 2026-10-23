@@ -21,29 +21,19 @@ def _():
 
 @app.cell
 def _(np):
-    def first_der_ends(f, h):
-        start = (-3 * f[0] + 4 * f[1] - f[2]) / (2 * h)     # three-point forward
-        end = (3 * f[-1] - 4 * f[-2] + f[-3]) / (2 * h)     # three-point backward
-        return start, end
-
-
-    def second_der_ends(f, h):
-        start = (2 * f[0] - 5 * f[1] + 4 * f[2] - f[3]) / h**2      # four-point forward
-        end = (2 * f[-1] - 5 * f[-2] + 4 * f[-3] - f[-4]) / h**2    # four-point backward
-        return start, end
-
-
     def first_der(f, h):
         fp = np.empty_like(f)
-        fp[1:-1] = (f[2:] - f[:-2]) / (2 * h)                # central, interior
-        fp[0], fp[-1] = first_der_ends(f, h)
+        fp[1:-1] = (f[2:] - f[:-2]) / (2 * h)                         # central, interior
+        fp[0] = (-3 * f[0] + 4 * f[1] - f[2]) / (2 * h)               # three-point forward
+        fp[-1] = (3 * f[-1] - 4 * f[-2] + f[-3]) / (2 * h)            # three-point backward
         return fp
 
 
     def second_der(f, h):
         fpp = np.empty_like(f)
-        fpp[1:-1] = (f[2:] - 2 * f[1:-1] + f[:-2]) / h**2    # central, interior
-        fpp[0], fpp[-1] = second_der_ends(f, h)
+        fpp[1:-1] = (f[2:] - 2 * f[1:-1] + f[:-2]) / h**2             # central, interior
+        fpp[0] = (2 * f[0] - 5 * f[1] + 4 * f[2] - f[3]) / h**2       # four-point forward
+        fpp[-1] = (2 * f[-1] - 5 * f[-2] + 4 * f[-3] - f[-4]) / h**2  # four-point backward
         return fpp
 
     return first_der, second_der

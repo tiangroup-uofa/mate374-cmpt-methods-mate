@@ -15,7 +15,7 @@ bibliography: ../../../references.bib
 
 By the end of this lecture, you should be able to:
 
-1. **Implement** first- and second-derivative functions for a sampled NumPy array with $O(h^2)$ accuracy at every point, and check them against `np.gradient`.
+1. **Implement** first- and second-derivative functions for a Python function and for a sampled NumPy array with $O(h^2)$ accuracy at every point, and check them against `scipy.differentiate.derivative` and `np.gradient`.
 2. **Explain** the total error of a finite difference as the sum of truncation and round-off contributions, and choose a reasonable step size.
 3. **Compare** derivatives calculated directly from noisy data with derivatives of a fitted function.
 4. **Count** the energy evaluations needed for the gradient and Hessian of $N$ atoms, and explain how a large total energy can hide a small force (reading material).
@@ -39,11 +39,69 @@ $$
 
 At the first and last points of a data set, one neighbour is missing, and the three-point one-sided formulas from L17 keep the same $O(h^2)$ accuracy.
 
-## Finite differences on a NumPy array
+## Finite differences as Python functions
 
-### First and second derivatives as Python functions
+A finite-difference formula can receive two kinds of input. When the function is available as Python code, we can evaluate it wherever the stencil needs a value. When we have only a table of values, from a measurement or an earlier calculation, the stencil can use only the points in the table. The two cases lead to two kinds of Python function, and each has a library routine that performs the same calculation.
 
-This section reworks the stencil code from L17 into reusable functions. In L17 we applied the central stencil to an array, first with a loop and then with array slicing, and handled the end points separately. Collecting the interior and end-point formulas into functions gives a tool we can reuse on any evenly spaced data. Suppose an array `f` holds $n$ function values with spacing `h`. We want an array `fp` of the same length that holds $f'$ at every sample (@fig-array-stencil).
+### Derivatives of a Python function at a point
+
+Given a function `f`, a point `x`, and a step `h`, each formula becomes one line:
+
+```python
+def central(f, x, h):
+    return (f(x + h) - f(x - h)) / (2 * h)
+
+def central_second(f, x, h):
+    return (f(x + h) - 2 * f(x) + f(x - h)) / h**2
+```
+
+These functions are written for a single point `x`. They also accept a NumPy array of points, provided that `f` returns an array of values when it receives an array. Functions built from NumPy operations, such as `np.sin(x)` or `x**3`, do this. A function that uses `math.sin` or an `if` test on `x` works only for single numbers.
+
+SciPy performs this calculation with an automatic choice of step:
+
+- **`scipy.differentiate.derivative(f, x)`** differentiates a Python function at the point `x` [@virtanen2020scipy].
+  - It chooses its own evaluation points and refines the step until successive estimates agree.
+  - It returns the derivative `res.df`, an error estimate `res.error`, and the number of function calls `res.nfev`.
+  - It computes first derivatives only. Its `order` argument sets the accuracy order of the stencil, not the order of the derivative.
+  - A second derivative takes more work. We can nest two calls, `derivative(lambda x: derivative(f, x).df, x)`, or use `scipy.differentiate.hessian`, which expects a function of a vector and returns a matrix of second derivatives. For a function of one variable, `central_second` is the more direct choice.
+
+### Derivatives of sampled data in a NumPy array
+
+Measured or tabulated data give no function to call, only values at fixed points. The neighbours $f(x\pm h)$ are then the adjacent entries of an array, and the first and last entries have a neighbour on one side only. In L17 we applied the central stencil to an array, first with a loop and then with array slicing, and handled the end points separately. Collecting the interior and end-point formulas into functions gives a tool we can reuse on any evenly spaced data. Suppose an array `f` holds $n$ function values with spacing `h`, so `f` is now a table of numbers rather than a Python function. We want an array `fp` of the same length that holds $f'$ at every sample.
+
+We label the samples by their index: $f_i$ is the entry `f[i]`, the value $f(x_i)$ at $x_i=x_0+ih$, for $i=0,1,\dots,n-1$.
+
+- **Interior points**, $i=1,\dots,n-2$, have a neighbour on each side and use the central formulas.
+- **The first point**, $i=0$, has neighbours only to its right and uses a forward formula.
+- **The last point**, $i=n-1$, has neighbours only to its left and uses a backward formula.
+
+To keep the $O(h^2)$ accuracy of the central formulas, each one-sided formula uses one more point than its central counterpart (L17).
+
+**First derivative**, two points in the interior and three at each end:
+
+$$
+\begin{aligned}
+\text{interior, } i=1,\dots,n-2:&\quad f'_i=\frac{f_{i+1}-f_{i-1}}{2h}\\[6pt]
+\text{first point, } i=0:&\quad f'_0=\frac{-3f_0+4f_1-f_2}{2h}\\[6pt]
+\text{last point, } i=n-1:&\quad f'_{n-1}=\frac{3f_{n-1}-4f_{n-2}+f_{n-3}}{2h}
+\end{aligned}
+$$
+
+**Second derivative**, three points in the interior and four at each end:
+
+$$
+\begin{aligned}
+\text{interior, } i=1,\dots,n-2:&\quad f''_i=\frac{f_{i+1}-2f_i+f_{i-1}}{h^2}\\[6pt]
+\text{first point, } i=0:&\quad f''_0=\frac{2f_0-5f_1+4f_2-f_3}{h^2}\\[6pt]
+\text{last point, } i=n-1:&\quad f''_{n-1}=\frac{2f_{n-1}-5f_{n-2}+4f_{n-3}-f_{n-4}}{h^2}
+\end{aligned}
+$$
+
+All six formulas have an $O(h^2)$ error. In NumPy, negative indices count back from the end of the array, and a slice collects the same neighbour for every interior point at once (@fig-array-stencil):
+
+- $f_0,\ f_1,\ f_2,\ f_3$ ↔ `f[0]`, `f[1]`, `f[2]`, `f[3]`
+- $f_{n-1},\ f_{n-2},\ f_{n-3},\ f_{n-4}$ ↔ `f[-1]`, `f[-2]`, `f[-3]`, `f[-4]`
+- $f_{i-1},\ f_i,\ f_{i+1}$ for all interior $i$ ↔ `f[:-2]`, `f[1:-1]`, `f[2:]`
 
 ![Central differences on a NumPy array. Each interior entry of `fp` combines the entries of `f` on either side, for example `fp[1]` from `f[0]` and `f[2]` (blue). The slices `f[2:]` and `f[:-2]` line up the right and left neighbours of every interior point, so one line fills `fp[1:-1]` (green). The two end entries (red) need the three-point one-sided formulas.](../../../assets/L18-array-stencil.png){#fig-array-stencil width="100%" fig-alt="Two rows of array cells labelled f and fp, indexed 0 to n minus 1. Blue arrows from f[0] and f[2] point to fp[1]. Brackets above f mark the slices f[:-2], from index 0 to n minus 3, and f[2:], from index 2 to n minus 1. The interior cells of fp are green and labelled fp[1:-1] = (f[2:] - f[:-2]) / (2*h). The end cells are red and labelled 3-point forward and 3-point backward."}
 
@@ -53,49 +111,31 @@ A complete function has three steps:
 2. **Fill the interior.** One sliced line applies the central difference at indices $1$ to $n-2$. A loop over `range(1, len(f) - 1)` gives the same numbers, more slowly.
 3. **Fill the two ends.** Index $0$ takes a one-sided forward formula, and index $n-1$ takes a one-sided backward formula.
 
-The central part of both functions is the sliced stencil from L17:
+Each line of the two functions below is one of the six formulas above, written with these indices and slices:
 
 ```python
 import numpy as np
 
 def first_der(f, h):
     fp = np.empty_like(f)
-    fp[1:-1] = (f[2:] - f[:-2]) / (2 * h)                # central, interior
-    fp[0], fp[-1] = first_der_ends(f, h)
+    fp[1:-1] = (f[2:] - f[:-2]) / (2 * h)                         # central, interior
+    fp[0] = (-3 * f[0] + 4 * f[1] - f[2]) / (2 * h)               # three-point forward
+    fp[-1] = (3 * f[-1] - 4 * f[-2] + f[-3]) / (2 * h)            # three-point backward
     return fp
 
 def second_der(f, h):
     fpp = np.empty_like(f)
-    fpp[1:-1] = (f[2:] - 2 * f[1:-1] + f[:-2]) / h**2    # central, interior
-    fpp[0], fpp[-1] = second_der_ends(f, h)
+    fpp[1:-1] = (f[2:] - 2 * f[1:-1] + f[:-2]) / h**2             # central, interior
+    fpp[0] = (2 * f[0] - 5 * f[1] + 4 * f[2] - f[3]) / h**2       # four-point forward
+    fpp[-1] = (2 * f[-1] - 5 * f[-2] + 4 * f[-3] - f[-4]) / h**2  # four-point backward
     return fpp
 ```
 
-The end values come from the forward and backward tables in L17. To keep $O(h^2)$ accuracy at the ends, the first derivative needs three points and the second derivative needs four:
-
-```python
-def first_der_ends(f, h):
-    start = (-3 * f[0] + 4 * f[1] - f[2]) / (2 * h)     # three-point forward
-    end = (3 * f[-1] - 4 * f[-2] + f[-3]) / (2 * h)     # three-point backward
-    return start, end
-
-def second_der_ends(f, h):
-    start = (2 * f[0] - 5 * f[1] + 4 * f[2] - f[3]) / h**2      # four-point forward
-    end = (2 * f[-1] - 5 * f[-2] + 4 * f[-3] - f[-4]) / h**2    # four-point backward
-    return start, end
-```
-
-### Library routines for the same calculation
-
-For first derivatives, we seldom need to write this function ourselves:
+For first derivatives of an array, NumPy already provides this function:
 
 - **`np.gradient(f, h, edge_order=2)`** performs the calculation in `first_der`, with central differences in the interior and three-point one-sided differences at both ends [@harris2020numpy].
   - `edge_order=2` keeps the ends at $O(h^2)$. The default, `edge_order=1`, uses two-point $O(h)$ formulas there.
   - Applying `np.gradient` twice gives a second derivative, but its interior stencil reaches out to $x\pm2h$, so its error is four times that of `second_der`.
-- **`scipy.differentiate.derivative(func, x)`** differentiates a Python function at the point `x` [@virtanen2020scipy].
-  - It chooses its own evaluation points and refines the step until successive estimates agree.
-  - It returns the derivative `res.df`, an error estimate `res.error`, and the number of function calls `res.nfev`.
-  - It needs a callable function, so it cannot differentiate a table of measured values.
 
 ### A Lennard–Jones pair from a table of energies (after-class practice material)
 
@@ -121,7 +161,7 @@ Before trusting finite-difference code, we should test it on a function whose de
 
 - **Function:** $f(x)=x^3$.
 - **Exact derivative:** $f'(3)=27$.
-- **Question:** how large is the central-difference error for a given $h$?
+- **Question:** how large is the error of `central(f, 3.0, h)` for a given $h$?
 
 For a cubic, the central difference has an exact closed form:
 
@@ -158,7 +198,7 @@ The prediction for a few steps is:
 
 What does Python return? Choose $h$ in the notebook below.
 
-::: {.quarto-wasm-local notebook="l18_x3_test.edit.py" view="edit" title="Central difference of x³ at x = 3 for a chosen h" height="300" loading="lazy" fullscreen="true"}
+::: {.quarto-wasm-local notebook="l18_x3_test.edit.py" view="app" title="Central difference of x³ at x = 3 for a chosen h" height="300" loading="lazy" fullscreen="true"}
 For $h=0.1$, $0.01$, and $10^{-3}$, the central difference gives errors of $10^{-2}$, $10^{-4}$, and $10^{-6}$, as predicted. For $h=10^{-5}$ the error is $2.2\times10^{-10}$, about twice the prediction. For $h=10^{-8}$ the error is $-7.5\times10^{-8}$, and for $h=10^{-13}$ the result is 26.965097, an error of $-0.035$ where $10^{-26}$ was predicted. With $h=10^{-15}$ the result is 24.87.
 :::
 
@@ -228,7 +268,7 @@ Is the V-shaped error real? We can check it with a function whose derivative we 
 - **Steps:** 161 values of $h$ from $1$ down to $10^{-16}$.
 - **Question:** do the forward and central errors follow the shapes in @fig-error-vs-step, and where are their minima?
 
-The notebook defines the two formulas as Python functions that take the function, the point, and the step:
+The notebook compares `central` from the start of the lecture with the forward difference, written in the same form:
 
 ```python
 def forward(f, x, h):
@@ -238,9 +278,9 @@ def central(f, x, h):
     return (f(x + h) - f(x - h)) / (2 * h)
 ```
 
-Because NumPy operations act element by element, passing an array of steps `h` returns an array of estimates, one for each step.
+Passing the array of 161 steps as `h` returns 161 estimates from each function in one call.
 
-::: {.quarto-wasm-local notebook="l18_roundoff.edit.py" view="edit" title="Forward and central errors of d(sin x)/dx over sixteen decades of h, with the truncation-plus-round-off model" height="760" loading="lazy" fullscreen="true"}
+::: {.quarto-wasm-local notebook="l18_roundoff.edit.py" view="app" title="Forward and central errors of d(sin x)/dx over sixteen decades of h, with the truncation-plus-round-off model" height="760" loading="lazy" fullscreen="true"}
 At $x=1$ in `float64`, the forward error falls from $4.3\times10^{-2}$ at $h=0.1$ to $1.4\times10^{-8}$ at $h=10^{-8}$, then rises to $4.3\times10^{-5}$ at $h=10^{-12}$. The central error falls from $9.0\times10^{-4}$ at $h=0.1$ to $1.1\times10^{-11}$ at $h=10^{-5}$, then rises to $1.2\times10^{-5}$ at $h=10^{-12}$. Both measured curves follow the slopes of the dotted model lines $Ah+B/h$ and $Ah^2+B/h$, which bound the round-off scatter from above. In `float32` ($\epsilon\approx1.2\times10^{-7}$), the central minimum moves to about $h=10^{-2}$ with an error near $10^{-5}$. For $h\le10^{-8}$, `x + h` equals `x` and both formulas return zero.
 :::
 
@@ -324,8 +364,8 @@ Instead of differentiating neighbouring values, we can first represent the data 
 
 In NumPy, `p = Polynomial.fit(x, y, 3)` performs the fit and `p.deriv()` returns the derivative polynomial, which can be evaluated at any $x$ [@harris2020numpy]. Between the two extremes, a **smoothing spline** allows the curve to miss each point by a small residual, and a smoothing parameter balances closeness to the data against smoothness of the curve. SciPy's [smoothing-spline tutorial](https://docs.scipy.org/doc/scipy/tutorial/interpolate/smoothing_splines.html) shows how to construct one [@virtanen2020scipy].
 
-::: {.quarto-wasm-local notebook="l18_noisy_derivative.edit.py" view="edit" title="Derivatives of noisy x³ data: central difference, cubic spline, and cubic fit" height="820" loading="lazy" fullscreen="true"}
-With 21 points on $[1,3]$ and noise $\sigma=0.1$, the data error is 0.93%. The central-difference, cubic-spline, and cubic-fit derivatives have errors of 9.4%, 11.8%, and 0.98%. With 81 points and $\sigma=0.2$, the data error is 1.6%, while the central and spline errors grow to 47% and 75%. The cubic-fit error stays at 1.0% as more points contribute to the four coefficients. With $\sigma=0$, the fit and spline are exact, and the central difference keeps only its truncation error of 0.08%.
+::: {.quarto-wasm-local notebook="l18_noisy_derivative.edit.py" view="app" title="Derivatives of noisy x³ data: central difference, cubic spline, and cubic fit" height="820" loading="lazy" fullscreen="true"}
+With 21 points on $[1,3]$ and noise $\sigma=0.1$, the data error is 0.93%. The central-difference, cubic-spline, and cubic-fit derivatives have errors of 9.4%, 11.8%, and 0.98%. With 81 points and $\sigma=0.2$, the data error is 1.6%, while the central and spline errors grow to 47% and 75%. The cubic-fit error stays at 1.0% as more points contribute to the four coefficients. At the largest noise, $\sigma=1.0$ with 21 points, the data error is 9.3% and the central-difference error reaches 94%. With $\sigma=0$, the fit and spline are exact, and the central difference keeps only its truncation error of 0.08%.
 :::
 
 The fit succeeds here because the cubic form matches the function that generated the data. A quadratic fitted to the same data would give a smooth derivative with a systematic error. For real measurements, choose a form motivated by the physics, such as a quadratic energy near a bond minimum, and check the residuals for systematic patterns, as in L09.
@@ -466,10 +506,6 @@ This difference is smaller than the spacing between stored numbers (@fig-float-s
 
 Subtracting the constant after the energies have been stored cannot restore the lost digits, because the information was lost when each total was rounded. The same reasoning connects a force tolerance to the accuracy of the energies. If each energy has an absolute error $\eta$, the force error is of order $\eta/h$. To resolve forces to a tolerance $\tau_F$, the energies must be accurate to well below $h\tau_F$. For a typical relaxation criterion of $\tau_F=0.01$ eV/Å and a displacement of $h=0.01$ Å, this means energies accurate to much better than $10^{-4}$ eV.
 
-::: {.quarto-wasm-local notebook="l18_energy_offset.edit.py" view="app" title="Central-difference force of a harmonic energy with a large constant offset" height="740" loading="lazy" fullscreen="true"}
-With $E_0=-10^8$ eV and $h=10^{-5}$ Å, both displaced energies are stored as $-100000000.0$, their difference is zero, and the central force is zero, while the true force is $-10^{-4}$ eV/Å. With $E_0=0$ the central difference recovers the true force, and with $E_0=-10^4$ eV it agrees to within 0.1%. With $E_0=-10^{12}$ eV, even $h=10^{-3}$ Å returns zero force. Across the plotted displacements, the reported force forms steps or vanishes entirely instead of following the line $-kq$.
-:::
-
 ### Energy convergence versus force convergence
 
 Near a harmonic minimum, the energy above the minimum and the force are related by
@@ -479,6 +515,16 @@ $$
 $$
 
 For $k=1$ eV/Å², a force of $10^{-4}$ eV/Å corresponds to only $5\times10^{-9}$ eV above the minimum. An energy history can therefore look flat long before the forces are small. In an electronic-structure calculation, each energy also carries the error of its iterative electronic solution. With a tolerance of $10^{-4}$ eV and $h=0.01$ Å, the finite-difference force error is of order $10^{-2}$ eV/Å, as large as the relaxation criterion itself.
+
+### Convergence criteria for atomistic relaxations
+
+The examples in this problem lead to three practical conclusions:
+
+- **Energy precision is critical in atomistic simulations.** A finite-difference force cannot resolve more than $\eta/h$, where $\eta$ is the absolute accuracy of each energy. The precision of the total energies, set by floating-point storage and by the tolerance of the electronic solution, therefore limits every force and every relaxation built on them.
+- **Force criteria do not need to go below $10^{-3}$ eV/Å.** With $\Delta E=F^2/2k$ and $k\approx1$ eV/Å², a residual force of $10^{-3}$ eV/Å leaves the structure only $5\times10^{-7}$ eV above the minimum. Resolving a force of $10^{-4}$ eV/Å with $h=0.01$ Å would require energies accurate to $10^{-6}$ eV. For example, the documentation of packages such as the Vienna Ab initio Simulation Package (VASP) lists $10^{-2}$ eV/Å as a common target and $10^{-3}$ eV/Å before phonon calculations [@vaspwikiimaginaryphonon].
+- **A relaxation can be regarded as converged** when both conditions hold:
+  - the total energy changes by less than $10^{-5}$ eV between successive relaxation steps,
+  - the force on every atom is below $10^{-2}$ eV/Å, or below $10^{-3}$ eV/Å when the relaxed structure is used for a phonon calculation.
 
 ::: {.callout-caution}
 ## A zero force can mean lost resolution

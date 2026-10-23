@@ -113,3 +113,38 @@ New citations (please confirm)
   evaluation counts listed afterwards.
 - LJ, relaxation-cost, and energy-offset notebooks embedded in app view
   (code hidden behind "Edit code"). "What to keep" section removed.
+
+October 23 revision
+-------------------
+- "Finite differences on a NumPy array" is now "Finite differences as Python
+  functions", split into two subsections:
+  1. Derivatives of a Python function at a point: central(f, x, h) and
+     central_second(f, x, h), with a note that array x needs an f that
+     returns arrays; library equivalent scipy.differentiate.derivative
+     (first derivative only; nested calls or hessian for second).
+  2. Derivatives of sampled data in a NumPy array: the stencil figure,
+     first_der / second_der with the end formulas; library equivalent
+     np.gradient(..., edge_order=2).
+  The separate "Library routines" subsection was removed.
+- forward(f, x, h) is introduced in the sin x section, beside central.
+- l18_x3_test and l18_roundoff embedded in app view (code not shown).
+  l18_x3_test now calls central(f, 3.0, h).
+- Please check the iframe heights of these two notebooks in app view.
+- first_der and second_der now include their end-point formulas directly;
+  first_der_ends and second_der_ends were removed from the page and from
+  l18_fd_functions.
+- l18_noisy_derivative embedded in app view; noise slider extends to
+  sigma = 1.0 (21 points: data 9.3%, central 94%, spline 118%, fit 9.8%).
+- Problem 4: the l18_energy_offset demo was removed from the page and the
+  notebook moved, unchanged, to activities/graveyard/. A new subsection,
+  "Convergence criteria for atomistic relaxations", states three conclusions.
+  Thresholds: energy change < 1e-5 eV between steps; force < 1e-2 eV/A,
+  or < 1e-3 eV/A before phonons. VASP appears once, as an example in the
+  force-criteria bullet, citing vaspwikiimaginaryphonon (VASP Wiki, "How to
+  handle imaginary phonon modes", checked 2026-10-23; EDIFFG = -0.01 common,
+  -0.001 before phonons). The 1e-5 eV energy threshold has no citation.
+- After-class feedback: the array formulas were unclear. "Derivatives of
+  sampled data in a NumPy array" now states the six index formulas (first
+  derivative: 2-point central, 3-point forward/backward; second derivative:
+  3-point central, 4-point forward/backward) before the code, followed by a
+  correspondence list from f_i notation to f[0], f[-1], and the slices.
