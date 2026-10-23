@@ -38,3 +38,4 @@ toc: false
 ## [04 · Numerical differentiation and integration](04/index.qmd)
 
 17. [L17 · Finite differences: calculating derivatives in a computer](04/L17/index.qmd) — Newton's second law as differentiation and integration, forward, backward, and central differences, truncation error from Taylor series, three-point end formulas, and `np.gradient`.
+18. [L18 · Caveats in numerical differentiation](04/L18/index.qmd) — finite-difference functions for NumPy arrays, truncation versus round-off error, derivatives of noisy data, and (reading material) the cost of many-atom gradients and small forces from large total energies.

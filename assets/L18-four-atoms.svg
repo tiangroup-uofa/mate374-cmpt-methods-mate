@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="68mm" viewBox="0 0 160 68">
+<title>Four atoms have twelve coordinate directions</title>
+<desc>Four atoms at the corners of a square, numbered 1 and 2 on top and 3 and 4 below. Each atom has three short arrows for its x (red, oblique), y (green, right), and z (blue, up) coordinates. A dashed copy of atom 2 is displaced upwards along z2 by a small step h. A coordinate triad is drawn at the left.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+</defs>
+<rect id="background" width="160" height="68" style="fill:#ffffff"/>
+<g id="L18-four-atoms" inkscape:groupmode="layer" inkscape:label="L18-four-atoms">
+<path d="M 50.200,26.000 L 77.800,26.000" style="fill:none;stroke:#8a8f98;stroke-width:0.35;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.2,1.0"/>
+<path d="M 46.000,30.200 L 46.000,51.800" style="fill:none;stroke:#8a8f98;stroke-width:0.35;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.2,1.0"/>
+<path d="M 82.000,30.200 L 82.000,51.800" style="fill:none;stroke:#8a8f98;stroke-width:0.35;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.2,1.0"/>
+<path d="M 50.200,56.000 L 77.800,56.000" style="fill:none;stroke:#8a8f98;stroke-width:0.35;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1.2,1.0"/>
+<circle cx="82.000" cy="13.000" r="4.200" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.4;stroke-dasharray:1.0,0.8"/>
+<text x="88.00" y="12.40" style="font-family:Arial;font-size:3.40px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start">atom 2 moved by <tspan style="font-style:italic">h</tspan></text>
+<text x="88.00" y="16.60" style="font-family:Arial;font-size:3.40px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start">along <tspan style="font-style:italic">z</tspan><tspan style="font-size:70%" baseline-shift="sub">2</tspan></text>
+<path d="M 43.396,29.276 L 39.366,34.346" style="fill:none;stroke:#b5473a;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 50.200,26.000 L 57.700,26.000" style="fill:none;stroke:#2ca02c;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 46.000,21.800 L 46.000,14.300" style="fill:none;stroke:#1f77b4;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<circle cx="46.000" cy="26.000" r="4.200" style="fill:#d1d1d1;fill-opacity:1;stroke:#231f20;stroke-width:0.4"/>
+<text x="46.00" y="27.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">1</text>
+<path d="M 79.396,29.276 L 75.366,34.346" style="fill:none;stroke:#b5473a;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 86.200,26.000 L 93.700,26.000" style="fill:none;stroke:#2ca02c;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 82.000,21.800 L 82.000,14.300" style="fill:none;stroke:#1f77b4;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<circle cx="82.000" cy="26.000" r="4.200" style="fill:#d1d1d1;fill-opacity:1;stroke:#231f20;stroke-width:0.4"/>
+<text x="82.00" y="27.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">2</text>
+<path d="M 43.396,59.276 L 39.366,64.346" style="fill:none;stroke:#b5473a;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 50.200,56.000 L 57.700,56.000" style="fill:none;stroke:#2ca02c;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 46.000,51.800 L 46.000,44.300" style="fill:none;stroke:#1f77b4;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<circle cx="46.000" cy="56.000" r="4.200" style="fill:#d1d1d1;fill-opacity:1;stroke:#231f20;stroke-width:0.4"/>
+<text x="46.00" y="57.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">3</text>
+<path d="M 79.396,59.276 L 75.366,64.346" style="fill:none;stroke:#b5473a;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 86.200,56.000 L 93.700,56.000" style="fill:none;stroke:#2ca02c;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 82.000,51.800 L 82.000,44.300" style="fill:none;stroke:#1f77b4;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<circle cx="82.000" cy="56.000" r="4.200" style="fill:#d1d1d1;fill-opacity:1;stroke:#231f20;stroke-width:0.4"/>
+<text x="82.00" y="57.50" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">4</text>
+<text x="56.70" y="23.60" style="font-family:Arial;font-size:3.60px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">y</tspan><tspan style="font-size:70%" baseline-shift="sub">1</tspan></text>
+<text x="47.40" y="13.60" style="font-family:Arial;font-size:3.60px;fill:#1f77b4;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">z</tspan><tspan style="font-size:70%" baseline-shift="sub">1</tspan></text>
+<text x="36.63" y="38.41" style="font-family:Arial;font-size:3.60px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:end"><tspan style="font-style:italic">x</tspan><tspan style="font-size:70%" baseline-shift="sub">1</tspan></text>
+<path d="M 14.000,42.000 L 9.660,47.460" style="fill:none;stroke:#b5473a;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 14.000,42.000 L 22.000,42.000" style="fill:none;stroke:#2ca02c;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 14.000,42.000 L 14.000,34.000" style="fill:none;stroke:#1f77b4;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<text x="8.46" y="50.86" style="font-family:Arial;font-size:4.23px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:end"><tspan style="font-style:italic">x</tspan></text>
+<text x="23.50" y="43.40" style="font-family:Arial;font-size:4.23px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">y</tspan></text>
+<text x="14.80" y="32.50" style="font-family:Arial;font-size:4.23px;fill:#1f77b4;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">z</tspan></text>
+<text x="108.00" y="30.00" style="font-family:Arial;font-size:3.60px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">4 atoms × 3 = 12 coordinates</text>
+<text x="108.00" y="36.00" style="font-family:Arial;font-size:3.60px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">x</tspan><tspan style="font-size:70%" baseline-shift="sub">1</tspan>, <tspan style="font-style:italic">y</tspan><tspan style="font-size:70%" baseline-shift="sub">1</tspan>, <tspan style="font-style:italic">z</tspan><tspan style="font-size:70%" baseline-shift="sub">1</tspan>,  <tspan style="font-style:italic">x</tspan><tspan style="font-size:70%" baseline-shift="sub">2</tspan>, <tspan style="font-style:italic">y</tspan><tspan style="font-size:70%" baseline-shift="sub">2</tspan>, <tspan style="font-style:italic">z</tspan><tspan style="font-size:70%" baseline-shift="sub">2</tspan>,</text>
+<text x="108.00" y="41.50" style="font-family:Arial;font-size:3.60px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">x</tspan><tspan style="font-size:70%" baseline-shift="sub">3</tspan>, <tspan style="font-style:italic">y</tspan><tspan style="font-size:70%" baseline-shift="sub">3</tspan>, <tspan style="font-style:italic">z</tspan><tspan style="font-size:70%" baseline-shift="sub">3</tspan>,  <tspan style="font-style:italic">x</tspan><tspan style="font-size:70%" baseline-shift="sub">4</tspan>, <tspan style="font-style:italic">y</tspan><tspan style="font-size:70%" baseline-shift="sub">4</tspan>, <tspan style="font-style:italic">z</tspan><tspan style="font-size:70%" baseline-shift="sub">4</tspan></text>
+<text x="108.00" y="50.00" style="font-family:Arial;font-size:3.60px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start">one energy <tspan style="font-style:italic">E</tspan> for the</text>
+<text x="108.00" y="55.00" style="font-family:Arial;font-size:3.60px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start">whole configuration</text>
+</g>
+</svg>

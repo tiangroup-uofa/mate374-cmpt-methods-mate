@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="58mm" viewBox="0 0 160 58">
+<title>Two energies closer than the floating-point spacing are stored as the same number</title>
+<desc>A number line of energies near minus 10 to the 8 eV. Stored float64 values are 1.49e-8 eV apart. The exact energies E(q-h) and E(q+h), 4.05e-9 and 6.05e-9 eV above minus 10 to the 8, both lie closer to minus 10 to the 8 than to the next stored value, so both are stored as minus 10 to the 8 eV.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+</defs>
+<rect id="background" width="160" height="58" style="fill:#ffffff"/>
+<g id="L18-float-spacing" inkscape:groupmode="layer" inkscape:label="L18-float-spacing">
+<rect x="44.537" y="33.000" width="38.630" height="6.000" style="fill:#2ca02c;fill-opacity:0.15;stroke:none;stroke-width:0"/>
+<path d="M 12.000,36.000 L 152.000,36.000" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 25.222,33.500 L 25.222,38.500" style="fill:none;stroke:#231f20;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round"/>
+<path d="M 63.852,33.500 L 63.852,38.500" style="fill:none;stroke:#231f20;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round"/>
+<path d="M 102.481,33.500 L 102.481,38.500" style="fill:none;stroke:#231f20;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round"/>
+<path d="M 141.111,33.500 L 141.111,38.500" style="fill:none;stroke:#231f20;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="63.85" y="43.00" style="font-family:Arial;font-size:3.60px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">−10<tspan style="font-size:70%" baseline-shift="super">8</tspan> eV</text>
+<text x="102.48" y="43.00" style="font-family:Arial;font-size:3.40px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">+1.49×10<tspan style="font-size:70%" baseline-shift="super">−8</tspan></text>
+<text x="141.11" y="43.00" style="font-family:Arial;font-size:3.40px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">+2.98×10<tspan style="font-size:70%" baseline-shift="super">−8</tspan></text>
+<text x="25.22" y="43.00" style="font-family:Arial;font-size:3.40px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">−1.49×10<tspan style="font-size:70%" baseline-shift="super">−8</tspan></text>
+<text x="63.85" y="48.50" style="font-family:Arial;font-size:3.30px;fill:#8a8f98;font-weight:normal;font-style:italic;text-anchor:middle">stored float64 values</text>
+<path d="M 74.352,23.000 L 74.352,34.800" style="fill:none;stroke:#1f77b4;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:0.8,0.7"/>
+<circle cx="74.352" cy="36.000" r="1.000" style="fill:#ffffff;fill-opacity:1;stroke:#1f77b4;stroke-width:0.5"/>
+<text x="72.35" y="22.00" style="font-family:Arial;font-size:3.60px;fill:#1f77b4;font-weight:normal;font-style:italic;text-anchor:end">E(q − h)</text>
+<path d="M 79.537,23.000 L 79.537,34.800" style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:0.8,0.7"/>
+<circle cx="79.537" cy="36.000" r="1.000" style="fill:#ffffff;fill-opacity:1;stroke:#b5473a;stroke-width:0.5"/>
+<text x="81.54" y="22.00" style="font-family:Arial;font-size:3.60px;fill:#b5473a;font-weight:normal;font-style:italic;text-anchor:start">E(q + h)</text>
+<path d="M 63.852,16.000 L 63.852,14.000 L 102.481,14.000 L 102.481,16.000" style="fill:none;stroke:#8a8f98;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="83.17" y="12.50" style="font-family:Arial;font-size:3.40px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">spacing 1.49×10<tspan style="font-size:70%" baseline-shift="super">−8</tspan> eV</text>
+<text x="27.22" y="22.00" style="font-family:Arial;font-size:3.30px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:middle">values in the green band</text>
+<text x="27.22" y="26.00" style="font-family:Arial;font-size:3.30px;fill:#2ca02c;font-weight:normal;font-style:normal;text-anchor:middle">are stored as −10<tspan style="font-size:70%" baseline-shift="super">8</tspan> eV</text>
+<path d="M 37.222,27.400 L 46.537,32.600" style="fill:none;stroke:#2ca02c;stroke-width:0.35;stroke-linecap:round;stroke-linejoin:round"/>
+</g>
+</svg>

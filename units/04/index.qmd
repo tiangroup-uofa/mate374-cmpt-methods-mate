@@ -6,5 +6,6 @@ toc: false
 Unit 4 develops numerical differentiation and integration, the two operations that turn Newton's second law into a calculation of atomic motion. [L17](L17/index.qmd) introduces the unit and begins with derivatives.
 
 - [L17 · Finite differences: calculating derivatives in a computer](L17/index.qmd)
+- [L18 · Caveats in numerical differentiation](L18/index.qmd)
 
 [Unit 04 references](references.qmd)

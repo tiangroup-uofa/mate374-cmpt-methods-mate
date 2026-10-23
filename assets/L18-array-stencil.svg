@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="72mm" viewBox="0 0 160 72">
+<title>Central differences on a NumPy array</title>
+<desc>Two rows of array cells, f and fp. fp[1] is computed from f[0] and f[2]. The slices f[:-2] and f[2:] line up the left and right neighbours of every interior point. The end cells of fp use three-point one-sided formulas.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker>
+</defs>
+<rect id="background" width="160" height="72" style="fill:#ffffff"/>
+<g id="L18-array-stencil" inkscape:groupmode="layer" inkscape:label="L18-array-stencil">
+<path d="M 24.600,9.500 L 24.600,7.500 L 127.400,7.500 L 127.400,9.500" style="fill:none;stroke:#4a3ab5;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="22.00" y="9.20" style="font-family:Courier New;font-size:3.90px;fill:#4a3ab5;font-weight:bold;font-style:normal;text-anchor:end">f[:-2]</text>
+<path d="M 50.600,15.500 L 50.600,13.500 L 140.400,13.500 L 140.400,15.500" style="fill:none;stroke:#1f77b4;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="143.00" y="15.20" style="font-family:Courier New;font-size:3.90px;fill:#1f77b4;font-weight:bold;font-style:normal;text-anchor:start">f[2:]</text>
+<text x="30.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">0</text>
+<rect x="24.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="24.000" y="43.000" width="13.000" height="8.000" style="fill:#b5473a;fill-opacity:0.18;stroke:#231f20;stroke-width:0.35"/>
+<text x="30.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">0</text>
+<text x="43.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">1</text>
+<rect x="37.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="37.000" y="43.000" width="13.000" height="8.000" style="fill:#1f77b4;fill-opacity:0.35;stroke:#231f20;stroke-width:0.35"/>
+<text x="43.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">1</text>
+<text x="56.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">2</text>
+<rect x="50.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="50.000" y="43.000" width="13.000" height="8.000" style="fill:#2ca02c;fill-opacity:0.15;stroke:#231f20;stroke-width:0.35"/>
+<text x="56.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">2</text>
+<text x="69.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">3</text>
+<rect x="63.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="63.000" y="43.000" width="13.000" height="8.000" style="fill:#2ca02c;fill-opacity:0.15;stroke:#231f20;stroke-width:0.35"/>
+<text x="69.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">3</text>
+<text x="82.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">4</text>
+<rect x="76.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="76.000" y="43.000" width="13.000" height="8.000" style="fill:#2ca02c;fill-opacity:0.15;stroke:#231f20;stroke-width:0.35"/>
+<text x="82.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">4</text>
+<text x="95.50" y="28.50" style="font-family:Arial;font-size:5.00px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">⋯</text>
+<text x="95.50" y="48.50" style="font-family:Arial;font-size:5.00px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:middle">⋯</text>
+<text x="108.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">n−3</text>
+<rect x="102.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="102.000" y="43.000" width="13.000" height="8.000" style="fill:#2ca02c;fill-opacity:0.15;stroke:#231f20;stroke-width:0.35"/>
+<text x="108.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">n−3</text>
+<text x="121.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">n−2</text>
+<rect x="115.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="115.000" y="43.000" width="13.000" height="8.000" style="fill:#2ca02c;fill-opacity:0.15;stroke:#231f20;stroke-width:0.35"/>
+<text x="121.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">n−2</text>
+<text x="134.50" y="21.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">n−1</text>
+<rect x="128.000" y="23.000" width="13.000" height="8.000" style="fill:#ffffff;fill-opacity:1;stroke:#231f20;stroke-width:0.35"/>
+<rect x="128.000" y="43.000" width="13.000" height="8.000" style="fill:#b5473a;fill-opacity:0.18;stroke:#231f20;stroke-width:0.35"/>
+<text x="134.50" y="54.50" style="font-family:Arial;font-size:3.00px;fill:#8a8f98;font-weight:normal;font-style:normal;text-anchor:middle">n−1</text>
+<text x="20.00" y="28.60" style="font-family:Courier New;font-size:4.60px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:end">f</text>
+<text x="20.00" y="48.60" style="font-family:Courier New;font-size:4.60px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:end">fp</text>
+<path d="M 30.500,31.600 L 42.300,41.400" style="fill:none;stroke:#1f77b4;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<path d="M 56.500,31.600 L 44.700,41.400" style="fill:none;stroke:#1f77b4;stroke-width:0.6;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)"/>
+<text x="61.50" y="38.20" style="font-family:Courier New;font-size:3.90px;fill:#1f77b4;font-weight:bold;font-style:normal;text-anchor:start">fp[1] = (f[2] - f[0]) / (2*h)</text>
+<path d="M 37.600,57.000 L 37.600,59.000 L 127.400,59.000 L 127.400,57.000" style="fill:none;stroke:#2ca02c;stroke-width:0.45;stroke-linecap:round;stroke-linejoin:round"/>
+<text x="82.50" y="64.00" style="font-family:Courier New;font-size:3.90px;fill:#2ca02c;font-weight:bold;font-style:normal;text-anchor:middle">fp[1:-1] = (f[2:] - f[:-2]) / (2*h)</text>
+<text x="30.50" y="62.50" style="font-family:Arial;font-size:3.30px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">3-point</text>
+<text x="30.50" y="66.30" style="font-family:Arial;font-size:3.30px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">forward</text>
+<text x="134.50" y="62.50" style="font-family:Arial;font-size:3.30px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">3-point</text>
+<text x="134.50" y="66.30" style="font-family:Arial;font-size:3.30px;fill:#b5473a;font-weight:normal;font-style:normal;text-anchor:middle">backward</text>
+</g>
+</svg>

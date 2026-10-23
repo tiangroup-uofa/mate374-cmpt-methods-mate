@@ -132,6 +132,8 @@ website:
             contents:
               - href: units/04/L17/index.qmd
                 text: "Lecture 17"
+              - href: units/04/L18/index.qmd
+                text: "Lecture 18"
               - href: units/04/references.qmd
                 text: "References"
       - href: seminars/index.qmd
