@@ -7,3 +7,4 @@ title: "Assignments"
 - [A2 · Working with functions: root-finding, optimization, and curve fitting](A2/index.qmd) — due Wednesday, October 7, 2026, at 12:00 pm (noon) via Canvas.
 - [A2 answers](A2/answers.qmd)
 - [A3 · Systems of equations, least squares, and atomic vibrations](A3/index.qmd) — due Wednesday, October 21, 2026, at 12:00 pm (noon) via Canvas.
+- [A4 · Numerical differentiation](A4/index.qmd) — due Monday, November 16, 2026, at 11:59 am (after the reading week) via Canvas.
