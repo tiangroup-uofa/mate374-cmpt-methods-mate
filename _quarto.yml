@@ -151,6 +151,8 @@ website:
             text: "S05 · Matrices in Python"
           - href: seminars/S06-elimination-cholesky/index.qmd
             text: "S06 · Elimination and Cholesky"
+          - href: seminars/S07-roots-and-balances/index.qmd
+            text: "S07 · (Midterm prep) root finding and balance eqn solver"
       - href: assignments/index.qmd
         text: Assignments
         contents:

@@ -1,0 +1,158 @@
+---
+title: "S07 · (Midterm prep) root finding and balance eqn solver"
+body-classes: lecture-page seminar-page
+---
+
+## Learning outcomes
+
+By the end of this seminar, you should be able to:
+
+1. **Formulate** a pressure residual using temperature- and pressure-dependent parameters.
+2. **Calculate** a molar volume with a bracketed root finder and verify the pressure mismatch.
+3. **Assemble** a linear system from three overlapping dye signals.
+4. **Explain** how a measurement error changes the inferred concentrations, using residuals and relative errors.
+
+Work from the equations and data below. Open a blank notebook at [marimo.app](https://marimo.app/) or in your usual Python environment and write your calculations from scratch. You may consult the NumPy and SciPy documentation.
+
+## Exercise 1 · A gas with changing model parameters
+
+Consider a hypothetical gas described by a modified van der Waals model. The attraction parameter decreases with temperature, while the excluded-volume parameter increases slightly with the imposed pressure:
+
+$$
+a(T)=a_0\frac{T_0}{T},
+\qquad
+b(P)=b_0\left(1+\beta\frac{P}{P_0}\right).
+$$
+
+The pressure predicted at molar volume $v$ is
+
+$$
+P_{\mathrm{model}}(v,T,P)
+=\frac{RT}{v-b(P)}-\frac{a(T)}{v^2}.
+$$
+
+Here $P$ is the externally specified pressure. At each state, use that same supplied $P$ to evaluate $b(P)$ throughout the root search. These prescribed parameter laws define the model for this exercise.
+
+| Quantity | Value |
+|---|---:|
+| $R$ | $0.08314462618\ \mathrm{L\,bar\,mol^{-1}\,K^{-1}}$ |
+| $a_0$ | $3.592\ \mathrm{L^2\,bar\,mol^{-2}}$ |
+| $b_0$ | $0.04267\ \mathrm{L\,mol^{-1}}$ |
+| $T_0$ | $300\ \mathrm K$ |
+| $P_0$ | $50\ \mathrm{bar}$ |
+| $\beta$ | $0.020$ (dimensionless) |
+
+Calculate the molar volume at both states:
+
+| State | $T$ (K) | $P$ (bar) |
+|---|---:|---:|
+| A | 320 | 40 |
+| B | 360 | 60 |
+
+### Set up the model
+
+1. Write a residual $F(v,T,P)$ whose zero means that the predicted pressure equals the imposed pressure. State its units.
+2. Draw the function dependencies: the residual calls the pressure function, and the pressure function calls the two parameter functions.
+3. Implement separate functions for $a(T)$, $b(P)$, the predicted pressure, and the residual. Pass temperature and pressure as arguments so that the same functions work at both states.
+
+### Find the volume
+
+Find the molar volume at both states using a root finder. You may use the bracket $[0.20,1.20]\ \mathrm{L/mol}$, which lies in the allowed domain $v>b(P)$.
+
+::: {.callout-note collapse="true"}
+## Example code · Molar volumes at both states
+
+```python
+from scipy.optimize import root_scalar
+
+R = 0.08314462618
+
+def a(T):
+    return 3.592 * 300.0 / T
+
+def b(P):
+    return 0.04267 * (1 + 0.020 * P / 50.0)
+
+def pressure(v, T, P):
+    return R * T / (v - b(P)) - a(T) / v**2
+
+def F(v, T, P):
+    return pressure(v, T, P) - P
+
+for T, P in [(320, 40), (360, 60)]:
+    solution = root_scalar(
+        F, args=(T, P), bracket=[0.20, 1.20], method="brentq"
+    )
+    print(f"T = {T} K, P = {P} bar")
+    print(f"v = {solution.root:.6f} L/mol")
+    print(f"Converged: {solution.converged}")
+    print(f"Pressure residual = {F(solution.root, T, P):.3e} bar")
+```
+
+The volumes are approximately $0.572619\ \mathrm{L/mol}$ at state A and $0.440551\ \mathrm{L/mol}$ at state B.
+:::
+
+## Exercise 2 · Three dyes, three signals
+
+A solution contains three dyes, A, B, and C, with unknown concentrations $x_A$, $x_B$, and $x_C$ in mg/L. An instrument measures absorbance at three wavelengths. Assume each dye's contribution is proportional to its concentration and the three contributions add.
+
+The fictional response coefficients below have units of L/mg, so absorbance is dimensionless. Treat the coefficients as exact.
+
+| Wavelength (nm) | Dye A | Dye B | Dye C | Measured absorbance |
+|---|---:|---:|---:|---:|
+| 450 | 0.100 | 0.080 | 0.030 | 0.372 |
+| 550 | 0.080 | 0.070 | 0.020 | 0.290 |
+| 650 | 0.020 | 0.030 | 0.100 | 0.370 |
+
+For example, the first signal gives
+$$
+0.100x_A+0.080x_B+0.030x_C=0.372.
+$$
+
+1. **Formulate and solve.** Write the three measurements as $\mathbf A\mathbf x=\mathbf b$ and solve for the dye concentrations. Check your result by calculating $\mathbf A\mathbf x$.
+2. **Correct a reading.** A calibration check shows that the true absorbance at 450 nm is **0.370**, rather than 0.372. The other two readings are correct. Solve again and calculate the absolute relative error in each original concentration, $100|x_{\mathrm{original}}-x_{\mathrm{corrected}}|/x_{\mathrm{corrected}}\%$.
+3. **Explain the change.** Compare the concentration errors with the reading error, $100|0.372-0.370|/0.370\%$. Which numerical concept explains why some concentration errors are larger, even though both solves have small residuals?
+
+::: {.callout-note collapse="true"}
+## Example code · Dye concentrations and a corrected signal
+
+```python
+import numpy as np
+
+A = np.array([
+    [0.100, 0.080, 0.030],
+    [0.080, 0.070, 0.020],
+    [0.020, 0.030, 0.100],
+])
+b = np.array([0.372, 0.290, 0.370])
+
+x = np.linalg.solve(A, b)
+print("Original concentrations (mg/L):", x)
+print("Reconstructed signals:", A @ x)
+print("Original residual:", A @ x - b)
+
+b_corrected = b.copy()
+b_corrected[0] = 0.370
+x_corrected = np.linalg.solve(A, b_corrected)
+
+print("Corrected concentrations (mg/L):", x_corrected)
+print("Corrected residual:", A @ x_corrected - b_corrected)
+print("Concentration errors (%):",
+      100 * np.abs(x - x_corrected) / x_corrected)
+print("Reading error (%):", 100 * abs(0.372 - 0.370) / 0.370)
+```
+
+| Dye | Original concentration (mg/L) | Corrected concentration (mg/L) | Absolute relative error |
+|---|---:|---:|---:|
+| A | 2.206452 | 2.000000 | 10.32% |
+| B | 0.754839 | 1.000000 | 24.52% |
+| C | 3.032258 | 3.000000 | 1.08% |
+
+The reading error is **0.54%**. The larger concentration errors reflect the **conditioning** of the linear system. Dyes A and B have similar response patterns, so a change in one concentration can partly offset a change in the other. Each solution reproduces its supplied readings closely, but the original readings lead to inaccurate concentrations.
+:::
+
+## Record and discuss
+
+Keep your function definitions, root-finder results, matrix system, and a table comparing the original and corrected dye concentrations.
+
+**Discuss:** in each exercise, what does a small residual establish? What additional information do you need before trusting the inferred physical quantities?

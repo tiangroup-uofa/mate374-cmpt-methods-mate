@@ -11,5 +11,6 @@ Seminars are practical support sessions. Dates, rooms, and section-specific inst
 - [S04 · Interpolation and fitting in Python](S04-interpolation-fitting/index.qmd)
 - [S05 · Matrices in Python](S05-matrix-in-python/index.qmd)
 - [S06 · Gaussian elimination and Cholesky factorization](S06-elimination-cholesky/index.qmd)
+- [S07 · (Midterm prep) root finding and balance eqn solver](S07-roots-and-balances/index.qmd)
 
 Additional seminar pages will be added when their activities are ready for students.
