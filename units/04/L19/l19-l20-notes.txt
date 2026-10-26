@@ -1,0 +1,336 @@
+L19-L20 · authoring notes for the instructor
+=============================================
+
+October 23: first drafts of L19 and L20 from the instructor's audio transcript
+(Oct 23, 13:52-14:23), two handwritten sketch pages, and the Fall 2025 decks
+(Hao Zhang) Lecture 17-1, 19-1, and 20 in Google Drive. The source decks were
+only read; nothing in Drive was changed.
+
+L19 sequence (follows the transcript)
+-------------------------------------
+1. The other half of Newton's second law: x(t) = x0 + integral of v dt, with the
+   remark that MD itself is an ODE (L21). Definition of I, integrand, limits.
+2. Integrals in materials engineering: two kinds (rate over time; totals and
+   averages over space or a path), itemized, with the new 4-panel figure
+   (MD position, corrosion loss, tube flow rate, toughness of steel). DSC peak
+   area, carbon combustion, and double-layer electrical energy are in the list.
+3. A function or a table? Callable function (formula, simulation, numerical
+   derivative) vs discrete data. This lecture handles discrete data.
+4. "Numerical integration on discrete data: Newton-Cotes formulas":
+   I ~ integral of P_n, weighted sum, table of degrees 0-3 placed side by side
+   with a 4-row figure (Quarto columns 58% / 38%). Direct vs composite figure.
+5. Tai trivia callout (after the table, as in the transcript).
+6. Rectangle: left/right/midpoint figure, midpoint rule, composite midpoint
+   (expanded sum, then the sum symbol), "midpoint needs values between data".
+7. Trapezoid: derivation from Newton's form, caution callout midpoint vs
+   trapezoid, composite trapezoid for uneven spacing, tip callout "baseline".
+8. Simpson 1/3: Newton form c1, c2, c3, result only (term-by-term integration
+   in a collapsed callout), comparison of points used, S = (2M + T)/3 as a
+   forward pointer to L20, composite rule with the panel figure, requirements.
+9. Simpson 3/8: result, composite, 1/3 + 3/8 for an odd N. In-class notebook
+   comparing all five rules. "Why stop at degree 3?"
+10. Python: slicing formula vs np.trapezoid on a stress-strain table (toughness),
+    then a tool list: np.trapezoid, scipy.integrate.simpson, romb, quad.
+
+L20 sequence (follows the transcript)
+-------------------------------------
+1. Recap of composite trapezoid and Simpson 1/3.
+2. Hand-worked example (as requested): flow rate of quench oil in a pipe,
+   5 radii, trapezoid 46.875 vs Simpson 50.000 (exact, cubic integrand), then
+   np.trapezoid / integrate.simpson / integrate.romb in an editable notebook.
+3. Convergence test on e^x with a table and a notebook (4 test integrals,
+   N = 6 ... 24576), smoothness caution callout (sqrt x, order 1.5).
+4. scipy.integrate.quad subsection. Added because L19 and the transcript both
+   say "more in L20" about quad.
+5. Error analysis by Taylor series about the midpoint: midpoint h^3 f''/24,
+   trapezoid -h^3 f''/12, left rectangle h^2 f'/2; composite errors lose one
+   power of h; boxed summary with all five rules; round-off in integration.
+6. Richardson extrapolation (kept short, as requested): [4T(h/2) - T(h)]/3,
+   e^x numbers, and T(h/2) = (T + M)/2 so the result is (T + 2M)/3 = Simpson.
+   This is the transcript's "combine the midpoint and trapezoidal rule".
+7. Simulation-based task (as requested): MD of an LJ13 argon cluster run in
+   the notebook, velocities "saved" every s steps, displacement by trapezoid,
+   Simpson, cumulative_trapezoid, and cumulative_simpson vs stored positions.
+   Four numbered student tasks.
+8. Noisy data: weighted-sum noise sigma (b - a)/sqrt(N) vs L18's sigma/(sqrt2 h),
+   the L18 data set (seed 374), typical errors over 300 draws, conclusions.
+
+Corrections to the transcript and sketches
+------------------------------------------
+- "Simpson with h about 0.01 already gives 1e-16" is too optimistic. For the
+  integral of sin x from 0 to pi, Simpson 1/3 with h ~ 0.01 has an error of
+  1.1e-10, and the round-off level is reached near h ~ 3e-4. The page states
+  these numbers. For e^x on [0, 1] the round-off level is reached at N ~ 1500.
+- "We are safe to work on much fewer points when integrating than when
+  differentiating" is overstated. More points reduce the noise in an integral
+  (sigma (b - a)/sqrt(N)) while they increase it in a derivative, but a coarse
+  grid still has a truncation error (6 points of x^3: 1.6%, almost all
+  truncation). L20 states the corrected version: refine until truncation is
+  below the noise, and extra points never make the integral worse.
+- "No need to interpolate to make data integrable" is kept, and confirmed:
+  the integral of a fitted cubic (0.23% typical) is no better than the
+  trapezoidal sum (0.25%), and Simpson is not better either (0.24%).
+- Tai trivia, checked against the PubMed abstract (PMID 8137688):
+  - The abstract describes dividing the area into "rectangles and triangles",
+    validation against the graph-paper method, and states that "other formulas
+    widely applied by researchers under- or overestimated" the area. It does
+    not say that rectangles were the taught method, so the page says "other
+    formulas in use".
+  - Her profession is not given in the paper (affiliation: Obesity Research
+    Center, St. Luke's-Roosevelt Hospital Center), so the page says "Mary Tai"
+    and does not call her a nurse.
+  - Citations: Crossref lists 406 (checked Oct 23, 2026), not about 100. The
+    page says "cited hundreds of times".
+  - "Invented 300 years ago": Newton-Cotes formulas date from around 1700, but
+    the trapezoid idea is far older. Babylonian tablets (350-50 BCE) compute
+    Jupiter's displacement as a trapezoid area under a velocity-time graph
+    (Ossendrijver 2016, Science). This is added because it matches the opening
+    velocity-to-distance example.
+- "Order 0, 1, 2, 3" of the Newton-Cotes rules is called "degree n" of the
+  interpolating polynomial on the pages, to keep it apart from the order of
+  accuracy O(h^p). Delta x from the old slides is written h; N is the number
+  of subintervals (n is the polynomial degree).
+- The Fall 2025 L17 slide 9 implies the trapezoid is more accurate than the
+  midpoint rule. For smooth integrands, the composite midpoint error is half
+  the trapezoidal error (opposite sign); L20 shows this with numbers and a
+  figure.
+- Water at the example's velocities in a 20 mm pipe would be turbulent
+  (Re ~ 2e4), so a parabolic profile would be wrong. The worked example uses
+  quench oil (rho = 900 kg/m^3) and states only that it is viscous enough for
+  laminar flow; no viscosity value is quoted.
+- Closed Newton-Cotes rules have negative weights at degree 8 and at every
+  degree from 10 upwards (checked with exact fractions). Degree 9 does not.
+
+Decisions to confirm
+--------------------
+- Titles: "L19 · Numerical integration: Newton-Cotes formulas" and
+  "L20 · Numerical integration in practice: worked examples and caveats".
+- Hand example: the old race-car table (Fall 2025 L20) was not used. Its
+  three rules give 360, 360, and 360.375 (mi/h)·s, so it shows no difference
+  between the rules. The quench-oil example shows trapezoid -6.25% vs exact
+  Simpson. Easy to swap back if preferred.
+- Toughness data in L19 are illustrative (generated from a model curve:
+  E = 208 GPa, yield plateau at 250 MPa to a strain of 0.015, hardening to
+  about 413 MPa, fracture at 0.30). The page says "illustrative". Toughness
+  112.33 MJ/m^3 with 14 points.
+- The MD task uses velocity Verlet before L21 explains it (stated on the page).
+  LJ argon parameters epsilon/k_B = 119.8 K and sigma = 3.405 A are the
+  standard values but are not cited. tau = 2.156 ps was computed from them and
+  m = 39.948 u. "Shortest vibration periods about 0.7 ps" comes from the power
+  spectrum of the simulated velocity (99% of the power below 1.55 THz).
+- Figures were drawn from scratch, so none carries "Recreated from ...". The
+  left/right/midpoint rectangle figure resembles the old slides' layout; add
+  "Recreated from @gilat2013numerical" if you want the L17 convention.
+- No citation for: Newton and Cotes "around 1700", the DSC / corrosion /
+  combustion / double-layer examples, and the 21-point Gauss-Kronrod/QUADPACK
+  description (linked to the SciPy documentation instead).
+- burden2016numerical is cited with the locator §4.3-4.4 for the composite
+  error formulas. Please confirm the section numbers in the 10th edition
+  (same request as for §4.1 in L18). taylor1997error ch. 3 is reused for the
+  sum of independent errors.
+- units/04/main_idea.txt still lists L20 as the IVP-ODE lecture. It was not
+  edited; the ODE lectures now start at L21, and L20/L19 "Next" sections say so.
+- planning/A5-plan.txt overlaps L19-L20 in two candidate problems (toughness
+  from a stress-strain table; velocity/position from sampled acceleration).
+  Consider other data for A5, or reuse the L20 MD notebook as a starting point.
+- Seminar next Friday (Oct 30): the seminar page says dates are posted on
+  Canvas, so nothing on the site was changed. The syllabus lists the midterm
+  on the same day (Oct 30, 12:00).
+
+Figures (8, SVG beside a 300-dpi PNG, Inkscape-editable, L17 style)
+------------------------------------------------------------------
+L19-integration-examples, L19-newton-cotes (tall 4-row, for the column
+layout), L19-direct-composite, L19-rectangle-midpoint,
+L19-composite-midpoint-trapezoid, L19-simpson-panels, L20-flow-integrand,
+L20-midpoint-trapezoid-error. No generator script was kept, as for L17-L18.
+Re-export: inkscape FIG.svg --export-type=png --export-filename=FIG.png -d 300
+
+Notebooks (all pass marimo check, run natively, and ran in the browser)
+-----------------------------------------------------------------------
+- l19_newton_cotes.edit.py (app): rule dropdown, N slider (1, 2, 3, 4, 6, 12),
+  shaded polynomial pieces, error, number of function values; warns when
+  Simpson needs an even N or 3/8 a multiple of 3.
+- l19_trapezoid_toughness.edit.py (edit): slicing formula vs np.trapezoid,
+  dropdown for all / every 2nd / every 3rd point (112.33, 111.65, 110.63).
+- l20_flow_rate.edit.py (edit): 5 / 9 / 17 radii, np.trapezoid, simpson, romb.
+- l20_convergence.edit.py (app): exp, sin, x^3, sqrt x; five rules; log-log
+  plot with slope guides and the round-off level; quad row in the table.
+- l20_md_velocity.edit.py (app): LJ13 argon, 4000 x 5 fs velocity-Verlet steps
+  (about 1 s natively), stride slider 1-100, totals and cumulative integrals.
+- l20_noisy_integral.edit.py (app): points and sigma sliders, this data set
+  (seed 374, the L18 draw) and typical values over 300 draws, error vs number
+  of points for derivative, data, trapezoid, and Simpson. The typical-value
+  loop makes each slider change take a few seconds in the browser.
+
+Length (words of prose at 200 words/minute, from the source)
+------------------------------------------------------------
+L19 about 20 min and L20 about 20 min including the static notebook fallbacks
+(about 1 and 3 min of that text is replaced by the notebooks in HTML).
+L17 is about 18 min by the same count.
+
+Checks run
+----------
+- quarto render of L19 and L20 (single page) and of the whole site
+  (quarto render --to html): no warnings, no unresolved cross-references or
+  citations. Sidebar, units/index.qmd, and units/04/index.qmd link both pages.
+- New references.bib entries (verified on Crossref and PubMed): tai1994mathematical,
+  monaco1994tai, ossendrijver2016babylonian. Added to the units/04/references.qmd
+  nocite list.
+
+October 23, revision after instructor review (L19)
+--------------------------------------------------
+- "ordinary differential equation (ODE)"; "In this lecture, we deal with
+  functions of one variable only."
+- Data-interval paragraph is now a list: frequent readings (thermocouple),
+  long-term tests (corrosion), simulation steps (MD save interval).
+- Removed the scipy.differentiate / L20 sentence from "A function or a
+  table?"; it now says the lecture mostly focuses on discrete data.
+- Removed "Newton-Cotes formulas combine the two."
+- L19-newton-cotes redrawn as four panels in one row (160 x 44 mm). The
+  table is transposed (columns n = 0 to 3) and placed below the figure;
+  the Quarto column layout was removed.
+- L19-direct-composite: panel a is now one direct trapezoid; panel b labels
+  x0 to x6 (with a and b underneath) and shades the columns alternately.
+  L19-composite-midpoint-trapezoid uses the same alternating shades.
+- Tai callout titled "Trivia"; its last sentence ends at "than columns".
+- Section titles carry the degree: "(degree 0)" to "(degree 3)". The
+  transcript said "order 0"; "degree" keeps it apart from O(h^p). Change
+  back if you prefer "order".
+- Every rule is boxed, direct and composite: end-point rectangles, midpoint,
+  composite midpoint (expanded sum shown first, boxed sum-symbol form),
+  trapezoid, composite trapezoid (uneven and even spacing), Simpson 1/3
+  panel and composite, Simpson 3/8 panel and composite. The boxes carry no
+  error terms, since the errors are derived in L20.
+- Figure 5 (composite midpoint / trapezoid) now follows the caution callout
+  "The midpoint rule and the trapezoidal rule use different points".
+- Removed "which is why Tai's model handled uneven time intervals".
+
+October 23, second revision (L19)
+---------------------------------
+- New side figures (38% column beside the opening text of each section):
+  L19-trapezoid-panel, L19-simpson13-panel, L19-simpson38-panel (single
+  panels in the style of L19-newton-cotes, with a, b or x0... and h marked).
+- Simpson boxes now read I = integral of f ~ integral of P_n = h/3[...] and
+  3h/8[...].
+- Tip callout "Simpson's rule is more accurate than the midpoint and
+  trapezoidal rules" (point comparison and the 2/3 M + 1/3 T remark).
+- Caution callout for the two Simpson 1/3 requirements, ending with a bold
+  practical sentence.
+- "as L20 shows" -> "as L20 will show"; the round-off paragraph after "Why
+  stop at degree 3?" was removed.
+- Steel toughness demo removed; activities/l19_trapezoid_toughness.edit.py
+  moved, unchanged, to activities/graveyard/. Learning outcome 4 now reads
+  "Choose a NumPy or SciPy routine ...". The Python section keeps the slicing
+  bullets and the routine list.
+- New subsection "How do we choose the method?" with L19-integration-decision
+  (L13 decision-chart style): callable -> quad; uneven -> np.trapezoid;
+  2^k + 1 points -> romb; otherwise simpson.
+- Section headings already carried "(degree 2)" for Simpson's 1/3 rule.
+
+October 23, revision after instructor review (L20)
+--------------------------------------------------
+- Recap: "*any spacing*" and "*equal spacing*" in italics.
+- Worked example replaced: carbon taken up during carburizing (instructor's
+  screenshot of a textbook problem: C0 = 0.2 wt%, Cs = 1.2 wt%,
+  D = 1.4e-11 m^2/s; t = 3 h chosen here). Seven "measured" depths, 0 to
+  1.5 mm at h = 0.25 mm, values of the erfc model rounded to 0.001 wt%.
+  Hand results: trapezoid 0.4450 wt%·mm (34.93 g/m^2, +1.67%), Simpson 1/3
+  0.4375 (34.34 g/m^2, -0.05%); model integral 0 to 1.5 mm 0.43770
+  (34.36 g/m^2); rho = 7850 kg/m^3. The model tail beyond 1.5 mm adds 0.24%.
+  New figure L20-carburizing (process schematic + profile with the excess
+  area). New notebook activities/l20_carburizing.edit.py (4, 5, 7, 9, 13, 17
+  depths; trapezoid, simpson, romb when 2^k + 1, model via quad).
+  Source to confirm: the screenshot looks like Problem 9.34 of Gilat and
+  Subramaniam (it refers to an ErrorFun from Problem 9.26). The page does not
+  cite it; add [@gilat2013numerical, ...] if that is the source.
+  No citation for the carburizing description or for D at the process
+  temperature (the page says only "high temperature").
+- Removed: quench-oil example, activities/l20_flow_rate.edit.py (moved to
+  activities/graveyard/), and assets/L20-flow-integrand.{svg,png} (deleted).
+- "How fast do the errors shrink?" is now "Problem 1: how fast do the errors
+  shrink?", reduced to the plan (doubling N; O(h) halves, O(h^2) /4,
+  O(h^4) /16) and the notebook. The e^x error table was removed; the later
+  text refers to "the convergence test" instead of the table.
+- l20_convergence notebook: no table. The dropdown shows the integral and its
+  exact value as an equation, then the quad result, then the log-log plot with
+  the fitted slope of every rule in the legend and slope triangles (one decade
+  of h) for the left rectangle, trapezoid, and Simpson 1/3. Slopes are fitted
+  to errors above 1000 eps |I|: exp and sin give 1.00, 2.00, 2.00, 4.00,
+  4.00; sqrt(x) gives 1.01, 1.49, 1.49, 1.50, 1.50; x^3 Simpson is "exact to
+  round-off".
+- Check-your-understanding Q3 now asks about x^5 instead of the oil profile.
+- Only Problem 1 is numbered. Later caveat sections (smoothness, MD sampling,
+  noise) could be numbered Problem 2-4 as in L18, if wanted.
+
+October 23, third revision (L20)
+--------------------------------
+- Smoothness caution (sqrt x) removed. Replaced by a note callout "Why does
+  round-off matter less in integration?" (differentiation divides a small
+  difference by small h; integration adds h-weighted values and never divides
+  by h, so rounding stays near eps |I|). The separate "Round-off error in
+  integration" subsection was merged into it. New learning outcome 3.
+- The quad subsection was removed, with the quad line in l20_convergence and
+  the quad learning outcome and What-to-keep bullet. sqrt x was dropped from
+  the convergence dropdown (it only served the smoothness caution). L19 no
+  longer says "We use it in L20"; quad remains in the L19 routine list and
+  flow chart.
+- "Where the errors come from" is now a statement: "Using Taylor series ... it
+  can be shown that" with one bullet per rule (leading error term -> order),
+  followed by four check bullets and the midpoint/trapezoid figure. The
+  single-subinterval derivation, the composite-counting paragraph, and the
+  boxed summary were removed. Burden §4.3-4.4 is still cited.
+
+October 23, fourth revision (L20 structure)
+-------------------------------------------
+- Section order: worked example (carburizing); Problem 1 convergence (with
+  the round-off callout and "Where the errors come from" as a subsection);
+  Problem 2 noisy data; Problem 3 (reading material) Richardson extrapolation;
+  Problem 4 (reading material) "do we really need many data points for
+  integration?" (MD task). Learning outcomes reordered to match.
+- "Where the errors come from" keeps only the five error bullets; the
+  check bullets, the notation sentence, and the midpoint/trapezoid error
+  figure were removed (assets/L20-midpoint-trapezoid-error.* deleted).
+- Richardson: states that it needs one more calculation (a second estimate at
+  h/2), keeps the derivation and the boxed formula, then one paragraph on
+  Romberg / scipy.integrate.romb with 2^k + 1 points (4, 8, ..., 512
+  subintervals). The e^x numbers, the (T + 2M)/3 = Simpson link, and the
+  nested-grid paragraph were removed. L19 still mentions S = (2M + T)/3 with
+  "L20 explains why"; that pointer is now only implicit. Reword in L19 if
+  wanted.
+- MD task opens with: positions in MD must be accurate, trends such as
+  <dx^2>(t) need far fewer frames. New task 4 asks whether the path error at
+  s = 20 (4.3e-3 A trapezoid, 1.2e-3 A Simpson, vs 1.2 A range) would change
+  D from <dx^2> ~ 2Dt (one dimension). The notebook is unchanged.
+- "What to keep" removed from L19 and L20 (instructor wrote "lectures 20 and
+  21"; read as L19 and L20, the two lectures in this set).
+
+October 26 revision (L19/L20)
+-----------------------------
+- L19-integration-examples panel c: ring cross-section restored beside the
+  tube (concentric rings, one ring of width dr highlighted, radius r).
+  SVG edited in place, PNG re-exported at 300 dpi. Caption and alt updated.
+- "A function or a table?" in L19 now holds the Type I / Type II
+  side-by-side problems (f(x) = x + x^3 on [0, 2] and its five-point table),
+  each with engineering sources of that problem type. L20 no longer repeats
+  them; it refers back to the L19 problems.
+- l20_callable_integral, l20_tabulated_integral, l20_composite_slices now use
+  x + x^3: quad 6 (error est. 7e-14), trapezoid 6.25, Simpson 6 (exact).
+- Image-credits paragraph under the examples figure removed; credits kept as
+  one small line at the end of the caption (CC BY-SA requires attribution
+  and the share-alike licence of the composite).
+- Tai trivia callout is now a section, "Integration rule rediscovered: the
+  story of Tai's formula", placed after the composite trapezoidal rule.
+  Figure 1 and formula of the 1994 paper (assets/L19-tai-1994-figure1.png,
+  "Adapted from Tai 1994") beside L19-tai-construction. Two lessons: degree 1
+  beats degree 0; trapezoid accepts uneven spacing (quotes the abstract's
+  CONCLUSIONS), midpoint on data needs even spacing.
+- Tai figure redrawn as one SVG, L19-tai-formula.{svg,png} (a: Tai's Figure 1
+  redrawn with uneven intervals, dashed sample lines, rectangles/triangles,
+  "Adapted from Figure 1 of Tai 1994"; b: one-interval construction).
+  Replaced L19-tai-construction.* and the pasted excerpt (both deleted).
+  Generator: /tmp/l19fig/tai.py (not kept). Tai's formula written as an
+  equation in the page. Lessons reduced to two bold statements plus the quote.
+- L19-composite-midpoint-trapezoid: dashed vertical lines at every x_i in
+  both panels restored; PNG re-exported at 300 dpi.
+- L19-simpson-panels: uniform green shading (was alternating dark/light); solid lines at panel boundaries x0, x2, x4, x6, dashed at centres. Caption and alt updated.
+- L19 Python section: slicing notebook replaced by a static five-point listing (x = 0,1,3,4,6; y = 1,3,2,4,2; result 16). activities/l19_trapezoid_slices.edit.py moved to activities/graveyard/.

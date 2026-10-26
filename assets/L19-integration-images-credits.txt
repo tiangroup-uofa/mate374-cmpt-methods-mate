@@ -1,0 +1,41 @@
+Image provenance for L19-integration-examples.svg and .png
+=========================================================
+The composite figure is licensed CC BY-SA 4.0:
+https://creativecommons.org/licenses/by-sa/4.0/
+The individual CC0 photographs retain their CC0 status.
+All metadata below was verified through the Wikimedia Commons imageinfo API.
+
+Panel a: Molecular Dynamics Simulation of Solid Argon
+Creator: Christopher Rowley
+Date: 2015-10-26
+Source: https://commons.wikimedia.org/wiki/File:Molecular_Dynamics_Simulation_of_Solid_Argon.webm
+License: CC BY-SA 4.0
+https://creativecommons.org/licenses/by-sa/4.0/
+Modification: frame extracted at 1 second, converted to JPEG, embedded in SVG.
+Local file: L19-argon-md-still.jpg
+Source description: solid argon at 50 K, Lennard-Jones interactions, FCC cell.
+The accompanying velocity curve is illustrative, not extracted from this video.
+
+Panel b: Rusty steel plate
+Creator: Fumikas Sagisavas
+Date: 2024-08-02
+Source: https://commons.wikimedia.org/wiki/File:Rusty_steel_plate.jpg
+License: CC0
+https://creativecommons.org/publicdomain/zero/1.0/
+Modification: cropped to the plates, resized, embedded in SVG.
+Local file: L19-rusty-steel.jpg
+
+Panel d: Steel sample
+Creator: Trociny-fotografujo
+Date: 2015-04-17
+Source: https://commons.wikimedia.org/wiki/File:Steel_sample.JPG
+License: CC0
+https://creativecommons.org/publicdomain/zero/1.0/
+Source description: steel sample after ultimate tensile test on millimetre paper.
+Modification: resized, embedded in SVG.
+Local file: L19-fractured-steel.jpg
+
+Images are embedded as data URIs so the SVG is self-contained and editable.
+Photographs and simulation still are illustrative; graph values do not come
+from the pictured specimens or simulation.
+PNG figure exported at 300 dpi.

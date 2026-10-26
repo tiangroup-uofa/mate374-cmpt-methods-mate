@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="66mm" viewBox="0 0 160 66" version="1.1">
+<title>Tai's formula: rectangles and triangles under a sampled curve</title>
+<desc>a: a sampled glucose curve with uneven time intervals; the area under each interval is a rectangle plus a triangle. Adapted from Tai (1994), Figure 1. b: the construction for two successive measurements g0 and g1.</desc>
+<defs><marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"/></marker></defs>
+<rect width="160" height="66" fill="#ffffff"/>
+<g inkscape:groupmode="layer" inkscape:label="a — Tai figure 1">
+<text x="2" y="7" style="font-family:Arial;fill:#231f20;font-size:6.35px;font-weight:bold">a</text>
+<text x="9" y="7" style="font-family:Arial;fill:#231f20;font-size:4.23px;font-weight:bold">Tai's construction</text>
+<path d="M 10.0,54.0 H 83.0 M 10.0,54.0 V 12" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;marker-end:url(#tri)"/>
+<text x="84.5" y="55.4" style="font-family:Arial;fill:#231f20;font-size:4.23px;font-style:italic">t</text>
+<text x="12.0" y="14" style="font-family:Arial;fill:#231f20;font-size:4.23px">glucose</text>
+<path d="M 13.000,54.0 V 41.043 H 19.200 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 13.000,41.043 L 19.200,39.028 L 19.200,41.043 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 13.000,41.043 H 19.200" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 19.200,54.0 V 39.028 H 23.540 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 19.200,39.028 L 23.540,36.243 L 23.540,39.028 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 19.200,39.028 H 23.540" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 23.540,54.0 V 36.243 H 29.120 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 23.540,36.243 L 29.120,30.522 L 29.120,36.243 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 23.540,36.243 H 29.120" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 29.120,54.0 V 30.522 H 34.080 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 29.120,30.522 L 34.080,23.778 L 34.080,30.522 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 29.120,30.522 H 34.080" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 34.080,54.0 V 23.778 H 41.520 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 34.080,23.778 L 41.520,14.081 L 41.520,23.778 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 34.080,23.778 H 41.520" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 41.520,54.0 V 14.081 H 47.100 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 41.520,14.081 L 47.100,10.835 L 47.100,14.081 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 41.520,14.081 H 47.100" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 47.100,54.0 V 12.453 H 52.060 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 47.100,10.835 L 52.060,12.453 L 47.100,12.453 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 47.100,12.453 H 52.060" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 52.060,54.0 V 20.232 H 58.880 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 52.060,12.453 L 58.880,20.232 L 52.060,20.232 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 52.060,20.232 H 58.880" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 58.880,54.0 V 30.522 H 66.320 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 58.880,20.232 L 66.320,30.522 L 58.880,30.522 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 58.880,30.522 H 66.320" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 66.320,54.0 V 36.243 H 71.900 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 66.320,30.522 L 71.900,36.243 L 66.320,36.243 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 66.320,36.243 H 71.900" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 71.900,54.0 V 40.060 H 78.720 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 71.900,36.243 L 78.720,40.060 L 71.900,40.060 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 71.900,40.060 H 78.720" style="fill:none;stroke:#5e5e5e;stroke-width:0.2"/>
+<path d="M 13.000,54.0 V 41.043" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 19.200,54.0 V 39.028" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 23.540,54.0 V 36.243" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 29.120,54.0 V 30.522" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 34.080,54.0 V 23.778" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 41.520,54.0 V 14.081" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 47.100,54.0 V 10.835" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 52.060,54.0 V 12.453" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 58.880,54.0 V 20.232" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 66.320,54.0 V 30.522" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 71.900,54.0 V 36.243" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 78.720,54.0 V 40.060" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:0.8,0.6"/>
+<path d="M 13.000,41.043 L 19.200,39.028 L 23.540,36.243 L 29.120,30.522 L 34.080,23.778 L 41.520,14.081 L 47.100,10.835 L 52.060,12.453 L 58.880,20.232 L 66.320,30.522 L 71.900,36.243 L 78.720,40.060" style="fill:none;stroke:#b5473a;stroke-width:0.5"/>
+<circle cx="13.000" cy="41.043" r="0.8" fill="#231f20"/>
+<circle cx="19.200" cy="39.028" r="0.8" fill="#231f20"/>
+<circle cx="23.540" cy="36.243" r="0.8" fill="#231f20"/>
+<circle cx="29.120" cy="30.522" r="0.8" fill="#231f20"/>
+<circle cx="34.080" cy="23.778" r="0.8" fill="#231f20"/>
+<circle cx="41.520" cy="14.081" r="0.8" fill="#231f20"/>
+<circle cx="47.100" cy="10.835" r="0.8" fill="#231f20"/>
+<circle cx="52.060" cy="12.453" r="0.8" fill="#231f20"/>
+<circle cx="58.880" cy="20.232" r="0.8" fill="#231f20"/>
+<circle cx="66.320" cy="30.522" r="0.8" fill="#231f20"/>
+<circle cx="71.900" cy="36.243" r="0.8" fill="#231f20"/>
+<circle cx="78.720" cy="40.060" r="0.8" fill="#231f20"/>
+<text x="11.60" y="40.04" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:end"><tspan style="font-style:italic">y</tspan><tspan style="font-size:2.5px" dy="0.9">1</tspan><tspan dy="-0.9"></tspan></text>
+<text x="17.80" y="38.03" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:end"><tspan style="font-style:italic">y</tspan><tspan style="font-size:2.5px" dy="0.9">2</tspan><tspan dy="-0.9"></tspan></text>
+<text x="22.14" y="35.24" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:end"><tspan style="font-style:italic">y</tspan><tspan style="font-size:2.5px" dy="0.9">3</tspan><tspan dy="-0.9"></tspan></text>
+<text x="67.92" y="29.52" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:start"><tspan style="font-style:italic">y</tspan><tspan style="font-size:2.5px" dy="0.9">10</tspan><tspan dy="-0.9"></tspan></text>
+<text x="73.50" y="35.24" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:start"><tspan style="font-style:italic">y</tspan><tspan style="font-size:2.5px" dy="0.9">11</tspan><tspan dy="-0.9"></tspan></text>
+<text x="80.32" y="39.06" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:start"><tspan style="font-style:italic">y</tspan><tspan style="font-size:2.5px" dy="0.9">12</tspan><tspan dy="-0.9"></tspan></text>
+<path d="M 13.300,57.0 H 18.900" style="fill:none;stroke:#231f20;stroke-width:0.25;marker-start:url(#tri);marker-end:url(#tri)"/>
+<text x="16.10" y="61.6" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle"><tspan style="font-style:italic">X</tspan><tspan style="font-size:2.5px" dy="0.9">1</tspan><tspan dy="-0.9"></tspan></text>
+<path d="M 19.500,57.0 H 23.240" style="fill:none;stroke:#231f20;stroke-width:0.25;marker-start:url(#tri);marker-end:url(#tri)"/>
+<text x="21.37" y="61.6" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle"><tspan style="font-style:italic">X</tspan><tspan style="font-size:2.5px" dy="0.9">2</tspan><tspan dy="-0.9"></tspan></text>
+<path d="M 66.620,57.0 H 71.600" style="fill:none;stroke:#231f20;stroke-width:0.25;marker-start:url(#tri);marker-end:url(#tri)"/>
+<text x="69.11" y="61.6" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle"><tspan style="font-style:italic">X</tspan><tspan style="font-size:2.5px" dy="0.9">10</tspan><tspan dy="-0.9"></tspan></text>
+<path d="M 72.200,57.0 H 78.420" style="fill:none;stroke:#231f20;stroke-width:0.25;marker-start:url(#tri);marker-end:url(#tri)"/>
+<text x="75.31" y="61.6" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle"><tspan style="font-style:italic">X</tspan><tspan style="font-size:2.5px" dy="0.9">11</tspan><tspan dy="-0.9"></tspan></text>
+</g>
+<g inkscape:groupmode="layer" inkscape:label="b — one interval">
+<text x="86" y="7" style="font-family:Arial;fill:#231f20;font-size:6.35px;font-weight:bold">b</text>
+<text x="93" y="7" style="font-family:Arial;fill:#231f20;font-size:4.23px;font-weight:bold">One interval</text>
+<path d="M 96.0,54.0 H 146.0 M 96.0,54.0 V 12" style="fill:none;stroke:#231f20;stroke-width:0.5;stroke-linecap:round;marker-end:url(#tri)"/>
+<text x="147.5" y="55.4" style="font-family:Arial;fill:#231f20;font-size:4.23px;font-style:italic">t</text>
+<text x="98.0" y="14" style="font-family:Arial;fill:#231f20;font-size:4.23px"></text>
+<path d="M 102.0,54.0 V 38.0 H 136.0 V 54.0 Z" style="fill:#cfedcd;stroke:none"/>
+<path d="M 102.0,38.0 L 136.0,20.0 V 38.0 Z" style="fill:#cde5ec;stroke:none"/>
+<path d="M 96.0,38.0 H 102.0 M 96.0,20.0 H 136.0" style="fill:none;stroke:#5e5e5e;stroke-width:0.25;stroke-dasharray:1.2,0.8"/>
+<path d="M 102.0,54.0 V 38.0 L 136.0,20.0 V 54.0" style="fill:none;stroke:#b5473a;stroke-width:0.5"/>
+<circle cx="102.0" cy="38.0" r="0.9" fill="#231f20"/><circle cx="136.0" cy="20.0" r="0.9" fill="#231f20"/>
+<text x="94.5" y="39.3" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:end"><tspan style="font-style:italic">g</tspan><tspan style="font-size:2.5px" dy="0.9">0</tspan><tspan dy="-0.9"></tspan></text>
+<text x="94.5" y="21.3" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:end"><tspan style="font-style:italic">g</tspan><tspan style="font-size:2.5px" dy="0.9">1</tspan><tspan dy="-0.9"></tspan></text>
+<text x="102.0" y="58.5" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle"><tspan style="font-style:italic">t</tspan><tspan style="font-size:2.5px" dy="0.9">0</tspan><tspan dy="-0.9"></tspan></text>
+<text x="136.0" y="58.5" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle"><tspan style="font-style:italic">t</tspan><tspan style="font-size:2.5px" dy="0.9">1</tspan><tspan dy="-0.9"></tspan></text>
+<path d="M 102.4,61.5 H 135.6" style="fill:none;stroke:#231f20;stroke-width:0.25;marker-start:url(#tri);marker-end:url(#tri)"/>
+<text x="119.0" y="65.0" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle">Δ<tspan style="font-style:italic">t</tspan></text>
+<text x="119.0" y="47.2" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle">rectangle</text>
+<text x="124.0" y="35.5" style="font-family:Arial;fill:#231f20;font-size:3.53px;text-anchor:middle">triangle</text>
+<text x="139.0" y="47.2" style="font-family:Arial;fill:#231f20;font-size:3.53px"><tspan style="font-style:italic">g</tspan><tspan style="font-size:2.5px" dy="0.9">0</tspan><tspan dy="-0.9"></tspan> Δ<tspan style="font-style:italic">t</tspan></text>
+<text x="139.0" y="30.2" style="font-family:Arial;fill:#231f20;font-size:3.53px">½(<tspan style="font-style:italic">g</tspan><tspan style="font-size:2.5px" dy="0.9">1</tspan><tspan dy="-0.9"> − </tspan><tspan style="font-style:italic">g</tspan><tspan style="font-size:2.5px" dy="0.9">0</tspan><tspan dy="-0.9">) Δ</tspan><tspan style="font-style:italic">t</tspan></text>
+</g></svg>

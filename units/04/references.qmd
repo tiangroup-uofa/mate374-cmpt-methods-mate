@@ -5,7 +5,7 @@ format:
     toc: true
 bibliography: ../../references.bib
 nocite: |
-  @kiusalaas2013, @harris2020numpy, @virtanen2020scipy, @burden2016numerical, @taylor1997error, @vaspwikiimaginaryphonon
+  @kiusalaas2013, @harris2020numpy, @virtanen2020scipy, @burden2016numerical, @taylor1997error, @vaspwikiimaginaryphonon, @rowley2015solidargon, @sagisavas2024rustysteel, @trociny2015steelsample, @tai1994mathematical, @monaco1994tai, @ossendrijver2016babylonian
 ---
 
 ## Bibliography

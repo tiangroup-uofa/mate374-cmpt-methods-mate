@@ -1,0 +1,57 @@
+L20 reframe from the Monday 09:20–09:36 transcript
+================================================
+Title shortened to Numerical integration; landing-page labels updated.
+Sidebar already uses Lecture 20 and project.render already includes units/**/*.qmd.
+
+Sequence:
+1. Side-by-side exam-style callable-function and two-row data-table problems.
+2. Boxed library calls: quad, then trapezoid / Simpson.
+3. Array slices, with explicit equal-spacing and even-subinterval checks.
+4. Carburizing: question, M = 78.5 integral(f dx), and two-row seven-point table
+   kept together. Hand calculation followed by a fixed-table Python notebook.
+5. Convergence and round-off; error orders explained after the experiment.
+6. Noisy data; three practical conclusions placed in an important callout.
+7. Richardson reading material.
+
+New notebooks:
+- l20_callable_integral.edit.py
+- l20_tabulated_integral.edit.py
+- l20_composite_slices.edit.py
+
+Changed notebooks:
+- l20_carburizing.edit.py: only the fixed seven values and trapezoid/Simpson;
+  no erfc, density conversion, selectable data counts, model plot, romb or quad.
+- l20_convergence.edit.py: display math delimiters fixed, no slope legend,
+  direct curve labels and O(h), O(h²), O(h⁴) beside triangle wedges.
+  Cubic case explicitly states Simpson exactness apart from round-off.
+
+Removed from the page:
+- Problem 4 MD-output sampling and its learning outcome.
+- Check your understanding.
+The MD notebook source was preserved for possible later use.
+
+Accuracy cleanup:
+- Replaced the categorical claim that finer spacing can never worsen an
+  integral with the round-off limit: extra refinement does not reliably help.
+- Noise cancellation stated for independent, zero-mean errors.
+- Combined noise and truncation in root-mean-square form.
+- Error formulas now define the intermediate xi points explicitly.
+
+Learning-outcome alignment:
+Calculate integrals | Apply | executable callable/table/slice results
+Apply rules to carbon uptake | Apply | hand arithmetic and matching Python
+Compare convergence | Analyze | three integrals, orders, and round-off limit
+Explain noise effects | Understand/Analyze | existing noise experiment and
+three practical conclusions
+Richardson remains optional reading, outside the four main outcomes.
+
+Validation:
+marimo check passed for all five new/changed notebooks.
+Native execution checked the four calculation notebooks and all three
+convergence dropdown options. Carbon results: 34.9325 and 34.34375 g/m².
+WASM exports and single-page Quarto HTML render passed.
+Inspected rendered convergence and SVG previews.
+No live browser interaction test was available in this pass.
+
+Instructor's suggestion to box function calls in past lectures is recorded
+for a separate review; L17/L18 remain unchanged.

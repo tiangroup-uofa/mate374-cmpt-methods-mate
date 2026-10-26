@@ -134,6 +134,10 @@ website:
                 text: "Lecture 17"
               - href: units/04/L18/index.qmd
                 text: "Lecture 18"
+              - href: units/04/L19/index.qmd
+                text: "Lecture 19"
+              - href: units/04/L20/index.qmd
+                text: "Lecture 20"
               - href: units/04/references.qmd
                 text: "References"
       - href: seminars/index.qmd

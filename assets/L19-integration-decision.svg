@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="176mm"
+   height="118mm"
+   viewBox="0 0 176 118"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="L19-integration-decision.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview id="namedview1" pagecolor="#ffffff" bordercolor="#000000" borderopacity="0.25" inkscape:document-units="mm" />
+  <title id="title1">Choosing an integration routine</title>
+  <desc id="desc1">Start from the integrand. If it is a function that can be evaluated anywhere, use scipy.integrate.quad. For discrete data, if the points are not evenly spaced, use np.trapezoid. For evenly spaced data, if the number of points is 2 to the k plus 1, use scipy.integrate.romb; otherwise use scipy.integrate.simpson. Discrete data can also be integrated by implementing a suitable rule with NumPy arrays and sums.</desc>
+  <defs id="defs1">
+    <marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid">
+      <path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt" id="tripath" />
+    </marker>
+  </defs>
+  <rect id="background" width="176" height="118" style="fill:#ffffff" />
+  <g id="layer1" inkscape:groupmode="layer" inkscape:label="chart">
+    <text id="t2" x="84.00" y="7.00" style="font-family:Arial;font-size:5.00px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">Integrate <tspan style="font-style:italic">f</tspan> from <tspan style="font-style:italic">a</tspan> to <tspan style="font-style:italic">b</tspan></text>
+    <ellipse cx="84.00" cy="21.00" rx="33.00" ry="8.00" style="fill:#cfe6f7;stroke:#5e5e5e;stroke-width:0.5" />
+    <text id="t3" x="84.00" y="20.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">Can <tspan style="font-style:italic">f</tspan> be evaluated</text>
+    <text id="t4" x="84.00" y="24.80" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">anywhere?</text>
+    <rect x="121.00" y="11.00" width="53.00" height="22.00" rx="3" ry="3" style="fill:#fdf1e6;stroke:#5e5e5e;stroke-width:0.5" />
+    <text id="t5" x="147.50" y="17.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">Callable function</text>
+    <rect x="121.28" y="19.60" width="52.45" height="5.6" style="fill:#ffffff;stroke:#5e5e5e;stroke-width:0.35" />
+    <text x="147.50" y="23.60" style="font-family:Menlo;font-size:3.53px;fill:#1353d3;text-anchor:middle">quad(f, a, b)</text>
+    <text id="t6" x="147.50" y="30.40" style="font-family:Arial;font-size:3.53px;fill:#5e5e5e;font-weight:normal;font-style:normal;text-anchor:middle">adaptive, with error estimate</text>
+    <path id="path7" d="M 117.000,21.000 L 120.500,21.000" style="fill:none;stroke:#149443;stroke-width:0.7;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
+    <text id="t8" x="118.75" y="19.40" style="font-family:Arial;font-size:4.23px;fill:#149443;font-weight:bold;font-style:normal;text-anchor:middle">Y</text>
+    <path id="path9" d="M 84.000,29.000 L 84.000,39.500" style="fill:none;stroke:#ee426d;stroke-width:0.7;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
+    <text id="t10" x="86.50" y="35.80" style="font-family:Arial;font-size:4.23px;fill:#ee426d;font-weight:bold;font-style:normal;text-anchor:start">N: discrete data</text>
+    <ellipse cx="84.00" cy="48.00" rx="29.00" ry="8.00" style="fill:#cfe6f7;stroke:#5e5e5e;stroke-width:0.5" />
+    <text id="t11" x="84.00" y="47.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">Evenly spaced</text>
+    <text id="t12" x="84.00" y="51.80" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">points?</text>
+    <rect x="2.00" y="37.00" width="46.00" height="22.00" rx="3" ry="3" style="fill:#fdf1e6;stroke:#5e5e5e;stroke-width:0.5" />
+    <text id="t13" x="25.00" y="43.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">Any spacing</text>
+    <rect x="4.15" y="45.60" width="41.70" height="5.6" style="fill:#ffffff;stroke:#5e5e5e;stroke-width:0.35" />
+    <text x="25.00" y="49.60" style="font-family:Menlo;font-size:3.53px;fill:#1353d3;text-anchor:middle">trapezoid(y, x)</text>
+    <text id="t14" x="25.00" y="56.40" style="font-family:Arial;font-size:3.53px;fill:#5e5e5e;font-weight:normal;font-style:normal;text-anchor:middle">the baseline for data</text>
+    <path id="path15" d="M 55.000,48.000 L 48.500,48.000" style="fill:none;stroke:#ee426d;stroke-width:0.7;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
+    <text id="t16" x="51.75" y="46.40" style="font-family:Arial;font-size:4.23px;fill:#ee426d;font-weight:bold;font-style:normal;text-anchor:middle">N</text>
+    <path id="path17" d="M 84.000,56.000 L 84.000,66.500" style="fill:none;stroke:#149443;stroke-width:0.7;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
+    <text id="t18" x="87.00" y="62.45" style="font-family:Arial;font-size:4.23px;fill:#149443;font-weight:bold;font-style:normal;text-anchor:middle">Y</text>
+    <ellipse cx="84.00" cy="75.00" rx="29.00" ry="8.00" style="fill:#cfe6f7;stroke:#5e5e5e;stroke-width:0.5" />
+    <text id="t19" x="84.00" y="74.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">2<tspan style="font-size:3.05px;baseline-shift:super"><tspan style="font-style:italic">k</tspan></tspan> + 1 points?</text>
+    <text id="t20" x="84.00" y="78.80" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">(5, 9, 17, 33, …)</text>
+    <rect x="121.00" y="64.00" width="53.00" height="22.00" rx="3" ry="3" style="fill:#fdf1e6;stroke:#5e5e5e;stroke-width:0.5" />
+    <text id="t21" x="147.50" y="70.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">Romberg</text>
+    <rect x="121.28" y="72.60" width="52.45" height="5.6" style="fill:#ffffff;stroke:#5e5e5e;stroke-width:0.35" />
+    <text x="147.50" y="76.60" style="font-family:Menlo;font-size:3.53px;fill:#1353d3;text-anchor:middle">romb(y, dx=h)</text>
+    <text id="t22" x="147.50" y="83.40" style="font-family:Arial;font-size:3.53px;fill:#5e5e5e;font-weight:normal;font-style:normal;text-anchor:middle">repeated Richardson</text>
+    <path id="path23" d="M 113.000,75.000 L 120.500,75.000" style="fill:none;stroke:#149443;stroke-width:0.7;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
+    <text id="t24" x="116.75" y="73.40" style="font-family:Arial;font-size:4.23px;fill:#149443;font-weight:bold;font-style:normal;text-anchor:middle">Y</text>
+    <rect x="54.00" y="94.00" width="60.00" height="22.00" rx="3" ry="3" style="fill:#fdf1e6;stroke:#5e5e5e;stroke-width:0.5" />
+    <text id="t25" x="84.00" y="100.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:middle">Simpson's rule</text>
+    <rect x="55.62" y="102.60" width="56.75" height="5.6" style="fill:#ffffff;stroke:#5e5e5e;stroke-width:0.35" />
+    <text x="84.00" y="106.60" style="font-family:Menlo;font-size:3.53px;fill:#1353d3;text-anchor:middle">simpson(y, x=x)</text>
+    <text id="t26" x="84.00" y="113.40" style="font-family:Arial;font-size:3.53px;fill:#5e5e5e;font-weight:normal;font-style:normal;text-anchor:middle">odd or even number of points</text>
+    <path id="path27" d="M 84.000,83.000 L 84.000,93.500" style="fill:none;stroke:#ee426d;stroke-width:0.7;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
+    <text id="t28" x="87.00" y="89.45" style="font-family:Arial;font-size:4.23px;fill:#ee426d;font-weight:bold;font-style:normal;text-anchor:middle">N</text>
+  </g>
+  <g id="custom-numpy" inkscape:groupmode="layer" inkscape:label="Custom NumPy option">
+    <rect x="2" y="68" width="46" height="43" rx="3" ry="3" style="fill:#fdf1e6;stroke:#5e5e5e;stroke-width:0.5"/>
+    <text x="25" y="75" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;text-anchor:middle">Custom NumPy</text>
+    <text x="25" y="83" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle">Discrete data</text>
+    <text x="25" y="92" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle">Implement a rule</text>
+    <text x="25" y="98" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle">with array slices</text>
+    <text x="25" y="104" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle">and sums</text>
+  </g>
+  <g id="imports" inkscape:groupmode="layer" inkscape:label="imports">
+    <rect x="2" y="2" width="52" height="13.0" rx="1" style="fill:#ffffff;stroke:#8a8f98;stroke-width:0.3" />
+    <text x="4" y="6.2" style="font-family:Menlo;font-size:2.7px;fill:#1353d3;text-anchor:start">from numpy import trapezoid</text>
+    <text x="4" y="9.7" style="font-family:Menlo;font-size:2.7px;fill:#1353d3;text-anchor:start">from scipy.integrate import (</text>
+    <text xml:space="preserve" x="4" y="13.2" style="font-family:Menlo;font-size:2.7px;fill:#1353d3;text-anchor:start">    quad, simpson, romb)</text>
+  </g>
+</svg>

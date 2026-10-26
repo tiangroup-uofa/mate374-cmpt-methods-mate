@@ -7,5 +7,7 @@ Unit 4 develops numerical differentiation and integration, the two operations th
 
 - [L17 · Finite differences: calculating derivatives in a computer](L17/index.qmd)
 - [L18 · Caveats in numerical differentiation](L18/index.qmd)
+- [L19 · Numerical integration: Newton–Cotes formulas](L19/index.qmd)
+- [L20 · Numerical integration](L20/index.qmd)
 
 [Unit 04 references](references.qmd)

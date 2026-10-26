@@ -39,3 +39,5 @@ toc: false
 
 17. [L17 · Finite differences: calculating derivatives in a computer](04/L17/index.qmd) — Newton's second law as differentiation and integration, forward, backward, and central differences, truncation error from Taylor series, three-point end formulas, and `np.gradient`.
 18. [L18 · Caveats in numerical differentiation](04/L18/index.qmd) — finite-difference functions for NumPy arrays, truncation versus round-off error, derivatives of noisy data, and (reading material) the cost of many-atom gradients and small forces from large total energies.
+19. [L19 · Numerical integration: Newton–Cotes formulas](04/L19/index.qmd) — integrals in materials problems, functions versus discrete data, direct and composite rules, the midpoint, trapezoidal, and Simpson rules, and `np.trapezoid`.
+20. [L20 · Numerical integration](04/L20/index.qmd) — callable functions and tables in Python, composite rules with NumPy slices, carbon uptake by hand and in Python, convergence, noisy data, and Richardson extrapolation.
