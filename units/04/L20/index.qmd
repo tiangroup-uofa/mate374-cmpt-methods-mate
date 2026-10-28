@@ -24,59 +24,85 @@ The reading material also shows how to improve two trapezoidal estimates by Rich
 
 ## Numerical integration in Python
 
-L19 separated two types of problem: a callable function, $f(x)=x+x^3$ on $[0,2]$ (Type I), and a table of five values of the same function (Type II). We now integrate both in Python. The selection chart from L19 summarizes the routes. We will first call the library routines, then write the composite rules with array slices.
+In the last lecture, we separated two kinds of problem:
 
-![Integration methods for callable functions and discrete data. The lower-left box is the option of writing a suitable rule directly with NumPy arrays.](../../../assets/L19-integration-decision.png){#fig-integration-choice width="90%" fig-alt="A callable function leads to quad. For discrete data, the choices include trapezoid for any spacing, Romberg for evenly spaced data with 2 to the k plus 1 points, Simpson, and custom NumPy integration."}
+- **A callable function**, for example $f(x)=x+x^3$ on $[0,2]$.
+- **A table** of values recorded at fixed points.
+
+The selection chart from L19 summarizes the routines for both (@fig-integration-choice). We will first call the library routines, then write the composite rules with array slices.
+
+![Integration routines for callable functions and discrete data, from L19. The upper-left box lists the imports.](../../../assets/L19-integration-decision.png){#fig-integration-choice width="90%" fig-alt="Decision chart. A callable function leads to quad. For discrete data with uneven spacing, trapezoid; for evenly spaced data with 2 to the k plus 1 points, romb; otherwise simpson. A separate box offers custom integration with NumPy arrays. An upper-left box shows from numpy import trapezoid and from scipy.integrate import quad, simpson, romb."}
 
 ### Type I: integrate a callable function
 
 ::: {.callout-note}
-## Function call: `integrate.quad(f, a, b)`
+## Function call: `scipy.integrate.quad(f, a, b)`
 
 - **Input:** a Python function `f` and the limits `a`, `b`.
 - **Output:** the integral estimate and an estimate of its absolute error.
 :::
 
-SciPy's `quad` chooses the evaluation points and refines the calculation automatically [@virtanen2020scipy]. For an ordinary smooth function on a finite interval, this is the standard starting point. We supply the function and limits without constructing a grid or writing integration weights.
+`scipy.integrate.quad` chooses the evaluation points and refines the calculation automatically [@virtanen2020scipy]. We supply the function and the limits, without building a grid or writing integration weights.
 
-::: {.quarto-wasm-local notebook="l20_callable_integral.edit.py" view="edit" title="Integrating a callable function with scipy.integrate.quad" height="480" loading="lazy" fullscreen="true"}
-For $f(x)=x+x^3$ on $[0,2]$, `integrate.quad(f, 0, 2)` returns $6.0000000$ and an estimated absolute error of $7\times10^{-14}$. The exact answer is 6.
+::: {.quarto-wasm-local notebook="l20_callable_integral.edit.py" view="edit" title="Integrating a callable function with scipy.integrate.quad" height="360" loading="lazy" fullscreen="true"}
+For $f(x)=x+x^3$ on $[0,2]$, `scipy.integrate.quad(f, 0, 2)` returns the integral $6.000000000000001$ and an estimated absolute error of $7\times10^{-14}$. The exact answer is 6.
 :::
+
+For an ordinary smooth function, `scipy.integrate.quad` is usually good enough. Two points need care:
+
+- **Defining the function.** When no analytical expression exists, `f` must still be a Python function that returns one value for each `x`, for example by running a calculation or evaluating a fitted model at that point.
+- **Number of function evaluations.** `scipy.integrate.quad` decides how many points to use and where to place them, following its [**quadrature**](https://en.wikipedia.org/wiki/Gauss%E2%80%93Kronrod_quadrature_formula) rule. When each evaluation of `f` is an expensive simulation, this number sets the cost.
 
 ### Type II: integrate discrete data
 
-Store the positions in `x` and the measured values in `y`. The functions below receive the values first and the positions second.
-
 ::: {.callout-note}
-## Function calls: `np.trapezoid(y, x)` and `integrate.simpson(y, x=x)`
+## Function calls: `numpy.trapezoid(y, x)` and `scipy.integrate.simpson(y, x=x)`
 
-- **`np.trapezoid(y, x)`** adds trapezoids between successive data points, using their actual spacing [@harris2020numpy].
-- **`integrate.simpson(y, x=x)`** uses Simpson's rule [@virtanen2020scipy]. With equal spacing and an even number of subintervals, it is the composite 1/3 rule from L19.
+- **`numpy.trapezoid(y, x)`** adds trapezoids between successive data points, using their actual spacing [@harris2020numpy].
+- **`scipy.integrate.simpson(y, x=x)`** uses Simpson's rule [@virtanen2020scipy]. With equal spacing and an even number of subintervals, it is the composite 1/3 rule from L19.
+- Both functions take the values first and the points second.
 :::
 
-The library routines accept the positions directly, so we can use them before writing our own spacing checks. SciPy also handles unequal spacing and an odd number of subintervals with adjusted formulas. The simple 1, 4, 2, …, 4, 1 weights from L19 require equal spacing and an even number of subintervals.
-
-::: {.quarto-wasm-local notebook="l20_tabulated_integral.edit.py" view="edit" title="Integrating a table with NumPy trapezoid and SciPy Simpson" height="480" loading="lazy" fullscreen="true"}
-For the five-point table, `np.trapezoid(y, x)` gives 6.25 and `integrate.simpson(y, x=x)` gives 6. The values lie on the cubic $x+x^3$, so Simpson's rule gives its exact integral.
+::: {.quarto-wasm-local notebook="l20_tabulated_integral.edit.py" view="edit" title="Integrating a table with numpy.trapezoid and scipy.integrate.simpson" height="380" loading="lazy" fullscreen="true"}
+For the five-point table $x=0,0.5,1,1.5,2$ and $y=0,0.625,2,4.875,10$, `numpy.trapezoid(y, x)` gives 6.25 and `scipy.integrate.simpson(y, x=x)` gives 6.0.
 :::
+
+`scipy.integrate.simpson` is more general than the textbook rule of L19. It also accepts unequal spacing and an odd number of subintervals, and uses adjusted formulas for these cases. A measured table has no exact function to compare with, so we cannot be certain which of the two results is more accurate.
 
 ### The composite rules with NumPy slices
 
-Before opening the implementation, try writing the trapezoidal sum yourself. Each trapezoid has a width and an average height:
+Each composite rule is also one line of NumPy, using slices as the finite differences did in L18. @fig-array-slices shows which entries of the arrays each slice selects.
 
-- `x[1:] - x[:-1]` gives every width $h_i$.
-- `(y[:-1] + y[1:]) / 2` gives every average height.
-- Multiply these arrays and sum their entries.
+![Composite rules for NumPy slices.](../../../assets/L20-array-slices.png){#fig-array-slices width="100%" fig-alt="Panel a: an array y with indices 0 to 6, bracket y[:-1] over indices 0 to 5 and bracket y[1:] over indices 1 to 6, and six widths h0 to h5 between the cells labelled x[1:] minus x[:-1], with the sum formula below. Panel b: the same array with indices 1, 3, 5 in red selected by y[1:-1:2], indices 2 and 4 in blue selected by y[2:-1:2], weights 1 4 2 4 2 4 1, and the Simpson formula below."}
 
-For Simpson's 1/3 rule, the first and last values have weight 1. The interior values alternate between weights 4 and 2:
+```python
+import numpy as np
 
-- `y[1:-1:2]` selects $y_1,y_3,\ldots,y_{N-1}$, with weight 4.
-- `y[2:-1:2]` selects $y_2,y_4,\ldots,y_{N-2}$, with weight 2.
-- `np.diff(x)` gives the spacings. `np.allclose` checks whether they all equal the first spacing, allowing for floating-point rounding.
-- `N = len(x) - 1` counts the subintervals. `N % 2 == 0` checks that this count is even.
+def trapezoid_method(y, x):
+    return np.sum((x[1:] - x[:-1]) * (y[:-1] + y[1:]) / 2)
 
-::: {.quarto-wasm-local notebook="l20_composite_slices.edit.py" view="edit" title="Composite trapezoidal and Simpson one-third rules using NumPy slices" height="680" loading="lazy" fullscreen="true"}
-The trapezoidal slices give $0.5(0.3125+1.3125+3.4375+7.4375)=6.25$. For Simpson's rule, the four spacings all equal 0.5 and $N=4$ is even. Its slices give $(0.5/3)[0+10+4(0.625+4.875)+2(2)]=6$. Both agree with their library routines.
+def simpson_method(y, x):
+    h = x[1] - x[0]
+    # We also need to check that the spacings are equal and the number of intervals is even:
+    # Equal spacing:            np.allclose(np.diff(x), h)
+    # Even number of intervals: (len(x) - 1) % 2 == 0
+    return h / 3 * (y[0] + 4 * np.sum(y[1:-1:2])
+                    + 2 * np.sum(y[2:-1:2]) + y[-1])
+```
+
+Before calling `simpson_method`, make sure that the points in `x` are evenly spaced and that the number of subintervals is even. The commented checks inside the function show one way to test this.
+
+::: {.quarto-wasm-local notebook="l20_composite_slices.edit.py" view="edit" title="Composite trapezoidal and Simpson 1/3 rules with NumPy slices" height="620" loading="lazy" fullscreen="true"}
+For the five-point table, `trapezoid_method(y, x)` gives 6.25 and `simpson_method(y, x)` gives 6.0, the same values as `numpy.trapezoid(y, x)` and `scipy.integrate.simpson(y, x=x)`.
+:::
+
+::: {.callout-caution}
+## Checking a hand-written rule against the library routine
+
+- Compare `trapezoid_method(y, x)` with `numpy.trapezoid(y, x)`, and `simpson_method(y, x)` with `scipy.integrate.simpson(y, x=x)`, on the same data.
+- `simpson_method` reproduces `scipy.integrate.simpson` only for equally spaced points and an even number of subintervals. It reads the spacing from the first two points and does not check the others.
+
+**Confirm the spacing and the number of subintervals yourself before trusting a hand-written Simpson rule.**
 :::
 
 ## Worked example: carbon uptake during carburizing
@@ -87,21 +113,22 @@ Carburizing hardens a steel surface by allowing carbon from a carbon-rich gas to
 
 ### Question
 
-**How much carbon has entered each square metre of the steel surface down to a depth of 1.5 mm? Calculate the uptake using both the composite trapezoidal and Simpson's 1/3 rules.**
+**How much carbon has entered the steel surface down to a depth of 1.5 mm? Calculate the uptake using both the composite trapezoidal and Simpson's 1/3 rules.**
 
-The excess carbon content $f(x)$ has been measured at the seven depths below. With $x$ in mm and $f$ in wt%, the uptake $M$ in g/m² is
+The excess carbon content $f(x)$ has been measured at the seven depths below, with $x$ in mm and $f$ in wt%. The uptake $M$ in g/m² is
 
 $$
 M=78.5\int_0^{1.5} f(x)\,\mathrm dx.
 $$
+
+- The factor 78.5 includes the steel density and unit conversions.
+- Reference answer from the analytical profile: **34.36 g/m²**.
 
 | $x_i$ (mm) | 0 | 0.25 | 0.50 | 0.75 | 1.00 | 1.25 | 1.50 |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | $f_i$ (wt%) | 1.000 | 0.649 | 0.363 | 0.173 | 0.069 | 0.023 | 0.006 |
 
 : Excess carbon content below the steel surface. {#tbl-carbon-data}
-
-The factor 78.5 includes the steel density and unit conversions. **Reference answer from the analytical profile: 34.36 g/m².**
 
 ### Method 1: calculate by hand
 
@@ -143,13 +170,13 @@ Multiplying each integral by 78.5 gives:
 
 ### Method 2: calculate in Python
 
-Use the same seven measurements with `np.trapezoid` and `integrate.simpson`. This table has seven points, so it does not meet `romb`'s requirement of $2^k+1$ points. It also supplies no callable function for `quad`.
+Use the same seven measurements with `numpy.trapezoid` and `scipy.integrate.simpson`, then with `trapezoid_method` and `simpson_method` from above. This table has seven points, so it does not meet the requirement of `scipy.integrate.romb` for $2^k+1$ points. It also supplies no callable function for `scipy.integrate.quad`.
 
-::: {.quarto-wasm-local notebook="l20_carburizing.edit.py" view="edit" title="Carbon uptake from seven measurements using trapezoid and Simpson" height="560" loading="lazy" fullscreen="true"}
-Using the seven tabulated values, `78.5 * np.trapezoid(f, x)` gives 34.9325 g/m² and `78.5 * integrate.simpson(f, x=x)` gives 34.34375 g/m². Both reproduce the hand calculations.
+::: {.quarto-wasm-local notebook="l20_carburizing.edit.py" view="edit" title="Carbon uptake from seven measurements: library routines and hand-written methods" height="640" loading="lazy" fullscreen="true"}
+With the seven tabulated values, `78.5 * numpy.trapezoid(f, x)` gives 34.9325 g/m² and `78.5 * scipy.integrate.simpson(f, x=x)` gives 34.34375 g/m². `trapezoid_method` and `simpson_method` give the same two numbers, and both reproduce the hand calculations.
 :::
 
-Simpson's rule gives a close estimate from this small table, and `quad` handles a callable function directly. The remaining questions concern accuracy: how quickly an estimate improves as the spacing shrinks, where round-off stops that improvement, and how measurement noise affects the total. We will survey these practical considerations next.
+The remaining questions concern accuracy: how quickly an estimate improves as the spacing shrinks, where round-off stops that improvement, and how measurement noise affects the total.
 
 ## Problem 1: how fast do the errors shrink?
 
@@ -159,7 +186,11 @@ We use three integrals whose exact values we know:
 - $\displaystyle\int_0^{\pi/2}\sin x\,\mathrm dx=1$.
 - $\displaystyle\int_1^3x^3\,\mathrm dx=20$.
 
-Calculate each integral with $N=6,12,24,\ldots$ subintervals. Doubling $N$ halves the spacing $h$, and every $N$ is divisible by both 2 and 3, so all five rules apply. How much does the error fall after each halving? The log–log plot compares these changes, with the method names placed beside their curves.
+**How do we know the error scaling?** Calculate each integral with $N=6,12,24,\ldots$ subintervals and check how the error decreases. Every $N$ is divisible by both 2 and 3, so all five rules apply. Going from $N$ to $2N$ halves the spacing $h$, and the error changes as follows:
+
+- Error $e\to e/2$: $O(h)$.
+- Error $e\to e/4$: $O(h^2)$.
+- Error $e\to e/16$: $O(h^4)$.
 
 ::: {.quarto-wasm-local notebook="l20_convergence.edit.py" view="app" title="Convergence of five composite rules for exp(x), sin(x), and x³" height="680" loading="lazy" fullscreen="true"}
 For $\int_0^1e^x\,\mathrm dx=e-1$, the error curves have slopes of approximately 1 for the left rectangle, 2 for the midpoint and trapezoidal rules, and 4 for both Simpson rules. At $N=6$ ($h=1/6$), the errors are $1.4\times10^{-1}$, $2.0\times10^{-3}$, $4.0\times10^{-3}$, $7.3\times10^{-6}$, and $1.6\times10^{-5}$. The midpoint error is half the trapezoidal error, and the 3/8 error is about 2.25 times the 1/3 error. Simpson's 1/3 error reaches $1.8\times10^{-15}$ at $N=1536$ ($h\approx6.5\times10^{-4}$) and stays at the round-off level up to $N=24576$. For $\sin x$ on $[0,\pi/2]$ the slopes are the same. For $x^3$ on $[1,3]$, both Simpson rules are exact to round-off for every $N$.
@@ -178,25 +209,19 @@ In L18, the error of a finite difference fell as $h$ shrank and then rose again,
 
 ### Error orders of the composite rules
 
-The slopes reflect the leading truncation errors obtained by integrating the Taylor expansions on each panel [@burden2016numerical, §4.3–4.4]. For a sufficiently smooth function, the errors over the fixed interval $[a,b]$ are
+The slopes reflect the leading truncation errors obtained by integrating the Taylor expansions on each panel [@burden2016numerical, §4.3–4.4]. For a sufficiently smooth function on the fixed interval $[a,b]$, @tbl-error-orders lists the error of each rule, exact value minus estimate.
 
-$$
-\boxed{
-\begin{aligned}
-I-L &= \frac{b-a}{2}\,h\,f'(\xi_L) &&=O(h),\\
-I-M &= \frac{b-a}{24}\,h^2\,f''(\xi_M) &&=O(h^2),\\
-I-T &= -\frac{b-a}{12}\,h^2\,f''(\xi_T) &&=O(h^2),\\
-I-S_{1/3} &= -\frac{b-a}{180}\,h^4\,f^{(4)}(\xi_{1/3}) &&=O(h^4),\\
-I-S_{3/8} &= -\frac{b-a}{80}\,h^4\,f^{(4)}(\xi_{3/8}) &&=O(h^4).
-\end{aligned}}
-$$
+| **Method** | Error term | Error order |
+|---|:-:|:-:|
+| Left rectangle | $\dfrac{b-a}{2}\,h\,f'$ | $O(h)$ |
+| Midpoint | $\dfrac{b-a}{24}\,h^2\,f''$ | $O(h^2)$ |
+| Trapezoidal | $-\dfrac{b-a}{12}\,h^2\,f''$ | $O(h^2)$ |
+| Simpson's 1/3 | $-\dfrac{b-a}{180}\,h^4\,f^{(4)}$ | $O(h^4)$ |
+| Simpson's 3/8 | $-\dfrac{b-a}{80}\,h^4\,f^{(4)}$ | $O(h^4)$ |
 
-Here $L,M,T,S_{1/3},S_{3/8}$ denote the five estimates. Each $\xi$ is some point inside $[a,b]$ and may differ between rules. These formulas explain the patterns in the plot:
+: Leading truncation errors of the composite rules on $[a,b]$. {#tbl-error-orders .fd-table}
 
-- **Left rectangle:** halving $h$ approximately halves the error.
-- **Midpoint and trapezoidal:** halving $h$ reduces the error by about 4.
-- **Both Simpson rules:** halving $h$ reduces the error by about 16.
-- **For $x^3$:** the fourth derivative is zero, so both Simpson rules are exact apart from round-off.
+**Why do both Simpson rules integrate $x^3$ without error?** Their error terms contain the fourth derivative, and for $f(x)=x^3$ the fourth derivative is exactly 0.
 
 ## Problem 2: integrating noisy data
 
@@ -214,30 +239,22 @@ $$
 \sigma_I\approx\sigma\sqrt{N}\,h=\frac{\sigma\,(b-a)}{\sqrt N}.
 $$
 
-Compare this with the central-difference derivative of L18, $\sigma_{f'}=\sigma/(\sqrt2\,h)$:
+Compared with the central-difference derivative of L18:
 
-- **Derivative:** more closely spaced points, with a smaller $h$, give **more** noise in the result.
-- **Integral:** more points, with a larger $N$, give **less** noise in the result.
+- **Derivative:** $\sigma_{f'}=\dfrac{\sigma}{\sqrt2\,h}\propto\dfrac1h$. More closely spaced points give **more** noise in the result.
+- **Integral:** $\sigma_I\approx\dfrac{\sigma\,(b-a)}{\sqrt N}\propto\dfrac1{\sqrt N}$. More points give **less** noise in the result.
 
 ### Noisy samples of $x^3$ again
 
-- **Data:** the noisy data set of L18, $y_i=x_i^3+\xi_i$ at 21 evenly spaced points from 1 to 3, with $\sigma=0.1$.
-- **Exact integral:** $\int_1^3x^3\,\mathrm dx=20$.
-- **Question:** how large are the percentage errors of the trapezoidal and Simpson integrals, compared with the 9.4% error of the central-difference derivative in L18?
+Take the same noisy data as in L18, $y_i=x_i^3+\xi_i$ at evenly spaced points from 1 to 3 with $\sigma=0.1$, whose exact integral is $\int_1^3x^3\,\mathrm dx=20$.
 
-For this data set, the data error is 0.93% and the derivative error is 9.4%, as in L18, while the trapezoidal integral is off by only 0.03% and the Simpson integral by 0.005%. One data set can be lucky, so the notebook repeats the experiment with 300 independent noise draws and reports the typical, root-mean-square, errors:
-
-- data: 0.8%,
-- central-difference derivative: 6.9%,
-- trapezoidal integral: 0.25%,
-- Simpson's integral: 0.24%,
-- integral of a fitted cubic: 0.23%.
-
-The formula above predicts a noise of $0.1\times2/\sqrt{20}=0.045$, or 0.22% of the exact value. Combining that noise with the trapezoidal truncation error of 0.1% gives a root-mean-square error of $\sqrt{0.22^2+0.10^2}\%\approx0.24\%$, close to the observed 0.25%. With 81 points, the typical derivative error rises to 22%, while the integral error falls to 0.12%.
+**Question:** how large are the percentage errors of the trapezoidal and Simpson integrals, and how do they change as the number of points increases?
 
 ::: {.quarto-wasm-local notebook="l20_noisy_integral.edit.py" view="app" title="Noisy x³ data: errors of the derivative and of trapezoidal, Simpson, and cubic-fit integrals" height="780" loading="lazy" fullscreen="true"}
-For the L18 data set (21 points, $\sigma=0.1$), the data error is 0.93%, the central-difference derivative error 9.4%, and the trapezoidal and Simpson integral errors 0.028% and 0.005%. Over 300 noise draws, the typical errors are 0.77% for the data, 6.9% for the derivative, 0.25% for the trapezoidal integral, 0.24% for the Simpson integral, and 0.23% for the integral of a fitted cubic. As the number of points rises from 6 to 161, the typical derivative error grows from 2.8% to 41%, while the trapezoidal integral error falls from 1.6% (mostly truncation) to 0.08%. At $\sigma=1.0$ with 21 points, the derivative error is 69% and the integral errors are about 2.3%.
+As the number of points rises from 6 to 161, the typical derivative error grows from 2.8% to 41%, while the trapezoidal integral error falls from 1.6% (mostly truncation) to 0.08%. At $\sigma=1.0$ with 21 points, the derivative error is 69% and the integral errors are about 2.3%.
 :::
+
+As the number of points increases, the integral errors fall, because the independent errors partly cancel in the sum. The derivative error grows, because it divides a small difference by a small $h$. How should we treat such data?
 
 ::: {.callout-important}
 ## Three practical conclusions for noisy data

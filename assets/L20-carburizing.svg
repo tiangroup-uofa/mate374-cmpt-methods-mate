@@ -21,7 +21,7 @@
   <rect id="background" width="160" height="66" style="fill:#ffffff" />
   <g id="layer1" inkscape:groupmode="layer" inkscape:label="a — process">
     <text id="t2" x="2.00" y="7.00" style="font-family:Arial;font-size:6.35px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">a</text>
-    <text id="t3" x="9.00" y="7.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Carburizing steel</text>
+    <text id="t3" x="9.00" y="7.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;font-style:normal;text-anchor:start">Carburizing: adding carbon to steel</text>
     <path id="path4" d="M 8.000,12.000 L 72.000,12.000 L 72.000,26.000 L 8.000,26.000 Z" style="fill:#e8eef7;stroke:none;stroke-width:0.3;stroke-linecap:round;stroke-linejoin:round" />
     <text id="t5" x="40.00" y="17.00" style="font-family:Arial;font-size:3.53px;fill:#5e5e5e;font-weight:normal;font-style:normal;text-anchor:middle">carbon-rich gas, high temperature</text>
     <circle id="c6" cx="15.968" cy="20.684" r="0.7" style="fill:#231f20;stroke:#231f20;stroke-width:0.3" />
@@ -70,7 +70,7 @@
     <path id="path49" d="M 65.000,21.500 L 65.000,29.500" style="fill:none;stroke:#b5473a;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
     <text id="t50" x="10.00" y="35.00" style="font-family:Arial;font-size:3.53px;fill:#ffffff;font-weight:bold;font-style:normal;text-anchor:start">case: high carbon</text>
     <text id="t51" x="10.00" y="55.50" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start">core: initial carbon <tspan style="font-style:italic">C</tspan><tspan style="font-size:2.54px;baseline-shift:sub">0</tspan></text>
-    <text id="steel-label" x="40" y="45" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;text-anchor:middle">Steel</text>
+    <text id="steel-label" x="40" y="45" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:bold;text-anchor:middle">steel part</text>
     <path id="path52" d="M 75.000,26.000 L 75.000,57.000" style="fill:none;stroke:#231f20;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#tri)" />
     <text id="t53" x="76.30" y="45.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start"><tspan style="font-style:italic">x</tspan></text>
     <text id="t54" x="76.30" y="29.00" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:start">0</text>
@@ -99,7 +99,7 @@
     <text id="t76" x="94.80" y="21.42" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:end"><tspan style="font-style:italic">C</tspan><tspan style="font-size:2.54px;baseline-shift:sub">s</tspan></text>
     <text id="t77" x="94.80" y="49.57" style="font-family:Arial;font-size:3.53px;fill:#231f20;font-weight:normal;font-style:normal;text-anchor:end"><tspan style="font-style:italic">C</tspan><tspan style="font-size:2.54px;baseline-shift:sub">0</tspan></text>
     <path id="path78" d="M 104.364,41.333 L 116.073,27.259" style="fill:none;stroke:#1d6b1d;stroke-width:0.3;stroke-linecap:round;stroke-linejoin:round" />
-    <text id="t79" x="116.63" y="24.16" style="font-family:Arial;font-size:3.53px;fill:#1d6b1d;font-weight:normal;font-style:normal;text-anchor:start">carbon uptake</text>
+    <text id="t79" x="116.63" y="24.16" style="font-family:Arial;font-size:3.53px;fill:#1d6b1d;font-weight:normal;font-style:normal;text-anchor:start">carbon added to the steel</text>
     <text id="t80" x="116.63" y="29.00" style="font-family:Arial;font-size:3.53px;fill:#1d6b1d;font-weight:normal;font-style:normal;text-anchor:start">∝ ∫ (<tspan style="font-style:italic">C</tspan> − <tspan style="font-style:italic">C</tspan><tspan style="font-size:2.54px;baseline-shift:sub">0</tspan>) d<tspan style="font-style:italic">x</tspan></text>
   </g>
 </svg>

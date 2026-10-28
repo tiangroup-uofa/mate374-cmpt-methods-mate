@@ -55,3 +55,48 @@ No live browser interaction test was available in this pass.
 
 Instructor's suggestion to box function calls in past lectures is recorded
 for a separate review; L17/L18 remain unchanged.
+
+October 26 revision (14:16 transcript)
+--------------------------------------
+- Python intro: two bullets (bold "callable function", bold "table"); chart
+  caption now matches the new L19 chart with the import box.
+- Function-call boxes use full names: scipy.integrate.quad,
+  numpy.trapezoid, scipy.integrate.simpson.
+- l20_callable_integral: one cell (from scipy.integrate import quad; f;
+  quad(f, 0, 2) as the cell output). No marimo/numpy imports, no md output.
+  Caveat bullets after it: defining f without an analytical form; number of
+  evaluations set by the quadrature rule (bold link, Gauss-Kronrod page).
+- l20_tabulated_integral: one cell, from numpy import trapezoid / from
+  scipy.integrate import simpson, lists for x and y.
+- SciPy simpson note: the transcript says it "falls back to the trapezoid
+  rule". That was the old even='avg' behaviour (removed in SciPy 1.14); the
+  current function uses a Simpson-type correction on the last interval.
+  The page says only that it accepts unequal spacing and an odd number of
+  subintervals with adjusted formulas, and that without an exact function
+  we cannot tell which result is more accurate.
+- New figure L20-array-slices.{svg,png} (a: y[:-1], y[1:], widths
+  x[1:] - x[:-1]; b: y[1:-1:2] weight 4, y[2:-1:2] weight 2, ends weight 1).
+  Static copyable listing of trapezoid_slices / simpson_slices with the
+  spacing and even-N checks commented out. Caution callout comparing hand-
+  written and library results.
+- l20_composite_slices and l20_carburizing rewritten: import / data /
+  library routines / own slice functions; print output, no analytical model.
+- Carburizing: question without "each square metre"; factor 78.5 and the
+  reference answer as bullets. Figure: "Carburizing: adding carbon to
+  steel", "steel part", "carbon added to the steel".
+- l20_convergence: equation shown with one-line $$...$$ in mo.md (verified
+  to produce display TeX). Direct curve labels, O(h)/O(h^2)/O(h^4) wedges,
+  and no Simpson curves for x^3 were already in place.
+- Error-order box uses text labels (Left rectangle, Midpoint, Trapezoid,
+  Simpson's 1/3, Simpson's 3/8); the L, M, T notation and the "halving h"
+  bullets were removed.
+- Problem 2: derivative ~ 1/h and integral ~ 1/sqrt(N) bullets with
+  formulas; noisy x^3 section reduced to the data, one question, the
+  notebook, and a two-sentence observation ending "How should we treat such
+  data?" before the three conclusions.
+
+2026-10-28 revisions
+- Hand-written functions renamed trapezoid_method / simpson_method (page and both notebooks).
+- Prose always names scipy.integrate.quad / simpson / romb and numpy.trapezoid in full.
+- Error-order box replaced by tbl-error-orders (Method | Error term | Error order), written with f(x) derivatives; added the x^3 Simpson note.
+- Noisy-data fallback trimmed to the N-dependence numbers.

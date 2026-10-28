@@ -109,8 +109,7 @@ def _(choice, composite, mo, np, plt, rules, tests):
     ax.set_xlim(hs[0] * 1.5, hs[-1] / 15)
     ax.grid(alpha=0.2, which="major")
 
-    mo.vstack([choice, mo.md(f"$$\n{latex}\n$$"), fig])
-    plt.close(fig)
+    mo.vstack([choice, mo.md(rf"$${latex}$$"), fig])
     return
 
 

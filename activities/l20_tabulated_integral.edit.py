@@ -11,34 +11,13 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import marimo as mo
-    import numpy as np
-    from scipy import integrate
+    from numpy import trapezoid
+    from scipy.integrate import simpson
 
-    return integrate, mo, np
+    x = [0.0, 0.5, 1.0, 1.5, 2.0]
+    y = [0.0, 0.625, 2.0, 4.875, 10.0]
 
-
-@app.cell
-def _(np):
-    x = np.array([0.0, 0.5, 1.0, 1.5, 2.0])
-    y = np.array([0.0, 0.625, 2.0, 4.875, 10.0])
-    return x, y
-
-
-@app.cell
-def _(integrate, np, x, y):
-    trapezoid = np.trapezoid(y, x)
-    simpson = integrate.simpson(y, x=x)
-    return simpson, trapezoid
-
-
-@app.cell
-def _(mo, simpson, trapezoid):
-    mo.md(f"""
-    **Trapezoidal rule:** {trapezoid:.8f}
-
-    **Simpson's rule:** {simpson:.8f}
-    """)
+    trapezoid(y, x), simpson(y, x=x)
     return
 
 

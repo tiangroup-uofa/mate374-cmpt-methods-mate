@@ -11,55 +11,37 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import marimo as mo
     import numpy as np
-    from scipy import integrate
+    from numpy import trapezoid
+    from scipy.integrate import simpson
 
-    return integrate, mo, np
+    return np, simpson, trapezoid
 
 
 @app.cell
 def _(np):
+    def trapezoid_method(y, x):
+        return np.sum((x[1:] - x[:-1]) * (y[:-1] + y[1:]) / 2)
+
+
+    def simpson_method(y, x):
+        h = x[1] - x[0]
+        # We also need to check that the spacings are equal and the number of intervals is even:
+        # Equal spacing:            np.allclose(np.diff(x), h)
+        # Even number of intervals: (len(x) - 1) % 2 == 0
+        return h / 3 * (y[0] + 4 * np.sum(y[1:-1:2])
+                        + 2 * np.sum(y[2:-1:2]) + y[-1])
+
+    return simpson_method, trapezoid_method
+
+
+@app.cell
+def _(np, simpson, simpson_method, trapezoid, trapezoid_method):
     x = np.array([0.0, 0.5, 1.0, 1.5, 2.0])
     y = np.array([0.0, 0.625, 2.0, 4.875, 10.0])
-    return x, y
 
-
-@app.cell
-def _(np, x, y):
-    trapezoid_slices = np.sum((x[1:] - x[:-1]) * (y[:-1] + y[1:]) / 2)
-    return (trapezoid_slices,)
-
-
-@app.cell
-def _(mo, np, x):
-    spacings = np.diff(x)
-    N = len(x) - 1
-    mo.stop(
-        not (np.allclose(spacings, spacings[0]) and N % 2 == 0),
-        mo.md("The 1/3 slice formula needs equal spacing and an even number of subintervals."),
-    )
-    h = spacings[0]
-    return (h,)
-
-
-@app.cell
-def _(h, np, y):
-    simpson_slices = h / 3 * (
-        y[0] + y[-1]
-        + 4 * np.sum(y[1:-1:2])
-        + 2 * np.sum(y[2:-1:2])
-    )
-    return (simpson_slices,)
-
-
-@app.cell
-def _(integrate, mo, np, simpson_slices, trapezoid_slices, x, y):
-    mo.md(f"""
-    **Trapezoidal:** slices {trapezoid_slices:.8f}; NumPy {np.trapezoid(y, x):.8f}
-
-    **Simpson's 1/3:** slices {simpson_slices:.8f}; SciPy {integrate.simpson(y, x=x):.8f}
-    """)
+    print("trapezoid:", trapezoid_method(y, x), trapezoid(y, x))
+    print("simpson:  ", simpson_method(y, x), simpson(y, x=x))
     return
 
 
