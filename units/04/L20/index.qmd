@@ -266,27 +266,60 @@ As the number of points increases, the integral errors fall, because the indepen
 
 Integration is forgiving of noise, but a very coarse data set still has a truncation error. With only 6 points, the trapezoidal error of 1.6% for these data comes almost entirely from truncation. The number of points should be large enough for the truncation error to fall below the noise, after which further independent measurements reduce the typical noise. A systematic measurement offset does not cancel when the values are added.
 
-## Problem 3 (reading material): Richardson extrapolation, an accurate result from two inaccurate ones
+## Problem 3 (reading material): Richardson extrapolation
 
-If we know how the error depends on $h$, two calculations at different spacings can cancel it. Richardson extrapolation needs one calculation more than the estimate we already have, a second estimate at half the spacing. The trapezoidal estimate with the spacing $h$ has the form
+Richardson's extrapolation is a method for obtaining a more accurate estimate of the value of an integral from two less accurate estimates [@richardson1911approximate].
+
+### Motivation
+
+The composite trapezoidal rule has an $O(h^2)$ error (@tbl-error-orders). If we halve the spacing to $h/2$, we evaluate the function at about twice as many points, yet the error only falls to about $(h/2)^2=h^2/4$, a quarter of its previous value. Can we do better with the two estimates we already have?
+
+![Richardson extrapolation combines two trapezoidal estimates of the same integral, one with spacing $h$ and one with spacing $h/2$, into a single estimate with an $O(h^4)$ error.](../../../assets/L20-richardson.png){#fig-richardson width="90%" fig-alt="Left: a concave curve with one trapezoid of width h under its chord, labelled I(h), error O(h squared). Right: the same curve with two trapezoids of width h over 2, labelled I(h/2), error O(h squared). Arrows from both lead to a box: Richardson extrapolation, I exact approximately equals 4 I(h/2) minus I(h), all over 3, error O(h to the fourth), the same accuracy as Simpson's 1/3 rule."}
+
+### Idea: combine $I(h)$ and $I(h/2)$
+
+Write $I(h)$ for the trapezoidal estimate with spacing $h$ and $I(h/2)$ for the estimate with spacing $h/2$. Each estimate differs from the exact integral by its truncation error:
 
 $$
-T(h)=I+Ch^2+O(h^4),
+I_{\text{exact}}=I(h)+Ch^2+O(h^4),
 $$
 
-where $C$ is the leading error coefficient and does not depend on $h$. Halving the spacing gives
+where $C$ is a coefficient that depends on $f$ and the interval but not on $h$. The next term is $O(h^4)$ because the error of the trapezoidal rule contains only even powers of $h$ [@burden2016numerical, §4.5]. Replacing $h$ with $h/2$ gives
 
 $$
-T(h/2)=I+\frac{C h^2}{4}+O(h^4).
+I_{\text{exact}}=I(h/2)+\frac{Ch^2}{4}+O(h^4).
 $$
 
-Multiplying the second equation by 4 and subtracting the first removes the $Ch^2$ term and leaves $3I$ plus an $O(h^4)$ error.
+Both equations contain the same unknown term $Ch^2$, in different amounts. Multiplying the second equation by 4 and subtracting the first removes it:
+
+$$
+4I_{\text{exact}}-I_{\text{exact}}=4I(h/2)-I(h)+Ch^2-Ch^2+O(h^4),
+$$
+
+so that $3I_{\text{exact}}=4I(h/2)-I(h)+O(h^4)$.
 
 ### Summary: Richardson extrapolation of the trapezoidal rule
 
 $$
-\boxed{I=\frac{4\,T(h/2)-T(h)}{3}+O(h^4)}
+\boxed{I_{\text{exact}}=\frac{4\,I(h/2)-I(h)}{3}+O(h^4)}
 $$
+
+### The result is Simpson's 1/3 rule
+
+Take one panel from $a$ to $b$ with $h=b-a$ and midpoint $m=(a+b)/2$. The two trapezoidal estimates are
+
+- **Spacing $h$:** $I(h)=\dfrac h2\big[f(a)+f(b)\big]$.
+- **Spacing $h/2$:** $I(h/2)=\dfrac h4\big[f(a)+2f(m)+f(b)\big]$.
+
+Substituting them into the Richardson formula gives
+
+$$
+\frac{4I(h/2)-I(h)}{3}
+=\frac13\Big[h\,f(a)+2h\,f(m)+h\,f(b)-\frac h2 f(a)-\frac h2 f(b)\Big]
+=\frac{h/2}{3}\Big[f(a)+4f(m)+f(b)\Big].
+$$
+
+This is Simpson's 1/3 rule with spacing $h/2$. Applying the same step on every panel of a composite trapezoidal sum gives the composite Simpson's 1/3 rule, which explains why its error is $O(h^4)$ (@tbl-error-orders).
 
 Repeating this step on finer and finer halvings is **Romberg integration**. In SciPy, if you can afford evenly spaced data with $2^k+1$ points, that is, the interval split into 4, 8, 16, 32, 64, 128, 256, 512, … subintervals, `scipy.integrate.romb(y, dx=h)` applies these extrapolations. For smooth, low-noise data, it can improve the trapezoidal estimate substantially.
 

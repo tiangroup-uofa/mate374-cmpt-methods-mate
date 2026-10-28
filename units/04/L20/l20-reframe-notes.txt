@@ -100,3 +100,5 @@ October 26 revision (14:16 transcript)
 - Prose always names scipy.integrate.quad / simpson / romb and numpy.trapezoid in full.
 - Error-order box replaced by tbl-error-orders (Method | Error term | Error order), written with f(x) derivatives; added the x^3 Simpson note.
 - Noisy-data fallback trimmed to the N-dependence numbers.
+
+- Richardson section rewritten (definition + richardson1911approximate, motivation, I(h)/I(h/2) derivation with I_exact and C, boxed result, reduction to Simpson 1/3). New figure L20-richardson.{svg,png} at 300 dpi, exported with Inkscape. Unit nocite updated.

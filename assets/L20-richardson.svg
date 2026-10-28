@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160mm" height="85mm" viewBox="0 5 160 85" version="1.1">
+<title>Richardson extrapolation of the trapezoidal rule</title>
+<desc>Two trapezoidal estimates of the same integral, I(h) with one subinterval of width h and I(h/2) with two subintervals of width h/2, each with error O(h squared). Arrows merge them into the Richardson combination (4 I(h/2) minus I(h)) divided by 3, whose error is O(h to the fourth), the same accuracy as Simpson 1/3 rule.</desc>
+<defs><marker id="arr" orient="auto-start-reverse" markerWidth="2" markerHeight="2" viewBox="0 0 6 6" refX="5" refY="3" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="#231f20"/></marker></defs>
+<rect y="5" width="160" height="85" fill="#ffffff"/>
+<text x="42.00" y="12.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:bold">Trapezoidal rule, spacing <tspan font-style="italic">h</tspan></text>
+<polygon points="14.00,40 14.00,34.00 70.00,22.00 70.00,40" style="fill:#2ca02c;fill-opacity:0.18;stroke:none"/>
+<path d="M 14.00,40 V 34.00" style="stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 70.00,40 V 22.00" style="stroke:#2ca02c;stroke-width:0.3"/>
+<polyline points="14.00,34.00 70.00,22.00" style="fill:none;stroke:#b5473a;stroke-width:0.5;stroke-dasharray:1.2,0.8"/>
+<polyline points="11.20,35.99 11.98,35.42 12.76,34.86 13.54,34.32 14.32,33.78 15.10,33.26 15.88,32.74 16.66,32.24 17.44,31.74 18.22,31.26 19.00,30.78 19.78,30.32 20.56,29.87 21.34,29.42 22.12,28.99 22.90,28.57 23.68,28.15 24.46,27.75 25.24,27.36 26.02,26.98 26.79,26.60 27.57,26.24 28.35,25.89 29.13,25.55 29.91,25.22 30.69,24.90 31.47,24.59 32.25,24.29 33.03,24.00 33.81,23.72 34.59,23.45 35.37,23.19 36.15,22.94 36.93,22.70 37.71,22.47 38.49,22.26 39.27,22.05 40.05,21.85 40.83,21.66 41.61,21.48 42.39,21.32 43.17,21.16 43.95,21.01 44.73,20.88 45.51,20.75 46.29,20.64 47.07,20.53 47.85,20.43 48.63,20.35 49.41,20.27 50.19,20.21 50.97,20.16 51.75,20.11 52.53,20.08 53.31,20.05 54.09,20.04 54.87,20.04 55.65,20.04 56.43,20.06 57.21,20.09 57.98,20.13 58.76,20.17 59.54,20.23 60.32,20.30 61.10,20.38 61.88,20.47 62.66,20.57 63.44,20.68 64.22,20.80 65.00,20.93 65.78,21.07 66.56,21.22 67.34,21.38 68.12,21.55 68.90,21.73 69.68,21.92 70.46,22.12 71.24,22.33 72.02,22.55 72.80,22.79" style="fill:none;stroke:#231f20;stroke-width:0.5"/>
+<path d="M 9.52,40 H 74.48" style="stroke:#231f20;stroke-width:0.35"/>
+<circle cx="14.00" cy="34.00" r="0.8" fill="#231f20"/>
+<circle cx="70.00" cy="22.00" r="0.8" fill="#231f20"/>
+<path d="M 14.40,44 H 69.60" style="stroke:#231f20;stroke-width:0.3;marker-start:url(#arr);marker-end:url(#arr)"/>
+<text x="42.00" y="48.20" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-style:italic">h</text>
+<text x="42.00" y="55.00" style="font-family:Arial;font-size:3.88px;fill:#231f20;text-anchor:middle;"><tspan font-style="italic">I</tspan>(<tspan font-style="italic">h</tspan>), error <tspan font-style="italic">O</tspan>(<tspan font-style="italic">h</tspan><tspan style="font-size:2.6px" dy="-1.4">2</tspan><tspan dy="1.4">)</tspan></text>
+<text x="118.00" y="12.00" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:bold">Trapezoidal rule, spacing <tspan font-style="italic">h</tspan>/2</text>
+<polygon points="90.00,40 90.00,34.00 118.00,21.40 146.00,22.00 146.00,40" style="fill:#2ca02c;fill-opacity:0.18;stroke:none"/>
+<path d="M 90.00,40 V 34.00" style="stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 118.00,40 V 21.40" style="stroke:#2ca02c;stroke-width:0.3"/>
+<path d="M 146.00,40 V 22.00" style="stroke:#2ca02c;stroke-width:0.3"/>
+<polyline points="90.00,34.00 118.00,21.40 146.00,22.00" style="fill:none;stroke:#b5473a;stroke-width:0.5;stroke-dasharray:1.2,0.8"/>
+<polyline points="87.20,35.99 87.98,35.42 88.76,34.86 89.54,34.32 90.32,33.78 91.10,33.26 91.88,32.74 92.66,32.24 93.44,31.74 94.22,31.26 95.00,30.78 95.78,30.32 96.56,29.87 97.34,29.42 98.12,28.99 98.90,28.57 99.68,28.15 100.46,27.75 101.24,27.36 102.02,26.98 102.79,26.60 103.57,26.24 104.35,25.89 105.13,25.55 105.91,25.22 106.69,24.90 107.47,24.59 108.25,24.29 109.03,24.00 109.81,23.72 110.59,23.45 111.37,23.19 112.15,22.94 112.93,22.70 113.71,22.47 114.49,22.26 115.27,22.05 116.05,21.85 116.83,21.66 117.61,21.48 118.39,21.32 119.17,21.16 119.95,21.01 120.73,20.88 121.51,20.75 122.29,20.64 123.07,20.53 123.85,20.43 124.63,20.35 125.41,20.27 126.19,20.21 126.97,20.16 127.75,20.11 128.53,20.08 129.31,20.05 130.09,20.04 130.87,20.04 131.65,20.04 132.43,20.06 133.21,20.09 133.98,20.13 134.76,20.17 135.54,20.23 136.32,20.30 137.10,20.38 137.88,20.47 138.66,20.57 139.44,20.68 140.22,20.80 141.00,20.93 141.78,21.07 142.56,21.22 143.34,21.38 144.12,21.55 144.90,21.73 145.68,21.92 146.46,22.12 147.24,22.33 148.02,22.55 148.80,22.79" style="fill:none;stroke:#231f20;stroke-width:0.5"/>
+<path d="M 85.52,40 H 150.48" style="stroke:#231f20;stroke-width:0.35"/>
+<circle cx="90.00" cy="34.00" r="0.8" fill="#231f20"/>
+<circle cx="118.00" cy="21.40" r="0.8" fill="#231f20"/>
+<circle cx="146.00" cy="22.00" r="0.8" fill="#231f20"/>
+<path d="M 90.40,44 H 117.60" style="stroke:#231f20;stroke-width:0.3;marker-start:url(#arr);marker-end:url(#arr)"/>
+<text x="104.00" y="48.20" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-style:italic">h/2</text>
+<path d="M 118.40,44 H 145.60" style="stroke:#231f20;stroke-width:0.3;marker-start:url(#arr);marker-end:url(#arr)"/>
+<text x="132.00" y="48.20" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;font-style:italic">h/2</text>
+<text x="118.00" y="55.00" style="font-family:Arial;font-size:3.88px;fill:#231f20;text-anchor:middle;"><tspan font-style="italic">I</tspan>(<tspan font-style="italic">h</tspan>/2), error <tspan font-style="italic">O</tspan>(<tspan font-style="italic">h</tspan><tspan style="font-size:2.6px" dy="-1.4">2</tspan><tspan dy="1.4">)</tspan></text>
+<path d="M 42.00,58 L 66.00,66.5" style="fill:none;stroke:#231f20;stroke-width:0.4;marker-end:url(#arr)"/>
+<path d="M 118.00,58 L 94.00,66.5" style="fill:none;stroke:#231f20;stroke-width:0.4;marker-end:url(#arr)"/>
+<rect x="38" y="67" width="84" height="20" rx="1.5" style="fill:#e8eef7;stroke:#1f4e8c;stroke-width:0.4"/>
+<text x="80.00" y="72.40" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle;font-weight:bold">Richardson extrapolation</text>
+<text x="80.00" y="78.40" style="font-family:Arial;font-size:3.88px;fill:#231f20;text-anchor:middle;"><tspan font-style="italic">I</tspan><tspan style="font-size:2.6px" dy="0.8">exact</tspan><tspan dy="-0.8" dx="0.8">≈</tspan><tspan dx="0.8">[4</tspan><tspan dx="0.5" font-style="italic">I</tspan>(<tspan font-style="italic">h</tspan>/2) − <tspan font-style="italic">I</tspan>(<tspan font-style="italic">h</tspan>)] / 3,<tspan dx="0.9">error</tspan><tspan dx="0.9" font-style="italic">O</tspan>(<tspan font-style="italic">h</tspan><tspan style="font-size:2.6px" dy="-1.4">4</tspan><tspan dy="1.4">)</tspan></text>
+<text x="80.00" y="84.20" style="font-family:Arial;font-size:3.53px;fill:#231f20;text-anchor:middle;fill:#1d6b1d;font-weight:bold">same accuracy as Simpson's 1/3 rule</text>
+</svg>
