@@ -279,7 +279,6 @@ def plot_newton(
             return fig
 
     newton_figure = draw()
-    plt.close(newton_figure)
     return (newton_figure,)
 
 

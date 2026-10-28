@@ -364,7 +364,6 @@ def parity_plot(mo, np, parity_values, plt):
     _ax.set_aspect("equal", adjustable="box")
     _ax.legend()
     _ax.grid(alpha=0.2)
-    plt.close(_fig)
     _fig
     return
 

@@ -116,7 +116,6 @@ def _(composite, mo, n_sub, np, plt, rule):
             ha="center", va="top", fontsize=15,
         )
         output = fig
-        plt.close(fig)
 
     mo.vstack([mo.hstack([rule, n_sub], justify="start", gap=2), output])
     return

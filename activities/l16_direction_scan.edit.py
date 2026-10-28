@@ -131,7 +131,6 @@ def drawing(H, TwoSlopeNorm, energy, np, plt, scan_direction):
 @app.cell(hide_code=True)
 def display(angle, draw_direction, mo, plt):
     figure = draw_direction(angle.value)
-    plt.close(figure)
     mo.vstack([
         figure,
         mo.md(r"""

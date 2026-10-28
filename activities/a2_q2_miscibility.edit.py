@@ -59,7 +59,6 @@ def plotting_support(mo, np, plt):
         ax.set_aspect("equal", adjustable="box")
         ax.grid(alpha=0.25)
         ax.legend()
-        plt.close(fig)
         if not np.isclose(center, 0.5, rtol=0, atol=1e-8):
             return mo.vstack([
                 mo.callout(mo.md(
