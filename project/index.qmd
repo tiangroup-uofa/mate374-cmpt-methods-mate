@@ -1,6 +1,7 @@
 ---
-title: "Course project"
-subtitle: "Provisional staged computational materials study"
+title: "MAT E 374 Project"
+subtitle: "Melting of copper nanoparticles by molecular dynamics"
+bibliography: ../references.bib
 format:
   html:
     toc: true
@@ -8,90 +9,122 @@ format:
     toc: false
 ---
 
-## Purpose
+## Instructions
 
-The project asks students to create one end-to-end, reproducible materials prediction:
+- **Groups:** groups of five, formed by the instructor. The instructor will email the group list to each student later in the week of November 2.
+- **Same project for all groups:** every group works on the project described on this page.
+- **Weight:** 20% of the course grade.
+- **Due:** **Monday, December 7, 2026** (last day of classes), one final report per group via Canvas.
 
-> question → model and scale → numerical representation → computation → verification/validation → materials conclusion
+## How the project works
 
-It should assess synthesis and engineering judgment, not merely successful operation of a software package.
+- **Content:** the project combines a real materials simulation task, parameter regression, and numerical code.
+- **Goal:** interpret the melting behaviour of a real metal at the atomic scale, and compare the results of different methods.
+- **Code:** the instructor provides all example code as marimo notebooks. The links will be posted on this page later in the week of November 2.
+  - The notebooks run on a remote GPU instance (molab) from your own laptop. No local installation is required.
+  - The molecular dynamics (MD) engine is [OpenMM](https://openmm.org), a fast MD code that runs on the GPU.
+- **Run time:** the full set of simulations for one project takes less than a few hours of computing time. This does not include writing the report.
 
-## Recommended structure
+## Final report
 
-Use teams of **three or four**, rather than the Fall 2025 teams of five or six. With roughly 26 students this yields six or seven teams and leaves enough substantive responsibility for each member.
+- **Format:** use the format of an American Chemical Society (ACS) journal article.
+  - [ACS author guidelines](https://researcher-resources.acs.org/publish/author_guidelines)
+  - [ACS templates on Overleaf](https://www.overleaf.com/gallery/tagged/acs) (LaTeX). ACS also provides Word templates through its author guidelines.
+- **Style:** concise and scientific.
+- **Sections:**
+  - **Title** of the project.
+  - **Scope:** the question you answer and the systems you simulate.
+  - **Methods:** the model, simulation settings, and analysis procedure.
+  - **Results and discussion,** with figures and tables. Explain what each figure shows and what it means for the material.
+  - **References:** list every source you use to support a claim.
 
-Offer several bounded tracks that share the same rubric and can begin before late-term specialist lectures:
+## The problem
 
-- equilibrium or free-energy prediction;
-- calibration and kinetic evolution;
-- diffusion/heat transport with interfaces;
-- sampling or lattice Monte Carlo;
-- atomistic relaxation or molecular dynamics, with additional scaffolding.
+The melting behaviour of metals, and of small metal particles in particular, is of great importance in materials science. A nanoparticle melts at a lower temperature than the bulk metal because a large fraction of its atoms sit at the surface, where they have fewer neighbours and are less strongly bound. This affects, for example, sintering, catalysis, and printed electronics.
 
-A common Cu/LAMMPS case may remain one option, but it should not be the only project. Students choosing an advanced package must first reproduce or verify one transparent toy/reference result.
+Buffat and Borel measured this **melting temperature depression** for gold particles with electron diffraction [@buffat1976gold]. Gold particles 2–3 nm in diameter melted several hundred kelvin below the bulk melting point of gold (1337 K), and the depression grew steadily as the particles became smaller.
 
-## Milestones
+![Melting temperature of gold particles against diameter $D$ (in Å). Circles: Buffat and Borel; squares: earlier data by Sambles. The solid line is a fit of a thermodynamic model. Reproduced from Fig. 5 of @buffat1976gold.](figures/buffat1976_fig5.png){width=55%}
 
-| Milestone | Recommended timing | Evidence |
-|---|---|---|
-| **P0 · Track and team selection** | Fri Oct 23 | Individual ranked track choices and one relevant skill; formative |
-| **P1 · Lightweight proposal** | Mon Nov 2, prepared in S08 | Question, model/data source, intended method, reference/limit, risks, and team roles |
-| — | Nov 9–13 | **Reading Week: no expected project work** |
-| **P2 · Reproducible baseline** | Fri Nov 20 | A clean run producing one baseline figure/table plus environment and data instructions |
-| **P3 · Credibility checkpoint** | Fri Nov 27 | Draft result plus convergence/conservation/residual/uncertainty evidence; short TA or peer audit |
-| **P4 · Final artifact and handoff** | Mon Dec 7 or approved term-work deadline | Final notebook, static memo, data/code bundle, and individual reflection |
+To first order, the depression follows a power law in the particle diameter $D$:
 
-Track selection and the proposal are deliberately light setup. Based on the MATE 664 experience, protect **November 16–December 7 as three active project weeks**. Milestones should receive feedback quickly enough to change the final work, and no assignment should be due after November 20. Avoid making a project depend on MD or other material introduced only in late November.
+$$
+T_\mathrm{m}(D) = T_\mathrm{m,bulk}\left[1-\left(\frac{D_0}{D}\right)^{\alpha}\right], \qquad \alpha \approx 1,
+$$
 
-## Deliverables
+where $D_0$ is a length of the order of a nanometre. With $\alpha = 1$, this is the Gibbs–Thomson form, $T_\mathrm{m}(D) = T_\mathrm{m,bulk} - C/D$. The number of atoms is $N \propto D^3$, so $1/D \propto N^{-1/3}$.
 
-1. **Executable marimo notebook** that presents the question, model, computation, diagnostics, and interpretation in a readable order.
-2. **Two-page engineering memo or equivalent static HTML/PDF**, including the decision/conclusion and key credibility evidence.
-3. **Reproducibility bundle** containing data provenance, environment/package information, and instructions for a clean run.
-4. **Individual contribution and judgment statement** explaining one decision, one diagnostic, and one limitation each student owns.
+In this project, you simulate the melting of free copper (Cu) nanoparticles of different sizes with MD. The atoms interact through the embedded-atom method (EAM) potential for Cu by Mishin and co-workers [@mishin2001cu]. The total energy is
 
-Marimo is the interactive working and communication environment, but the static artifact is required for reliable grading, archiving, printing, and accessibility.
+$$
+E = \sum_{i<j} \phi(r_{ij}) + \sum_i F(\rho_i), \qquad \rho_i = \sum_{j\neq i} f(r_{ij}),
+$$
 
-## Common rubric
+where $\phi$ is a pair energy, $\rho_i$ is the electron density at atom $i$ from its neighbours, and $F$ is the energy to embed atom $i$ in that density.
 
-| Criterion | Suggested share |
-|---|---:|
-| Materials question, significance, and scope | 10% |
-| Model, assumptions, scales, and method selection | 20% |
-| Correct and reproducible computational work | 20% |
-| Verification, validation, uncertainty, and comparison evidence | 25% |
-| Physical interpretation and limitations | 15% |
-| Communication and reproducibility handoff | 5% |
-| Individual reflection/accountability | 5% |
+### Part 1 · Set up and check the simulation
 
-At least part of the project grade should be individual. A polished visualization cannot compensate for absent verification or an unsupported materials conclusion.
+- Use the provided notebook to run individual MD simulations of a free Cu nanoparticle at a fixed temperature.
+- Record the potential energy and the kinetic energy against time, for up to 100 ps.
+- Show that both energies become stable (fluctuate about a constant mean) after an initial period. Report how long this takes.
+- Check that the mean kinetic energy agrees with the target temperature, $\langle E_\mathrm{kin}\rangle/N = \tfrac{3}{2}k_\mathrm{B}T$.
 
-## Seminar support
+![A 4 nm particle (2899 atoms, inset) at 900 K, started from the perfect crystal with all atoms at rest. Both energies reach a stable mean within a few picoseconds. The kinetic energy fluctuates about $\tfrac{3}{2}k_\mathrm{B}T$.](figures/part1_stability.png){width=70%}
 
-The project should use existing seminar time rather than add separate meetings:
+### Part 2 · Melting by a heating ramp
 
-- **S06:** question, scope, and identifiability clinic;
-- **S08:** complete the lightweight proposal template;
-- **S09 or S10:** reproducibility and numerical-credibility checkpoint;
-- **S12:** structured peer audit and handoff test.
+- Heat a nanoparticle by increasing the thermostat temperature at a constant rate (the **heating rate**, in K/ps).
+- Plot the potential energy per atom against temperature. Melting appears as a region where the energy rises steeply (the latent heat).
+- Record the temperature at the **onset** and at the **end** of the melting region.
+- Repeat for:
+  - different particle sizes (numbers of atoms);
+  - different heating rates.
+- Report how the onset and end temperatures change with size and with heating rate.
 
-The TA needs a project triage guide: first check whether the model answers the stated question, then whether the computation is numerically credible, and only then debug package syntax.
+![Heating ramps for three particle sizes at 1.2 K/ps. Below the melting region, the energy rises slowly and linearly. The melting region has a much steeper slope.](figures/heating_ramp_example.png){width=70%}
 
-## Scope controls
+### Part 3 · Cooling
 
-A viable project must:
+- Take a particle that is fully melted and cool it at the same rate that you used for heating.
+- Record the temperature where the liquid freezes (the solidification point).
+- Compare the solidification point with the melting region from Part 2. You will find that the particle freezes at a much lower temperature than it melts.
+- Use the literature to identify this phenomenon and explain its origin.
 
-- answer one focused materials question;
-- use a model and computation the team can explain;
-- include at least one quantitative reference, limit, invariant, or refinement study;
-- fit the available browser, workstation, or server resources;
-- avoid depending on content introduced only in the final one or two lectures;
-- have a reduced-data or toy fallback if a large simulation fails.
+![Left: potential energy of a 4 nm particle heated from 400 K to 1600 K, held for 20 ps, and cooled to 300 K, all at 2.4 K/ps. Right: slices 4 Å thick through the centre of the particle, in the liquid at 1600 K and after cooling to 300 K. Gold atoms are crystalline and blue atoms are liquid-like.](figures/part3_hysteresis.png){width=100%}
 
-Projects should not claim competence in production DFT, FEM, phase field, MC, MD, or ML after one course exercise. They should demonstrate a transferable workflow and honest judgment about what the selected model can support.
+### Part 4 · Size dependence and bulk melting temperature
 
-::: {.callout-warning}
-## Assessment-weight decision
+A slow heating rate gives an estimate of the melting temperature of a nanoparticle, even though the estimate is not exact.
 
-The Fall 2025 syllabus lists only 25% for all assignments even though the archived A9 is a substantial team project. For the redesign, give the staged project a visible **20%** category in the recommended 20/20/20/40 partition. Keep proposal and checkpoint grading light; most marks should belong to the final artifact and individual reflection. If the final examination must remain at 45%, reduce the midterm to 15% rather than disguising the project as one small assignment.
-:::
+- Choose a slow heating rate. Measure the melting temperature of particles of at least four different sizes.
+- Repeat each simulation two to three times with different random seeds, and report the mean and spread.
+- Fit your results to $T_\mathrm{m}(D) = T_\mathrm{m,bulk} - C/D$.
+- Answer these questions:
+  - How good is the linear fit in $1/D$?
+  - What does the fit give for the melting temperature of bulk copper?
+  - How does your value compare with the experimental melting point of Cu (1357.77 K)? What causes the difference? Consider both the heating rate and the potential.
+
+![Melting temperature against inverse diameter for particles heated at 0.6 K/ps, mean and spread of three runs (one run for 12 nm). The insets show three of the particles at the same scale.](figures/part4_size.png){width=70%}
+
+## Bonus · Fit your own EAM-type potential
+
+The EAM potential describes the melting of Cu well. But how does one make such a potential? In this optional part, you fit an EAM-type potential to reference data from density functional theory (DFT), with the linear regression methods from this course.
+
+- **Model:** use the same form of the energy as above, with each function written as a sum of simple terms:
+  - pair energy $\phi(r) = \sum_k a_k (t_k - r)^3$ for $r < t_k$ (cubic pieces with fixed knots $t_k$);
+  - embedding energy $F(\rho) = c_1\rho^{1/2} + c_2\rho^{3/2} + c_3\rho^2$;
+  - density function $f(r)$ fixed in advance.
+- **Linear regression:** the energy and forces are linear in the coefficients $a_k$ and $c_m$. Fitting the model to energies and forces is a linear least-squares problem.
+- **Data:** a separate notebook from the instructor shows:
+  - how long one DFT calculation of a small Cu cell takes;
+  - a provided set of about 100 to 200 reference structures (solid, liquid, and strained cells) with energies and forces.
+- **Task:**
+  - Fit the coefficients. Report the energy and force errors on structures that you did not use in the fit.
+  - Check the lattice constant of fcc Cu from your potential.
+  - Put your potential back into the simulation notebook and repeat part of Part 2 or Part 4. Compare the melting temperatures with those of the Mishin EAM potential.
+- **Marks:** up to 10% extra on the project mark (the project mark cannot exceed 100%):
+  - 4%: a working fit, with errors reported on held-out structures;
+  - 2%: the lattice constant compared with the DFT value and with experiment;
+  - 4%: melting temperatures from your potential, compared with the Mishin EAM and discussed.
+
+## References
