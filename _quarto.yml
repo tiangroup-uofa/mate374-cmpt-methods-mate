@@ -7,6 +7,9 @@ project:
   post-render:
     - python scripts/generate_llms_txt.py
   resources:
+    - "exams/midterm-questions.pdf"
+    - "exams/midterm-final-answers.pdf"
+    - "completed-notebooks/**"
     - "wasm-local/**"
     - "assets/L01-fast16-implosion-poster.png"
     - "assets/prep-*.svg"
@@ -180,6 +183,8 @@ website:
             text: "Midterm prep (II)"
           - href: exams/midterm-mock.qmd
             text: "Mock midterm"
+          - href: exams/midterm-answer-check.qmd
+            text: "Midterm results and answer check"
       - href: project/index.qmd
         text: Project
 
