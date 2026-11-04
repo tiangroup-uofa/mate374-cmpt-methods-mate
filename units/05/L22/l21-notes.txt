@@ -1,0 +1,114 @@
+L21 · authoring notes for the instructor
+========================================
+
+October 23: first full draft of L21, the Unit 06 landing page, and the Unit 06
+references page.
+
+Sources
+-------
+- Instructor dictation (Oct 23, 14:38-14:48) on the mathematical background of
+  ODEs: Newton's law as an ODE, order/linearity, IVP versus BVP, characteristic
+  equation, Stefan-Boltzmann cooling, discretization, explicit versus implicit.
+- units/04/main_idea.txt and planning/unit04-atomic-motion-outline.txt for the
+  intended bridge from L20 (its "Next" paragraph promises L21 starts from
+  Newton's second law and builds time-stepping methods).
+
+Decisions to confirm
+--------------------
+- Unit number. The dictation says "unit 6", so the files are in units/06/ and
+  the sidebar jumps from 04 to 06. units/05/ holds only main_idea.txt (the PDE
+  plan, "Unit 5: changing through space"). If ODEs should be Unit 5, move the
+  contents of units/06/ into units/05/ (the folder already exists, so move the
+  files individually) and update the "Unit 06" strings, units/index.qmd, and
+  the _quarto.yml sidebar. The PDE plan then needs renumbering too.
+- Lecture sequence. main_idea.txt plans PDE lectures L23-L26, which leaves only
+  L21-L22 for ODEs. The landing page lists L21 only, like Unit 04 at L17.
+  Proposed continuation, for your decision:
+    L22  Euler on the harmonic bond (amplitude/energy growth), midpoint/RK2,
+         RK4, order of accuracy, scipy.integrate.solve_ivp and tolerances.
+    L23  Newton's equation for atoms: velocity Verlet, energy conservation,
+         time-step choice, the MD loop.
+    L24  A first MD simulation (small LJ cluster), in a notebook.
+  Stability, stiffness, and implicit solvers beyond the Euler level need more
+  room than the old five-lecture catalogue allowed; the outline advises against
+  compressing them.
+- Title of the unit: "Ordinary differential equations and molecular dynamics".
+  The sidebar and units/index.qmd use the same wording.
+- The Unit 06 landing page is one paragraph plus the L21 link, as for Unit 04.
+  The big picture (what MD means in this unit) is the opening section of L21.
+  For the PDE unit, the same section should say what "phase field" means.
+- L21 "Next" names L22 and the Euler-on-oscillator comparison.
+
+Corrections and interpretations of the dictation
+------------------------------------------------
+- "dy^2/dx^2 + b dy/dx + dx = 0" is read as a y'' + b y' + c y = 0.
+- Linearity: the dictation says a linear ODE is one where "all the functions
+  only depend on one dependent variable". The page uses the standard
+  definition (unknown and derivatives to the first power, coefficients depend
+  only on the independent variable).
+- Stefan-Boltzmann cooling has no explicit T(t). It is separable, so t(T)
+  exists through logarithms and arctangents. The page says so instead of
+  saying "no analytical solution".
+- Euler error: the dictation gives O(dx). The page gives O(h^2) per step and
+  O(h) globally, matching the forward difference of L17.
+- IVP/BVP: the dictation says first-order ODEs are usually IVPs and
+  second-order ODEs usually BVPs, with no hard rule. The page says the type
+  follows from where the conditions are given, and that time problems are IVPs.
+- Implicit methods: the page does not say they have no step limit. It states
+  the backward-Euler result for y' = -lambda y only, and that both methods are
+  O(h).
+- "Central method" for better estimates is mentioned in one sentence and left
+  to the following lectures.
+
+Added beyond the dictation
+--------------------------
+- Opening section on what molecular dynamics means in this unit (requested:
+  "so people don't get really scared").
+- Reduction of Newton's equation to two first-order equations (final section)
+  so that the Euler formulas apply to atoms and L22 can pick it up.
+- Harmonic-bond solution x(t) = x0 cos(wt) + (v0/w) sin(wt), kept as the exact
+  benchmark for numerical trajectories.
+- A short explanation of why a long explicit step fails (lambda = 4 alpha T^3).
+
+Cooling problem (all values checked numerically)
+------------------------------------------------
+- Steel sphere, R = 1 mm, emissivity 0.8, rho = 7800 kg/m^3, c = 500 J/(kg K),
+  T0 = 1200 K, T_ambient = 300 K, vacuum, uniform temperature.
+- alpha = 3 eps sigma / (rho c R) = 3.49e-11 K^-3 s^-1; initial rate -72.07 K/s.
+- Reference: solve_ivp, Radau, rtol 1e-11. T(5 s) = 969.1 K, T(10) = 852.2,
+  T(20) = 723.6, T(40) = 599.7, T(60) = 534.1.
+- Explicit Euler error at 20 s: h = 5, 2, 1, 0.5 s give -64.7, -20.7, -9.9,
+  -4.8 K. h = 20 s gives -241 K at the first step (negative temperature).
+- Implicit Euler (Newton on each step), h = 20 s: 846.8, 692.2, 604.6 K at
+  20, 40, 60 s. At h = 1 s the error at 20 s is +9.2 K.
+- Constant specific heat and emissivity, no convection or conduction inside
+  the sphere. These are stated in the lecture.
+
+Notebooks (activities/)
+-----------------------
+- l21_char_roots.edit.py: dropdown of four equations, sliders for y(0), y'(0);
+  the two real roots case solves the 2 x 2 system with numpy.
+- l21_euler_cooling.edit.py: explicit Euler, step slider, table and plot.
+- l21_implicit_euler.edit.py: method dropdown and step slider; the implicit
+  step uses a visible Newton loop.
+- All three export to wasm-local/ and render without warnings.
+
+References
+----------
+- Added no new bibliography entries. Cited [@burden2016numerical, ch. 5 and
+  ch. 11] and [@kiusalaas2013, ch. 7 and ch. 8]. Please confirm Kiusalaas
+  Chapter 7 (Initial value problems) and Chapter 8 (Two-point boundary value
+  problems); the chapter numbers come from memory of the 3rd edition.
+- The Stefan-Boltzmann constant (5.67e-8 W m^-2 K^-4) is quoted without a
+  citation. A NIST/CODATA entry could be added to references.bib.
+
+Figures
+-------
+- L21 has no new figures. A schematic of the time grid with one Euler
+  tangent step (and an implicit step beside it) would help; it should follow
+  the SVG style of the L17 figures. Not drawn yet.
+
+Length
+------
+- Quarto source is about 3,400 words, near the 17-minute median.
+

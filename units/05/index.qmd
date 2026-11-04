@@ -1,0 +1,11 @@
+---
+title: "Unit 05 · Ordinary differential equations and molecular dynamics"
+toc: false
+---
+
+Unit 5 develops the numerical solution of ordinary differential equations, the step that turns Newton's second law into a trajectory of atoms in time. [L22](L22/index.qmd) introduces the unit and begins with the mathematics of ODEs.
+
+- [L22 · Ordinary differential equations and initial-value problems](L22/index.qmd)
+
+[Unit 05 references](references.qmd)
+

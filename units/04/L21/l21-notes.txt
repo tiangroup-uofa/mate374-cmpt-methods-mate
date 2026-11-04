@@ -1,0 +1,118 @@
+L21: toy molecular dynamics engine
+=================================
+Implemented from the Monday 09:44–09:55 transcript.
+
+Placement and preserved material
+--------------------------------
+- L21 is the fifth lecture of Unit 4.
+- Existing ODE draft moved without replacing its substantive coverage:
+  units/06/L21/index.qmd -> units/05/L22/index.qmd.
+- ODE landing and references moved to units/05/.
+- Updated its title and introductory bridge to follow the toy engine.
+- Historical l21-notes.txt moved with that draft and left unchanged.
+- Existing activities/toy_md_engine.edit.py and its Simpson investigations
+  were left unchanged. The new lecture uses two focused standalone notebooks.
+- Existing ODE notebook names l21_char_roots, l21_euler_cooling, and
+  l21_implicit_euler remain stable; L22 still references those sources.
+- Existing main_idea.txt and recovery files retain their historical wording.
+  The new Unit 4/5 sequence in the landing pages supersedes their old plan.
+
+Teaching sequence (50-minute working allocation)
+------------------------------------------------
+0–6: motivation, Newton's second law, three frames and one-atom components.
+6–15: forward Euler and position Verlet from finite differences.
+15–20: pair force, function plan, and time-aligned velocity.
+20–32: students complete derivative and two step functions.
+32–39: U, K, E and completed notebook; side-by-side animation.
+39–45: time-step refinement and deliberate instability.
+45–50: higher physical energy versus numerical energy growth; ODE bridge.
+No separate review-question list was added.
+
+Outcomes / learning evidence
+----------------------------
+Assemble (Apply/Create): fill the three missing expressions and run.
+Derive (Apply): rearrange forward and central differences.
+Diagnose (Analyze): compare U, K, and E for two methods at the same step.
+Distinguish (Evaluate): hold starting state fixed, reduce time step, and
+separate numerical failure from structural motion.
+
+Numerical setup
+---------------
+Lennard-Jones reduced units; 13 equal masses, no cutoff or external bath.
+Fixed random displacement direction, seed 374.
+Displacement amplitude chosen so U(0) = U_min + N * added_energy.
+All initial velocities zero.
+Force derivative spacing delta = 1e-5, distinct from time step.
+Verlet velocity is recovered at CURRENT time n, using n-1 and n+1.
+Previous position initialized from x0 - dt*v0 + 0.5*dt²*F0.
+Energy recorded at every step, not just animation frames.
+Fixed view; atoms outside the view are counted and clipped explicitly.
+
+Restructure (Oct 28, instructor request)
+----------------------------------------
+Order: what we can compute (pair energy V = energy_func, internal energy U,
+FD forces) -> minimization check -> forward Euler -> Stormer-Verlet ->
+step functions -> assemble engine -> energy diagnostics and caveats.
+Removed the three-frames figure and its motion table.
+Terminology: U = internal energy; V = pairwise energy (energy_func in code);
+forces(pos) = central differences of internal_energy over all 3N
+coordinates (no dVdr, no pair-derivative force); step_euler(pos, vel, F, dt)
+and step_verlet(pos, pos_prev, F, dt), both with m=1.0.
+Notebooks rewritten to these names. Starter TODOs, in lecture order:
+the F[i, k] central difference, step_euler, step_verlet. The minimization
+check appears once forces is finite; each run waits for the selected step.
+The completed notebook opens on forward Euler; time step 0.001 was dropped
+from its menu because FD forces make a 10000-step run slow in the browser
+(about 1.5 ms per force call natively; dt=0.005 run about 3 s natively).
+
+Minimization check (BFGS, jac = -forces, noisy icosahedral guess, seed 21):
+guess U = -37.41088; relaxed U = -44.326801419534 in 51 iterations;
+max |F| at minimum 4.8e-8; max |sum F| 7e-10.
+With the wrong sign (jac = +forces) BFGS stops at the guess, 0 iterations.
+
+Measured results with FD forces (time 10, added energy 0.3 per atom):
+Verlet max |E-E0|: dt=.005 0.0095859, dt=.002 0.0015334, dt=.001 0.00038345
+Euler dt=.005: energy gain 49.6556; largest final radius 12.2 (Verlet 1.13).
+Verlet dt=.08: overflow stop at t=1.04.
+Added energy 1, Verlet dt=.005: max error 0.0623; remains bound.
+
+Figures
+-------
+scripts/l21_figures.py (listed in scripts/render_figures.py) draws all L21
+figures at 300 dpi. Schematics from the instructor's handwritten sketches
+(PNG + editable SVG): L21-md-workflow, L21-forces-from-energy,
+L21-positions-array, L21-numerical-forces, L21-time-step-methods,
+L21-md-engine-flow. Data figures from the completed notebook (PNG/GIF):
+L21-energy-comparison, L21-step-and-energy, L21-euler-verlet.gif,
+L21-euler-verlet-final. Use --schematics-only to skip the simulations and
+--check to print the time-step refinement values.
+L21-three-frames.png is no longer referenced.
+
+Validation
+----------
+- marimo check passed for starter and completed notebooks.
+- Starter executes with a deliberate instructional stop, not a cell error.
+  An explicit readiness reference was required to enforce marimo dependency
+  ordering during executed export.
+- Filling the three TODOs reproduces the completed trajectory.
+- Independent coordinate finite differences verify force gradient/sign.
+- Pair force attraction/repulsion and net-force cancellation checked.
+- Verlet initial kinetic energy checked with nonzero initial velocity.
+- Centre of mass remains fixed to numerical precision.
+- All 48 method/step/added-energy combinations execute without an unhandled
+  exception; severe divergence is stopped at a display safety limit.
+- Step refinement exhibits the expected second-order energy-error scaling.
+- WASM export and L21 HTML render passed; figures visually inspected.
+- L22, both unit landings, unit index, both reference pages, and L20 re-rendered
+  successfully. Both L21 embeds, animation, and local forward links verified.
+- Browser interaction was not exercised in this pass.
+- Verlet 1967 reference metadata verified through Crossref DOI
+  10.1103/PhysRev.159.98, and added to root references.bib and unit nocite.
+- No date was inserted: instructor specified first lecture of next week.
+
+Interpretive limits
+-------------------
+Energy conservation alone does not prove trajectory accuracy.
+The higher-energy run shows motion; melting needs structural/time statistics.
+The class compares forward Euler and position Verlet only. Existing
+implicit-Simpson research is outside this lecture's scope.

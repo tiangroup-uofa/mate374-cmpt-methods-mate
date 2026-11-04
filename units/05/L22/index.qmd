@@ -1,0 +1,314 @@
+---
+title: "L22 · Ordinary differential equations and initial-value problems"
+subtitle: "Order, linearity, initial and boundary conditions, and the Euler method"
+body-classes: lecture-page
+bibliography: ../../../references.bib
+---
+
+::: {.callout-note}
+## Central question
+
+**Newton's second law gives the acceleration of an atom from the forces on it. What kind of equation is this, what must we specify to obtain a unique trajectory, and how can a computer step through it?**
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Classify** an ordinary differential equation (ODE) by its order and linearity, and say which conditions an initial-value or a boundary-value problem supplies.
+2. **Solve** a linear, homogeneous, second-order ODE with constant coefficients through its characteristic equation, and determine the two constants from the conditions.
+3. **Derive** the explicit Euler method from the forward difference and state the order of its error.
+4. **Compare** explicit and implicit steps, including the equation an implicit step has to solve.
+5. **Rewrite** Newton's second law for one coordinate as a pair of first-order equations.
+
+## Unit 5: how does a material evolve in time?
+
+Unit 4 gave us two tools: differentiating energy to obtain forces and integrating acceleration to update motion. In L21, we combined them in a toy molecular dynamics (MD) engine and saw how the method and time step affect energy conservation. The force depends on the positions, the positions change with the velocities, and the velocities change with the forces. Unit 5 develops the mathematics of this coupled problem and the stability of its numerical solutions.
+
+In this unit, **molecular dynamics** means one specific calculation:
+
+- a system of $N$ atoms with a given energy function $E(\mathbf x_1,\ldots,\mathbf x_N)$,
+- Newton's second law for every coordinate, which is a set of $3N$ coupled ordinary differential equations,
+- initial positions and velocities for all atoms,
+- a numerical method that advances the positions and velocities from one time step to the next.
+
+Everything else in a production MD program, such as neighbour lists, thermostats, and periodic boundaries, is built around this core. The core is an ODE solver, and this lecture introduces the mathematics behind it.
+
+## Newton's second law is an ODE
+
+Consider one atom that moves along a line, with position $x(t)$ and mass $m$. The energy $E(x)$ gives the force $F=-\mathrm dE/\mathrm dx$, as in L17, and Newton's second law reads
+
+$$
+m\,\frac{\mathrm d^2x}{\mathrm dt^2}=F(x)=-\frac{\mathrm dE}{\mathrm dx}.
+$$
+
+How this differs from Unit 4:
+
+- **Unknown.** The unknown is the whole function $x(t)$, the trajectory.
+- **Known.** The mass and the energy function, hence the force $F(x)$.
+- **Derivatives.** The derivative belongs to the unknown. In L17 we differentiated a given function, and in L19 we integrated one. Here the function we need appears inside its own derivative, because the force depends on the position we are trying to find.
+
+An equation that relates an unknown function $y(x)$ of one independent variable to its derivatives is an **ordinary differential equation**. The word "ordinary" refers to the single independent variable and the total derivatives $\mathrm dy/\mathrm dx$. When the unknown depends on several variables, such as a concentration $c(x,t)$ in space and time, the equation contains partial derivatives and is a partial differential equation (PDE), which belongs to the next unit. The independent variable in an ODE is usually
+
+- **time**, for the motion of atoms and for reaction and cooling kinetics, or
+- **a space coordinate**, for a steady profile such as the temperature through a wall.
+
+## Classifying an ODE
+
+Three properties decide which methods apply.
+
+- **Order.** The order is the highest derivative that appears. Newton's second law is second order, and the radiative cooling law below is first order.
+- **Linearity.** An ODE is **linear** when the unknown and each of its derivatives appear only to the first power, each multiplied by a function of the independent variable alone:
+
+  $$
+  a(x)\,y''+b(x)\,y'+c(x)\,y=g(x).
+  $$
+
+  Any term such as $y^2$, $\sin y$, or $y\,y'$ makes the equation **nonlinear**. A linear equation is **homogeneous** when $g(x)=0$, and it has **constant coefficients** when $a$, $b$, and $c$ are numbers.
+- **Number of conditions.** A solution of an $n$th-order ODE contains $n$ free constants, so $n$ conditions are needed to fix it.
+
+| Equation | Order | Linear? | Where it appears |
+|---|:-:|:-:|---|
+| $m\,x''=-k\,x$ | 2 | yes, homogeneous | harmonic bond |
+| $m\,x''=-E'(x)$ for a Lennard–Jones $E$ | 2 | no | anharmonic bond |
+| $\mathrm dC/\mathrm dt=-\kappa\,C$ | 1 | yes, homogeneous | first-order decay or reaction |
+| $\mathrm dT/\mathrm dt=-\alpha\,(T^4-T_\mathrm{a}^4)$ | 1 | no | radiative cooling (below) |
+
+: Examples of ODEs in materials problems {#tbl-ode-examples}
+
+A harmonic bond is linear, and an anharmonic bond is not. This is the same step that took us from the spring chain of L11 to the Lennard–Jones chain of L14.
+
+## Initial-value and boundary-value problems
+
+The conditions that fix the constants come in two forms.
+
+- **Initial-value problem (IVP).** All $n$ conditions are given at the same point, the start of the domain. For Newton's second law they are the initial position and velocity, $x(0)=x_0$ and $x'(0)=v_0$. We know the present state and want to follow it forward.
+- **Boundary-value problem (BVP).** The conditions are given at two different points, the ends of the domain. For steady diffusion through a film of thickness $L$ with fixed concentrations on both faces, $D\,c''(x)=0$ with $c(0)=c_0$ and $c(L)=c_L$.
+
+A first-order ODE has a single condition, so it is almost always an initial-value problem. A second-order ODE may be either: the same equation $y''=0$ is an IVP when we give $y(0)$ and $y'(0)$, and a BVP when we give $y(0)$ and $y(L)$. In practice, evolution in time is posed as an IVP, because time has a definite starting point, and steady profiles in space are posed as BVPs. Unit 5 concentrates on IVPs, and boundary-value problems return with steady-state problems in the PDE unit [@burden2016numerical, ch. 5 and ch. 11; @kiusalaas2013, ch. 7 and ch. 8].
+
+## An analytical solution: linear ODEs with constant coefficients
+
+Some ODEs can be solved with pencil and paper. The most useful family is the linear, homogeneous, second-order equation with constant coefficients,
+
+$$
+a\,y''+b\,y'+c\,y=0 .
+$$
+
+The derivative of an exponential is proportional to the exponential itself, so we try $y=\mathrm e^{\lambda x}$. Then $y'=\lambda\mathrm e^{\lambda x}$ and $y''=\lambda^2\mathrm e^{\lambda x}$, and the equation becomes $(a\lambda^2+b\lambda+c)\,\mathrm e^{\lambda x}=0$. The exponential never vanishes, so $\lambda$ must satisfy the **characteristic equation**
+
+$$
+a\lambda^2+b\lambda+c=0,\qquad \lambda_{1,2}=\frac{-b\pm\sqrt{b^2-4ac}}{2a}.
+$$
+
+Because the ODE is linear and homogeneous, any sum of two solutions is also a solution. Combining the two roots gives the general solution with two constants $C_1$ and $C_2$. Its form depends on the discriminant $b^2-4ac$:
+
+- **$b^2>4ac$, two real roots:** $y=C_1\mathrm e^{\lambda_1x}+C_2\mathrm e^{\lambda_2x}$, which is a sum of exponential growth or decay.
+- **$b^2=4ac$, one repeated root:** $y=(C_1+C_2x)\,\mathrm e^{\lambda x}$.
+- **$b^2<4ac$, a complex pair $\lambda=p\pm \mathrm iq$:** $y=\mathrm e^{px}\big(C_1\cos qx+C_2\sin qx\big)$, which is an oscillation with an envelope $\mathrm e^{px}$ that grows for $p>0$ and decays for $p<0$.
+
+The conditions then fix $C_1$ and $C_2$. Each condition is one linear equation in the two constants, so two conditions form a $2\times2$ linear system of the kind we solved in Unit 3.
+
+### A worked initial-value problem
+
+- **Equation:** $y''+3y'+2y=0$.
+- **Conditions:** $y(0)=1$ and $y'(0)=0$.
+- **Question:** what are $\lambda_1$, $\lambda_2$, $C_1$, and $C_2$?
+
+The characteristic equation $\lambda^2+3\lambda+2=0$ has the roots $\lambda_1=-1$ and $\lambda_2=-2$, so $y=C_1\mathrm e^{-x}+C_2\mathrm e^{-2x}$ and $y'=-C_1\mathrm e^{-x}-2C_2\mathrm e^{-2x}$. Setting $x=0$ in each gives
+
+$$
+\begin{bmatrix}1&1\\-1&-2\end{bmatrix}\begin{bmatrix}C_1\\C_2\end{bmatrix}=\begin{bmatrix}1\\0\end{bmatrix}
+\quad\Rightarrow\quad C_1=2,\; C_2=-1,
+$$
+
+so $y(x)=2\mathrm e^{-x}-\mathrm e^{-2x}$. The value $y(0)=1$ and the slope $y'(0)=-2+2=0$ confirm the result.
+
+### The harmonic bond
+
+For $m\,x''+k\,x=0$ we have $b=0$, and the characteristic equation $m\lambda^2+k=0$ has the imaginary roots $\lambda=\pm\mathrm i\omega$ with $\omega=\sqrt{k/m}$. The solution is an oscillation, and the conditions $x(0)=x_0$ and $x'(0)=v_0$ give $C_1=x_0$ and $C_2=v_0/\omega$:
+
+$$
+\boxed{x(t)=x_0\cos\omega t+\frac{v_0}{\omega}\sin\omega t,\qquad \omega=\sqrt{\frac km}}
+$$
+
+The frequency $\omega=\sqrt{k/m}$ is the vibrational frequency that we obtained from the Hessian in L16. A bond that starts at rest ($v_0=0$) at the displacement $x_0$ oscillates with amplitude $x_0$ and period $2\pi/\omega$. The total energy $\tfrac12mv^2+\tfrac12kx^2$ stays constant along this solution. We will use both facts as exact benchmarks for numerical trajectories.
+
+::: {.quarto-wasm-local notebook="l21_char_roots.edit.py" view="edit" title="Characteristic roots and the constants of a second-order ODE" height="700" loading="lazy" fullscreen="true"}
+For $y''+4y=0$ (a harmonic bond with $m=1$ and $k=4$, so $\omega=2$) with $y(0)=1$ and $y'(0)=0$, the roots are $\pm2\mathrm i$ and $y=\cos2t$, with period $\pi\approx3.14$. For $y''+3y'+2y=0$ with the same conditions, the roots are $-1$ and $-2$ and $y=2\mathrm e^{-t}-\mathrm e^{-2t}$. For $y''+0.6y'+4y=0$, the roots are $-0.3\pm1.977\mathrm i$ and the oscillation decays within the envelope $\mathrm e^{-0.3t}$. For $y''=0$, the double root $\lambda=0$ gives the straight line $y=y(0)+y'(0)\,t$.
+:::
+
+The formula above exists because the equation is linear. A Lennard–Jones bond, the radiative cooling of a hot part, and most other equations in materials simulation are nonlinear, and for them we need a numerical method.
+
+## An initial-value problem without a formula: radiative cooling
+
+A steel sphere of radius $R=1$ mm is heated to $T_0=1200$ K and cools by radiation alone in a vacuum furnace with walls at $T_\mathrm{a}=300$ K. We assume a uniform temperature in the sphere and these properties:
+
+- emissivity $\varepsilon=0.8$,
+- density $\rho=7800$ kg/m³,
+- specific heat $c=500$ J/(kg K).
+
+The energy balance says that the heat stored in the sphere decreases at the rate of the net radiated power, with the Stefan–Boltzmann constant $\sigma=5.67\times10^{-8}$ W/(m² K⁴):
+
+$$
+\rho c V\frac{\mathrm dT}{\mathrm dt}=-\varepsilon\sigma A\big(T^4-T_\mathrm{a}^4\big).
+$$
+
+For a sphere $A/V=3/R$, which gives
+
+$$
+\frac{\mathrm dT}{\mathrm dt}=-\alpha\big(T^4-T_\mathrm{a}^4\big),\qquad \alpha=\frac{3\varepsilon\sigma}{\rho cR}=3.49\times10^{-11}\ \mathrm{K^{-3}\,s^{-1}},\qquad T(0)=1200\ \mathrm K.
+$$
+
+How to classify it:
+
+- **Order:** first, since only $\mathrm dT/\mathrm dt$ appears.
+- **Linearity:** nonlinear, because of the $T^4$ term.
+- **Conditions:** one initial value, so this is an initial-value problem.
+
+The equation is separable, and integrating it gives the time $t$ as a function of $T$ through logarithms and arctangents. The temperature $T(t)$ cannot be isolated from that relation, so a direct formula for the cooling curve does not exist. At the start the sphere cools at $-\alpha(1200^4-300^4)=-72$ K/s, and the rate falls rapidly as $T$ approaches $T_\mathrm{a}$.
+
+## Discretization: solving an ODE with finite differences
+
+A numerical method returns a table of values at chosen times. We **discretize** the time domain, exactly as we divided the integration interval in L19. The domain from $t_0$ to $t_n$ is divided into $n$ subintervals of width $h$, which gives the grid points $t_i=t_0+ih$. The numerical solution is the set of pairs
+
+$$
+(t_0,y_0),\;(t_1,y_1),\;\ldots,\;(t_n,y_n),
+$$
+
+where $y_i$ is our estimate of the true value $y(t_i)$. Unlike a single integral, the ODE requires every intermediate value, because each one is needed to compute the next.
+
+For a first-order IVP written as $y'=f(t,y)$ with $y(t_0)=y_0$, the initial condition supplies the first point. If we know $y_i$, the forward difference from L17 gives the next point:
+
+$$
+\frac{y_{i+1}-y_i}{h}\approx y'(t_i)=f(t_i,y_i)
+\quad\Rightarrow\quad
+y_{i+1}=y_i+h\,f(t_i,y_i).
+$$
+
+This is the **explicit Euler method**, also called the forward Euler method. Geometrically, each step follows the tangent line at the current point for a time $h$. Starting from $y_0$ and repeating the formula gives $y_1$, $y_2$, and so on up to $y_n$.
+
+### The size of the error
+
+A Taylor expansion about $t_i$ shows what the formula drops:
+
+$$
+y(t_{i+1})=y(t_i)+h\,y'(t_i)+\frac{h^2}{2}y''(\xi),
+$$
+
+for some $\xi$ between $t_i$ and $t_{i+1}$. With $y'=f$, the Euler step keeps the first two terms, so each step has an error of $O(h^2)$. Reaching a fixed final time takes $n=(t_n-t_0)/h$ steps, and the errors of the steps accumulate to a total of order $n\,h^2\propto h$. The **global error** of the Euler method is $O(h)$, the same order as the forward difference it is built on: halving $h$ halves the error. Methods with a higher order replace the forward difference by more accurate formulas, such as the central difference of L17, and are the subject of the next lectures.
+
+### The cooling curve by explicit Euler
+
+The first step of the cooling problem with $h=5$ s is
+
+$$
+T_1=T_0+h\,f(T_0)=1200+5\,(-72.07)=839.6\ \mathrm K,
+$$
+
+while the accurate solution at $t=5$ s is 969.1 K. The step overshoots because the true cooling rate drops during the 5 s, and the tangent line at the hot starting point does not know about it. Reducing the step shrinks the error as predicted:
+
+| $h$ (s) | $T(20\ \mathrm s)$ from Euler (K) | error (K) |
+|:-:|:-:|:-:|
+| 5 | 659.0 | $-64.7$ |
+| 2 | 703.0 | $-20.7$ |
+| 1 | 713.7 | $-9.9$ |
+| 0.5 | 718.8 | $-4.8$ |
+
+: Explicit Euler at $t=20$ s, where the accurate value is 723.6 K {#tbl-euler-cooling}
+
+The notebook compares the Euler points with an accurate reference solution calculated by SciPy's `solve_ivp` [@virtanen2020scipy]. Move the step slider from 5 s down to 0.5 s and check the halving of the error, then increase it to 20 s.
+
+::: {.quarto-wasm-local notebook="l21_euler_cooling.edit.py" view="edit" title="Explicit Euler for the radiative cooling of a steel sphere" height="720" loading="lazy" fullscreen="true"}
+With $h=5$ s, explicit Euler gives 754.3 K at 10 s and 659.0 K at 20 s, against 852.2 K and 723.6 K in the reference solution. Reducing $h$ to 2 s, 1 s, and 0.5 s lowers the error at 20 s to $-20.7$ K, $-9.9$ K, and $-4.8$ K. With $h=10$ s, the first step drops the sphere to 479 K and the temperature at 20 s is 464 K, an error of $-260$ K. With $h=20$ s, the first step gives $-241$ K, below absolute zero, and the later points remain negative.
+:::
+
+::: {.callout-caution}
+## A step that is too long gives a nonphysical temperature
+
+For $h=20$ s, the first Euler step is $T_1=1200+20\,(-72.07)=-241$ K. The step is longer than the time in which the cooling rate changes. Linearizing the right-hand side at $T_0$, a small temperature deviation $\Delta T$ obeys $\mathrm d(\Delta T)/\mathrm dt\approx-\lambda\,\Delta T$ with $\lambda=4\alpha T_0^3=0.24\ \mathrm s^{-1}$, a time scale of $1/\lambda\approx4$ s. An Euler step multiplies the deviation by $1-\lambda h$, which shrinks it only if $|1-\lambda h|<1$, that is for $h<2/\lambda\approx8$ s. Beyond that limit the numerical deviation grows instead of decaying. The limit applies at the current temperature, and $\lambda$ falls as the sphere cools, so $h=10$ s overshoots in the first step (479 K) and then settles, while $h=20$ s is far beyond the limit.
+
+**Reducing the error requires a step that is small compared with the fastest time scale of the problem, and every result should be checked against a halved step and for physical consistency.**
+:::
+
+## Explicit and implicit methods
+
+The Euler formula evaluates the rate $f$ at the beginning of the step, where $y_i$ is already known. Such a formula is **explicit**: the new value follows directly from known quantities, so each step is one evaluation of the right-hand side, and the solution marches through $y_1$, $y_2$, $y_3$ in turn.
+
+An **implicit** method evaluates the rate at the end of the step instead. Using the backward difference from L17 at $t_{i+1}$ gives the **implicit** or **backward Euler method**:
+
+$$
+\frac{y_{i+1}-y_i}{h}\approx f(t_{i+1},y_{i+1})
+\quad\Rightarrow\quad
+y_{i+1}=y_i+h\,f(t_{i+1},y_{i+1}).
+$$
+
+The unknown $y_{i+1}$ now appears on both sides. Each step requires solving an equation for $y_{i+1}$, which is the root-finding problem of Unit 2:
+
+$$
+g(y_{i+1})=y_{i+1}-y_i-h\,f(t_{i+1},y_{i+1})=0 .
+$$
+
+For a system of equations the same step becomes the nonlinear system of L14, solved with Newton's method and a Jacobian. The previous value $y_i$ is the natural starting guess, and a few iterations usually suffice.
+
+For the cooling problem, $g(T)=T-T_i+h\alpha\,(T^4-T_\mathrm{a}^4)$ and $g'(T)=1+4h\alpha T^3$. With $h=20$ s and $T_0=1200$ K the first step solves
+
+$$
+T_1+20\alpha\,(T_1^4-300^4)=1200 \quad\Rightarrow\quad T_1=846.8\ \mathrm K,
+$$
+
+where the left side evaluates to $846.8+353.2=1200$. The step lands at a physical temperature, and it is also an overestimate of the accurate 723.6 K, the opposite sign of the explicit error. Comparing the two methods at $h=20$ s and at $h=1$ s:
+
+- **Explicit, $h=20$ s:** $T(20\ \mathrm s)=-241$ K, a nonphysical result that stays below zero.
+- **Implicit, $h=20$ s:** $T(20\ \mathrm s)=846.8$ K, $T(40\ \mathrm s)=692.2$ K, and $T(60\ \mathrm s)=604.6$ K. The curve decreases smoothly and stays above $T_\mathrm{a}$, with errors of $+123$ K, $+93$ K, and $+71$ K against 723.6 K, 599.7 K, and 534.1 K.
+- **At $h=1$ s:** the explicit error at 20 s is $-9.9$ K and the implicit error is $+9.2$ K. Both methods are $O(h)$, so halving $h$ halves the error of either one.
+
+Both methods have the same $O(h)$ accuracy, and the benefit of the implicit method is stability. For the decay equation $y'=-\lambda y$ the backward Euler step is $y_{i+1}=y_i/(1+\lambda h)$, and the solution decays for every $h>0$, while the explicit step needs $h<2/\lambda$. Production solvers use implicit methods for problems with a very fast time scale that we do not need to resolve, and they pay for the stability with the cost of the equation solve in every step. Later lectures return to when this trade is worthwhile.
+
+::: {.quarto-wasm-local notebook="l21_implicit_euler.edit.py" view="edit" title="Explicit and implicit Euler compared on the radiative cooling problem" height="740" loading="lazy" fullscreen="true"}
+With the implicit method and $h=20$ s, the notebook solves each step with Newton's method and returns 846.8 K at 20 s, 692.2 K at 40 s, and 604.6 K at 60 s, against reference values of 723.6 K, 599.7 K, and 534.1 K. Switching to the explicit method at the same $h$ gives negative temperatures. At $h=5$ s the implicit error at 20 s is $+41.2$ K, against $-64.7$ K for the explicit method, and at $h=1$ s the two errors are $+9.2$ K and $-9.9$ K.
+:::
+
+## Back to Newton's equation
+
+The Euler formulas were written for a first-order equation $y'=f(t,y)$, and Newton's second law is second order. The velocity $v=\mathrm dx/\mathrm dt$ turns it into two coupled first-order equations:
+
+$$
+\boxed{\frac{\mathrm dx}{\mathrm dt}=v,\qquad \frac{\mathrm dv}{\mathrm dt}=\frac{F(x)}{m},\qquad x(0)=x_0,\; v(0)=v_0}
+$$
+
+How to read this system:
+
+- the **state** is the pair $(x,v)$, and the two initial conditions of the second-order ODE are the initial values of the two components,
+- the rate of change of position is the velocity, the rate of change of velocity is the acceleration from the force at the current position,
+- the same step formulas apply to both components together.
+
+For $N$ atoms in three dimensions the state contains $3N$ positions and $3N$ velocities, so the system has $6N$ first-order equations. Explicit Euler for one coordinate reads
+
+$$
+x_{i+1}=x_i+h\,v_i,\qquad v_{i+1}=v_i+h\,\frac{F(x_i)}{m},
+$$
+
+with one force evaluation per step. The force at each step comes from differentiating the energy, the tool of L17, and the harmonic bond of this lecture supplies an exact solution against which to test the result.
+
+## What to keep
+
+- Newton's second law is a second-order ODE for the trajectory, with the force $-\mathrm dE/\mathrm dx$ depending on the unknown position. Molecular dynamics solves $3N$ of these equations as an initial-value problem.
+- An ODE is classified by its order, its linearity, and whether its conditions are given at one point (initial-value problem) or at two ends (boundary-value problem). An $n$th-order equation needs $n$ conditions.
+- A linear, homogeneous, second-order ODE with constant coefficients is solved by $y=\mathrm e^{\lambda x}$ and the roots of $a\lambda^2+b\lambda+c=0$. The two conditions form a $2\times2$ linear system for $C_1$ and $C_2$.
+- The harmonic bond gives $x(t)=x_0\cos\omega t+(v_0/\omega)\sin\omega t$, an exact benchmark with $\omega=\sqrt{k/m}$.
+- Nonlinear equations such as radiative cooling are solved on a time grid. Explicit Euler, $y_{i+1}=y_i+h\,f(t_i,y_i)$, has a global error $O(h)$, and a step longer than the fastest time scale gives nonphysical results.
+- An implicit step, $y_{i+1}=y_i+h\,f(t_{i+1},y_{i+1})$, requires a root-finding solve in every step. It has the same $O(h)$ accuracy and better stability.
+
+## Check your understanding
+
+1. Classify each equation by order and linearity: (a) $m\,x''=-k\,x$, (b) $\mathrm dC/\mathrm dt=-\kappa\,C^2$, (c) $\theta''=-(g/L)\sin\theta$ for a pendulum.
+2. Solve $y''-4y=0$ with $y(0)=0$ and $y'(0)=2$. Which of the three root types occurs?
+3. An Euler calculation of the cooling curve with $h=0.4$ s has an error of $5.0$ K at some time. What error do you expect with $h=0.1$ s?
+4. For $y'=-2y$ and $y(0)=1$, take one step of $h=1$ with the explicit and the implicit Euler methods. Compare both with the exact value $\mathrm e^{-2}=0.135$ and with the stability condition $h<2/\lambda$.
+5. Which method from Unit 2 or Unit 3 would you use to carry out an implicit step for $N$ atoms? What must be evaluated in every iteration?
+
+## Next
+
+The cooling curve falls smoothly, but a bond oscillates for many periods, and every Euler step adds an error that the following steps carry along. If we apply the two update formulas above to the harmonic bond, the exact solution $x(t)=x_0\cos\omega t$ tells us what to look for: the amplitude of the oscillation and the energy $\tfrac12mv^2+\tfrac12kx^2$, which should both stay constant. In the next lecture we make this comparison and build time-stepping methods that remain accurate over many oscillations.
+
