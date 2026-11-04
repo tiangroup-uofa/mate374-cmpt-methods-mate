@@ -268,13 +268,13 @@ def positions_array():
     ax.plot([0.1, 16.9], [3.0, 3.0], color=GREY, lw=1, ls="--")
     ax.text(0.2, 2.65, "Energy: loop over all pairs", fontsize=13, weight="bold", va="top")
     ax.text(0.5, 1.6, r"$U=V(r_{01})+V(r_{02})+\cdots=\sum_{i<j}V(r_{ij})$", fontsize=15, va="center")
-    code = ("def internal_energy(pos):\n"
-            "    U = 0.0\n"
+    code = ("def U(pos):\n"
+            "    energy = 0.0\n"
             "    for i in range(len(pos)):\n"
             "        for j in range(i + 1, len(pos)):\n"
             "            r_ij = np.linalg.norm(pos[i] - pos[j])\n"
-            "            U = U + energy_func(r_ij)\n"
-            "    return U")
+            "            energy += energy_func(r_ij)\n"
+            "    return energy")
     box(ax, 8.0, -0.45, 8.9, 3.25, fc=PALE, r=0.15)
     ax.text(8.25, 2.6, code, family=MONO, fontsize=11.5, va="top", linespacing=1.45)
     save(fig, "L21-positions-array")
@@ -304,19 +304,18 @@ def numerical_forces():
         table(ax, 5.6, y_target, 4, 3, 0.45, 0.35, marks={(1, 1): "#e8c3bd" if sign == "+" else "#c1d3ea"})
         ax.text(6.275, y_target - 1.5, name, ha="center", va="top", family=MONO, fontsize=13, weight="bold")
         arrow(ax, (7.1, y_target - 0.7), (7.9, y_target - 0.7), lw=1.5)
-        ax.text(8.0, y_target - 0.7, f"internal_energy({name})", family=MONO, fontsize=13, va="center")
+        ax.text(8.0, y_target - 0.7, f"U({name})", family=MONO, fontsize=13, va="center")
     ax.text(5.6, 7.75, "y of atom 1 + δ", fontsize=11, color=RED, va="bottom", family=MONO)
     ax.text(5.6, 5.05, "y of atom 1 − δ", fontsize=11, color=BLUE, va="bottom", family=MONO)
     # Combine and store
     ax.plot([12.4, 12.8, 12.8, 12.4], [6.7, 6.7, 4.0, 4.0], color=INK, lw=1.6)
     arrow(ax, (12.8, 5.35), (12.8, 3.15), lw=1.8, ms=16)
-    ax.text(8.75, 2.95, "F[1, 1] = -(internal_energy(pos_r)\n"
-                       "           - internal_energy(pos_l)) / (2 * δ)",
+    ax.text(8.75, 2.95, "F[1, 1] = (-(U(pos_r) - U(pos_l))\n"
+                       "           / (2 * δ))",
             family=MONO, fontsize=11.5, va="top", ha="left", linespacing=1.4)
     table(ax, 2.0, 3.0, 5, 3, cw, ch, marks={(1, 1): "#9fd1a9"})
     ax.text(1.75, 2.1, "F", family=MONO, fontsize=16, weight="bold", ha="right", va="center")
     arrow(ax, (8.55, 2.55), (3.9, 2.32), lw=1.8, rad=0.0, color=GREEN, ms=16)
-    ax.text(5.2, 0.5, "same shape as pos: one force component per coordinate", fontsize=12, va="center", color="#444444")
     save(fig, "L21-numerical-forces")
 
 
@@ -417,59 +416,96 @@ def simulate(check=False):
     app = runpy.run_path(str(ROOT / "activities" / "l21_md_engine_completed.edit.py"))["app"]
     _, definitions = app.run()
     nb = dict(definitions)
-    initial_state, run = nb["initial_state"], nb["run"]
+    initial_state = nb["initial_state"]
+
+    def run(start, velocity, dt, duration, method):
+        if "analyse" in nb:
+            step = nb["step_verlet"] if method == VERLET else nb["step_euler"]
+            positions = nb["run"](start, velocity, dt, round(duration / dt), step)
+        else:
+            return nb["run"](start, velocity, dt, duration, method)
+        # The revised notebook records positions, then analyses central velocities.
+        trajectory = nb["analyse"](positions, dt)
+        energy_func = nb["U"]
+        trajectory["t"] = np.r_[0.0, trajectory["t"]]
+        trajectory["x"] = np.concatenate(([start], trajectory["x"]))
+        trajectory["U"] = np.r_[energy_func(start), trajectory["U"]]
+        trajectory["K"] = np.r_[0.5 * np.sum(velocity**2), trajectory["K"]]
+        return {key: trajectory[key] for key in ("t", "x", "U", "K")}
     np.testing.assert_allclose(nb["U_min"], -44.326801, atol=1e-6)
     start, velocity = initial_state(0.3)
-    hot_start, hot_velocity = initial_state(1.0)
     runs = {
         "verlet": run(start, velocity, 0.005, 10.0, VERLET),
         "euler": run(start, velocity, 0.005, 10.0, EULER),
+        "medium": run(start, velocity, 0.04, 10.0, VERLET),
         "large": run(start, velocity, 0.08, 10.0, VERLET),
-        "hot": run(hot_start, hot_velocity, 0.005, 10.0, VERLET),
     }
     steps = [0.005, 0.002, 0.001] if check else [0.005]
     for dt in steps:
         trajectory = runs["verlet"] if dt == 0.005 else run(start, velocity, dt, 10.0, VERLET)
         E = trajectory["U"] + trajectory["K"]
         print(f"Verlet dt={dt}: max |E - E0| = {np.max(np.abs(E - E[0])):.6g}")
-    for key in ("euler", "large", "hot"):
+    for key in ("euler", "medium", "large"):
         E = runs[key]["U"] + runs[key]["K"]
         radius = np.max(np.linalg.norm(runs[key]["x"][-1], axis=1))
         print(f"{key}: max |E - E0| = {np.max(np.abs(E - E[0])):.6g}, final time {runs[key]['t'][-1]:g}, "
               f"largest final radius {radius:.3g}")
     E = runs["verlet"]["U"] + runs["verlet"]["K"]
     assert np.max(np.abs(E - E[0])) < 0.011 and np.max(runs["euler"]["U"] + runs["euler"]["K"]) - E[0] > 40
+    runs["relaxation"] = minimize_cluster(nb)
     return runs
 
 
-def draw_cluster(ax, p, size, tag=0):
+def minimize_cluster(nb):
+    """Record accepted BFGS iterates, using the notebook's numerical forces."""
+    phi = (1 + np.sqrt(5)) / 2
+    shell = []
+    for a in [-1, 1]:
+        for b in [-phi, phi]:
+            shell.extend([[0, a, b], [a, b, 0], [b, 0, a]])
+    base = np.vstack([np.zeros((1, 3)), np.array(shell)])
+    guess = 0.6 * base + 0.05 * np.random.default_rng(21).normal(size=base.shape)
+    guess -= guess.mean(axis=0)
+    frames = [guess.copy()]
+    energy_func = nb["U"] if "U" in nb else nb["internal_energy"]
+    result = nb["optimize"].minimize(
+        lambda x: energy_func(x.reshape(-1, 3)),
+        guess.ravel(),
+        jac=lambda x: -nb["forces"](x.reshape(-1, 3)).ravel(),
+        callback=lambda x: frames.append(x.reshape(-1, 3).copy()),
+        method="BFGS", options={"gtol": 1e-7},
+    )
+    energy = np.array([energy_func(p) for p in frames])
+    max_force = np.max(np.abs(nb["forces"](frames[-1])))
+    np.testing.assert_allclose(energy[-1], -44.326801, atol=1e-6)
+    assert max_force < 1e-6 and np.all(np.diff(energy) <= 1e-8)
+    print(f"Relaxation: {result.message}; {result.nit} BFGS iterations; "
+          f"U {energy[0]:.8f} -> {energy[-1]:.8f}; max |F| {max_force:.3g}")
+    return {"x": np.array(frames), "U": energy}
+
+
+def draw_cluster(ax, p, size, tag=0, view=VIEW):
     ax.set_axis_off()
-    inside = np.all(np.abs(p) <= VIEW, axis=1)
+    inside = np.all(np.abs(p) <= view, axis=1)
     colours = np.array([RED if k == tag else GREY for k in range(len(p))])
     ax.scatter(*p[inside].T, s=size, c=colours[inside], edgecolors=INK, linewidths=0.6, depthshade=True)
-    ax.set(xlim=(-VIEW, VIEW), ylim=(-VIEW, VIEW), zlim=(-VIEW, VIEW))
+    ax.set(xlim=(-view, view), ylim=(-view, view), zlim=(-view, view))
     ax.set_box_aspect((1, 1, 1))
     ax.view_init(elev=18, azim=35)
     return len(p) - np.count_nonzero(inside)
 
 
 def energy_comparison(runs):
-    fig, axes = plt.subplots(1, 3, figsize=(10, 3.4), layout="constrained")
-    v, e = runs["verlet"], runs["euler"]
-    E_v, E_e = v["U"] + v["K"], e["U"] + e["K"]
-    axes[0].plot(v["t"], v["K"], color=RED, lw=1.1, label=r"$K$")
-    axes[0].plot(v["t"], v["U"] - v["U"][0], color=BLUE, lw=1.1, label=r"$U-U(0)$")
-    axes[0].plot(v["t"], E_v - E_v[0], color=INK, lw=1.4, label=r"$E-E(0)$")
-    axes[0].set(ylabel="energy", ylim=(-4.5, 4.5))
-    axes[0].legend(loc="upper right", ncol=3, fontsize=9, frameon=False, handlelength=1.2, columnspacing=0.8)
-    axes[1].plot(v["t"], E_v - E_v[0], color=BLUE, lw=1)
-    axes[2].plot(e["t"], E_e - E_e[0], color=RED, lw=1.4)
-    for ax, label, title in zip(axes, "abc", ("Energy exchange, Verlet", "Størmer–Verlet", "Forward Euler")):
-        ax.set_title(f"{label}   {title}", loc="left", fontsize=12)
-        ax.set_xlabel("time")
-        ax.grid(alpha=0.25)
-    axes[1].set_ylabel(r"$E(t)-E(0)$")
-    axes[2].set_ylabel(r"$E(t)-E(0)$")
+    fig, ax = plt.subplots(figsize=(9, 3.8), layout="constrained")
+    for key, title, color in (("euler", "Forward Euler", RED),
+                              ("verlet", VERLET, BLUE)):
+        trajectory = runs[key]
+        ax.plot(trajectory["t"], trajectory["U"] + trajectory["K"],
+                color=color, lw=1.8, label=title)
+    ax.set(xlabel=r"time $t/\tau$", ylabel=r"total energy $E/\varepsilon$",
+           title=r"Same initial state, $\Delta t=0.005$", xlim=(0, 10))
+    ax.legend(frameon=False, loc="upper left")
+    ax.grid(alpha=0.25)
     save(fig, "L21-energy-comparison", svg=False)
 
 
@@ -478,17 +514,60 @@ def frame_at(trajectory, time):
 
 
 def step_and_energy(runs):
-    fig = plt.figure(figsize=(10, 3.6))
-    titles = (r"a   $\Delta t=0.005$", r"b   $\Delta t=0.08$", "c   added energy 1 per atom")
-    for k, (key, title) in enumerate(zip(("verlet", "large", "hot"), titles)):
+    fig = plt.figure(figsize=(10, 3.8))
+    # 0.96 is a stored time for all 3 time steps, before the large-step safety stop.
+    snapshot_time = 0.96
+    titles = (r"$\Delta t=0.005$", r"$\Delta t=0.04$", r"$\Delta t=0.08$")
+    for k, (key, title) in enumerate(zip(("verlet", "medium", "large"), titles)):
         ax = fig.add_subplot(1, 3, k + 1, projection="3d")
-        p, _ = frame_at(runs[key], 1.0)
+        p, time = frame_at(runs[key], snapshot_time)
+        np.testing.assert_allclose(time, snapshot_time, atol=1e-12)
         outside = draw_cluster(ax, p, size=230)
-        ax.set_title(title, fontsize=13)
+        ax.set_title(title, fontsize=14)
         if outside:
             ax.text2D(0.5, 0.02, f"{outside} atoms outside view", transform=ax.transAxes, ha="center", fontsize=11)
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=0.92, wspace=0)
+        if key in ("verlet", "medium"):
+            ax.text2D(0.5, -0.07, "Cluster intact", color=GREEN,
+                      transform=ax.transAxes, ha="center", fontsize=13, weight="bold")
+        if key == "large" and outside > len(p) // 2:
+            ax.text2D(0.5, -0.07, "Cluster disintegrated", color=RED,
+                      transform=ax.transAxes, ha="center", fontsize=13, weight="bold")
+        print(f"Snapshot {key}: t={time:g}, {outside} atoms outside view")
+    fig.suptitle(r"Størmer–Verlet: same initial state, $t=0.96\tau$", fontsize=14, y=0.99)
+    fig.subplots_adjust(left=0, right=1, bottom=0.09, top=0.85, wspace=0)
     save(fig, "L21-step-and-energy", svg=False)
+
+
+def relaxation_movie(runs):
+    relaxation = runs["relaxation"]
+    frames, energies = relaxation["x"], relaxation["U"]
+    fig = plt.figure(figsize=(7, 3.6))
+    axes = [fig.add_subplot(1, 2, k + 1, projection="3d") for k in range(2)]
+    fig.subplots_adjust(left=0, right=1, bottom=0.1, top=0.82, wspace=0)
+    fig.suptitle("Energy minimization with BFGS", fontsize=14, y=0.98)
+    fig.text(0.5, 0.02, "Accepted minimization steps (not physical time)",
+             ha="center", fontsize=11)
+
+    def draw(n):
+        for ax, p, title, energy in zip(
+            axes, (frames[0], frames[n]),
+            ("Randomly perturbed guess", f"BFGS iteration {n}"),
+            (energies[0], energies[n]),
+        ):
+            ax.cla()
+            draw_cluster(ax, p - p.mean(axis=0), size=160, view=1.65)
+            ax.set_title(title, fontsize=12)
+            ax.text2D(0.5, -0.02, rf"$U={energy:.5f}\,\varepsilon$",
+                      transform=ax.transAxes, ha="center", fontsize=12)
+
+    draw(len(frames) - 1)
+    save(fig, "L21-relaxation-final", svg=False, close=False)
+    # Repeat the end frames for a readable pause. All displayed structures are actual iterates.
+    indices = [0] * 7 + list(range(len(frames))) + [len(frames) - 1] * 12
+    FuncAnimation(fig, draw, frames=indices).save(
+        ASSETS / "L21-relaxation.gif", writer=PillowWriter(fps=8), dpi=DPI)
+    plt.close(fig)
+    print("Saved L21-relaxation.gif")
 
 
 def euler_verlet_movie(runs):
@@ -529,6 +608,7 @@ def main():
             runs = simulate(args.check)
             energy_comparison(runs)
             step_and_energy(runs)
+            relaxation_movie(runs)
             euler_verlet_movie(runs)
 
 
