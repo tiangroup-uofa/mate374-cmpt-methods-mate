@@ -414,7 +414,12 @@ VERLET, EULER = "Størmer–Verlet", "forward Euler"
 
 def simulate(check=False):
     app = runpy.run_path(str(ROOT / "activities" / "l21_md_engine_completed.edit.py"))["app"]
-    _, definitions = app.run()
+    # Batch rendering supplies a submitted configuration explicitly; the browser
+    # still waits for the user to click Simulate before doing any calculation.
+    _, definitions = app.run(defs={"config": {
+        "atoms": 13, "steps": 10, "method": VERLET,
+        "dt": 0.005, "added": 0.3,
+    }})
     nb = dict(definitions)
     initial_state = nb["initial_state"]
 
