@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["marimo", "numpy", "scipy", "matplotlib", "ase"]
+# dependencies = ["marimo==0.25.2", "numpy==2.5.4", "scipy==1.18.1", "matplotlib==3.11.2", "ase==3.29.0"]
 # ///
 
 import marimo
@@ -21,8 +21,11 @@ def intro(mo):
 
     Fit the model here, download its tables, and insert it into your own simulation notebook.
     That integration and the subsequent force and trajectory checks are your bonus task.
-    The small-cell data do not establish accuracy for liquid copper or melting. Compare with
-    the Mishin reference and explain any failure of the fitted model.
+    The small-cell data cover distorted crystals and a surface. Compare the model with the Mishin
+    reference, especially when you apply it to liquid copper or a nanoparticle.
+
+    Launch locally with `uvx marimo@0.25.2 edit --sandbox project_bonus_eam_fit.molab.py`.
+    The ZIP includes both data files in this folder. Keep the data files beside the notebook after extraction.
     """)
     return
 
@@ -56,9 +59,9 @@ def model_md(mo):
     All 16 coefficients are linear. Forces are the negative position derivatives of this same energy.
     Periodic neighbours, including periodic images, are counted.
 
-    The notebook reads the supplied `cu_vasp_train.xyz` and `cu_vasp_test.xyz` files from
-    `project/data/` when run in the course repository. In molab, it downloads them from the course
-    repository. You can also upload both files below. There are 178 training and 46 test structures;
+    The notebook reads `cu_vasp_train.xyz` and `cu_vasp_test.xyz` beside this notebook in the ZIP,
+    or from `project/data/` in the course repository. You can also upload both files below.
+    There are 178 training and 46 test structures;
     each split contains all four configuration families.
     """)
     return
@@ -75,17 +78,12 @@ def files_ui(mo):
 def load_data(Path, data_upload, io, mo, read):
     names = ("cu_vasp_train.xyz", "cu_vasp_test.xyz")
     uploaded = {f.name: f.contents.decode("utf-8") for f in data_upload.value}
-    root = Path(mo.notebook_dir() or Path.cwd()).resolve().parent / "project" / "data"
-    from urllib.request import urlopen
+    notebook_dir = Path(mo.notebook_dir() or Path.cwd()).resolve()
+    roots = (notebook_dir, notebook_dir.parent / "project" / "data")
     texts = {}
     for name in names:
-        if name in uploaded:
-            texts[name] = uploaded[name]
-        elif (root / name).exists():
-            texts[name] = (root / name).read_text()
-        else:
-            with urlopen("https://raw.githubusercontent.com/tiangroup-uofa/mate374-cmpt-methods-mate/main/project/data/" + name, timeout=30) as response:
-                texts[name] = response.read().decode("utf-8")
+        local_file = next((root / name for root in roots if (root / name).exists()), None)
+        texts[name] = uploaded[name] if name in uploaded else (local_file.read_text() if local_file else None)
     missing = [name for name in names if texts[name] is None]
     mo.stop(bool(missing), mo.md("Upload both supplied files: " + ", ".join(missing)))
     train = read(io.StringIO(texts[names[0]]), index=":", format="extxyz")
@@ -228,7 +226,7 @@ def force_check(candidates, coefficients, feature_rows, mo, np, scores, test):
 
 
 @app.cell
-def export_model(coefficients, io, mo, np):
+def export_model(Path, coefficients, io, mo, np):
     r_grid = np.linspace(0.0, 5.5, 10001)  # Angstrom
     rho_grid = np.linspace(0.0, 10.0, 20001)
     phi_table = np.maximum(np.linspace(2.2, 5.5, 12)[None, :] - r_grid[:, None], 0.0)**3 @ coefficients[1:13]
@@ -238,11 +236,15 @@ def export_model(coefficients, io, mo, np):
     np.savez(model_buffer, phi=phi_table, density=density_table, embed=embed_table,
              r_max=5.5, rho_max=10.0, cutoff=5.5, coefficients=coefficients,
              element="Cu", length_unit="angstrom", energy_unit="eV")
-    mo.vstack([mo.md("## Download your fitted model\nThe NPZ file contains `phi`, `density`, `embed`, `r_max`, `rho_max`, and `cutoff`. "
+    fitted_model_path = Path(mo.notebook_dir() or Path.cwd()) / "cu_fitted_eam.npz"
+    fitted_model_path.write_bytes(model_buffer.getvalue())
+    print(f"Fitted Cu model: {fitted_model_path}; energy MAE and force MAE appear above.")
+    mo.vstack([mo.md("## Download your fitted model\nSaved beside this notebook as `cu_fitted_eam.npz`. "
+                     "The NPZ file contains `phi`, `density`, `embed`, `r_max`, `rho_max`, and `cutoff`. "
                      "The embedding table includes the fitted constant energy per atom. "
                      "Check that every atom's density remains within the table range when you use it."),
                mo.download(model_buffer.getvalue(), filename="cu_fitted_eam.npz", label="Download fitted Cu model")])
-    return
+    return (fitted_model_path,)
 
 
 @app.cell(hide_code=True)
@@ -253,7 +255,7 @@ def tasks(mo):
     1. Explain why energy and force rows are both linear in the coefficients.
     2. Compare the validation scores for the candidate ridge penalties. What happens when the penalty is too large?
     3. Change the number of pair knots or the relative energy/force scales. Refit and compare the held-out errors.
-    4. Download the fitted tables below. Insert the fitted model into your copy of the Cu simulation notebook.
+    4. Download the fitted tables above. Insert the fitted model into your copy of the Cu simulation notebook.
        Its `potential` cell reads EAM tables and `eam_system` builds the OpenMM force. Replace the
        reference tables with yours, retaining the Å-to-nm and eV-to-kJ/mol conversions.
     5. Check forces by finite differences and run a short trajectory before a complete heating cycle.

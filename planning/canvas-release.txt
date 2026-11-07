@@ -1,0 +1,66 @@
+Canvas package validation, 2026-11-07
+
+Request: ordered assignment, tutorial, and sample-report PDFs; separate MD (with Mishin), analysis, and Cu bonus folders. Local GPU/multicore CPU marimo sandbox operation. Sparse atomic snapshots. No WEAS for this release.
+
+Artifacts (private; never commit named assignment or complete Canvas ZIP):
+- instructor-private/project-demo/MATE374-group-project.zip
+- instructor-private/project-demo/assignment.qmd and assignment.pdf
+- instructor-private/project-demo/tutorial.qmd and tutorial.pdf
+- instructor-private/project-demo/canvas-validation/ contains timing logs, force checks, figures and a private completed fitted-MD notebook.
+- One existing roster spelling needs instructor confirmation. All existing names and group memberships were retained.
+
+Package order:
+1-assignment.pdf
+2-assignment-tutorial.pdf
+3-assignment-sample-report.pdf
+4-md-run/ (notebook, Cu_mishin1.eam.alloy, START-HERE.txt)
+5-analysis/ (notebook, START-HERE.txt)
+6-bonus/ (notebook, 178 train and 46 test Cu VASP structures, START-HERE.txt)
+3-assignment-sample-report-source.zip (portable LaTeX source, generated root-bibliography copy, 3 figures)
+
+Notebook changes:
+- PEP 723 dependencies include pinned marimo; OpenMM CUDA 12 works with the host's CUDA-13-capable NVIDIA driver. Explicit Auto/CUDA/CPU controls; CPU thread selector defaults to 4. An explicitly requested CUDA platform never silently falls back.
+- Defaults: 2 nm sphere, 900 K, 20 ps stability, 10 K/ps cycle. No external widget or dataset downloads. The Mishin file and bonus datasets are supplied in the ZIP.
+- Each cycle saves 2430 energy rows and 27 snapshots at 100 K spacing, independent of rate. 200 K gives 15 frames; 50 K gives 51. Fixed-T run saves energy rows only. The initial structure is saved separately.
+- Analysis reads the neighbouring MD runs directory, accepts uploads, and uses matplotlib. Actual interior-atom counts guard the g(r) calculation; tiny particles display a message rather than dividing by zero. Single-frame files use a disabled slider.
+- Bonus writes cu_fitted_eam.npz locally and provides a tested browser download. The integration remains a student task; the completed integration used for validation stays private.
+
+Measured sequential workloads on RTX A2000 12 GB / i9-13900K (dependencies available):
+GPU 2 nm: 20 ps fixed T 1.14 s; 10 K/ps full cycle 12.63 s; total notebook invocation 17.51 s.
+GPU 4 nm: 100 ps fixed T 6.03 s; 1 K/ps full cycle 144.88 s; total 152.18 s.
+GPU 8 nm: 20 ps fixed T 4.58 s; 10 K/ps full cycle 58.03 s; total 64.63 s.
+CPU 4 threads, 2 nm: 20 ps fixed T 8.29 s; 10 K/ps cycle 112.07 s; total 121.31 s.
+These are reference workflows, not an estimate of an unspecified group's complete experimental design. Slower runs and more seeds increase the cost. First-time dependency downloads are not characterized by the cached-start timing.
+
+Cycle output (uncompressed):
+2 nm: CSV 135286 B, XYZ 540337 B.
+4 nm: CSV 137542 B, XYZ 4229128 B.
+8 nm: CSV 135297 B, XYZ 33045043 B.
+Every XYZ has 27 frames. Fixed-T CSV: about 5.4 KB / 20 ps and 27 KB / 100 ps.
+
+Bonus validation:
+Held-out energy MAE 34.996 meV/atom; force MAE 97.400 meV/Angstrom; selected ridge 1e-7.
+Analytic vs central difference max error over sampled components: 1.78e-8 eV/Angstrom.
+Exported tables in the actual modified MD notebook vs analytic model on a distorted cluster:
+energy error 7.32e-9 eV/atom; max force error 1.63e-4 eV/Angstrom on mixed-precision CUDA.
+20 ps runs at 400 and 900 K and a full 270 ps 400->1600->400 K cycle remained finite.
+Maximum density ~1.23, within the table maximum of 10. Both potentials lose solid-like order during the hot hold. At this fast rate, the fitted model did not recrystallize during cooling. Numerical stability does not establish quantitative melting accuracy.
+Analysis of all 27 frames: about 0.2 s (2 nm), 0.8 s (4 nm), 5.7 s (8 nm), excluding Python startup. Bonus fitting notebook invocation: about 3 s; fit cell workflow ~0.7 s.
+
+Checks:
+- marimo 0.25.2 check passes for all 3 sources.
+- Extracted ZIP tested outside source activities paths; exact outputs opened in analysis; bonus read only the packaged local data and wrote an NPZ.
+- All 3 launched with marimo edit --sandbox in a local browser. MD buttons, figures and downloaded results checked. Bonus NPZ browser endpoint returned HTTP 200, 322714 B, valid ZIP/NPZ header and correct download filename.
+- LaTeX source ZIP compiled separately in an Overleaf-like extracted folder. All cited sources resolve from root references.bib. Metadata for 3 added bibliography entries verified through Crossref; print year used for OpenMM.
+- Assignment, tutorial and sample-report PDFs inspected visually. Named handout remains private.
+- Signed-in molab/GPU cloud execution and cross-origin embedding remain outside this local release check. WEAS is removed, not claimed fixed.
+- The public project-page draft and unrelated lecture/configuration changes remain separate from this Canvas package task.
+
+Rebuild:
+quarto render instructor-private/project-demo/assignment.qmd --to pdf
+quarto render instructor-private/project-demo/tutorial.qmd --to pdf
+(cd project/report-template && latexmk -pdf report.tex)
+python3 scripts/package_project.py
+Extract the ZIP, run the MD notebook with uv, then:
+uv run scripts/check_project_release.py --package EXTRACTED_PATH --output PRIVATE_CHECK_PATH
+Use explicit --platform CUDA or --platform CPU --threads 4 for timing checks. Run GPU workloads sequentially.

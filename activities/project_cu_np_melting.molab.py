@@ -1,23 +1,19 @@
 # /// script
-# requires-python = ">=3.13"
+# requires-python = ">=3.12"
 # dependencies = [
+#     "marimo==0.25.2",
 #     "ase==3.29.0",
 #     "matplotlib==3.11.2",
 #     "numpy==2.5.4",
-#     "nvidia-cuda-crt==13.2.86",
-#     "nvidia-cuda-nvcc==13.2.86",
-#     "nvidia-cuda-nvrtc==13.2.86",
-#     "nvidia-nvvm==13.2.86",
-#     "openmm[cuda13]==8.6.1",
+#     "openmm[cuda12]==8.6.1",
 #     "scipy==1.18.1",
-#     "weas-widget==0.2.6",
 # ]
 # ///
 
 import marimo
 
 __generated_with = "0.25.2"
-app = marimo.App(width="medium", auto_download=["html"])
+app = marimo.App(width="medium")
 
 
 @app.cell(hide_code=True)
@@ -34,9 +30,13 @@ def intro(mo):
     3. Heat and cool it, then examine its energy and atomic structures.
     4. Download the results and use the analysis notebook to compare your group's runs.
 
-    In molab, sign in and choose **Fork** to create an editable copy. Select a GPU machine for the
-    simulation. Download each result before changing its settings: running the same settings again
-    replaces files with the same names.
+    Locally, open a terminal in this folder and run `uvx marimo@0.25.2 edit --sandbox project_cu_np_melting.molab.py`.
+    The sandbox installs the declared dependencies. OpenMM selects NVIDIA CUDA when available and otherwise
+    uses multiple CPU threads. Use the platform selector to compare them. This notebook uses matplotlib
+    for structures and does not require an external 3D widget.
+
+    Download each result before changing its settings: running the same settings again replaces files
+    with the same names. Local results also remain in the `runs/` folder.
     """)
     return
 
@@ -44,6 +44,7 @@ def intro(mo):
 @app.cell
 def imports():
     import csv
+    import time
     import marimo as mo
     import matplotlib.pyplot as plt
     import numpy as np
@@ -57,8 +58,9 @@ def imports():
 
     # Run without the browser, for example:
     #   python notebook.py --shape icosahedron --seed 2 --rate 1 --run cycle
-    #   python notebook.py --temperature 1100 --length 100 --run stability,cycle
-    # Options: --shape --size --seed --temperature --length --rate --run (stability, cycle, or both).
+    #   uv run notebook.py --temperature 1100 --length 100 --run stability,cycle
+    # Options: --shape --size --seed --temperature --length --rate --snapshots --platform --threads --run.
+    # Use --platform CUDA to require the GPU, or --platform CPU --threads 4 for a CPU run.
     ARGS = mo.cli_args()
     IS_SCRIPT = mo.app_meta().mode == "script"
 
@@ -73,9 +75,7 @@ def imports():
     RUN_DIR.mkdir(exist_ok=True)
     POTENTIAL = NOTEBOOK_DIR / "Cu_mishin1.eam.alloy"   # shipped with the notebook
     if not POTENTIAL.exists():
-        from urllib.request import urlopen
-        with urlopen("https://raw.githubusercontent.com/tiangroup-uofa/mate374-cmpt-methods-mate/main/activities/Cu_mishin1.eam.alloy", timeout=30) as response:
-            POTENTIAL.write_bytes(response.read())
+        raise FileNotFoundError("Keep Cu_mishin1.eam.alloy beside this notebook. Extract the complete assignment ZIP first.")
 
     return (
         ARGS,
@@ -93,13 +93,22 @@ def imports():
         plt,
         read_structures,
         script_runs,
+        time,
         unit,
         write_structures,
     )
 
 
 @app.cell
-def potential(POTENTIAL, mm, mo, np):
+def platform_controls(ARGS, mo):
+    platform_choice = mo.ui.dropdown(["Auto", "CUDA", "CPU"], value=str(ARGS.get("platform", "Auto")), label="OpenMM platform")
+    cpu_threads = mo.ui.number(start=1, stop=64, value=int(ARGS.get("threads", 4)), label="CPU threads")
+    mo.hstack([platform_choice, cpu_threads], justify="start")
+    return cpu_threads, platform_choice
+
+
+@app.cell
+def potential(POTENTIAL, cpu_threads, mm, mo, np, platform_choice):
     EV_TO_KJMOL = 96.48533212  # kJ/mol per eV
     KB_EV = 8.617333262e-5     # Boltzmann constant, eV/K
     CU_MASS = 63.546           # g/mol
@@ -149,20 +158,26 @@ def potential(POTENTIAL, mm, mo, np):
 
 
     def pick_platform():
-        """Use the GPU (CUDA) when it works; otherwise fall back to the much slower CPU."""
-        for name, properties in (("CUDA", {"Precision": "mixed"}), ("CPU", {})):
+        """Probe a context, report failures, and never silently replace an explicitly requested platform."""
+        names = ["CUDA", "CPU"] if platform_choice.value == "Auto" else [platform_choice.value]
+        failures = []
+        for name in names:
+            properties = {"Precision": "mixed"} if name == "CUDA" else {"Threads": str(int(cpu_threads.value))}
             try:
                 platform = mm.Platform.getPlatformByName(name)
-                mm.Context(eam_system(2), mm.VerletIntegrator(0.001), platform, properties)
-                return name, platform, properties
-            except Exception:
-                continue
-        raise RuntimeError("OpenMM found neither a CUDA nor a CPU platform.")
+                probe = mm.Context(eam_system(2), mm.VerletIntegrator(0.001), platform, properties)
+                del probe
+                return name, platform, properties, failures
+            except Exception as error:
+                failures.append(f"{name}: {error}")
+        raise RuntimeError("Cannot start the requested OpenMM platform. " + " | ".join(failures))
 
 
-    PLATFORM_NAME, PLATFORM, PLATFORM_PROPERTIES = pick_platform()
-    mo.md(f"OpenMM {mm.__version__} runs on **{PLATFORM_NAME}**."
-          + ("" if PLATFORM_NAME == "CUDA" else " No GPU found: choose a GPU machine, or each run takes hours."))
+    PLATFORM_NAME, PLATFORM, PLATFORM_PROPERTIES, platform_failures = pick_platform()
+    print(f"OpenMM {mm.__version__}: {PLATFORM_NAME}, properties={PLATFORM_PROPERTIES}")
+    mo.md(f"OpenMM {mm.__version__} runs on **{PLATFORM_NAME}**, properties `{PLATFORM_PROPERTIES}`. "
+          "Start with a 2 nm particle and a fast cycle before choosing larger or slower runs."
+          + ("  \nGPU probe: " + " | ".join(platform_failures) if platform_failures else ""))
 
     return CU_A0, EV_TO_KJMOL, KB_EV, PLATFORM, PLATFORM_PROPERTIES, eam_system
 
@@ -180,20 +195,23 @@ def md_functions(
     mm,
     mo,
     np,
+    time,
     unit,
     write_structures,
 ):
     COLUMNS = ["time_ps", "stage", "T_set_K", "T_K", "PE_eV_per_atom", "KE_eV_per_atom"]
 
 
-    def run_md(atoms, schedule, seed, title, start_at_rest=False, frame_every_ps=None,
+    def run_md(atoms, schedule, seed, title, start_at_rest=False, snapshot_kelvin=None,
                dt_fs=2.0, friction_per_ps=2.0):
         """Langevin MD of a free Cu particle.
 
         schedule: list of (stage, set temperature in K, length in ps). The thermostat temperature
         is updated at the start of each piece, and one row of data is recorded at its end.
-        Returns the data table and, if frame_every_ps is set, a list of structures (ASE Atoms).
+        Returns the data table and sparse structures at temperature intervals and stage boundaries.
+        Snapshot count depends on the temperature range, not the number of integration steps.
         """
+        started = time.perf_counter()
         n = len(atoms)
         integrator = mm.LangevinMiddleIntegrator(schedule[0][1] * unit.kelvin, friction_per_ps / unit.picosecond,
                                                  dt_fs * unit.femtoseconds)
@@ -208,14 +226,17 @@ def md_functions(
                          info={"time_ps": round(time_ps, 3), "stage": stage, "T_set_K": round(t_set, 1)})
 
         table = {c: [] for c in COLUMNS}
-        frames = [frame(atoms.positions, 0.0, schedule[0][0], schedule[0][1])] if frame_every_ps else []
-        time_ps, next_frame = 0.0, frame_every_ps or np.inf
-        for stage, t_set, length_ps in mo.status.progress_bar(schedule, title=title, remove_on_exit=True):
+        frames = [frame(atoms.positions, 0.0, "initial", schedule[0][1])] if snapshot_kelvin else []
+        time_ps = 0.0
+        pieces = list(enumerate(schedule))
+        for piece_index, (stage, t_set, length_ps) in mo.status.progress_bar(pieces, title=title, remove_on_exit=True):
             integrator.setTemperature(t_set * unit.kelvin)
             steps = max(1, round(length_ps * 1000 / dt_fs))
             integrator.step(steps)
             time_ps += steps * dt_fs / 1000
-            want_frame = time_ps >= next_frame - 1e-9
+            stage_end = piece_index == len(schedule) - 1 or schedule[piece_index + 1][0] != stage
+            at_interval = stage in ("heat", "cool") and abs(t_set / (snapshot_kelvin or 1) - round(t_set / (snapshot_kelvin or 1))) < 1e-8
+            want_frame = bool(snapshot_kelvin) and (stage_end or at_interval)
             state = context.getState(getEnergy=True, getPositions=want_frame)
             pe = state.getPotentialEnergy().value_in_unit(unit.kilojoule_per_mole) / EV_TO_KJMOL / n
             ke = state.getKineticEnergy().value_in_unit(unit.kilojoule_per_mole) / EV_TO_KJMOL / n
@@ -224,8 +245,9 @@ def md_functions(
             if want_frame:
                 frames.append(frame(state.getPositions(asNumpy=True).value_in_unit(unit.angstrom),
                                     time_ps, stage, t_set))
-                next_frame += frame_every_ps
         del context
+        elapsed = time.perf_counter() - started
+        print(f"{title}: {n} atoms, {time_ps:.3f} ps, {elapsed:.2f} s, {len(table['time_ps'])} rows, {len(frames)} snapshots")
         return table, frames
 
 
@@ -254,6 +276,8 @@ def md_functions(
             save_csv(csv_path, table)
             if frames:
                 write_structures(xyz_path, frames, format="extxyz")
+            print(f"Saved {csv_path.name}: {csv_path.stat().st_size} bytes"
+                  + (f"; {xyz_path.name}: {xyz_path.stat().st_size} bytes" if frames else ""))
         return load_csv(csv_path) if csv_path.exists() else None
 
 
@@ -305,7 +329,7 @@ def particle_controls(ARGS, mo):
     _shape = str(ARGS.get("shape", "sphere"))
     shape_choice = mo.ui.dropdown(SHAPES, value=next(k for k, v in SHAPES.items() if v == _shape), label="Particle shape")
     SIZES = {"2 nm": 2, "3 nm": 3, "4 nm": 4, "6 nm": 6, "8 nm": 8}
-    size_choice = mo.ui.dropdown(SIZES, value=f"{int(ARGS.get('size', 4))} nm", label="Diameter")
+    size_choice = mo.ui.dropdown(SIZES, value=f"{int(ARGS.get('size', 2))} nm", label="Diameter")
     seed_choice = mo.ui.number(start=1, stop=999, value=int(ARGS.get("seed", 1)), label="Random seed")
     mo.hstack([shape_choice, size_choice, seed_choice], justify="start", gap=2)
 
@@ -420,8 +444,8 @@ def exp1_md(mo):
 def exp1_controls(ARGS, mo):
     stability_T = mo.ui.slider(300, 1300, step=50, value=int(ARGS.get("temperature", 900)),
                               label="Temperature (K)", show_value=True)
-    _lengths = {f"{v} ps": v for v in sorted({20, 50, 100, int(ARGS.get("length", 100))})}
-    stability_ps = mo.ui.dropdown(_lengths, value=f"{int(ARGS.get('length', 100))} ps", label="Length")
+    _lengths = {f"{v} ps": v for v in sorted({20, 50, 100, int(ARGS.get("length", 20))})}
+    stability_ps = mo.ui.dropdown(_lengths, value=f"{int(ARGS.get('length', 20))} ps", label="Length")
     run_stability = mo.ui.run_button(label="Run at fixed temperature")
     mo.hstack([stability_T, stability_ps, run_stability], justify="start", gap=2)
 
@@ -490,14 +514,16 @@ def exp2_md(mo):
 
     - **equilibrate:** 10 ps at 400 K;
     - **heat:** the thermostat temperature rises from 400 K to 1600 K at the chosen rate, in steps of 1 K;
-    - **hold:** 20 ps at 1600 K, where the particle is liquid;
+    - **hold:** 20 ps at 1600 K; inspect the structures to establish whether melting occurred;
     - **cool:** back to 400 K at the same rate.
 
     One row of data is recorded at every kelvin. The `stage` column of the `.csv` file marks the four parts.
-    Structures are saved every 25 K in the `.xyz` file.
+    By default, structures are saved every **100 K** on heating and cooling, plus the initial structure
+    and the end of each stage: **27 snapshots per cycle**, independent of heating rate.
+    Choose 50 K or 200 K spacing if you need more or fewer structures.
 
-    Choose the rate in the menu. Before you press the button, the notebook shows the simulated time
-    and the expected GPU time for that rate.
+    Start at 10 K/ps to check the workflow. A slower rate increases the compute time, but it does not
+    increase the number of CSV rows or snapshots.
     """)
     return
 
@@ -506,14 +532,6 @@ def exp2_md(mo):
 def exp2_controls(ARGS, mo):
     RATES = {"10 K/ps": 10.0, "5 K/ps": 5.0, "2 K/ps": 2.0, "1 K/ps": 1.0,
              "0.5 K/ps": 0.5, "0.2 K/ps": 0.2, "0.1 K/ps": 0.1}
-    MIN_PER_NS_4NM = 0.95   # measured on the molab GPU for about 2900 atoms
-
-
-    def minutes_per_ns(n_atoms):
-        """Rough GPU time per simulated ns: 0.95 min at 2900 atoms, about 1.6 min at 23 000 atoms."""
-        return MIN_PER_NS_4NM * (0.9 + 0.1 * n_atoms / 2900)
-
-
     def cycle_schedule(rate, t_low=400.0, t_high=1600.0, hold_ps=20.0, equilibrate_ps=10.0):
         """(stage, thermostat temperature in K, length in ps) for every piece of the run."""
         steps = int(round(t_high - t_low))
@@ -523,13 +541,15 @@ def exp2_controls(ARGS, mo):
                 + [("cool", t_high - k - 1, 1.0 / rate) for k in range(steps)])
 
 
-    _rate = float(ARGS.get("rate", 1.0))
+    _rate = float(ARGS.get("rate", 10.0))
     RATES.setdefault(f"{_rate:g} K/ps", _rate)
     cycle_rate = mo.ui.dropdown(RATES, value=f"{_rate:g} K/ps", label="Heating and cooling rate")
+    snapshot_spacing = mo.ui.dropdown({"50 K": 50, "100 K": 100, "200 K": 200},
+                                     value=f"{int(ARGS.get('snapshots', 100))} K", label="Snapshot spacing")
     run_cycle = mo.ui.run_button(label="Run heating and cooling (400 -> 1600 -> 400 K)")
-    mo.hstack([cycle_rate, run_cycle], justify="start", gap=2)
+    mo.hstack([cycle_rate, snapshot_spacing, run_cycle], justify="start", gap=2)
 
-    return cycle_rate, cycle_schedule, minutes_per_ns, run_cycle
+    return cycle_rate, cycle_schedule, run_cycle, snapshot_spacing
 
 
 @app.cell
@@ -538,25 +558,25 @@ def exp2_run(
     cycle_schedule,
     download_buttons,
     experiment,
-    minutes_per_ns,
     mo,
     particle,
     run_cycle,
     run_md,
     script_runs,
     seed,
+    snapshot_spacing,
     tag,
 ):
     cycle_name = f"cycle_{tag}_{cycle_rate.value:g}Kps"
     cycle = experiment(
         cycle_name,
         lambda: run_md(particle, cycle_schedule(cycle_rate.value), seed,
-                       title=f"Heating and cooling at {cycle_rate.value:g} K/ps", frame_every_ps=25.0 / cycle_rate.value),
+                       title=f"Heating and cooling at {cycle_rate.value:g} K/ps", snapshot_kelvin=snapshot_spacing.value),
         run_cycle.value or script_runs("cycle"),
     )
     _ns = sum(piece[2] for piece in cycle_schedule(cycle_rate.value)) / 1000
     (mo.md(f"Press **Run heating and cooling**. At {cycle_rate.value:g} K/ps this is {_ns:.2g} ns of "
-           f"simulation, about {max(0.5, minutes_per_ns(len(particle)) * _ns):.1f} min on the GPU.")
+           f"simulation. The CSV contains 2430 rows. Snapshot spacing: {snapshot_spacing.value} K.")
      if cycle is None else download_buttons(cycle_name))
 
     return (cycle,)
@@ -583,45 +603,47 @@ def viewer_md(mo):
     mo.md(r"""
     ## Look inside your runs
 
-    Choose a saved structure file. The viewer plays its frames: use the frame slider under the picture,
-    drag to rotate, and scroll to zoom.
+    Choose a saved structure file and a frame. The matplotlib picture shows a 4 Å-thick central slice.
+    Compare the ordered low-temperature lattice with a high-temperature structure.
     """)
     return
 
 
 @app.cell
-def viewer_controls(RUN_DIR, cycle, mo, stability):
-    # Re-list the files after each experiment finishes.
+def viewer_controls(RUN_DIR, cycle, cycle_rate, mo, stability, tag):
+    # Re-list the files after each experiment finishes and select this particle's cycle when available.
     _ = (stability, cycle)
     _xyz_files = sorted(p.name for p in RUN_DIR.glob("*.xyz"))
-    viewer_file = mo.ui.dropdown(_xyz_files, value=_xyz_files[-1] if _xyz_files else None, label="Structure file")
+    _preferred = f"cycle_{tag}_{cycle_rate.value:g}Kps.xyz"
+    _initial = f"initial_{tag.rsplit('_seed', 1)[0]}.xyz"
+    _selected = _preferred if _preferred in _xyz_files else _initial
+    viewer_file = mo.ui.dropdown(_xyz_files, value=_selected, label="Structure file")
     viewer_file
 
     return (viewer_file,)
 
 
 @app.cell
-def viewer(RUN_DIR, mo, read_structures, viewer_file):
-    from weas_widget import WeasWidget
-
+def viewer_frames(RUN_DIR, mo, read_structures, viewer_file):
     mo.stop(viewer_file.value is None, mo.md("Run an experiment first."))
-    _frames = read_structures(RUN_DIR / viewer_file.value, index=":")
-    _gui = {  # keep the picture, the frame slider, and fullscreen; hide the extra panels
-        "controls": {"enabled": False},
-        "meshLegend": {"enabled": False},
-        "atomLegend": {"enabled": False},
-        "buttons": {"enabled": True, "fullscreen": True, "undo": False, "redo": False, "export": False,
-                    "import": False, "measurement": False},
-        "timeline": {"enabled": True},
-    }
-    _viewer = WeasWidget(viewerStyle={"width": "480px", "height": "360px"}, guiConfig=_gui)
-    _viewer.from_ase(_frames)
-    _viewer.avr.model_style = 0          # spheres only, no bonds
-    mo.vstack([
-        mo.md(f"`{viewer_file.value}`: {len(_frames)} frames, {len(_frames[0])} atoms"),
-        mo.ui.anywidget(_viewer._widget),
-    ])
+    saved_frames = read_structures(RUN_DIR / viewer_file.value, index=":")
+    saved_frame = mo.ui.slider(0, max(1, len(saved_frames) - 1), value=len(saved_frames) - 1,
+                               disabled=len(saved_frames) == 1, label="Frame", show_value=True)
+    mo.vstack([mo.md(f"`{viewer_file.value}`: {len(saved_frames)} frames, {len(saved_frames[0])} atoms"), saved_frame])
+    return saved_frame, saved_frames
 
+
+@app.cell
+def viewer(np, plt, saved_frame, saved_frames):
+    _frame = saved_frames[saved_frame.value]
+    _xyz = _frame.positions - _frame.positions.mean(axis=0)
+    _slice = np.abs(_xyz[:, 2]) < 2.0
+    _fig, _ax = plt.subplots(figsize=(4.2, 4.2))
+    _ax.scatter(*_xyz[_slice, :2].T, s=12, color="peru")
+    _ax.set_aspect("equal")
+    _ax.set(xlabel="x (Å)", ylabel="y (Å)", title=f"{_frame.info.get('stage', '')}, {_frame.info.get('T_set_K', '')} K")
+    _fig.tight_layout()
+    _fig
     return
 
 
