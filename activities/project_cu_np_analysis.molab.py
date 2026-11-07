@@ -1,12 +1,11 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "ase",
-#     "marimo",
-#     "matplotlib",
-#     "numpy",
-#     "scipy",
-#     "weas-widget",
+#     "ase==3.29.0",
+#     "marimo==0.25.2",
+#     "matplotlib==3.11.2",
+#     "numpy==2.5.4",
+#     "scipy==1.18.1",
 # ]
 # ///
 
@@ -28,6 +27,8 @@ def intro(mo):
     - `.xyz` files hold the atom positions at a few moments of the run.
 
     Upload your files below, or put them in a `runs/` folder next to this notebook.
+    In the assignment ZIP, this notebook also reads `../4-md-run/runs/` automatically.
+    Launch locally with `uvx marimo@0.25.2 edit --sandbox project_cu_np_analysis.molab.py`.
     """)
     return
 
@@ -46,7 +47,8 @@ def imports():
 
     KB_EV = 8.617333262e-5  # Boltzmann constant, eV/K
     RUN_DIR = Path(mo.notebook_dir() or Path.cwd()) / "runs"
-    return KB_EV, RUN_DIR, cKDTree, io, mo, np, plt, read, sph_harm_y
+    MD_RUN_DIR = RUN_DIR.parent.parent / "4-md-run" / "runs"
+    return KB_EV, MD_RUN_DIR, RUN_DIR, cKDTree, io, mo, np, plt, read, sph_harm_y
 
 
 @app.cell
@@ -58,9 +60,10 @@ def upload(mo):
 
 
 @app.cell
-def files(RUN_DIR, mo, uploads):
+def files(MD_RUN_DIR, RUN_DIR, mo, uploads):
     # Collect every file as {name: text}. An uploaded file replaces a file in runs/ with the same name.
-    files = {p.name: p.read_text() for p in sorted(RUN_DIR.glob("*.*"))} if RUN_DIR.exists() else {}
+    files = {p.name: p.read_text() for folder in (MD_RUN_DIR, RUN_DIR)
+             for p in sorted(folder.glob("*.*")) if p.suffix in (".csv", ".xyz")}
     files.update({f.name: f.contents.decode() for f in uploads.value})
     csv_names = sorted(n for n in files if n.endswith(".csv"))
     xyz_names = sorted(n for n in files if n.endswith(".xyz"))
@@ -179,9 +182,9 @@ def structure_md(mo):
     `ase.io.read(..., index=":")` reads every frame of an `.xyz` file as a list. Each frame keeps the time,
     stage, and set temperature of the run in `frame.info`.
 
-    - **3D viewer (WEAS):** rotate with the mouse and play the frames with the slider below the picture.
-    - **Slice:** a flat picture of the atoms within 2 Å of the centre plane, which shows whether the inside of the
-      particle is still a crystal. The slice works without a 3D viewer and goes straight into a report.
+    Use the frame slider to select a snapshot. The matplotlib slice shows atoms within 2 Å of the centre
+    plane, so you can inspect whether the inside of the particle is still a crystal. It requires no external
+    3D viewer. Save report figures with `fig.savefig("my-figure.png", dpi=300)`.
     """)
     return
 
@@ -198,28 +201,10 @@ def structure_pick(mo, xyz_names):
 def structure_read(files, io, mo, read, structure_file):
     mo.stop(structure_file.value is None, mo.md("Choose an `.xyz` file."))
     frames = read(io.StringIO(files[structure_file.value]), index=":", format="extxyz")
-    frame_slider = mo.ui.slider(0, len(frames) - 1, value=len(frames) - 1, label="Frame for the slice",
+    frame_slider = mo.ui.slider(0, max(1, len(frames) - 1), value=len(frames) - 1, disabled=len(frames) == 1, label="Frame for the slice",
                                 show_value=True)
     frame_slider
     return frame_slider, frames
-
-
-@app.cell
-def viewer(frames, mo):
-    from weas_widget import WeasWidget
-
-    GUI = {  # keep the picture, the frame slider, and fullscreen; hide the extra panels
-        "controls": {"enabled": False},
-        "meshLegend": {"enabled": False},
-        "atomLegend": {"enabled": False},
-        "buttons": {"enabled": True, "fullscreen": True, "undo": False, "redo": False, "export": False,
-                    "import": False, "measurement": False},
-        "timeline": {"enabled": True},
-    }
-    viewer3d = WeasWidget(viewerStyle={"width": "420px", "height": "320px"}, guiConfig=GUI)
-    viewer3d.from_ase(frames)
-    mo.ui.anywidget(viewer3d._widget)
-    return
 
 
 @app.cell
@@ -250,7 +235,7 @@ def gr_md(mo):
     - **Liquid:** a broad first peak, then weaker and smoother oscillations.
 
     Only atoms at least 10 Å inside the surface are used as centres, so that every shell up to 8 Å is full.
-    The plot compares frame 1 (the crystal at the start of the run) with the frame chosen by the slider above.
+    The plot compares frame 0 (the initial crystal) with the frame chosen by the slider above.
     """)
     return
 
@@ -262,6 +247,8 @@ def gr_function(cKDTree, np):
         xyz = positions - positions.mean(axis=0)
         radius = np.linalg.norm(xyz, axis=1)
         centres = xyz[radius < radius.max() - inset]
+        if len(centres) == 0:
+            raise ValueError("No atoms remain after the surface exclusion. Choose a larger particle.")
         inner = radius.max() - 3.0                                  # density from the inside of the particle
         density = (radius < inner).sum() / (4 / 3 * np.pi * inner**3)
         distances = cKDTree(centres).sparse_distance_matrix(cKDTree(xyz), r_max, output_type="ndarray")["v"]
@@ -274,10 +261,10 @@ def gr_function(cKDTree, np):
 
 @app.cell
 def gr_plot(frame_slider, frames, mo, np, pair_distribution, plt):
-    _reference_index = min(1, len(frames) - 1)
+    _reference_index = 0
     _selected = (frames[_reference_index], frames[frame_slider.value])
-    _enough_core = all(np.max(np.linalg.norm(f.positions - f.positions.mean(axis=0), axis=1)) > 10.0
-                       for f in _selected)
+    _radii = [np.linalg.norm(f.positions - f.positions.mean(axis=0), axis=1) for f in _selected]
+    _enough_core = all(np.any(radius < radius.max() - 10.0) for radius in _radii)
     mo.stop(not _enough_core, mo.md("This particle has no atoms 10 Å inside its outer radius. Choose a larger particle for this g(r) estimate."))
     _fig, _ax = plt.subplots(figsize=(6, 3.2))
     for _index, _colour in ((_reference_index, "grey"), (frame_slider.value, "tab:red")):

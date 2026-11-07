@@ -28,6 +28,19 @@ __pycache__/
 /calculations/
 authoring-notes.txt
 
+# Local project runs and generated report build products.
+/activities/runs/
+/activities/cu_fitted_eam.npz
+/project/report-template/report.pdf
+/project/report-template/*.aux
+/project/report-template/*.bbl
+/project/report-template/*.blg
+/project/report-template/*.log
+/project/report-template/*.out
+/project/report-template/*.fls
+/project/report-template/*.fdb_latexmk
+/project/report-template/acs-*.bib
+
 # Local figure-drawing references and review tooling stay untracked.
 /example-drawings/
 .pi/skills/svg-figure/
