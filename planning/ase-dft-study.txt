@@ -1,0 +1,46 @@
+ASE displays and local Cu DFT fitting study, 2026-11-07
+
+The instructor confirmed the existing repeated surname in the private roster. Keep all names and group memberships unchanged. The named assignment and full Canvas ZIP remain inside ignored instructor-private/project-demo/.
+
+Student package changes
+- ASE plot_atoms renders the initial particle and atomic slices in the simulation and analysis notebooks. It uses matplotlib, with no WEAS widget or external 3D assets.
+- The analysis identifies the largest cluster with a 3.8 Angstrom connectivity cutoff. Atomic views, g(r), and core/shell radii use that cluster. Whole-file solid fractions still include detached atoms. A far-away atom no longer inflates the inferred radius or dilutes the density estimate.
+- The bonus notebook now uses a deterministic, family-stratified internal split: 143 fit / 35 validation, including all 4 families. The 178-structure training file and 46-structure test file are unchanged and have distinct (family, config_id) pairs. The original last-20-percent validation split contained 36 surface structures and no bulk structures.
+- Energy residual scale is 0.03 eV/atom and force scale is 0.05 eV/Angstrom. Ridge candidates span 1e-9 to 1e-1 by decades. Candidate refits must keep fcc below both bcc and ideal-c/a hcp on relaxed lattice-spacing grids. Select the lowest validation error among these candidates. The model remains linear in the same 16 coefficients.
+- The NPZ contains the selected penalty, weighting scales and internal split indices as well as potential tables and units.
+
+Fresh fit and checks
+- Selected ridge penalty: 1e-5.
+- Held-out test energy MAE: 41.8617 meV/atom. Force MAE: 51.1922 meV/Angstrom.
+- Relaxed fcc spacing: 3.60509 Angstrom (Mishin: 3.61492 Angstrom).
+- bcc above fcc: 5.64 meV/atom; ideal-c/a hcp above fcc: 3.70 meV/atom.
+- The original fit instead favoured bcc by 21.48 meV/atom and gave 35.00 meV/atom / 97.40 meV/Angstrom errors. Weighting and regularization involve a real tradeoff between fit errors and crystal ordering.
+- Central-difference force error on sampled components: max 2.55e-9 eV/Angstrom.
+- Exported tables vs analytic model on a distorted cluster, CPU: 5.44e-9 eV/atom energy difference, max 1.06e-6 eV/Angstrom force difference.
+- The extracted package passed the release check on 4 CPU threads: two 20 ps trajectories plus a full 270 ps cycle, all finite. The fitted 2 nm cycle took 275.57 s in that loaded-host run. The full check, including 2/4/8 nm analysis and figure exports, took 5 min 41 s. Do not replace earlier isolated Mishin timings with this fitted-model timing.
+- marimo check passes for all 3 notebooks. Browser execution shows the new split table, phase checks and errors. A synthetic distant-atom check and an actual evaporation case verify the cluster-aware analysis.
+
+Melting study
+- scripts/study_project_cu_melting.py refits the local DFT files and creates private completed MD notebook copies. It supports --fit-only, --quick, --reference-output and per-case resumption with input fingerprints. This is instructor validation, not a student plain-script workflow.
+- Planned comparison: 2 nm spheres at 10 and 1 K/ps, seeds 1/2/3, both Mishin and revised DFT fit; plus 4 nm at 1 K/ps, seed 1, both models. All use a 2 fs time step, friction 2/ps, the same initial lattice and 400->1600->400 K schedule.
+- The private study saves every 50 K (51 frames). The student default remains every 100 K (27 frames). Each full cycle saves 2430 CSV rows.
+- All 12 revised/reference 2 nm cases completed on CUDA. At 1 K/ps, the core solid-like fraction fell below half its equilibrated value at 850-900 K for all 3 revised-fit runs, versus 950-1000 K, 950-1000 K and 1000-1050 K for Mishin.
+- Cooling is seed- and structure-dependent. Revised-fit core recovery brackets: 500-550 K, 550-600 K, 550-600 K. Mishin core recovery: 700-750 K in 2 runs; the remaining core did not cross the chosen threshold, although its whole-file fraction crossed half at 650-700 K.
+- In one revised-fit 2 nm, 1 K/ps case, 1 of 369 atoms detached during the hot part and remained detached. The main particle radius remained about 10.8 Angstrom while the distant atom reached about 245 Angstrom. This motivated the cluster-aware analysis fix. This is model extrapolation behaviour, not a numerical blow-up.
+- The Mishin 4 nm case completed: core transition bracket 1200-1250 K. The revised-fit 4 nm case was still running at the time of this source update. See the private results/log for its eventual result.
+- The A2000 is shared with unrelated inference work. Per-process SM-utilization samples reported 74-88% for that work and roughly 11-24% for MD. These samples do not measure either job's throughput. Do not treat these extended-run wall times as isolated GPU benchmarks. No other GPU job was stopped.
+- These thresholds measure ramp-induced loss/recovery of crystalline order. They are not equilibrium melting temperatures or direct DFT molecular dynamics. The fitted model still lacks liquid/cluster DFT reference coverage and gives different transition temperatures from Mishin.
+
+Canonical private artifacts
+- instructor-private/project-demo/MATE374-group-project.zip
+- instructor-private/project-demo/ase-release-check/ and ase-release-check.log
+- instructor-private/project-demo/dft-melting-revised/fit/cu_fitted_eam.npz
+- instructor-private/project-demo/dft-melting-revised/interim-results.json and interim-report/ (cluster-aware analysis of completed cases)
+- instructor-private/project-demo/dft-melting-study/ (original-fit diagnostics; stopped after 11 saved cases)
+- instructor-private/project-demo/dft-melting-results.txt
+
+Live continuation, until the final large case finishes
+- Working copy: ../mate374-ase-dft-study, branch ase-dft-study.
+- Revised study worker PID at launch: 421238. It writes under that worktree's instructor-private/project-demo/dft-melting-revised/.
+- Do not prune that worktree while the worker runs. After completion, rerun the driver to reanalyze all saved cases with the latest cluster-aware code, copy private outputs to the canonical checkout, and prune only this task branch/worktree after its sources are merged.
+- Preserve unrelated dirty files and the older project-release-check worktree. Student names and complete Canvas ZIPs must never be pushed to GitHub.

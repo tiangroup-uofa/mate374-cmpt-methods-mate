@@ -41,6 +41,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--package", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--platform", choices=("Auto", "CUDA", "CPU"), default="Auto")
+    parser.add_argument("--threads", type=int, default=4)
     args = parser.parse_args()
     package, output = args.package.resolve(), args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -83,6 +85,8 @@ def main():
     shutil.copy(bonus["fitted_model_path"], fitted_dir)
     # This is the exact edit that a completed integration makes to the supplied notebook.
     source = md_file.read_text()
+    source = source.replace('ARGS.get("platform", "Auto")', f'ARGS.get("platform", "{args.platform}")')
+    source = source.replace('ARGS.get("threads", 4)', f'ARGS.get("threads", {args.threads})')
     old = "    eam = read_setfl(POTENTIAL)"
     assert source.count(old) == 1
     source = source.replace(old, '    with np.load(POTENTIAL.with_name("cu_fitted_eam.npz")) as fitted:\n'

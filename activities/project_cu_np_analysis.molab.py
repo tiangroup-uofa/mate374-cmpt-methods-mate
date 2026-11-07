@@ -42,13 +42,17 @@ def imports():
     import matplotlib.pyplot as plt
     import numpy as np
     from ase.io import read
+    from ase.visualize.plot import plot_atoms
+    from matplotlib.patches import Patch
     from scipy.spatial import cKDTree
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
     from scipy.special import sph_harm_y
 
     KB_EV = 8.617333262e-5  # Boltzmann constant, eV/K
     RUN_DIR = Path(mo.notebook_dir() or Path.cwd()) / "runs"
     MD_RUN_DIR = RUN_DIR.parent.parent / "4-md-run" / "runs"
-    return KB_EV, MD_RUN_DIR, RUN_DIR, cKDTree, io, mo, np, plt, read, sph_harm_y
+    return KB_EV, MD_RUN_DIR, Patch, RUN_DIR, cKDTree, connected_components, coo_matrix, io, mo, np, plot_atoms, plt, read, sph_harm_y
 
 
 @app.cell
@@ -183,8 +187,8 @@ def structure_md(mo):
     stage, and set temperature of the run in `frame.info`.
 
     Use the frame slider to select a snapshot. The matplotlib slice shows atoms within 2 Å of the centre
-    plane, so you can inspect whether the inside of the particle is still a crystal. It requires no external
-    3D viewer. Save report figures with `fig.savefig("my-figure.png", dpi=300)`.
+    plane, so you can inspect whether the inside of the particle is still a crystal. ASE renders the atoms
+    with `ase.visualize.plot.plot_atoms`. Save report figures with `fig.savefig("my-figure.png", dpi=300)`.
     """)
     return
 
@@ -208,16 +212,38 @@ def structure_read(files, io, mo, read, structure_file):
 
 
 @app.cell
-def slice_plot(frame_slider, frames, np, plt):
+def particle_geometry(cKDTree, connected_components, coo_matrix, np):
+    def largest_particle(positions, connection_A=3.8):
+        """Centre the largest group of atoms connected by separations below connection_A."""
+        pairs = cKDTree(positions).query_pairs(connection_A, output_type="ndarray")
+        graph = coo_matrix((np.ones(2 * len(pairs)),
+                            (np.r_[pairs[:, 0], pairs[:, 1]], np.r_[pairs[:, 1], pairs[:, 0]])),
+                           shape=(len(positions), len(positions)))
+        _, labels = connected_components(graph, directed=False)
+        bound = labels == np.argmax(np.bincount(labels))
+        return positions - positions[bound].mean(axis=0), bound
+    return (largest_particle,)
+
+
+@app.cell
+def structure_status(frame_slider, frames, largest_particle, mo):
+    _centred, _bound = largest_particle(frames[frame_slider.value].positions)
+    mo.md(f"**Main connected particle:** {_bound.sum()} of {len(_bound)} atoms; {(~_bound).sum()} detached. "
+          "Atoms are connected below 3.8 Å. The structure plots and g(r) use this main particle.")
+    return
+
+
+@app.cell
+def slice_plot(frame_slider, frames, largest_particle, np, plot_atoms, plt):
     frame = frames[frame_slider.value]
-    xyz = frame.positions - frame.positions.mean(axis=0)
-    near_centre = np.abs(xyz[:, 2]) < 2.0          # atoms within 2 Angstrom of the z = 0 plane
+    xyz, bound = largest_particle(frame.positions)
+    near_centre = bound & (np.abs(xyz[:, 2]) < 2.0)          # atoms within 2 Angstrom of the z = 0 plane
 
     fig3, ax = plt.subplots(figsize=(3.6, 3.6))
-    ax.scatter(xyz[near_centre, 0], xyz[near_centre, 1], s=10, color="peru")
-    ax.set_aspect("equal")
-    ax.set(xlabel="x (Å)", ylabel="y (Å)",
-           title=f"{frame.info.get('stage', '')}, {frame.info.get('T_set_K', '')} K, {frame.info.get('time_ps', '')} ps")
+    slice_atoms = frame[near_centre]
+    slice_atoms.positions = xyz[near_centre]
+    plot_atoms(slice_atoms, ax, rotation="0x,0y,0z", show_unit_cell=0, radii=0.55)
+    ax.set_title(f"{frame.info.get('stage', '')}, {frame.info.get('T_set_K', '')} K, {frame.info.get('time_ps', '')} ps")
     fig3.tight_layout()
     fig3
     return
@@ -236,15 +262,17 @@ def gr_md(mo):
 
     Only atoms at least 10 Å inside the surface are used as centres, so that every shell up to 8 Å is full.
     The plot compares frame 0 (the initial crystal) with the frame chosen by the slider above.
+    If atoms detach, only the main connected particle contributes to the density and neighbour counts.
     """)
     return
 
 
 @app.cell
-def gr_function(cKDTree, np):
+def gr_function(cKDTree, largest_particle, np):
     def pair_distribution(positions, r_max=8.0, dr=0.05, inset=10.0):
         """g(r) of a free particle, averaged over atoms at least `inset` Angstrom inside the surface."""
-        xyz = positions - positions.mean(axis=0)
+        centred, bound = largest_particle(positions)
+        xyz = centred[bound]
         radius = np.linalg.norm(xyz, axis=1)
         centres = xyz[radius < radius.max() - inset]
         if len(centres) == 0:
@@ -260,10 +288,11 @@ def gr_function(cKDTree, np):
 
 
 @app.cell
-def gr_plot(frame_slider, frames, mo, np, pair_distribution, plt):
+def gr_plot(frame_slider, frames, largest_particle, mo, np, pair_distribution, plt):
     _reference_index = 0
     _selected = (frames[_reference_index], frames[frame_slider.value])
-    _radii = [np.linalg.norm(f.positions - f.positions.mean(axis=0), axis=1) for f in _selected]
+    _geometry = [largest_particle(f.positions) for f in _selected]
+    _radii = [np.linalg.norm(xyz[bound], axis=1) for xyz, bound in _geometry]
     _enough_core = all(np.any(radius < radius.max() - 10.0) for radius in _radii)
     mo.stop(not _enough_core, mo.md("This particle has no atoms 10 Å inside its outer radius. Choose a larger particle for this g(r) estimate."))
     _fig, _ax = plt.subplots(figsize=(6, 3.2))
@@ -318,26 +347,28 @@ def q6_function(cKDTree, np, sph_harm_y):
 
 
 @app.cell
-def q6_plot(frame_slider, frames, np, plt, solid_like):
+def q6_plot(Patch, frame_slider, frames, largest_particle, np, plot_atoms, plt, solid_like):
     _frame = frames[frame_slider.value]
-    _xyz = _frame.positions - _frame.positions.mean(axis=0)
+    _xyz, _bound = largest_particle(_frame.positions)
     _solid = solid_like(_xyz)
-    _near = np.abs(_xyz[:, 2]) < 2.0
+    _near = _bound & (np.abs(_xyz[:, 2]) < 2.0)
     _radius = np.linalg.norm(_xyz, axis=1)
-    _edges = np.arange(0, _radius.max() + 2, 2.0)
+    _edges = np.arange(0, _radius[_bound].max() + 2, 2.0)
     _which = np.digitize(_radius, _edges) - 1
-    _profile = [(_solid[_which == k].mean() if (_which == k).any() else np.nan) for k in range(len(_edges) - 1)]
+    _profile = [(_solid[(_which == k) & _bound].mean() if ((_which == k) & _bound).any() else np.nan)
+                for k in range(len(_edges) - 1)]
 
     _fig, (_ax_s, _ax_r) = plt.subplots(1, 2, figsize=(9, 3.6), width_ratios=(1, 1.4))
-    _ax_s.scatter(*_xyz[_near & ~_solid, :2].T, s=10, color="tab:blue", label="liquid-like")
-    _ax_s.scatter(*_xyz[_near & _solid, :2].T, s=10, color="goldenrod", label="solid-like")
-    _ax_s.set_aspect("equal")
-    _ax_s.set(xlabel="x (Å)", ylabel="y (Å)")
-    _ax_s.legend(frameon=False, fontsize=8, loc="upper right")
+    _slice_atoms = _frame[_near]
+    _slice_atoms.positions = _xyz[_near]
+    plot_atoms(_slice_atoms, _ax_s, rotation="0x,0y,0z", show_unit_cell=0, radii=0.55,
+               colors=np.where(_solid[_near], "goldenrod", "tab:blue").tolist())
+    _ax_s.legend(handles=[Patch(color="goldenrod", label="solid-like"), Patch(color="tab:blue", label="liquid-like")],
+                 frameon=False, fontsize=8, loc="upper right")
     _ax_r.plot(0.5 * (_edges[1:] + _edges[:-1]), _profile, "o-", color="k", ms=4, lw=1)
     _ax_r.set(xlabel="Distance from the centre (Å)", ylabel="Solid-like fraction", ylim=(-0.05, 1.05))
     _fig.suptitle(f"{_frame.info.get('stage', '')}, {_frame.info.get('T_set_K', '')} K: "
-                  f"{_solid.mean():.0%} solid-like", fontsize=10)
+                  f"main particle {_solid[_bound].mean():.0%} solid-like", fontsize=10)
     _fig.tight_layout()
     _fig
     return
@@ -349,21 +380,24 @@ def order_md(mo):
     ## 7 · Solid-like fraction through the whole run
 
     The same label, applied to every saved frame, gives an order parameter for the whole particle:
-    about 1 for a crystal and about 0 for a liquid. The core (inner half of the radius) and the outer shell
-    (the outer 5 Å) are also shown separately.
+    about 1 for a crystal and about 0 for a liquid. This whole-file fraction includes detached atoms.
+    The core (inner half of the radius) and outer shell (outer 5 Å) use the main connected particle,
+    so an escaping atom does not enlarge the core or move the surface.
     """)
     return
 
 
 @app.cell
-def order_plot(frames, mo, np, plt, solid_like):
+def order_plot(frames, largest_particle, mo, np, plt, solid_like):
     _rows = []
     for _frame in mo.status.progress_bar(frames, title="Labelling every frame", remove_on_exit=True):
-        _xyz = _frame.positions - _frame.positions.mean(axis=0)
+        _xyz, _bound = largest_particle(_frame.positions)
         _radius = np.linalg.norm(_xyz, axis=1)
         _solid = solid_like(_xyz)
+        _core = _bound & (_radius < 0.5 * _radius[_bound].max())
+        _shell = _bound & (_radius > _radius[_bound].max() - 5)
         _rows.append((_frame.info.get("stage", ""), float(_frame.info.get("T_set_K", np.nan)), _solid.mean(),
-                      _solid[_radius < 0.5 * _radius.max()].mean(), _solid[_radius > _radius.max() - 5].mean()))
+                      _solid[_core].mean() if _core.any() else np.nan, _solid[_shell].mean()))
     _stage = np.array([r[0] for r in _rows])
     _values = np.array([r[1:] for r in _rows])
 

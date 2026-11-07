@@ -37,9 +37,10 @@ def imports():
     import marimo as mo
     import matplotlib.pyplot as plt
     import numpy as np
+    from ase.build import bulk
     from ase.io import read
     from ase.neighborlist import neighbor_list
-    return Path, io, mo, neighbor_list, np, plt, read
+    return Path, bulk, io, mo, neighbor_list, np, plt, read
 
 
 @app.cell(hide_code=True)
@@ -97,10 +98,15 @@ def design_md(mo):
     mo.md(r"""
     ## Build the linear system
 
-    Each structure contributes 1 energy row and $3N$ force rows. The first 80% of the training file
-    fit the coefficients and the last 20% select the ridge penalty. The separate test file remains
-    untouched until the final evaluation. Energy residuals are scaled by 0.003 eV/atom and force
-    residuals by 0.05 eV/Å and $\sqrt{3N}$, giving each structure comparable energy and force weight.
+    Each structure contributes 1 energy row and $3N$ force rows. We reserve about 20% of each
+    configuration family in the training file for validation, using random seed 374. The separate test
+    file is used after model selection. The training file is ordered by family, so taking its last 20%
+    would validate only surface structures.
+
+    Energy residuals are scaled by 0.03 eV/atom and force residuals by 0.05 eV/Å and $\sqrt{3N}$.
+    These scales set the balance between energy and force errors. We also require relaxed fcc Cu to have
+    lower energy than relaxed bcc and hcp Cu. Among the candidate fits that pass this crystal-ordering
+    check, we select the lowest validation error and refit using the complete training file.
     """)
     return
 
@@ -148,23 +154,58 @@ def matrices(build_matrix, mo, test, train):
 
 
 @app.cell
-def fitting(energy_test, energy_train, force_test, force_train, np, test, train):
+def training_split(mo, np, train):
+    split_rng = np.random.default_rng(374)
+    fit_indices, validation_indices, split_counts = [], [], []
+    families = sorted({a.info.get("family", "all") for a in train})
+    for family in families:
+        indices = np.array([i for i, a in enumerate(train) if a.info.get("family", "all") == family])
+        split_rng.shuffle(indices)
+        n_validation = max(1, round(0.2 * len(indices)))
+        validation_indices.extend(indices[:n_validation])
+        fit_indices.extend(indices[n_validation:])
+        split_counts.append((family, len(indices) - n_validation, n_validation))
+    fit_indices = np.array(sorted(fit_indices))
+    validation_indices = np.array(sorted(validation_indices))
+    split_table = "\n".join(f"| {name} | {n_fit} | {n_val} |" for name, n_fit, n_val in split_counts)
+    mo.md("### Internal training and validation split\n\n| Family | Fit | Validation |\n|:--|--:|--:|\n" + split_table)
+    return fit_indices, split_counts, validation_indices
+
+
+@app.cell
+def phase_features(bulk, feature_rows, np):
+    # Energy per atom on a lattice-spacing grid. hcp uses ASE's ideal c/a ratio.
+    phase_grids = {"fcc": np.linspace(3.2, 4.1, 121), "bcc": np.linspace(2.55, 3.25, 121),
+                   "hcp": np.linspace(2.3, 2.9, 121)}
+    phase_rows = {}
+    for phase, spacings in phase_grids.items():
+        phase_rows[phase] = np.array([feature_rows(atoms)[0] / len(atoms)
+                                    for a in spacings for atoms in [bulk("Cu", phase, a=a)]])
+    return phase_grids, phase_rows
+
+
+@app.cell
+def fitting(energy_test, energy_train, fit_indices, force_test, force_train, mo, np, phase_grids, phase_rows, test, train, validation_indices):
     ref_energy_train = np.array([a.info["dft_energy"] for a in train])
     ref_force_train = [a.arrays["dft_forces"] for a in train]
     ref_energy_test = np.array([a.info["dft_energy"] for a in test])
     ref_force_test = np.concatenate([a.arrays["dft_forces"].ravel() for a in test])
     test_sizes = np.array([len(a) for a in test])
 
+    energy_scale = 0.03  # eV/atom
+    force_scale = 0.05   # eV/Angstrom
+
     def weighted_matrix(energy, force, ref_e, ref_f):
         sizes = np.array([len(f) for f in force])
-        a = np.vstack([energy / (sizes[:, None] * 0.003),
-                       *[f.reshape(-1, energy.shape[1]) / (0.05 * np.sqrt(3 * len(f))) for f in force]])
-        b = np.concatenate([ref_e / (sizes * 0.003),
-                            *[f.ravel() / (0.05 * np.sqrt(3 * len(f))) for f in ref_f]])
+        a = np.vstack([energy / (sizes[:, None] * energy_scale),
+                       *[f.reshape(-1, energy.shape[1]) / (force_scale * np.sqrt(3 * len(f))) for f in force]])
+        b = np.concatenate([ref_e / (sizes * energy_scale),
+                            *[f.ravel() / (force_scale * np.sqrt(3 * len(f))) for f in ref_f]])
         return a, b
 
-    def fit_model(n, penalty):
-        a, b = weighted_matrix(energy_train[:n], force_train[:n], ref_energy_train[:n], ref_force_train[:n])
+    def fit_model(indices, penalty):
+        a, b = weighted_matrix(energy_train[indices], [force_train[i] for i in indices],
+                               ref_energy_train[indices], [ref_force_train[i] for i in indices])
         scale = np.linalg.norm(a, axis=0)
         scale = np.where(scale > 0, scale, 1.0)
         scaled = a / scale
@@ -172,18 +213,26 @@ def fitting(energy_test, energy_train, force_test, force_train, np, test, train)
                                  np.r_[b, np.zeros(a.shape[1])], rcond=None)[0] / scale
         return coeff
 
-    candidates = (1e-9, 1e-7, 1e-5, 1e-3, 1e-1)
-    n_fit = int(0.8 * len(train))
-    va, vb = weighted_matrix(energy_train[n_fit:], force_train[n_fit:], ref_energy_train[n_fit:], ref_force_train[n_fit:])
-    scores = [np.mean((va @ fit_model(n_fit, alpha) - vb)**2) for alpha in candidates]
-    alpha_best = candidates[int(np.argmin(scores))]
-    coefficients = fit_model(len(train), alpha_best)
+    candidates = (1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1)
+    va, vb = weighted_matrix(energy_train[validation_indices], [force_train[i] for i in validation_indices],
+                             ref_energy_train[validation_indices], [ref_force_train[i] for i in validation_indices])
+    scores = [np.mean((va @ fit_model(fit_indices, alpha) - vb)**2) for alpha in candidates]
+    full_fits = [fit_model(np.arange(len(train)), alpha) for alpha in candidates]
+    phase_minima = [{phase: float((rows @ c).min()) for phase, rows in phase_rows.items()} for c in full_fits]
+    phase_pass = [e["fcc"] < min(e["bcc"], e["hcp"]) for e in phase_minima]
+    mo.stop(not any(phase_pass), mo.md("No candidate keeps fcc below both bcc and hcp. Revise the model or fitting scales before using it for Cu MD."))
+    best_index = min((i for i, passes in enumerate(phase_pass) if passes), key=lambda i: scores[i])
+    alpha_best = candidates[best_index]
+    coefficients = full_fits[best_index]
+    selected_phases = {phase: {"energy_eV_atom": phase_minima[best_index][phase],
+                              "a_A": float(phase_grids[phase][np.argmin(rows @ coefficients)])}
+                       for phase, rows in phase_rows.items()}
     predicted_e = energy_test @ coefficients / test_sizes
     ref_energy_test = ref_energy_test / test_sizes
     predicted_f = np.concatenate([(f @ coefficients).ravel() for f in force_test])
     e_mae = np.mean(np.abs(predicted_e - ref_energy_test)) * 1000
     f_mae = np.mean(np.abs(predicted_f - ref_force_test)) * 1000
-    return alpha_best, coefficients, e_mae, f_mae, predicted_e, predicted_f, ref_energy_test, ref_force_test, scores, candidates
+    return alpha_best, candidates, coefficients, e_mae, energy_scale, f_mae, force_scale, phase_minima, phase_pass, predicted_e, predicted_f, ref_energy_test, ref_force_test, scores, selected_phases
 
 
 @app.cell
@@ -202,7 +251,7 @@ def results(alpha_best, candidates, coefficients, e_mae, f_mae, mo, np, plt, pre
 
 
 @app.cell
-def force_check(candidates, coefficients, feature_rows, mo, np, scores, test):
+def force_check(candidates, coefficients, feature_rows, mo, np, phase_minima, phase_pass, scores, selected_phases, test):
     atom = test[0].copy()
     h = 1e-5  # Angstrom
     plus, minus = atom.copy(), atom.copy()
@@ -210,7 +259,10 @@ def force_check(candidates, coefficients, feature_rows, mo, np, scores, test):
     minus.positions[0, 0] -= h
     finite_difference = -(feature_rows(plus)[0] @ coefficients - feature_rows(minus)[0] @ coefficients) / (2 * h)
     analytic = feature_rows(atom)[1][0, 0] @ coefficients
-    table = "\n".join(f"| {a:g} | {score:.5f} |" for a, score in zip(candidates, scores))
+    table = "\n".join(f"| {a:g} | {score:.5f} | {(phases['bcc'] - phases['fcc']) * 1000:.2f} | {'yes' if passes else 'no'} |"
+                      for a, score, phases, passes in zip(candidates, scores, phase_minima, phase_pass))
+    phase_table = "\n".join(f"| {name} | {values['a_A']:.3f} | {(values['energy_eV_atom'] - selected_phases['fcc']['energy_eV_atom']) * 1000:.2f} |"
+                            for name, values in selected_phases.items())
     mo.md(f"""
     ## Check the force and penalty
 
@@ -218,15 +270,22 @@ def force_check(candidates, coefficients, feature_rows, mo, np, scores, test):
     A central difference of the fitted energy gives **{finite_difference:.6f} eV/Å** with $h=10^{{-5}}$ Å.
     Their absolute difference is {abs(analytic - finite_difference):.2g} eV/Å.
 
-    | Ridge penalty | Mean squared scaled validation residual |
-    |---:|---:|
+    | Ridge penalty | Scaled validation MSE | bcc − fcc (meV/atom) | fcc lowest of 3? |
+    |---:|---:|---:|:--|
     {table}
+
+    The selected model gives these relaxed lattice energies. The grid varies the lattice spacing,
+    with the ideal hcp $c/a$ ratio held fixed. This is a crystal-ordering check at 0 K.
+
+    | Crystal | Lattice spacing (Å) | Energy above fcc (meV/atom) |
+    |:--|---:|---:|
+    {phase_table}
     """)
     return
 
 
 @app.cell
-def export_model(Path, coefficients, io, mo, np):
+def export_model(Path, alpha_best, coefficients, energy_scale, fit_indices, force_scale, io, mo, np, validation_indices):
     r_grid = np.linspace(0.0, 5.5, 10001)  # Angstrom
     rho_grid = np.linspace(0.0, 10.0, 20001)
     phi_table = np.maximum(np.linspace(2.2, 5.5, 12)[None, :] - r_grid[:, None], 0.0)**3 @ coefficients[1:13]
@@ -235,7 +294,8 @@ def export_model(Path, coefficients, io, mo, np):
     model_buffer = io.BytesIO()
     np.savez(model_buffer, phi=phi_table, density=density_table, embed=embed_table,
              r_max=5.5, rho_max=10.0, cutoff=5.5, coefficients=coefficients,
-             element="Cu", length_unit="angstrom", energy_unit="eV")
+             element="Cu", length_unit="angstrom", energy_unit="eV", ridge_penalty=alpha_best,
+             energy_scale=energy_scale, force_scale=force_scale, fit_indices=fit_indices, validation_indices=validation_indices)
     fitted_model_path = Path(mo.notebook_dir() or Path.cwd()) / "cu_fitted_eam.npz"
     fitted_model_path.write_bytes(model_buffer.getvalue())
     print(f"Fitted Cu model: {fitted_model_path}; energy MAE and force MAE appear above.")
@@ -253,7 +313,7 @@ def tasks(mo):
     ## Investigate the fit
 
     1. Explain why energy and force rows are both linear in the coefficients.
-    2. Compare the validation scores for the candidate ridge penalties. What happens when the penalty is too large?
+    2. Compare the validation scores and crystal energies for the candidate ridge penalties. Which fits favour bcc over fcc? What happens when the penalty is too large?
     3. Change the number of pair knots or the relative energy/force scales. Refit and compare the held-out errors.
     4. Download the fitted tables above. Insert the fitted model into your copy of the Cu simulation notebook.
        Its `potential` cell reads EAM tables and `eam_system` builds the OpenMM force. Replace the
