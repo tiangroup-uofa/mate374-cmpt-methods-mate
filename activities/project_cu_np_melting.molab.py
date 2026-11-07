@@ -32,8 +32,8 @@ def intro(mo):
 
     Locally, open a terminal in this folder and run `uvx marimo@0.25.2 edit --sandbox project_cu_np_melting.molab.py`.
     The sandbox installs the declared dependencies. OpenMM selects NVIDIA CUDA when available and otherwise
-    uses multiple CPU threads. Use the platform selector to compare them. This notebook uses matplotlib
-    for structures and does not require an external 3D widget.
+    uses multiple CPU threads. Use the platform selector to compare them. ASE renders the atomic
+    structures in the notebook through its matplotlib plotting interface.
 
     Download each result before changing its settings: running the same settings again replaces files
     with the same names. Local results also remain in the `runs/` folder.
@@ -54,6 +54,7 @@ def imports():
     from ase import Atoms
     from ase.cluster import Decahedron, Icosahedron, Octahedron
     from ase.io import read as read_structures, write as write_structures
+    from ase.visualize.plot import plot_atoms
     from scipy.spatial import cKDTree
 
     # Run without the browser, for example:
@@ -91,6 +92,7 @@ def imports():
         mo,
         np,
         plt,
+        plot_atoms,
         read_structures,
         script_runs,
         time,
@@ -349,6 +351,7 @@ def particle(
     mo,
     np,
     plt,
+    plot_atoms,
     seed_choice,
     shape_choice,
     size_choice,
@@ -401,13 +404,9 @@ def particle(
     _neighbours = np.array([len(v) - 1 for v in cKDTree(_x).query_ball_point(_x, 3.0)])
     _surface = _neighbours < 12
     _d_equiv = (6 * len(particle) * CU_A0**3 / 4 / np.pi) ** (1 / 3) / 10
-    _fig = plt.figure(figsize=(4.2, 4.2))
-    _ax = _fig.add_subplot(projection="3d")
-    _ax.scatter(*_x[~_surface].T, s=6, c="goldenrod", depthshade=True)
-    _ax.scatter(*_x[_surface].T, s=6, c="tab:blue", depthshade=True)
-    _ax.set_box_aspect((1, 1, 1))
-    _ax.set_axis_off()
-    _ax.view_init(elev=20, azim=35)
+    _fig, _ax = plt.subplots(figsize=(4.2, 4.2))
+    plot_atoms(particle, _ax, rotation="20x,35y,0z", show_unit_cell=0,
+               radii=0.65, colors=np.where(_surface, "tab:blue", "goldenrod").tolist())
     _fig.tight_layout()
     mo.hstack([
         _fig,
@@ -603,7 +602,7 @@ def viewer_md(mo):
     mo.md(r"""
     ## Look inside your runs
 
-    Choose a saved structure file and a frame. The matplotlib picture shows a 4 Å-thick central slice.
+    Choose a saved structure file and a frame. ASE shows a 4 Å-thick central slice.
     Compare the ordered low-temperature lattice with a high-temperature structure.
     """)
     return
@@ -634,14 +633,15 @@ def viewer_frames(RUN_DIR, mo, read_structures, viewer_file):
 
 
 @app.cell
-def viewer(np, plt, saved_frame, saved_frames):
+def viewer(np, plot_atoms, plt, saved_frame, saved_frames):
     _frame = saved_frames[saved_frame.value]
     _xyz = _frame.positions - _frame.positions.mean(axis=0)
     _slice = np.abs(_xyz[:, 2]) < 2.0
     _fig, _ax = plt.subplots(figsize=(4.2, 4.2))
-    _ax.scatter(*_xyz[_slice, :2].T, s=12, color="peru")
-    _ax.set_aspect("equal")
-    _ax.set(xlabel="x (Å)", ylabel="y (Å)", title=f"{_frame.info.get('stage', '')}, {_frame.info.get('T_set_K', '')} K")
+    _atoms = _frame[_slice]
+    _atoms.positions = _xyz[_slice]
+    plot_atoms(_atoms, _ax, rotation="0x,0y,0z", show_unit_cell=0, radii=0.55)
+    _ax.set_title(f"{_frame.info.get('stage', '')}, {_frame.info.get('T_set_K', '')} K")
     _fig.tight_layout()
     _fig
     return

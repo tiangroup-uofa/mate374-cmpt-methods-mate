@@ -1,4 +1,8 @@
-Canvas package validation, 2026-11-07
+Initial Canvas package validation, 2026-11-07
+
+The ASE display and revised bonus fitting checks supersede the initial bonus metrics below.
+See planning/ase-dft-study.txt for the family-stratified split, phase checks and local melting study.
+The earlier isolated Mishin timing and output-size measurements remain useful references.
 
 Request: ordered assignment, tutorial, and sample-report PDFs; separate MD (with Mishin), analysis, and Cu bonus folders. Local GPU/multicore CPU marimo sandbox operation. Sparse atomic snapshots. No WEAS for this release.
 
@@ -7,7 +11,7 @@ Artifacts (private; never commit named assignment or complete Canvas ZIP):
 - instructor-private/project-demo/assignment.qmd and assignment.pdf
 - instructor-private/project-demo/tutorial.qmd and tutorial.pdf
 - instructor-private/project-demo/canvas-validation/ contains timing logs, force checks, figures and a private completed fitted-MD notebook.
-- One existing roster spelling needs instructor confirmation. All existing names and group memberships were retained.
+- The instructor confirmed the existing roster spelling on 2026-11-07. All existing names and group memberships are retained.
 
 Package order:
 1-assignment.pdf
@@ -22,7 +26,7 @@ Notebook changes:
 - PEP 723 dependencies include pinned marimo; OpenMM CUDA 12 works with the host's CUDA-13-capable NVIDIA driver. Explicit Auto/CUDA/CPU controls; CPU thread selector defaults to 4. An explicitly requested CUDA platform never silently falls back.
 - Defaults: 2 nm sphere, 900 K, 20 ps stability, 10 K/ps cycle. No external widget or dataset downloads. The Mishin file and bonus datasets are supplied in the ZIP.
 - Each cycle saves 2430 energy rows and 27 snapshots at 100 K spacing, independent of rate. 200 K gives 15 frames; 50 K gives 51. Fixed-T run saves energy rows only. The initial structure is saved separately.
-- Analysis reads the neighbouring MD runs directory, accepts uploads, and uses matplotlib. Actual interior-atom counts guard the g(r) calculation; tiny particles display a message rather than dividing by zero. Single-frame files use a disabled slider.
+- Analysis reads the neighbouring MD runs directory, accepts uploads, and uses ASE plot_atoms for atomic views through matplotlib. Actual interior-atom counts guard the g(r) calculation; tiny particles display a message rather than dividing by zero. Single-frame files use a disabled slider.
 - Bonus writes cu_fitted_eam.npz locally and provides a tested browser download. The integration remains a student task; the completed integration used for validation stays private.
 
 Measured sequential workloads on RTX A2000 12 GB / i9-13900K (dependencies available):

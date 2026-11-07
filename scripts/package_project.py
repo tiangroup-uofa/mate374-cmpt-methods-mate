@@ -53,7 +53,7 @@ def main():
             archive.write(ROOT / source, target)
         for folder, notebook, description in (
             ("4-md-run", "project_cu_np_melting.molab.py", "Keep Cu_mishin1.eam.alloy beside the notebook. Results go into runs/. Select Auto, CUDA, or CPU in the notebook. CPU defaults to 4 threads. Start with a 2 nm sphere, 20 ps at 900 K, then a 10 K/ps cycle with 100 K snapshot spacing. The cycle saves 2430 CSV rows and 27 XYZ frames."),
-            ("5-analysis", "project_cu_np_analysis.molab.py", "This notebook reads ../4-md-run/runs/ at startup. Use Run all to refresh after a new simulation, or upload CSV/XYZ files. You can also put files in a runs/ folder beside this notebook. The matplotlib figures need no external 3D viewer."),
+            ("5-analysis", "project_cu_np_analysis.molab.py", "This notebook reads ../4-md-run/runs/ at startup. Use Run all to refresh after a new simulation, or upload CSV/XYZ files. You can also put files in a runs/ folder beside this notebook. ASE draws the atomic structures through its matplotlib interface. The notebook needs no external 3D widget."),
             ("6-bonus", "project_bonus_eam_fit.molab.py", "Keep both supplied Cu XYZ data files beside the notebook. It fits the model, checks a force, and saves cu_fitted_eam.npz here. Insert those tables into your own edited simulation notebook for the bonus, then check forces and a short trajectory. Compare with the original Mishin model using matched settings."),
         ):
             text = ("Install uv: https://docs.astral.sh/uv/getting-started/installation/\n\n"
@@ -63,7 +63,7 @@ def main():
                     "The first launch installs Python and the declared packages and needs internet access. "
                     "Later launches reuse the downloaded environment.\n\n" + description + "\n")
             archive.writestr(f"{folder}/START-HERE.txt", text)
-        archive.writestr("3-assignment-sample-report-source.zip", report_sources())
+        archive.writestr("7-report-template-source.zip", report_sources())
     with zipfile.ZipFile(output) as archive:
         assert archive.testzip() is None
         assert archive.namelist()[:3] == ["1-assignment.pdf", "2-assignment-tutorial.pdf", "3-assignment-sample-report.pdf"]
