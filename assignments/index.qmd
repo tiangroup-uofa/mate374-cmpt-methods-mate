@@ -9,3 +9,4 @@ title: "Assignments"
 - [A3 · Systems of equations, least squares, and atomic vibrations](A3/index.qmd) — due Wednesday, October 21, 2026, at 12:00 pm (noon) via Canvas.
 - [A3 answers](A3/answers.qmd)
 - [A4 · Numerical differentiation](A4/index.qmd) — due Monday, November 16, 2026, at 11:59 am (after the reading week) via Canvas.
+- [A5 · Numerical integration and ordinary differential equations](A5/index.qmd) — due Monday, November 30, 2026, at 12:00 pm (noon) via Canvas.

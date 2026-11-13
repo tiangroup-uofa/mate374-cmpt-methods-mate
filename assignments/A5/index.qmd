@@ -1,0 +1,124 @@
+---
+title: "MAT E 374 Assignment 5"
+subtitle: "Numerical integration and ordinary differential equations"
+---
+
+**Due:** Monday, November 30, 2026, at 12:00 pm (noon, before class) via Canvas
+
+::: {.content-visible when-format="html"}
+[Download the PDF handout](index.pdf)
+:::
+
+Submit **one PDF answering all three problems**, including your code, the requested results, and short explanations. You may use [https://marimo.app](https://marimo.app) or your local Python environment for short calculations, and our provided notebooks for Q2 and Q3.
+
+## Problem 1 · Short answers — 20 marks
+
+Keep your answers concise. If you use AI to help with these questions, clearly state which model you used.
+
+1. **Noise in derivatives and integrals** ([Lectures 18](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/04/L18/index.html) and [20](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/04/L20/index.html)). Compared with numerical differentiation, why is numerical integration **less** sensitive to random noise in the data?
+
+```{=latex}
+\vspace{1em}
+```
+
+2. **Why stop at Simpson?** ([Lecture 19](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/04/L19/index.html)). In principle, Newton–Cotes formulas can be built from interpolating polynomials of any degree. Why do we usually stop at the Simpson rules (1/3 and 3/8 rules)?
+
+```{=latex}
+\vspace{1em}
+```
+
+3. **Tabulated data and the trapezoidal rule** ([Lecture 19](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/04/L19/index.html)). In class, we called the composite trapezoidal rule the gold standard for integrating tabulated data. Does this mean we should stop at the trapezoidal rule when calculating an integral, for example by using `np.trapezoid`? Explain briefly.
+
+```{=latex}
+\vspace{1em}
+```
+
+4. **Accuracy without an exact answer** ([Lecture 20](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/units/04/L20/index.html)). With only tabulated data, there is no exact integral to compare with. How can you check that a numerical integral of the data is accurate enough? (Hint: this question is open-ended; one reason is enough.)
+
+```{=latex}
+\newpage
+```
+
+## Problem 2 · Enthalpy of copper from its heat capacity — 40 marks
+
+Heating a material at constant pressure raises its enthalpy by the integral of its heat capacity $C_p$,
+
+$$
+\Delta H=\int_{T_1}^{T_2}C_p(T)\,\mathrm dT .
+$$
+
+In practice, $C_p$ is measured and tabulated at a set of temperatures. The table lists the molar heat capacity $C_p$ of solid copper every 100 K. Copper melts at 1358 K, so the whole range stays in the solid.
+
+| $T$ (K) | $C_p$ (J/(mol K)) | $T$ (K) | $C_p$ (J/(mol K)) |
+|---:|---:|---:|---:|
+| 300 | 24.49 | 900 | 27.97 |
+| 400 | 25.29 | 1000 | 28.62 |
+| 500 | 25.99 | 1100 | 29.48 |
+| 600 | 26.55 | 1200 | 30.64 |
+| 700 | 27.02 | 1300 | 32.18 |
+| 800 | 27.47 | | |
+
+How much heat does one mole of copper absorb between 300 K and 1300 K? The [Q2 notebook](../../wasm-local/a5_q2_copper_enthalpy.html) contains this table.
+
+### 2.1 Composite trapezoidal rule
+
+Implement the composite trapezoidal rule to calculate $\Delta H$ from 300 K to 1300 K. Compare your result with `np.trapezoid`.
+
+### 2.2 Composite Simpson's 1/3 rule
+
+The data are equally spaced and have an even number of intervals, so we can use the composite Simpson's 1/3 rule. Implement the rule and compare your result with `scipy.integrate.simpson`.
+
+### 2.3 Comparison
+
+For this material, the standard result is $\Delta H=27\,725.9$ J/mol. Calculate the absolute and relative errors of the trapezoidal and Simpson results and compare them.
+
+:::: {.content-visible when-format="html"}
+::: {.quarto-wasm-local notebook="a5_q2_copper_enthalpy.edit.py" view="edit" title="A5 Q2 · Enthalpy of copper from tabulated heat capacity" height="900" loading="lazy" fullscreen="true"}
+The [Q2 notebook](../../wasm-local/a5_q2_copper_enthalpy.html) holds the heat-capacity table and compares your trapezoidal and Simpson's 1/3 sums with the corresponding library functions.
+:::
+::::
+
+```{=latex}
+\newpage
+```
+
+## Problem 3 · How long does a steel sphere take to cool? — 40 marks
+
+A steel sphere of radius 1 mm cools by radiation alone in a vacuum furnace, from $T_0=1200$ K towards the wall temperature $T_\mathrm a=300$ K:
+
+$$
+\frac{\mathrm dT}{\mathrm dt}=-\alpha\left(T^4-T_\mathrm a^4\right),\qquad
+\alpha=3.49\times10^{-11}\ \mathrm{K^{-3}\,s^{-1}},\qquad T(0)=1200\ \mathrm K .
+$$
+
+We want to estimate the time $t_\mathrm f$ it takes the sphere to cool to a final temperature $T_\mathrm f$. We can do this in two ways:
+
+1. **Numerical integration.** The cooling time is
+
+   $$
+   t_\mathrm f=\int_{T_\mathrm f}^{1200\ \mathrm K}\frac{\mathrm dT}{\alpha\left(T^4-T_\mathrm a^4\right)} .
+   $$
+
+   We can evaluate this integral with `scipy.integrate.quad`.
+
+2. **ODE simulation.** Solve the cooling equation by stepping forward in time, and find when the temperature first reaches $T_\mathrm f$ or below.
+
+The [Q3 notebook](../../wasm-local/a5_q3_cooling_time.html) provides a starting point for both calculations.
+
+### 3.1 Cooling time from an integral
+
+For $T_\mathrm f=600$ K, write the integral with its limits, write the integrand as a Python function, and use `scipy.integrate.quad` to calculate the cooling time. Complete **Step 1** in the notebook and report your code and result in seconds. Why is `quad` a suitable choice here instead of applying Simpson's rule to a fixed set of points?
+
+### 3.2 Cooling time from explicit Euler
+
+Complete the Euler update in **Step 2** of the notebook, $T_{i+1}=T_i+h\,f(T_i)$ with $f(T)=-\alpha(T^4-T_\mathrm a^4)$. For $T_\mathrm f=600$ K, report the time at which the Euler solution first reaches 600 K or below for $h=5$, 2, 1, and 0.5 s. Compare these times with your `quad` result from 3.1. Why does a coarse Euler step predict a shorter cooling time?
+
+### 3.3 A final temperature close to the wall temperature
+
+How does the choice of method change when the final temperature is very close to the wall temperature? Use your method from 3.1 to calculate the cooling time for $T_\mathrm f=350$, 305, and 301 K. Explain what happens to the cooling time as $T_\mathrm f$ approaches 300 K, and why using the uniform time step in 3.2 may become a problem.
+
+:::: {.content-visible when-format="html"}
+::: {.quarto-wasm-local notebook="a5_q3_cooling_time.edit.py" view="edit" title="A5 Q3 · Cooling time by numerical integration and explicit Euler" height="1100" loading="lazy" fullscreen="true"}
+The [Q3 notebook](../../wasm-local/a5_q3_cooling_time.html) provides the cooling equation and inputs for `quad` and explicit Euler. Select a final temperature and time step to compare the cooling times.
+:::
+::::

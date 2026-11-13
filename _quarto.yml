@@ -188,6 +188,8 @@ website:
             text: "A3 · Answers"
           - href: assignments/A4/index.qmd
             text: "A4 · Numerical differentiation"
+          - href: assignments/A5/index.qmd
+            text: "A5 · Integration and ODEs"
       - section: "Exams info"
         contents:
           - href: exams/midterm-prep-1.qmd

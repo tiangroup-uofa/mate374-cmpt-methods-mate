@@ -1,0 +1,144 @@
+---
+title: "MAT E 374 · Assignment 5 answers"
+---
+
+## Completed reference notebooks
+
+- [Q2 · Enthalpy of copper from its heat capacity](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a5_q2_copper_enthalpy_completed.html)
+- [Q3 · Cooling time of a steel sphere](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/a5_q3_cooling_time_completed.html)
+
+## Problem 1 · Short answers — 20 marks
+
+**1.1** A finite difference subtracts two nearby values and divides the small difference by a small $h$, so the noise in the values is divided by $h$ as well. For independent, zero-mean errors with standard deviation $\sigma$, the noise in the central-difference estimate of $f'$ is about $\sigma/(\sqrt2\,h)$, which **grows** as the points get closer. An integration rule is a weighted sum $w_0y_0+\cdots+w_Ny_N$ with weights of about $h$. It adds the values instead of subtracting them, and independent positive and negative errors partly cancel. For the trapezoidal rule, the noise in the integral is about $\sigma\,(b-a)/\sqrt N$, which **falls** as more points are added. Give credit for either the "divide by $h$ versus multiply by $h$" argument or the cancellation argument. A strong answer also notes that a systematic offset in the data does not cancel.
+
+**1.2** Two reasons, from L19:
+
+- **Oscillation and negative weights.** High-degree interpolating polynomials through evenly spaced points oscillate (Runge's example, L08). The formula of degree 8, and every formula from degree 10 upwards, has negative weights, which subtract values and amplify errors and noise in the data.
+- **Simpson is already accurate enough.** Its error falls as $h^4$. To improve accuracy, it is simpler and safer to use a composite rule with smaller subintervals than to raise the degree.
+
+One correct reason with an explanation earns full marks.
+
+**1.3** No. The trapezoidal rule accepts uneven spacing and any number of subintervals, so it is a useful starting point. When the data are smooth and evenly spaced with an even number of subintervals, Simpson's 1/3 rule can give a more accurate result. Comparing suitable rules or refining the measurements can help assess the integration error. Both rules can miss a peak between data points, so agreement alone does not guarantee accuracy.
+
+**1.4** One well-explained check earns full marks. Examples:
+
+- **Coarsen the data.** Integrate with every point and with every second point. Agreement to the needed precision provides evidence of convergence, provided the data resolve the underlying variation. For smooth data on nested, equally spaced grids in the asymptotic regime, the difference divided by 3 estimates the finer result's error (Richardson, L20).
+- **Compare two rules.** Agreement between suitable trapezoidal and Simpson estimates provides a useful check, but both can miss features between the data points. The Richardson combination $[4I(h/2)-I(h)]/3$ gives an improved estimate.
+- **Estimate the noise.** Use repeated measurements to estimate $\sigma$. For independent, zero-mean errors at equally spaced points, the trapezoidal noise is approximately $\sigma\,(b-a)/\sqrt N$. Once the truncation error is smaller than the noise, measurement uncertainty limits the result.
+- **Plot the data.** Check that the points resolve every peak and bend. Add points where the curve changes quickly if more measurements are possible.
+- **Physical checks.** Check units, sign, limiting cases, and conservation laws, and compare with an independent result, such as a fitted model, a handbook value, or a different measurement.
+
+## Problem 2 · Enthalpy of copper from its heat capacity — 40 marks
+
+The table has 11 evenly spaced points from 300 K to 1300 K, so $h=100$ K and $N=10$ subintervals.
+
+### 2.1 Composite trapezoidal rule
+
+The sum of the nine interior values is $25.29+25.99+\cdots+30.64=249.03$ J/(mol K). Then
+
+$$
+\Delta H\approx\frac{100}{2}\left[24.49+2\,(249.03)+32.18\right]=50\times554.73=27\,736.5\ \mathrm{J/mol}.
+$$
+
+### 2.2 Composite Simpson's 1/3 rule
+
+The table meets both conditions of the rule: the points are evenly spaced ($h=100$ K), and $N=10$ is even. The values with weight 4 are those at 400, 600, 800, 1000, and 1200 K, which sum to 138.57. The values with weight 2 are those at 500, 700, 900, and 1100 K, which sum to 110.46. Then
+
+$$
+\Delta H\approx\frac{100}{3}\left[24.49+4\,(138.57)+2\,(110.46)+32.18\right]=\frac{100}{3}\times831.87=27\,729.0\ \mathrm{J/mol}.
+$$
+
+A NumPy implementation and the library checks are:
+
+```python
+import numpy as np
+from numpy import trapezoid
+from scipy.integrate import simpson
+
+T = np.arange(300.0, 1301.0, 100.0)
+Cp = np.array([24.49, 25.29, 25.99, 26.55, 27.02, 27.47,
+               27.97, 28.62, 29.48, 30.64, 32.18])
+h = T[1] - T[0]
+
+dH_trap = h / 2 * (np.sum(Cp) + np.sum(Cp[1:-1]))
+dH_trap_reference = trapezoid(Cp, T)
+dH_simp = h / 3 * (np.sum(Cp) + np.sum(Cp[1:-1])
+                   + 2 * np.sum(Cp[1:-1:2]))
+dH_simp_reference = simpson(Cp, x=T)
+```
+
+The two library calls return the same values as the corresponding sums.
+
+### 2.3 Comparison
+
+With the standard result $\Delta H=27\,725.9$ J/mol, the absolute error is $|\Delta H_{\mathrm{estimate}}-\Delta H_{\mathrm{standard}}|$ and the relative error is the absolute error divided by the standard result.
+
+| Estimate | $\Delta H$ (J/mol) | Absolute error (J/mol) | Relative error (%) |
+|---|---:|---:|---:|
+| Trapezoidal | 27 736.5 | 10.6 | 0.038 |
+| Simpson's 1/3 | 27 729.0 | 3.1 | 0.011 |
+
+Simpson's result is closer to the standard value for this table.
+
+## Problem 3 · How long does a steel sphere take to cool? — 40 marks
+
+### 3.1 Cooling time from an integral
+
+For $T_\mathrm f=600$ K,
+
+$$
+t_\mathrm f=\int_{600\ \mathrm K}^{1200\ \mathrm K}
+\frac{\mathrm dT}{\alpha(T^4-T_\mathrm a^4)} .
+$$
+
+Using $\alpha=3.49\times10^{-11}$ K⁻³ s⁻¹ and $T_\mathrm a=300$ K, one implementation is:
+
+```python
+from scipy.integrate import quad
+
+alpha = 3.49e-11  # K^-3 s^-1
+T_a = 300.0       # K
+T_0 = 1200.0      # K
+
+def integrand(T):
+    return 1 / (alpha * (T**4 - T_a**4))
+
+t_f, estimated_error = quad(integrand, 600.0, T_0)
+```
+
+The result is $t_\mathrm f=39.92$ s. The second value returned by `quad` estimates the numerical integration error.
+
+`quad` is suitable because the integrand can be evaluated at any temperature in the interval. It selects evaluation points adaptively where they are needed. Simpson's rule can also be used on an appropriate set of evenly spaced points. It requires a suitably fine grid, particularly near the wall temperature where the integrand changes rapidly.
+
+### 3.2 Cooling time from explicit Euler
+
+In `euler(T, h)`, the explicit Euler update is `return T - h * alpha * (T**4 - T_a**4)`. The table reports the first step at which $T\leq600$ K.
+
+| $h$ (s) | Euler time (s) | Temperature at that step (K) | Difference from `quad` (s) |
+|---:|---:|---:|---:|
+| 5 | 35.0 | 580.3 | −4.9 |
+| 2 | 38.0 | 595.2 | −1.9 |
+| 1 | 39.0 | 597.7 | −0.9 |
+| 0.5 | 39.5 | 598.7 | −0.4 |
+
+The Euler times approach the `quad` result as $h$ decreases. Each Euler step uses the cooling rate at the beginning of the step. Since the sphere cools more slowly as its temperature falls, a coarse step overestimates the temperature drop and reaches 600 K too early. The reported crossing time is also rounded up to the next time step.
+
+### 3.3 A final temperature close to the wall temperature
+
+| $T_\mathrm f$ (K) | Cooling time from `quad` (s) |
+|---:|---:|
+| 350 | 298.96 |
+| 305 | 854.47 |
+| 301 | 1276.20 |
+
+The cooling time grows as $T_\mathrm f$ approaches the 300 K wall temperature. The net radiative cooling rate approaches zero, so the sphere takes longer to lose each additional kelvin. Near $T_\mathrm a$,
+
+$$
+T^4-T_\mathrm a^4\approx4T_\mathrm a^3(T-T_\mathrm a),
+$$
+
+so the integrand grows approximately as $1/(T-T_\mathrm a)$. The integral diverges at $T_\mathrm f=T_\mathrm a$: the model approaches the wall temperature without reaching it in finite time.
+
+With a uniform Euler time step, resolving the rapid initial cooling calls for a small $h$. Keeping that same small step throughout the much slower late stage requires many steps. A large $h$ can reduce the cost but increase the early error and limit the precision of the reported crossing time to the step size. Adaptive time stepping can use small steps during rapid cooling and larger steps later, with its error controlled. Adaptive quadrature is another option for $T_\mathrm f>T_\mathrm a$; as the endpoint approaches 300 K, the increasingly sharp integrand needs careful numerical treatment.
+
+A fixed step does not automatically become unstable near the wall temperature. For example, with $h=1$ s Euler reaches 350 K at 297 s, 305 K at 851 s, and 301 K at 1272 s, close to the `quad` values. Accept other explanations that identify a numerical accuracy or computational-cost issue.

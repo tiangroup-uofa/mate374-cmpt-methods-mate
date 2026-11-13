@@ -1,0 +1,17 @@
+A5 draft notes (2026-11-12)
+
+Files
+- assignments/A5/index.qmd (handout), answer-keys/A5/answers.qmd (key)
+- activities/a5_q2_copper_enthalpy(.edit/_completed.edit).py, a5_q3_cooling_time(...).py
+- Links added: assignments/index.qmd, _quarto.yml sidebar, answer-keys/_quarto.yml render list.
+- Source of Q2 data: NIST WebBook, Cu solid Shomate, Chase 1998. Instructor requested no citation in the handout.
+
+Review notes
+- No release date in handout. Due Mon Nov 30, 12:00 pm.
+- Q1 replaced (2026-11-12) with the instructor's four short answers: noise in integration vs
+  differentiation; why stop at Simpson; when to use trapezoid; accuracy checks without an exact
+  integral (open-ended).
+- Q2 uses Cp of solid Cu from the NIST-JANAF Shomate fit (300-1300 K, rounded to 0.01).
+  Standard dH = 27725.9 J/mol; trap 27736.5; Simpson 27729.0.
+- Q3 uses quad and explicit Euler for radiative cooling. t(600 K) = 39.92 s; t(350 K), t(305 K), t(301 K) = 298.96, 854.47, 1276.20 s. The notebook compares evaluation counts and errors against tighter-tolerance quad.
+- scripts/render_answer_pdfs.py stages only A1-A3; A4 and A5 answer PDFs are not staged yet.
