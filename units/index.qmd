@@ -44,6 +44,8 @@ toc: false
 
 21. [L21 · Building a toy molecular dynamics engine](04/L21/index.qmd) — internal energy and finite-difference forces, a minimization check, forward Euler and Størmer–Verlet step functions, a starter and completed engine, energy conservation, time-step failure, and physical interpretation.
 
+[Unit 04 · Summary and preparation](04/summary.qmd)
+
 ## [05 · Ordinary differential equations and molecular dynamics](05/index.qmd)
 
 22. [L22 · Ordinary differential equations and initial-value problems](05/L22/index.qmd) — Newton's second law as an ODE, order and linearity, initial and boundary conditions, characteristic roots of the harmonic bond, radiative cooling, and the explicit and implicit Euler methods.

@@ -11,4 +11,6 @@ Unit 4 develops numerical differentiation and integration, the two operations th
 - [L20 · Numerical integration](L20/index.qmd)
 - [L21 · Building a toy molecular dynamics engine](L21/index.qmd)
 
+[Unit 04 · Summary and preparation](summary.qmd)
+
 [Unit 04 references](references.qmd)

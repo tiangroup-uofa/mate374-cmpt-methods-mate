@@ -145,6 +145,8 @@ website:
                 text: "Lecture 20"
               - href: units/04/L21/index.qmd
                 text: "Lecture 21"
+              - href: units/04/summary.qmd
+                text: "Summary and preparation"
               - href: units/04/references.qmd
                 text: "References"
           - section: "05 · Ordinary differential equations and molecular dynamics"
