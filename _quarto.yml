@@ -10,6 +10,8 @@ project:
     - "exams/midterm-questions.pdf"
     - "exams/midterm-final-answers.pdf"
     - "completed-notebooks/**"
+    - "project/data/**"
+    - "project/MATE374-group-project.zip"
     - "wasm-local/**"
     - "assets/L01-fast16-implosion-poster.png"
     - "assets/prep-*.svg"

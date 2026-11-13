@@ -1,0 +1,72 @@
+{
+  "element": "Cu",
+  "isolated_atom_energy_eV": -0.24239966,
+  "energy_convention": "VASP free energy TOTEN; electronic entropy is zero for this integer-occupied atom",
+  "method": {
+    "vasp_version": "6.3.2",
+    "exchange_correlation": "PBE",
+    "potcar_title": "PAW_PBE Cu 22Jun2005",
+    "potcar_sha256": "b64dae53834dc113c0e23e6a6d919c9f23446fffbe5b6a1a7c48410998f6f67d",
+    "encut_eV": 400,
+    "prec": "Accurate",
+    "lreal": false,
+    "cell_A": [18.0, 18.0, 18.0],
+    "fractional_position": [0.5, 0.5, 0.5],
+    "kpoint_mesh": [1, 1, 1],
+    "kpoint_centering": "Gamma",
+    "nelect": 11,
+    "ispin": 2,
+    "magmom_muB": 1.0,
+    "nupdown": 1,
+    "electronic_configuration": "3d10 4s1, doublet",
+    "ismear": -2,
+    "nbands": 10,
+    "occupations_up": [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+    "occupations_down": [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+    "isym": 2,
+    "ediff_eV": 1e-8,
+    "algo": "Normal",
+    "amix": 0.2,
+    "bmix": 0.0001,
+    "amix_mag": 0.8,
+    "bmix_mag": 0.0001,
+    "nsw": 0
+  },
+  "validation": {
+    "electronic_converged": true,
+    "normal_completion": true,
+    "energy_without_entropy_eV": -0.24239966,
+    "energy_sigma0_eV": -0.24239966,
+    "vacuum_checks": [
+      {"cell_A": 12.0, "energy_eV": -0.24267240},
+      {"cell_A": 15.0, "energy_eV": -0.24272051},
+      {"cell_A": 18.0, "energy_eV": -0.24239966}
+    ],
+    "difference_15_to_18_A_meV": 0.32085,
+    "maximum_spread_12_to_18_A_meV": 0.32085,
+    "vacuum_tolerance_meV": 1.0,
+    "automatic_occupation_check": {
+      "cell_A": 18.0,
+      "ismear": 0,
+      "sigma_eV": 0.03,
+      "energy_eV": -0.24239966,
+      "moment_muB": 1.0,
+      "electronic_converged": true
+    },
+    "independent_parser": "ASE vasprun.xml energy agrees with parsed OUTCAR TOTEN",
+    "scope": "Vacuum and occupation checks at the dataset's fixed 400 eV cutoff; not a plane-wave cutoff convergence study"
+  },
+  "dataset_compatibility": {
+    "files": ["cu_vasp_train.xyz", "cu_vasp_test.xyz"],
+    "matched": ["VASP executable", "exact Cu PAW file", "PBE", "400 eV cutoff", "Accurate precision", "reciprocal-space projectors"],
+    "bulk_energy_convention": "VASP finite-smearing free energy TOTEN, ISMEAR=1, SIGMA=0.15 eV",
+    "atom_specific_choices": "Spin-polarized ground-state atom, Gamma point, vacuum cell, and integer occupations with a small-Gaussian cross-check. Bulk metallic smearing is not imposed on the atom."
+  },
+  "fitting_use": {
+    "interaction_energy_target": "E_DFT - N_Cu * isolated_atom_energy_eV",
+    "force_targets": "Unchanged",
+    "isolated_atom_interaction_energy_eV": 0.0,
+    "reference_is_trainable": false,
+    "note": "Hold the atomic reference fixed. Do not fit an additional unconstrained per-atom constant after subtracting this reference. This absolute atomic energy is specific to the recorded PAW and computational setup."
+  }
+}
