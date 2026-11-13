@@ -1,15 +1,102 @@
 ---
 title: "MAT E 374 Group Project"
 subtitle: "Melting of copper nanoparticles by molecular dynamics"
+from: markdown+tex_math_single_backslash
+bibliography: ../references.bib
 format:
   html:
-    toc: false
+    toc: true
   pdf:
     toc: false
 ---
 
 Study how particle size, shape, and heating rate affect the melting and freezing of copper nanoparticles using molecular dynamics. Download the complete project package for the assignment, tutorial, sample report, three editable marimo notebooks, all required input files, and the report-template source. The assignment PDF gives the deadline, report requirements, and optional bonus task.
 
-[Download the complete project package (ZIP)](MATE374-group-project.zip){.btn .btn-primary}
+[Download the complete project package (ZIP)](MATE374-group-project.zip)
 
 Work online in your own editable molab copies: [Simulation](https://molab.marimo.io/notebooks/nb_snapzMa8oVN3beQpXGuBNc), [Analysis](https://molab.marimo.io/notebooks/nb_2m8VYhDJC1A8y2MXkFXtUk), and [Bonus](https://molab.marimo.io/notebooks/nb_6yiNfKPqBZQSU8LNjCPHco). Choose a GPU machine for the MD simulations.
+
+**Due:** Monday, December 7, 2026, at 11:59 pm via Canvas (one submission per group)\
+**Weight:** 20% of the course grade
+
+## How the project works
+
+- **Groups:** groups of five, formed by the instructor (changes are possible before November 20). All groups work on the same project.
+- **Submission:** each group submits one complete project report. See `3-assignment-sample-report.pdf` for an example.
+- **Code:** run the supplied editable notebooks in the online marimo playground (molab). If you cannot use molab, the tutorial also explains how to run them locally on a laptop or desktop.
+- **Use of AI:** permitted for **any part** of the project. State in the report which tools you used and for which tasks, and check every result.
+- **Your own judgement:** there is **no single correct answer**. Marks are given for sound evidence and clear reasoning. (A completed group project will receive at least 90% of the project marks.)
+
+## The problem
+
+A metal nanoparticle melts at a lower temperature than the bulk metal, because a large fraction of its atoms sit at the surface, where they have fewer neighbours and are less strongly bound. Buffat and Borel measured this **melting temperature depression** for gold particles [@buffat1976gold]: particles 2–3 nm in diameter melted several hundred K below the bulk melting point (1337 K). To first order, the melting temperature follows
+
+\[
+T_\mathrm{m}(D) = T_\mathrm{m,bulk}\left[1-\left(\frac{D_0}{D}\right)^{\alpha}\right],
+\]
+
+where \(D\) is the particle diameter, \(D_0\) is a length of about a nanometre, and \(\alpha\) describes the size dependence. With \(\alpha = 1\), this is the classic Gibbs–Thomson form \(T_\mathrm{m} = T_\mathrm{m,bulk} - C/D\) [@buffat1976gold]. Here, the **melting temperature** is the temperature at which you identify the solid-to-liquid transition in your simulation.
+
+![Melting temperature of gold particles, recreated from Fig. 5 of @buffat1976gold. The line is a fit of the power law, \(D_0 \approx 0.83\) nm and \(\alpha \approx 0.93\).](figures/buffat1976_recreated.png){width=45%}
+
+In this project, you simulate the melting of free copper nanoparticles with molecular dynamics (MD). The notebook code is written in plain Python with importable modules, so you can inspect how the simulation works. The atoms interact through an embedded-atom method (EAM) potential for Cu [@mishin2001cu]. At each stage, we set a target temperature for the particle. A method called the **Langevin thermostat** exchanges energy with the atoms to control their temperature as we heat or cool them.
+
+### Central questions
+
+1. **Heating rate.** Heat a sphere at different rates and plot its potential energy against temperature. Does the temperature at which melting begins change with the heating rate? Which rate does your group choose?
+2. **Particle size.** Change the sphere diameter from **2 to 8 nm**. How does the melting region in the potential-energy curve change? Record the melting temperature at each diameter and heating rate in **Table 3 of the analysis notebook**.
+3. **Size-dependent fit.** After step 2, fit the melting law above to the diameter \(D\) and melting temperature \(T_\mathrm{m}\). Use `scipy.optimize.minimize` for nonlinear regression. What values do you obtain for \(\alpha\), \(D_0\), and \(T_\mathrm{m,bulk}\)? Compare the fitted bulk melting temperature with the experimental Cu value, **1357.77 K**.
+4. **Further investigation: shape.** How would your conclusions change for another particle shape? Keep the heating rate and particle size comparable when testing the effect of shape.
+5. **Further investigation: freezing.** A particle may remain liquid hundreds of K below its melting temperature during cooling. What physical mechanism can explain this difference? Use references to discuss whether it is a physical phenomenon, a simulation effect, or a combination of both.
+
+## Notebooks
+
+We provide three editable notebooks. Use their molab links to work online. The ZIP folders also contain copies that you can run locally or upload to your own marimo workspace.
+
+- **[Simulation](https://molab.marimo.io/notebooks/nb_snapzMa8oVN3beQpXGuBNc) (`4-md-run/`):** create a Cu particle, hold it at a fixed temperature, and run a heating-and-cooling cycle after **100 ps of initial equilibration**. The equilibration energy curve is separate from the final cycle CSV and XYZ files.
+- **[Analysis](https://molab.marimo.io/notebooks/nb_2m8VYhDJC1A8y2MXkFXtUk) (`5-analysis/`):** plot a CSV, inspect XYZ snapshots and pair distributions, and estimate the solid-like fraction. Use the results table and fitting workspace for the size-dependent melting law.
+- **[Bonus](https://molab.marimo.io/notebooks/nb_6yiNfKPqBZQSU8LNjCPHco) (`6-bonus/`):** fit an MD potential to supplied quantum-mechanical energies and forces. See the bonus task below.
+
+## Report
+
+Write one report per group in the format of an American Chemical Society (ACS) journal article ([author guidelines](https://researcher-resources.acs.org/publish/author_guidelines), [article examples](https://pubs.acs.org/journal/jpccck)). We provide `3-assignment-sample-report.pdf` to show the expected sections, coverage, and types of plots. Its blue placeholder text explains what each section should contain. Use your own results and figures. Aim for about **2 to 4 pages of results and discussion**.
+
+Address these questions with your own data:
+
+1. **Equilibration.** After how long do the energies become stable at a fixed temperature? Does the mean kinetic-energy plateau per atom agree with \(\tfrac32 k_\mathrm{B}T\)?
+2. **Melting and freezing temperatures.** How do you identify these temperatures from the energy curves and atomic structures?
+3. **Heating rate.** How does it affect the measured melting temperature? Which rate did your group choose for the size study, and what comparison supports that choice?
+4. **Size-dependent fit.** Fit the melting temperatures of spheres with different diameters at the chosen rate. Report the nonlinear-regression parameters \(\alpha\), \(D_0\), and \(T_\mathrm{m,bulk}\), and compare the fitted bulk value with experiment.
+
+If you can, also address these further questions:
+
+5. **Shape.** Does changing the shape change the melting temperature? For example, does an octahedral particle melt at a higher or lower temperature than a sphere of comparable size? Explain whether the result agrees with your physical intuition.
+6. **Freezing below melting.** What phenomenon explains the large difference between melting and freezing temperatures? Is it physical, an MD artifact, or both? Use references to support your explanation.
+
+**Submission:** one group member uploads the report to Canvas as a **PDF**. You may also include a ZIP of your collected data. The optional data ZIP is not used to grade the report.
+
+## Bonus · Fit your own EAM-type potential (up to 10 extra points)
+
+Bonus points that take the total group-project score above 100% will count towards your final course grade.
+
+How can we create a potential like the one supplied for the simulation? One approach is to fit a custom potential to accurate density functional theory (DFT) calculations. We provide energies and atomic forces for about **200 Cu structures**, covering different crystal structures and slabs.
+
+In an EAM model, the contribution assigned to atom \(i\) includes its pair interactions and an embedding energy:
+
+\[
+V_i = \frac12\bigl[\phi(r_{i1})+\phi(r_{i2})+\cdots\bigr]+F(\rho_i),
+\qquad
+\rho_i=f(r_{i1})+f(r_{i2})+\cdots.
+\]
+
+Here, 1, 2, and so on label the neighbours of atom \(i\), and \(r_{ij}\) is the distance between two atoms. The pair function \(\phi(r)\) describes their pair interaction. Each neighbour contributes \(f(r)\) to the **local density** \(\rho_i\), which measures the atom's surroundings. The embedding function \(F(\rho_i)\) makes the energy depend on those surroundings. Adding all the \(V_i\) gives the particle's total potential energy, with the factor \(1/2\) counting each pair once [@mishin2001cu].
+
+The bonus notebook, also supplied as `6-bonus/project_bonus_eam_fit.molab.py`, provides a skeleton for fitting a custom EAM-type potential to the DFT energies and forces. Its examples explain what the EAM terms do and compare the fit with simple pairwise models such as Lennard–Jones. Examine how the pairwise model's energy predictions differ from the DFT data and how the embedding term accounts for many-body effects.
+
+After running the fitting notebook:
+
+1. **Fitted parameters.** Record how many parameters are fitted and their values.
+2. **Your own system.** Adapt the `custom_system` function to use your fitted parameters. An example is provided in the notebook.
+3. **Melting comparison.** Insert your custom-potential function into the first notebook and repeat the simulations. Report how the melting temperatures and fitted size-dependent melting law differ from those obtained with the supplied EAM potential.
+
+## References
