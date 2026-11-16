@@ -3,9 +3,8 @@ title: "Unit 05 · Ordinary differential equations and molecular dynamics"
 toc: false
 ---
 
-Unit 5 connects the numerical tools of Units 1–4 to the simulations used in materials engineering, and then develops the numerical solution of ordinary differential equations, the step that turns Newton's second law into a trajectory of atoms in time. [L22](L22/index.qmd) follows the pitch-drop experiment from the funnel to the atoms and links each level to a simulation method and its numerical core. [L23](L23/index.qmd) begins with the mathematics of ODEs.
+Unit 5 develops the numerical solution of ordinary differential equations, the step that turns Newton's second law into a trajectory of atoms in time. The bridging lecture [L22](L22/index.qmd) precedes this unit: it follows the pitch-drop experiment from the funnel to the atoms and links each level to a simulation method and its numerical core. [L23](L23/index.qmd) begins with the mathematics of ODEs.
 
-- [L22 · Why do we simulate materials?](L22/index.qmd)
 - [L23 · Ordinary differential equations and initial-value problems](L23/index.qmd)
 
 [Unit 05 references](references.qmd)

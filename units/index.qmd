@@ -46,7 +46,8 @@ toc: false
 
 [Unit 04 · Summary and preparation](04/summary.qmd)
 
+22. [L22 · Why do we simulate materials?](05/L22/index.qmd) — the pitch-drop experiment from the funnel to the atoms: Hagen–Poiseuille flow and the viscosity of pitch, extrapolation of a fitted viscosity law, a polymer chain as a random walk, MC and MD for chain length, the quantum origin of interatomic forces, length and time scales, and the numerical core of each simulation method.
+
 ## [05 · Ordinary differential equations and molecular dynamics](05/index.qmd)
 
-22. [L22 · Why do we simulate materials?](05/L22/index.qmd) — the pitch-drop experiment from the funnel to the atoms: Hagen–Poiseuille flow and the viscosity of pitch, extrapolation of a fitted viscosity law, a polymer chain as a random walk, MC and MD for chain length, the quantum origin of interatomic forces, length and time scales, and the numerical core of each simulation method.
 23. [L23 · Ordinary differential equations and initial-value problems](05/L23/index.qmd) — Newton's second law as an ODE, order and linearity, initial and boundary conditions, characteristic roots of the harmonic bond, radiative cooling, and the explicit and implicit Euler methods.

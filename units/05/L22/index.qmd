@@ -311,7 +311,7 @@ Inside the program, each simulation family spends most of its time on one kind o
 
 The rest of MAT E 374 follows these numerical cores in the order of their mathematics:
 
-- **Ordinary differential equations and molecular dynamics** (this unit): accuracy and stability of time-stepping methods, and why the integrator of an MD code matters.
+- **Ordinary differential equations and molecular dynamics** (Unit 5): accuracy and stability of time-stepping methods, and why the integrator of an MD code matters.
 - **Partial differential equations and continuum models**: diffusion and flow on a grid, and how a PDE becomes a linear system.
 - **Random methods**: Monte Carlo sampling of configurations.
 - **Back to the atoms**: where interatomic forces come from, from DFT to machine-learning interatomic potentials.

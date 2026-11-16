@@ -149,11 +149,13 @@ website:
                 text: "Summary and preparation"
               - href: units/04/references.qmd
                 text: "References"
+          - href: units/05/L22/index.qmd
+            text: "Lecture 22 · Why do we simulate materials?"
           - section: "05 · Ordinary differential equations and molecular dynamics"
             href: units/05/index.qmd
             contents:
-              - href: units/05/L22/index.qmd
-                text: "Lecture 22"
+              - href: units/05/L23/index.qmd
+                text: "Lecture 23"
               - href: units/05/references.qmd
                 text: "References"
       - href: seminars/index.qmd
