@@ -412,4 +412,4 @@ $$
 \frac{\mathrm d\mathbf v_i}{\mathrm dt}=\frac{\mathbf F_i(\mathbf x_1,\ldots,\mathbf x_N)}{m_i}
 $$
 
-form an initial-value problem for ordinary differential equations. We have already built two numerical methods for it and seen that their behaviour differs. [Unit 5](../../05/index.qmd) develops the formal tools to explain that behaviour: stability, accuracy, appropriate time steps, and the interpretation of molecular dynamics. [L22](../../05/L22/index.qmd) begins with the ODE formulation.
+form an initial-value problem for ordinary differential equations. We have already built two numerical methods for it and seen that their behaviour differs. [Unit 5](../../05/index.qmd) develops the formal tools to explain that behaviour: stability, accuracy, appropriate time steps, and the interpretation of molecular dynamics. [L22](../../05/L22/index.qmd) first places molecular dynamics among the other materials simulation methods, and [L23](../../05/L23/index.qmd) begins with the ODE formulation.

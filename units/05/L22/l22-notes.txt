@@ -1,0 +1,43 @@
+L22 · authoring notes for the instructor (2026-11-16, fourth version)
+====================================================================
+
+Structure (after instructor comments)
+1. "Liquid or solid?" opener: Parnell wanted to show pitch is a liquid.
+   Record of drops, live stream link (youtube.com/@UQPitchDrop/streams),
+   time-lapse video (UQ Science 2015, embed youtube.com/embed/BZvsrOciU_Q).
+2. Part 1 funnel: L09 fit figure reused (assets/L09-viscosity-fitting.png);
+   two viscosity facts; Hagen-Poiseuille drop time; root finding of
+   f(mu) = t_model - t_observed; notebook l22_pitch_drop.edit.py does
+   root_scalar (brentq) on log10(mu) with a dropdown for 8.1 / 12.3 / 13.4 years.
+   Banner: CONTINUUM MODEL (length, time, quantity of interest).
+3. Part 2 molecules: bitumen composition, random-walk figure (Wikimedia
+   Commons, public domain), notebook l22_random_walk.edit.py, MC (random) vs
+   MD (deterministic ODE) side by side. Banner: MOLECULAR MODELS.
+4. Part 3 electrons: one equation for MD, "where does the force come from?",
+   Feynman quotes, guest-lecture cartoon, LJ / QM-DFT / ML. Banner: ATOMISTIC MODELS.
+5. Four questions + table; Zhang slides 12, 13, 14 (conventional maps);
+   instructor's group slide from the guest lecture (tian-group.png).
+6. Method-core figure redrawn: rows ordered by length scale with a vertical
+   arrow, larger fonts and stronger colours.
+7. Plan by unit; most content not required for the final exam.
+8. Next: theory behind MD, ODEs (L23).
+
+Math: all inline math now uses $...$ (the \( \) form did not render).
+Banner style: .level-banner in styles.css.
+
+Facts checked
+- Drops and dates: Edgeworth et al. (1984) table 1 to drop 6. Drops 7-9 and
+  intervals from Wikipedia (rev. 2026-10-25) and the UQ page ("only 9 drops").
+- Stem and volume data: Edgeworth et al. (1984). Bisection gives 2.41e8 Pa s
+  for 8.1 years; the published value is (2.3 +/- 0.5)e8 Pa s.
+- Feynman quote 1 is from Wikiquote (Lectures vol. I sec. 1-2). Quote 2 is
+  from IJTP 21 (1982) p. 486. caltech.edu returned HTTP 403, so please confirm.
+
+Open items
+- Cartoon (feynman ladder): if it is AI-generated, add that to the caption.
+- The group slide contains a QR code and photographs of Pauli and Feynman.
+  Check their reuse before the site goes public.
+- The comment about "notebooks are broken": both notebooks ran in a
+  local browser check, inside the page and as standalone pages. The
+  only console errors came from the marimo language server
+  (code completion). If students see something else, tell me what it is.

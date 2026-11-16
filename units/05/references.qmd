@@ -5,7 +5,7 @@ format:
     toc: true
 bibliography: ../../references.bib
 nocite: |
-  @burden2016numerical, @kiusalaas2013, @virtanen2020scipy
+  @burden2016numerical, @edgeworth1984pitch, @feynman1963lectures, @feynman1982simulating, @gilbert2021fusion, @kiusalaas2013, @kremer1990entangled, @lesueur2009bitumen, @li2014asphalt, @pal2016cnt, @pochettino1914plastici, @rubinstein2003polymer, @uqpitchdrop, @uqpitchdroptimelapse, @virtanen2020scipy, @wikimediaidealchain, @wikipediamultiscale, @wikipediapitchdrop
 ---
 
 ## Bibliography
