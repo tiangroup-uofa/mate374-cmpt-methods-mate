@@ -1,0 +1,46 @@
+A4 answer-key rebuild and release check, 2026-11-18
+
+Scope
+- Solved the current assignments/A4/index.qmd again, independently of the backup's worked answers.
+- Read the assignment scaffold, A3 answer source, A1-A3 release pages, PDF renderer and full profile.
+- Preserved the current handout wording and due date without changes.
+- Backup sources inspected read-only: /home/ttian7/Dev-office-backup/MATE374/planning/A4-handout-draft.txt and A4-implementation-notes.txt.
+
+Differences from the backup/earlier summary
+- Current Q3 ends at 3.3. The old Q3.4 clustered-grid exercise is absent and is not included in the key.
+- Q1.1 does not specify x0. Use 3.2 angstrom as an illustrative value, not a given. The float64 spacing there is 4.440892098500626e-16 angstrom. The energy evaluations can also round to the same value when the positions differ.
+- Q2: both largest absolute errors occur at 2.40 angstrom. The second-largest force error is at 2.50, not 3.30. The second-largest stiffness error is at 3.30.
+- At 2.80, the force from the printed energies is 0.10625 and its signed error is +0.01065 eV/angstrom. Use five decimal places to avoid a half-way rounding discrepancy with the notebook's four-decimal display.
+- Q2 asks only for a bracket. Report [2.80, 2.90] and explain interpolation plus a bracketed solve. Do not present the synthetic model's 2.866 as a root determined exactly by the rounded table.
+- Q3: estimate minus exact derivative has leading error +h^2 f'''/3. The correction in exact = estimate + correction is negative. This agrees with the handout's general formula. The key makes both conventions explicit.
+- No changes to the problem statements are necessary.
+
+Checks
+- Both completed notebooks pass marimo check and execute through app.run(), with Q4 interpolation_done, slopes_done and solution_found all true.
+- Student and completed notebook input arrays match exactly. Q2 arrays also match the handout.
+- Independently computed local-polynomial finite-difference weights reproduce every Q2 result. Quadratic first-derivative and cubic second-derivative tests include both ends.
+- All Python listings in answers.qmd execute in order with the supplied arrays. Every entry in the printed Q2 result table matches these calculations.
+- Q3 general weights have moments (0, 1, 0, h_l*h_r), confirming the two special cases and the leading error.
+- Independent Q4 solve using analytic spline derivatives and slope/intercept equality:
+  alpha = 0.2394207500939082; beta = 0.5785721381239921.
+- Completed notebook's central differences, h=1e-5, from guesses (0.28,0.64), (0.25,0.60), (0.20,0.70):
+  alpha = 0.23942075017; beta = 0.57857213807.
+  Handout residuals are below 1e-5 J/mol. Default start gives about (-3.9e-10, 1.5e-9).
+- Slope checks: -882.24613617 at x=0.2 (fcc), -266.74931459 at x=0.6 (liquid), J/mol.
+- Reducing h from 1e-3 to 1e-6 approaches the analytic spline slopes.
+- Common tangent slope -389.93184797 J/mol; intercept -812.54706870 J/mol.
+- A dense check on both tabulated spline ranges places the line below both curves.
+- Distinct tangent points and data-range checks exclude the coincident-composition crossing root.
+- Saved the two completed-notebook figures at 300 dpi. Completed notebook sources need no edits.
+- Rendered the seven-page answer PDF and checked its text, equations, tables and figure content.
+
+Provenance
+- The old notes say the Cu Morse parameters were recalled from memory. The answer key uses only the actual handout table and makes no claim about a paper or those parameters.
+- The NIST input data and the existing hypothetical handout setup are retained. No unverified Girifalco-Weizer or Fecht bibliographic details were added.
+- The old pycalphad equilibrium values are not asserted as newly verified results.
+
+Release structure
+- answer-keys/A4/answers.qmd holds the full solution; only its two static PNG assets are stored alongside.
+- assignments/A4/answers.qmd follows A1-A3: public answer landing page linking the generated PDF.
+- Add the landing/sidebar links, answer PDF target, full-profile resource and staging entry.
+- Keep the generated PDF ignored, and link the existing editable completed notebook exports from the PDF.
