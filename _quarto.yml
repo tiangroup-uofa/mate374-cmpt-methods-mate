@@ -151,7 +151,7 @@ website:
                 text: "References"
           - href: units/05/L22/index.qmd
             text: "Lecture 22 · Why do we simulate materials?"
-          - section: "05 · Ordinary differential equations and molecular dynamics"
+          - section: "05 · ODE/IVP and molecular dynamics"
             href: units/05/index.qmd
             contents:
               - href: units/05/L23/index.qmd

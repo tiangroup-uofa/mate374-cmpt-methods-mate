@@ -48,6 +48,6 @@ toc: false
 
 22. [L22 · Why do we simulate materials?](05/L22/index.qmd) — the pitch-drop experiment from the funnel to the atoms: Hagen–Poiseuille flow and the viscosity of pitch, extrapolation of a fitted viscosity law, a polymer chain as a random walk, MC and MD for chain length, the quantum origin of interatomic forces, length and time scales, and the numerical core of each simulation method.
 
-## [05 · Ordinary differential equations and molecular dynamics](05/index.qmd)
+## [05 · Initial-value ODE problems and molecular dynamics](05/index.qmd)
 
-23. [L23 · Ordinary differential equations and initial-value problems](05/L23/index.qmd) — Newton's second law as an ODE, order and linearity, initial and boundary conditions, characteristic roots of the harmonic bond, radiative cooling, and the explicit and implicit Euler methods.
+23. [L23 · Solving initial-value problems](05/L23/index.qmd) — functions and ODEs, initial and boundary conditions, the vibrating atom, Euler and Runge–Kutta integration, error orders, and SciPy’s `solve_ivp`.
