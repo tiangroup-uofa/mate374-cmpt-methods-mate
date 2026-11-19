@@ -44,9 +44,11 @@ $$
 ## Example code and expected values
 
 $$
-f'(x)=\frac{2(3x^2-2x+8)-(2x-1)(6x-2)}{(3x^2-2x+8)^2}
-=\frac{-6x^2+6x+14}{(3x^2-2x+8)^2},
-\qquad f'(2)=\frac{2}{256}=0.00781250.
+\begin{aligned}
+f'(x)&=\frac{2(3x^2-2x+8)-(2x-1)(6x-2)}{(3x^2-2x+8)^2}
+=\frac{-6x^2+6x+14}{(3x^2-2x+8)^2},\\[6pt]
+f'(2)&=\frac{2}{256}=0.00781250.
+\end{aligned}
 $$
 
 The four function values are
