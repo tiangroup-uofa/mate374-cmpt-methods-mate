@@ -1,0 +1,13 @@
+source: "instructor-supplied Atomify/LAMMPS trajectory"
+source_sha256_uncompressed: "b2fbdab78d67f927acb72948d21aa020ba13858f3304836ae083338e4896898a"
+selected_atom_ids: [615, 631, 309, 847, 136]
+selection: "five type-1 atoms, random seed 374, without replacement"
+frames: 101
+dt_tau: 0.005
+sample_steps: 100
+MSD: "mean of squared 3D unwrapped displacements of these same five atoms"
+fit_time_tau: [10, 50]
+slope_sigma2_per_tau: 3.2595832307803065
+intercept_sigma2: -26.844135107644323
+D_sigma2_per_tau: 0.5432638717967178
+final_MSD_sigma2: 154.2742792706426

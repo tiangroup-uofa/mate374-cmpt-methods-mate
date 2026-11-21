@@ -479,3 +479,10 @@ table.fd-table td:nth-child(2) {
     flex-direction: column;
   }
 }
+
+/* L26 · numbered readings of the pair curve */
+#quarto-document-content h4.curve-reading {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-top: 2rem;
+}

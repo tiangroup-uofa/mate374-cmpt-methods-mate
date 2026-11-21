@@ -13,6 +13,7 @@ project:
     - "project/data/**"
     - "project/MATE374-group-project.zip"
     - "wasm-local/**"
+    - "assets/L24-bai-methods-excerpt.png"
     - "assets/L01-fast16-implosion-poster.png"
     - "assets/prep-*.svg"
     - "assets/preparation-icons-license.txt"
@@ -156,8 +157,12 @@ website:
             contents:
               - href: units/05/L23/index.qmd
                 text: "Lecture 23"
+              - href: units/05/L24/index.qmd
+                text: "L24 · Molecular dynamics (I): from IVP perspective"
               - href: units/05/L25/index.qmd
-                text: "L25 · Molecular dynamics (2): control and analysis"
+                text: "L25 · Molecular dynamics (II): control and analysis"
+              - href: units/05/L26/index.qmd
+                text: "L26 · Molecular dynamics (III): the choice of potentials"
               - href: units/05/references.qmd
                 text: "References"
       - href: seminars/index.qmd

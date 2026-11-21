@@ -1,0 +1,56 @@
+{
+  "protocol": {
+    "atoms": 32,
+    "initial_temperature_K": 100,
+    "duration_fs": 500,
+    "ensemble": "NVE",
+    "integrator": "velocity Verlet",
+    "seed": 374,
+    "precision": "float64",
+    "LJ_epsilon_eV": 0.44101445113186266,
+    "LJ_sigma_A": 2.3375899488677705,
+    "LJ_cutoff": "smooth, ro=2 sigma, rc=3 sigma",
+    "EAM": "Mishin Cu EAM1",
+    "MACE": "MACE-MP-0 medium"
+  },
+  "runs": {
+    "LJ": {
+      "a_A": 3.6149999604069434,
+      "minimum_eV_per_atom": -3.539999999999985,
+      "steps": {
+        "1.0": {
+          "max_total_energy_error_eV_per_atom": 1.3461899583979559e-05
+        },
+        "0.5": {
+          "max_total_energy_error_eV_per_atom": 3.361907933843028e-06
+        }
+      }
+    },
+    "EAM": {
+      "a_A": 3.6149250352499003,
+      "minimum_eV_per_atom": -3.540218330205058,
+      "steps": {
+        "1.0": {
+          "max_total_energy_error_eV_per_atom": 3.4069881076591313e-06
+        },
+        "0.5": {
+          "max_total_energy_error_eV_per_atom": 8.515192866619115e-07
+        }
+      }
+    },
+    "MACE": {
+      "a_A": 3.625654624012813,
+      "minimum_eV_per_atom": -4.084821254822339,
+      "steps": {
+        "1.0": {
+          "max_total_energy_error_eV_per_atom": 2.7306635926004075e-06
+        },
+        "0.5": {
+          "max_total_energy_error_eV_per_atom": 6.825215108884064e-07
+        }
+      },
+      "model_sha256": "01bfe22100139f424713cf921144e5509cbe353d67aa9fa1be9c6e1e0ed35845",
+      "parameters": 4688656
+    }
+  }
+}

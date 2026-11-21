@@ -1,0 +1,23 @@
+{
+  "atoms": 32,
+  "a_A": 3.615,
+  "initial_velocity_temperature_K": 100,
+  "seed": 374,
+  "dt_fs": 0.5,
+  "duration_fs": 1000,
+  "sample_fs": 2,
+  "ensemble": "NVE",
+  "precision": "float64",
+  "runs": {
+    "LJ": {
+      "max_displacement_A": 0.0642354618995064
+    },
+    "EAM": {
+      "max_displacement_A": 0.14458188825727317
+    },
+    "MACE": {
+      "checkpoint_sha256": "01bfe22100139f424713cf921144e5509cbe353d67aa9fa1be9c6e1e0ed35845",
+      "max_displacement_A": 0.13226859274034505
+    }
+  }
+}

@@ -1,0 +1,50 @@
+suffix kk
+
+#/camera position 15.0 21.8 66.5
+#/camera target 13.7 15.4 10.5
+#/atom 1 1.0 #ffffff
+#/atom 2 1.5 #ff0000
+
+variable L equal 15.0
+variable Lhalf equal $(0.5*v_L)
+variable thickness equal 2.0
+
+units lj
+atom_style atomic
+boundary p p p
+lattice fcc 0.5
+
+variable left equal 0.5*$L-0.5*${thickness}
+variable right equal 0.5*$L+0.5*${thickness}
+region system block 0 $L 0 $L 0 ${Lhalf}
+region boxinside block ${left} ${right} 0 $L 0 ${Lhalf}
+region boxoutside block ${left} ${right} 0 $L 0 ${Lhalf} side out
+
+create_box 2 system
+create_atoms 1 region boxinside
+create_atoms 2 region boxoutside
+
+mass 1 1.0
+mass 2 4.0
+
+velocity all create 3.00 1337 loop geom
+
+pair_style lj/cut 2.5
+pair_coeff * * 1.0 1.0 2.5
+neigh_modify every 1 delay 0 check yes
+timestep 0.005
+
+group light type 1
+compute msd_light light msd com yes
+variable sim_time equal step*dt
+
+fix integrate all nve
+fix msd_out all ave/time 100 1 100 v_sim_time c_msd_light[4] file msd_light.dat
+
+dump trajectory all custom 100 diffusion.lammpstrj id type xu yu zu
+dump_modify trajectory sort id
+
+thermo 100
+thermo_style custom step v_sim_time c_msd_light[4]
+
+run 10000

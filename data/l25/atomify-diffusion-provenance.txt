@@ -1,4 +1,26 @@
-Actual saved Atomify browser run, parent session 2026-11-20. URL https://andeplane.github.io/atomify/?project=quick-run-diffusion&tab=files&file=simple_diffusion.in . Fresh isolated browser had no temporary project, selected Home > Diffusion > Quick run. Simulation completed all 10000 steps with 6750 atoms (1125 light mass1,5625 heavy mass4), LJ units, initial T3.00 seed1337 loopgeom, lj/cut2.5 epsilon=sigma1, NVE, dt .005, box30x30x15, density.5. No equilibration stage separated in source, so use as exploratory classroom analysis, not converged equilibrium transport benchmark. MSD computed for each group with com yes, single initial time origin, LAMMPS unwrapped-coordinate compute msd.
-Source https://raw.githubusercontent.com/andeplane/atomify/main/public/examples/diffusion/diffusion/simple_diffusion.in (retrieved 2026-11-20). Input snapshot also saved beside CSV.
-Extracted from actual read-only runs/run-001/log.lammps using Monaco editor getValue via browser UI tool. Rows0..500 every100 then1000..10000 every500; time=step*.005. Full original log had output every100steps. CSV numbers exactly as printed for these25 rows (no smoothing/noise/model fitting). Reduced units sigma2, tau; D in sigma2/tau, no Angstrom conversion without parameters.
-Browser marked run Completed; log Loop time93.5176s, all10000 steps, dangerous builds0. After run it printed two UI-side thermo errors: variable spcpu cannot be used between runs, variable cpuremain cannot be used between runs. These occur after completed thermo records; retain note, don't claim error-free engine finish.
+Source: instructor-uploaded diffusion.lammpstrj, stored losslessly compressed as atomify-diffusion.lammpstrj.gz.
+SHA256 of uncompressed source: b2fbdab78d67f927acb72948d21aa020ba13858f3304836ae083338e4896898a
+
+Original trajectory: 101 frames, steps 0--10000 every 100 steps; 6750 atoms.
+Columns: id type xu yu zu. Periodic bounds: x,y=0--30 sigma; z=0--15 sigma.
+Input: atomify-diffusion-trajectory.in, dt=0.005 tau.
+
+Five-atom selection:
+- Type-1 atom IDs 615, 631, 309, 847, 136.
+- Drawn without replacement using numpy.random.default_rng(374).
+- These same five atoms provide all animated positions, trajectory trails, squared displacements, mean MSD samples and fitted data.
+- Positions and trails are unwrapped. Fixed plot limits contain the complete paths.
+- MSD = mean over the five atoms of |r_i(t)-r_i(0)|^2.
+- No centre-of-mass subtraction is applied to this five-atom mean.
+
+Current atomify-diffusion-msd.csv contains time_tau, msd_light_sigma2, and the individual squared-displacement columns for the five selected atom IDs.
+
+Least-squares fit MSD=s*t+b over 10<=t/tau<=50:
+s = 3.2595832307803065 sigma^2/tau
+b = -26.844135107644323 sigma^2
+D = s/6 = 0.5432638717967178 sigma^2/tau
+Final five-atom mean squared displacement = 154.2742792706426 sigma^2.
+
+Earlier full-group values and the earlier pasted thermo log are superseded for the displayed figure.
+Figure source: scripts/l25_msd_fit_figure.py.
+GIF canvas and static PNG are generated at 300 dpi. The PNG is the PDF/static fallback.

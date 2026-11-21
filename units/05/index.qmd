@@ -6,6 +6,8 @@ toc: false
 Unit 5 develops the numerical solution of ordinary differential equations, the step that turns Newton's second law into a trajectory of atoms in time. The bridging lecture [L22](L22/index.qmd) precedes this unit: it follows the pitch-drop experiment from the funnel to the atoms and links each level to a simulation method and its numerical core. [L23](L23/index.qmd) introduces initial-value problems through one vibrating atom, from its analytical trajectory to Euler, Runge–Kutta, and SciPy integration.
 
 - [L23 · Solving initial-value problems](L23/index.qmd)
-- [L25 · Molecular dynamics (2): control and analysis](L25/index.qmd) — time steps, periodic boundaries, ensembles, structure, and diffusion.
+- [L24 · Molecular dynamics (I): from IVP perspective](L24/index.qmd) — initial conditions, the MD loop, and velocity Verlet.
+- [L25 · Molecular dynamics (II): control and analysis](L25/index.qmd) — time steps, periodic boundaries, ensembles, structure, and diffusion.
+- [L26 · Molecular dynamics (III): the choice of potentials](L26/index.qmd) — hard spheres, pair potentials, many-body and machine-learned interatomic potentials, and how to measure what each one gets wrong.
 
 [Unit 05 references](references.qmd)

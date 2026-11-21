@@ -463,4 +463,4 @@ ODEs give us many fun problems to explore, from vibrating atoms to molecular dyn
 
 ## Next: integration for molecular dynamics
 
-The choice of integration method changed both the trajectory and the energy of our vibrating atom. In molecular dynamics we follow many coupled vibrations over long times, so local accuracy must be considered alongside stability and long-time energy behaviour. Next we return to the engine, examine the Verlet updates, and choose time steps that resolve the atomic motion.
+The choice of integration method changed both the trajectory and the energy of our vibrating atom. In molecular dynamics we follow many coupled vibrations over long times, so local accuracy must be considered alongside stability and long-time energy behaviour. [L24](../L24/index.qmd) returns to the engine and develops the Verlet updates. [L25](../L25/index.qmd) examines time steps, simulation conditions, and measurements from atomic motion.
