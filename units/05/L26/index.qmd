@@ -16,16 +16,14 @@ format:
 ::: {.callout-note}
 ## Central question
 
-How does the choice of atomistic potential affect the results of molecular dynamics simulations? Can we build a more accurate, more universal potential for a wider range of systems?
+How does the choice of potential affect MD results? Can one potential accurately describe many different materials?
 :::
 
-## The other half of the error budget
+## Sources of error in MD
 
-Where do the errors in an MD result come from?
-
-- **Truncation error ← the integrator.** Use **velocity Verlet**: global error \(O(\Delta t^2)\), stable over long runs.
-- **Roundoff error ← finite precision.** Use **Float64** when possible. Mixed precision is fine for most GPU runs of large, well-behaved systems.
-- **Modeling error ← the choice of potential.** A smaller time step or more digits cannot fix it. This is the subject of this lecture.
+- **Truncation error:** velocity Verlet has global error \(O(\Delta t^2)\). Stability depends on the forces and time step.
+- **Roundoff error:** finite precision limits accuracy. Float64 reduces roundoff. Mixed-precision GPU runs trade precision for speed.
+- **Modelling error:** the potential may give incorrect material properties even with accurate integration.
 
 ### The potential defines the simulated material
 
@@ -36,27 +34,21 @@ m_i\frac{\mathrm d^2\mathbf x_i}{\mathrm dt^2}
 =-\nabla_i E(\mathbf x_1,\ldots,\mathbf x_N).
 \]
 
-Electronic-structure calculations can estimate this energy from the electrons and nuclei, but repeating an accurate quantum calculation at every time step is expensive. An interatomic potential replaces that calculation with a faster approximation. The central issue is how much of the relevant physics survives in that approximation.
+Electronic-structure calculations estimate this energy from electrons and nuclei. Repeating them at every time step is expensive, so we use an interatomic potential as a faster approximation.
 
-We will use copper to examine three questions:
+## Stage 1 · Packing atoms as hard spheres
 
-- How do we construct an interaction model?
-- Which properties can each level of description reproduce?
-- Which benchmarks reveal its modeling error?
-
-## Stage 1 · Atoms before computers as hard spheres
-
-Physical models made the structure of a liquid visible before large computer simulations were possible. Bernal built ball-and-spoke and ball-bearing models to study how dense, disordered packing differs from a crystal. Each ball represents the space occupied by an atom, with no electrons and no attraction between atoms [@bernal1959geometrical; @finney2013bernal].
+Bernal studied liquid packing with ball-and-spoke and ball-bearing models. Each ball represents the space occupied by an atom, without electrons or attraction [@bernal1959geometrical; @finney2013bernal].
 
 ![J. D. Bernal with one of his ball-and-spoke models of a liquid [@finney2013bernal].](../../../assets/L26-bernal-model.gif){#fig-bernal width="42%" fig-align="center" fig-alt="Black-and-white photograph of J. D. Bernal adjusting a large ball-and-spoke model of a disordered liquid."}
 
-A [short physical demonstration](https://www.youtube.com/watch?v=vf5jtsgtYC4) uses table-tennis balls in a cage: gentle shaking produces vibration around fixed positions, stronger shaking lets neighbours exchange places, and an air stream produces freely moving particles.
+In this [demonstration](https://www.youtube.com/watch?v=vf5jtsgtYC4), shaking and airflow make table-tennis balls vibrate, exchange neighbours, and move freely.
 
 ::: {.content-visible when-format="html"}
 {{< video https://www.youtube.com/watch?v=vf5jtsgtYC4 >}}
 :::
 
-The same geometric idea leads to a **hard-sphere potential**, or the related **Sutherland potential**, which adds an attractive tail outside the hard wall [@sutherland1893viscosity]. Two spheres of diameter \(d\) can occupy any non-overlapping configuration, but overlap is forbidden:
+The **hard-sphere potential** forbids overlap between spheres of diameter \(d\):
 
 \[
 \boxed{
@@ -68,12 +60,14 @@ U_{\mathrm{HS}}(r)=
 }
 \]
 
-Alder and Wainwright used hard spheres in pioneering molecular dynamics calculations in 1957 and described the method in detail in 1959. Between collisions the particles travel in straight lines. At contact, an elastic collision changes their velocities while conserving momentum and kinetic energy [@alder1957phase; @alder1959molecular].
+The related **Sutherland potential** adds an attractive tail outside the hard wall [@sutherland1893viscosity].
+
+Alder and Wainwright introduced hard-sphere MD in 1957–1959. Particles travel in straight lines between elastic collisions, which conserve momentum and kinetic energy [@alder1957phase; @alder1959molecular].
 
 ![Hard sphere, Sutherland, and Lennard–Jones potentials on one scale. Increasing the repulsive power \(n\) in \((\sigma/r)^n\) makes the wall steeper. The hard sphere is the limit \(n\to\infty\).](../../../assets/L26-repulsion-family.svg){#fig-hard-sphere width="85%" fig-align="center" fig-alt="Energy against separation. A black hard-sphere wall at r equals sigma, a blue Sutherland curve with the same wall plus an attractive tail, grey dashed curves for repulsive powers 24 and 48, and the red Lennard-Jones curve with power 12."}
 
 - **Hard spheres:** the interaction is an exclusion rule. Event-driven MD advances from collision to collision.
-- **Lennard–Jones particles:** a continuous potential supplies forces between collisions. A time-stepping method integrates their motion.
+- **Lennard–Jones particles:** a continuous potential supplies forces as the particles move. A time-stepping method integrates their motion.
 
 ::: {.content-visible when-format="html"}
 ![Hard particles and Lennard–Jones particles start on the same grid at two scaled temperatures.](../../../assets/L26-lattice-comparison.gif){#fig-lattice-movie width="100%"}
@@ -83,7 +77,7 @@ Alder and Wainwright used hard spheres in pioneering molecular dynamics calculat
 ![Final configurations of hard particles and Lennard–Jones particles started on the same grid.](../../../assets/L26-lattice-comparison-final.png){width="100%"}
 :::
 
-As the animation shows, including attraction between the particles can significantly change the phase behaviour!
+In the low-temperature panels, Lennard–Jones attraction holds particles together. Hard particles interact only through collisions.
 
 ## Stage 2 · Pairwise potentials from physical intuition
 
@@ -92,7 +86,7 @@ A **pair potential** assigns an energy to the separation of two atoms. Most pair
 - **Repulsion** at short range keeps atoms from collapsing onto one another.
 - **Attraction** at longer range allows a bound state.
 
-The Lennard–Jones potential, the 12-6 form we have seen several times in this course, combines the two [@davies1924molecular]:
+The Lennard–Jones 12-6 potential combines these terms [@davies1924molecular]:
 
 \[
 \boxed{
@@ -120,7 +114,7 @@ The restriction \(i<j\) counts each pair once.
 
 ::::: {.scientist-method-inline}
 ::: {.scientist-method-text}
-This description works well for many questions about simple, nearly spherical atoms, as in Aneesur Rahman's simulation of liquid argon [@rahman1964correlations].
+Pair potentials describe many properties of simple, nearly spherical atoms, as in Aneesur Rahman's simulation of liquid argon [@rahman1964correlations].
 :::
 :::: {.scientist-portraits}
 ::: {.scientist-portrait}
@@ -133,38 +127,36 @@ This description works well for many questions about simple, nearly spherical at
 ::::
 :::::
 
-Another common pair curve is the **Morse potential**, which uses an exponential dependence to describe bond stretching [@morse1929diatomic].
+The **Morse potential** uses exponential terms to describe bond stretching, with a steep repulsive side and a broader attractive well [@morse1929diatomic].
 
-### What each curve tells us
-
-One pair curve and its two derivatives carry most of what a pair model knows about a bond. The four readings below use the Lennard–Jones curve in reduced units.
+### Reading the pair curve
 
 #### 1 · The potential: bond energy and bond length {.curve-reading}
 
 - **Bond energy \(\varepsilon\):** the depth of the well below the separated-atom energy, \(U(r_0)=-\varepsilon\).
 - **Bond length \(r_0\):** the position of the minimum, \(r_0=2^{1/6}\sigma\approx1.12\sigma\).
 
-![The pair potential with the bond energy (depth) and the bond length (position of the minimum) marked.](../../../assets/L26-curve-potential.svg){#fig-read-potential width="70%" fig-align="center" fig-alt="Lennard-Jones curve with a red arrow for the well depth epsilon and a green marker at the minimum r0, above a sketch of two atoms at rest at r0."}
+![Lennard–Jones well depth and equilibrium separation.](../../../assets/L26-curve-potential.svg){#fig-read-potential width="70%" fig-align="center" fig-alt="Lennard-Jones curve with a red arrow for the well depth epsilon and a green marker at the minimum r0, above a sketch of two atoms at rest at r0."}
 
-#### 2 · The first derivative: maximum restoring force and the point of no return {.curve-reading}
+#### 2 · The first derivative: maximum restoring force {.curve-reading}
 
 - **Equilibrium:** \(U'(r_0)=0\), so the pair feels no net force at \(r_0\).
 - **Maximum restoring force:** the peak of \(U'\), at the inflection point \(r_{\mathrm{infl}}=(26/7)^{1/6}\sigma\approx1.24\sigma\), where \(F_{\max}\approx2.40\,\varepsilon/\sigma\).
-- **Point of no return:** past the inflection the restoring force only weakens. A pull larger than \(F_{\max}\) separates the atoms.
+- **Applied pull:** beyond the inflection point, the restoring force weakens. A sustained pull above \(F_{\max}\) separates the atoms.
 
-![The first derivative with the equilibrium separation r₀ and the maximum restoring force at the inflection point r_infl, both marked on the separation axis.](../../../assets/L26-curve-force.svg){#fig-read-force width="70%" fig-align="center" fig-alt="First derivative of the Lennard-Jones potential with its zero at r0 near 1.12 sigma and its maximum of 2.40 epsilon per sigma at the inflection point near 1.24 sigma."}
+![Equilibrium separation and maximum restoring force at the inflection point.](../../../assets/L26-curve-force.svg){#fig-read-force width="70%" fig-align="center" fig-alt="First derivative of the Lennard-Jones potential with its zero at r0 near 1.12 sigma and its maximum of 2.40 epsilon per sigma at the inflection point near 1.24 sigma."}
 
-The animation pulls the two atoms of the [L24 two-atom demo](../../../wasm-local/l24_two_atom_md.html) apart with a slowly increasing force, using velocity Verlet. The bond follows \(U'(r)\) until the pull reaches the peak at the inflection point. Beyond it, no larger restoring force is available and the pair separates.
+We use velocity Verlet to follow the [L24 two-atom pair](../../../wasm-local/l24_two_atom_md.html) under a slowly increasing pull. The pair stretches while the forces nearly balance, then separates when the pull exceeds the maximum of \(U'(r)\).
 
 ::: {.content-visible when-format="html"}
-![Two Lennard–Jones atoms pulled apart by a slowly increasing force. The pair breaks once it passes the inflection point.](../../../assets/L26-bond-pull.gif){#fig-pull-pair width="70%" fig-align="center"}
+![Two Lennard–Jones atoms pulled apart by a slowly increasing force. The pair separates as the applied pull exceeds the maximum restoring force.](../../../assets/L26-bond-pull.gif){#fig-pull-pair width="70%" fig-align="center"}
 :::
 
 ::: {.content-visible unless-format="html"}
 ![Final frame of the pulled pair: the bond has broken after passing the inflection point.](../../../assets/L26-bond-pull-final.png){width="70%" fig-align="center"}
 :::
 
-In an MD simulation without an external pull, the energy needed to break a bond is usually higher than the energy needed just to pass the inflection point. The atoms vibrate: a stretched pair past \(r_{\mathrm{infl}}\) is still pulled back unless its total energy exceeds the well depth, and in a cluster the added energy is shared among many bonds and vibrations. Play with the cluster notebook from L24: how much energy per atom must you add to break apart \(N=2\) and \(N=13\)?
+Without an external pull, the pair can stretch beyond \(r_{\mathrm{infl}}\) and turn back. Escape requires enough initial energy to reach \(U=0\) from the minimum \(U=-\varepsilon\). A cluster shares added energy among many bonds and vibrations. In the L24 notebook, how much energy per atom is needed to break apart \(N=2\) and \(N=13\)?
 
 ::: {.content-visible when-format="html"}
 :::: {.quarto-wasm-local notebook="l24_cluster_velocity_verlet.edit.py" view="app" title="Velocity-Verlet cluster from L24: energy needed to break N = 2 and N = 13" height="850" loading="lazy" fullscreen="true"}
@@ -178,11 +170,11 @@ In the L24 cluster notebook, two atoms with 0.7 ε of added energy per atom end 
 ::: {.callout-note collapse="true"}
 ## Why the 13-atom cluster needs more energy per atom than the pair
 
-With two atoms, the pair separates once the added energy exceeds 0.5 ε per atom, because the total energy then exceeds the well depth \(\varepsilon\). With about 0.2 ε per atom, the pair already stretches past \(r_{\mathrm{infl}}\approx1.24\sigma\) and still turns back. At 13 atoms, 0.7 ε per atom leaves the icosahedral cluster intact, and atoms start to leave only between 1.0 and 1.5 ε per atom. Three effects explain the gap:
+The pair escapes above 0.5 ε per atom, when its total energy becomes positive. At 0.2 ε per atom, it passes \(r_{\mathrm{infl}}\approx1.24\sigma\) and turns back. The 13-atom icosahedron stays intact at 0.7 ε per atom and loses atoms between 1.0 and 1.5 ε per atom.
 
-- **More bonds per atom:** the relaxed 13-atom cluster holds 42 nearest-neighbour bonds, so its binding energy is \(44.3\,\varepsilon\), or \(3.4\,\varepsilon\) per atom. The dimer holds only \(0.5\,\varepsilon\) per atom. Removing a single surface atom from the cluster costs about \(6.4\,\varepsilon\), because it must break several bonds at once.
-- **Energy is shared among many vibrations:** the added energy spreads over \(3N-6=33\) vibrational modes. Roughly half of it ends up as potential energy, so one bond rarely receives enough at one time to escape.
-- **Added energy per atom is not \(k_BT\):** near the minimum each atom stores about \(3k_BT\) (kinetic \(\tfrac32k_BT\) plus a similar potential share). The 13-atom run with 0.7 ε per atom has \(k_BT\approx0.25\,\varepsilon\), well below the bulk melting estimate \(k_BT_m\approx0.7\,\varepsilon\) in @fig-read-thermal.
+- **More bonds:** the cluster has 42 nearest-neighbour bonds and a binding energy of \(44.3\,\varepsilon\), or \(3.4\,\varepsilon\) per atom. The dimer has \(0.5\,\varepsilon\) per atom. Removing a surface atom breaks several bonds and costs about \(6.4\,\varepsilon\).
+- **Shared energy:** energy spreads over \(3N-6=33\) vibrational modes. Roughly half becomes potential energy, so an individual pair seldom receives enough to separate.
+- **Temperature:** near the minimum, each atom stores about \(3k_BT\): kinetic \(\tfrac32k_BT\) and a similar potential share. At 0.7 ε per atom, the cluster has \(k_BT\approx0.25\,\varepsilon\), below the bulk melting estimate \(k_BT_m\approx0.7\,\varepsilon\) in @fig-read-thermal.
 :::
 
 #### 3 · The second derivative: bond stiffness {.curve-reading}
@@ -191,37 +183,37 @@ With two atoms, the pair separates once the added energy exceeds 0.5 ε per atom
 - **Curvature:** near \(r_0\) the well looks like a spring, \(U\approx-\varepsilon+\tfrac12k(r-r_0)^2\). A sharper well means a stiffer bond.
 - **Inflection:** \(U''=0\) at \(r_{\mathrm{infl}}\), the same point as the force maximum.
 
-![The second derivative with the stiffness at r₀. The inset compares the well near r₀ with the parabola of the same curvature.](../../../assets/L26-curve-stiffness.svg){#fig-read-stiffness width="70%" fig-align="center" fig-alt="Second derivative of the Lennard-Jones potential with the value at r0 marked as the stiffness, and an inset showing the potential near its minimum overlaid with a dashed parabola."}
+![Bond stiffness from the curvature at equilibrium. Inset: the harmonic approximation.](../../../assets/L26-curve-stiffness.svg){#fig-read-stiffness width="70%" fig-align="center" fig-alt="Second derivative of the Lennard-Jones potential with the value at r0 marked as the stiffness, and an inset showing the potential near its minimum overlaid with a dashed parabola."}
 
 #### 4 · Thermal expansion and melting {.curve-reading}
 
-- **Thermal expansion \(\alpha\):** the well is steeper on the compressed side than on the stretched side. As temperature fills the well, the midpoint of each energy level moves outward, so the mean bond length grows.
-- **Melting point:** melting begins when thermal energy is a fixed fraction of the bond energy. For Lennard–Jones, \(k_BT_m\approx0.7\,\varepsilon\) [@agrawal1995melting].
+- **Thermal expansion \(\alpha\):** the compressed side of the well is steeper. As vibration energy rises, the energy-level midpoints shift outward, indicating an increasing mean bond length.
+- **Melting point:** the well depth sets a thermal-energy scale. For bulk Lennard–Jones near the triple point, \(k_BT_m\approx0.7\,\varepsilon\) [@agrawal1995melting].
 
-![Energy levels in the asymmetric well. The midpoints (red) move to larger separation as the energy rises.](../../../assets/L26-curve-thermal.svg){#fig-read-thermal width="70%" fig-align="center" fig-alt="Lennard-Jones well with four horizontal energy levels; red dots at the midpoint of each level drift to larger separation as energy increases."}
+![Energy-level midpoints shift outward as vibration energy rises.](../../../assets/L26-curve-thermal.svg){#fig-read-thermal width="70%" fig-align="center" fig-alt="Lennard-Jones well with four horizontal energy levels; red dots at the midpoint of each level drift to larger separation as energy increases."}
 
-Both properties involve many atoms moving together, so the pair curve sets their scale, while the crystal structure and pressure set the exact value.
+The pair curve sets the energy scale. Collective motion, crystal structure, and pressure also affect expansion and melting.
 
 ### Worked case · Stiffness in Assignment 4
 
-In [Assignment 4, Problem 2](../../../assignments/A4/index.qmd), you differentiated a Cu–Cu energy table with central differences to obtain the force and stiffness of the bond. At \(r=2.5\) Å the central second difference gives \(k\approx4.80\ \mathrm{eV/\mathring A^2}\), close to the supplied exact value \(4.765\ \mathrm{eV/\mathring A^2}\).
+Central differences of the Cu–Cu energy data in [Assignment 4, Problem 2](../../../assignments/A4/index.qmd) give force and stiffness. At \(r=2.5\) Å, \(k\approx4.80\ \mathrm{eV/\mathring A^2}\), compared with the exact \(4.765\ \mathrm{eV/\mathring A^2}\).
 
-![Energy, force, and stiffness of the Cu–Cu bond from Assignment 4, Problem 2. Open squares show the supplied exact derivatives, and red circles show finite differences (central at interior points, one-sided at the two ends).](../../../assets/L26-a4-force-stiffness.png){#fig-a4-stiffness width="70%" fig-align="center" fig-alt="Three stacked panels for a Cu-Cu bond: energy, force, and stiffness versus separation, with finite-difference points lying on the exact derivative values."}
+![Assignment 4 Cu–Cu energy, force, and stiffness. Squares: exact derivatives. Circles: central differences at interior points, one-sided at the ends.](../../../assets/L26-a4-force-stiffness.png){#fig-a4-stiffness width="70%" fig-align="center" fig-alt="Three stacked panels for a Cu-Cu bond: energy, force, and stiffness versus separation, with finite-difference points lying on the exact derivative values."}
 
-### What a pairwise potential cannot see
+### Pair-model predictions for metals
 
-A pair potential gives two atoms at the same separation the same pair energy in every environment. That assumption becomes restrictive for metals, where changing the neighbours also changes the shared electron distribution.
+A pair potential assigns the same pair energy at a given separation in every environment. In metals, changing the neighbours redistributes the shared electrons.
 
-#### Caveat 1 · Cohesive energy versus vacancy formation energy
+#### Cohesive energy and vacancy formation energy
 
-The **cohesive energy** \(E_{\mathrm{coh}}\) is the energy needed per atom to separate a bulk crystal into isolated atoms. A **vacancy** is a missing atom at a lattice site. Its formation energy measures the cost of removing that atom and returning it to a bulk reservoir of the same material:
+**Cohesive energy** \(E_{\mathrm{coh}}\) is the energy per atom needed to separate a bulk crystal into isolated atoms. A **vacancy** is an unoccupied lattice site. Its formation energy is the cost of removing the atom to a bulk reservoir of the same material:
 
 \[
 E_{\mathrm{vac}}=E_{N-1}^{\mathrm{defect}}
 -\frac{N-1}{N}E_N^{\mathrm{perfect}}.
 \]
 
-- **Pair potential, unrelaxed monatomic crystal:** removing an atom breaks its pair interactions. With the bulk reservoir convention, \(E_{\mathrm{vac}}/E_{\mathrm{coh}}=1\). This follows for a fixed, environment-independent pair potential when the remaining atoms and cell stay in place.
+- **Pair potential, unrelaxed monatomic crystal:** removing an atom breaks its pair interactions. For a fixed, environment-independent pair potential, keeping the other atoms and cell fixed gives \(E_{\mathrm{vac}}/E_{\mathrm{coh}}=1\) under the bulk reservoir convention.
 - **Real metals:** vacancy formation costs roughly one-third of the cohesive energy, \(E_{\mathrm{vac}}\approx\tfrac13E_{\mathrm{coh}}\), with the ratio varying between metals.
 
 ::: {.table-responsive}
@@ -234,15 +226,15 @@ E_{\mathrm{vac}}=E_{N-1}^{\mathrm{defect}}
 | Ni | 4.45 | 1.6 | 0.36 |
 | Pt | 5.77 | 1.5 | 0.26 |
 
-: Experimental cohesive (sublimation) energies and vacancy formation energies of fcc metals, as compiled by Foiles, Baskes, and Daw [-@foiles1986embedded, Table II]. A pair potential gives a ratio of 1. {#tbl-vac-coh}
+: Experimental FCC cohesive and vacancy formation energies, compiled by Foiles, Baskes, and Daw [-@foiles1986embedded, Table II]. {#tbl-vac-coh}
 
 :::
 
-The pair model can detect the missing bonds. What it cannot describe is the change in the remaining bonds caused by redistribution of the electrons. Atomic relaxation can change the pair-model vacancy energy, so the exact ratio of one applies to the unrelaxed calculation.
+Electron redistribution changes the remaining bonds even at fixed separation, an effect absent from the pair model. Atomic relaxation also changes the pair-model vacancy energy, so the ratio of one applies to the unrelaxed crystal.
 
-#### Caveat 2 · Elastic constants
+#### Elastic constants
 
-Stress inside a solid is the force per unit area acting across a small surface. A small cube has three pairs of faces, and the force on each face can point in three directions, so stress needs nine numbers. They form the **stress tensor**:
+Stress is force per unit area. Three force components on each of three face orientations form the **stress tensor**:
 
 \[
 \boldsymbol{\sigma}=
@@ -253,14 +245,14 @@ Stress inside a solid is the force per unit area acting across a small surface. 
 \end{bmatrix}.
 \]
 
-- **First subscript:** the face, labelled by its normal direction.
-- **Second subscript:** the direction of the force on that face.
-- **Diagonal entries** (\(\sigma_{xx},\sigma_{yy},\sigma_{zz}\)): normal stresses, which push or pull straight across a face.
-- **Off-diagonal entries:** shear stresses, which act along a face. The cube must not spin, so \(\sigma_{xy}=\sigma_{yx}\) and only six of the nine numbers are different.
+- **First subscript:** face-normal direction.
+- **Second subscript:** force direction.
+- **Diagonal entries** (\(\sigma_{xx},\sigma_{yy},\sigma_{zz}\)): normal stresses across a face.
+- **Off-diagonal entries:** shear stresses along a face. Angular-momentum balance gives symmetry, \(\sigma_{xy}=\sigma_{yx}\), leaving six independent components.
 
-![Left: the nine stress components on the visible faces of a small cube. Middle: stretching along x while the height is held fixed produces a sideways normal stress, set by \(C_{12}\). Right: a shear in the x–y plane produces a shear stress, set by \(C_{44}\).](../../../assets/L26-stress-tensor.svg){#fig-stress-tensor width="90%" fig-align="center" fig-alt="A cube with normal stress arrows in red and shear stress arrows in blue on three faces, a rectangle stretched along x with vertical stress arrows labelled C12, and a sheared parallelogram with shear arrows labelled C44."}
+![Stress components (left), transverse normal stress governed by \(C_{12}\) (middle), and shear stress governed by \(C_{44}\) (right).](../../../assets/L26-stress-tensor.svg){#fig-stress-tensor width="90%" fig-align="center" fig-alt="A cube with normal stress arrows in red and shear stress arrows in blue on three faces, a rectangle stretched along x with vertical stress arrows labelled C12, and a sheared parallelogram with shear arrows labelled C44."}
 
-**Elastic constants** connect small strains to these stresses. For a cubic crystal, symmetry leaves three independent constants. Writing the six independent stresses and strains as columns gives
+A cubic crystal has three independent **elastic constants** relating small strains to stresses:
 
 \[
 \begin{bmatrix}
@@ -284,20 +276,18 @@ C_{12} & C_{12} & C_{11} & 0 & 0 & 0\\
 - \(C_{12}\): normal stress in one direction caused by stretching along another, \(\sigma_{yy}=C_{12}\,\varepsilon_{xx}\).
 - \(C_{44}\): shear stress caused by a shear strain, \(\sigma_{xy}=C_{44}\,\gamma_{xy}\).
 
-A pair model treats every bond as a spring that pulls only along the line between two atoms. When we work out \(C_{12}\) and \(C_{44}\) for such a crystal, both come from the same sum over these springs, so the model always gives the same number for both. This is the **Cauchy relation**, \(C_{12}=C_{44}\), and it holds for a cubic crystal at zero pressure when the atoms do not relax inside the cell [@daw1984embedded].
+Pair forces act along the line between atoms. For a cubic crystal at zero pressure, with no internal atomic relaxation, \(C_{12}\) and \(C_{44}\) come from the same spring sum. This gives the **Cauchy relation**, \(C_{12}=C_{44}\) [@daw1984embedded].
 
 Real metals break this rule. Copper has \(C_{12}\approx121\) GPa but \(C_{44}\approx76\) GPa [@mishin2001cu]. The difference comes from the shared electrons:
 
-- **Sideways stretch (\(C_{12}\)):** the volume changes, so the electron density changes, and the electrons add their own resistance.
-- **Shear (\(C_{44}\)):** the shape changes but the volume stays the same, so the electron density barely changes.
+- **Sideways stretch (\(C_{12}\)):** volume and electron density change, adding an electronic contribution to stress.
+- **Shear (\(C_{44}\)):** shape changes at fixed volume, with little density change.
 
-A pair model has no electron density, so no choice of its parameters can make \(C_{12}\) larger than \(C_{44}\).
-
-Pair potentials explain binding and local stiffness with a compact model. These two benchmarks show why metallic cohesion needs information about the surrounding atoms.
+Changing pair parameters preserves this equality for a zero-pressure, unrelaxed crystal.
 
 ### Many-body energies in the electron sea
 
-Metallic ion cores interact through a shared electron distribution. Removing a neighbour changes that distribution and therefore changes the energy of the atoms that remain. Effective medium theory (**EMT**) and the embedded atom method (**EAM**) include this environmental contribution [@norskov1980effective; @daw1984embedded].
+Effective medium theory (**EMT**) and the embedded atom method (**EAM**) describe metallic ion cores in a shared electron distribution. Their energies depend on the surrounding atoms [@norskov1980effective; @daw1984embedded].
 
 ::: {.table-responsive}
 
@@ -308,7 +298,7 @@ Metallic ion cores interact through a shared electron distribution. Removing a n
 
 :::
 
-The group project uses EAM for copper. Its energy has two parts, with the pair contribution first:
+The group project uses EAM for copper. We keep the pair-energy sum and add an embedding energy for each atom:
 
 \[
 \boxed{
@@ -327,11 +317,11 @@ Here \(f(r_{ij})\) is the density contribution of neighbour \(j\) at atom \(i\).
 - **Vacancy or surface:** missing neighbours usually lower the local density.
 - **Interstitial or compression:** additional nearby atoms can raise the density.
 
-![The three functions of the copper EAM used in the project. The shading on the embedding energy marks where adding neighbours lowers the energy (green) and where crowding raises it (orange).](../../../assets/L26-eam-functions.png){#fig-eam-functions width="100%"}
+![Copper EAM pair, density, and embedding functions. Shading marks stabilizing (green) and crowding (orange) regions of the embedding energy.](../../../assets/L26-eam-functions.png){#fig-eam-functions width="100%"}
 
 ### How different is EAM from LJ?
 
-Both models below are fitted to the same FCC copper: the LJ parameters reproduce its lattice constant, 3.615 Å, and cohesive energy, 3.54 eV/atom, and the EAM is the project potential [@mishin2001cu]. Each panel puts the copper atoms on one crystal structure and changes the nearest-neighbour distance.
+LJ is fitted to FCC copper's lattice constant, 3.615 Å, and cohesive energy, 3.54 eV/atom, matching the project EAM [@mishin2001cu]. Each panel shows energy versus nearest-neighbour distance for one structure.
 
 ![Energy per atom of copper on simple cubic (SC), body-centred cubic (BCC), and face-centred cubic (FCC) lattices, computed with LJ (dashed) and EAM (solid). Dots mark each minimum. Crystal drawings adapted from Callister and Rethwisch, 9th edition, Fig. 3.1.](../../../assets/L26-lj-vs-eam-phases.png){#fig-lj-vs-eam width="100%" fig-alt="Three panels of energy per atom against nearest-neighbour distance for SC, BCC, and FCC copper. LJ and EAM agree at the FCC minimum near minus 3.54 eV, differ slightly for BCC, and differ by about 0.8 eV for SC, each with a sphere model of the unit cell."}
 
@@ -339,20 +329,20 @@ Both models below are fitted to the same FCC copper: the LJ parameters reproduce
 - **BCC (8 neighbours):** EAM is lower by about 0.1 eV/atom.
 - **SC (6 neighbours):** LJ loses about one-third of its binding (−2.31 eV/atom), while EAM keeps −3.11 eV/atom.
 
-LJ reports copper as too stiff because it cannot capture metallic bonding.
+The sharper LJ minimum predicts a stiffer response to uniform expansion. Matching the equilibrium spacing and cohesive energy leaves the curvature as a further test.
 
-## Stage 3 · Beyond metals, bond order and molecular force fields
+## Stage 3 · Bond order and molecular force fields
 
-A scalar local density captures useful information about a metallic environment. Molecular geometry requires more information. A water molecule, for example, has two O–H bonds and a characteristic H–O–H angle. Counting neighbours alone cannot distinguish a bent arrangement from a straight one.
+For a water molecule, we need the H–O–H angle: bent and straight arrangements can have the same two O–H distances.
 
-- **Bond order:** chemistry distinguishes single, double, and triple bonds, with different lengths and strengths. Bond-order potentials use a continuous environment-dependent measure of bonding.
-- **Bond angles:** three atoms define an angle, which helps distinguish geometries with the same coordination.
-- **Dihedral angles:** four atoms define the relative rotation of two planes, important for molecular conformation.
-- **Atom types and charges:** chemically different environments can give the same element different interaction parameters.
+- **Bond order:** single, double, and triple bonds differ in length and strength. Potentials use a continuous, environment-dependent measure.
+- **Bond angles:** three atoms define an angle.
+- **Dihedral angles:** four atoms define the relative rotation of two planes.
+- **Atom types and charges:** distinguish chemical environments within the same element.
 
-Tersoff and Brenner potentials incorporate bond-order and angular dependence for covalent materials. ReaxFF extends an environment-dependent description to bond formation and breaking [@tersoff1988new; @brenner1990empirical; @vanduin2001reaxff]. Finnis–Sinclair is another important many-body model, based on a tight-binding description of metallic cohesion, and belongs with the metallic models rather than a water force field [@finnis1984simple].
+Tersoff and Brenner potentials include bond-order and angular dependence for covalent materials. ReaxFF describes bond formation and breaking [@tersoff1988new; @brenner1990empirical; @vanduin2001reaxff]. Finnis–Sinclair describes metallic cohesion using a tight-binding approximation to the electronic energy [@finnis1984simple].
 
-For many biomolecular simulations, the bonds are specified at the start. A **force field** combines energies for stretching, bending, twisting, and non-bonded interactions. Its forces still come from differentiating the total energy [@lesar2013]:
+For biomolecules with fixed bonds, a **force field** combines stretching, bending, twisting, and non-bonded energies. Forces follow by differentiating the total energy [@lesar2013]:
 
 \[
 \boxed{
@@ -365,9 +355,9 @@ U_{\mathrm{inter}}&=U_{\mathrm{LJ}}+U_{\mathrm{Coulomb}}.
 }
 \]
 
-![The energy terms of a molecular force field. Top row: bonded terms between atoms joined by the fixed bond list. Bottom row: the improper torsion, which keeps a group planar, and the two non-bonded terms.](../../../assets/L26-forcefield-terms.svg){#fig-forcefield-terms width="100%" fig-alt="Six panels, each with an atom sketch and an energy curve: bond stretching and angle bending as parabolas, dihedral torsion as a cosine, improper torsion as a parabola, Coulomb energy as one over r, and the Lennard-Jones well."}
+![Molecular force-field terms: bonds, angles, dihedrals, improper torsions, Coulomb, and Lennard–Jones interactions.](../../../assets/L26-forcefield-terms.svg){#fig-forcefield-terms width="100%" fig-alt="Six panels, each with an atom sketch and an energy curve: bond stretching and angle bending as parabolas, dihedral torsion as a cosine, improper torsion as a parabola, Coulomb energy as one over r, and the Lennard-Jones well."}
 
-The improper term can maintain planarity or a specified local handedness. Non-bonded LJ and Coulomb terms act between molecules and also between eligible atoms within a molecule, with exclusions or scaling for near neighbours along the bonded structure. Thus “inter” here labels the non-bonded contribution rather than a strict division by molecule.
+Improper terms maintain planarity or handedness. Non-bonded \(U_{\mathrm{inter}}\) acts within and between molecules, with exclusions or scaling for near neighbours along the bond network.
 
 ### How many parameters does a potential need?
 
@@ -377,7 +367,7 @@ The improper term can maintain planarity or a specified local handedness. Non-bo
 
 Hen egg-white lysozyme (PDB 1AKI) has 129 amino acids. With hydrogens added and the AMBER ff14SB force field [@maier2015ff14], the counts are:
 
-![Hen egg-white lysozyme, PDB 1AKI, with hydrogens added: 1,960 atoms coloured by element, with the backbone traced in black.](../../../assets/L26-lysozyme.png){#fig-lysozyme width="60%" fig-align="center" fig-alt="Atoms of the lysozyme protein drawn as coloured spheres, with a black line tracing the folded backbone."}
+![Hen egg-white lysozyme (PDB 1AKI): 1,960 atoms including hydrogens.](../../../assets/L26-lysozyme.png){#fig-lysozyme width="60%" fig-align="center" fig-alt="Atoms of the lysozyme protein drawn as coloured spheres, with a black line tracing the folded backbone."}
 
 ::: {.table-responsive}
 
@@ -392,40 +382,40 @@ Hen egg-white lysozyme (PDB 1AKI) has 129 amino acids. With hydrogens added and 
 
 :::
 
-To describe a material more realistically, the intuitive step is to give the potential more parameters: from **2** for LJ, to **15** for the project EAM, to thousands of terms for one protein. Machine-learned potentials take this step much further.
+The thousands of terms in lysozyme reuse the parameter sets listed in the table.
 
 ## Stage 4 · Machine-learned potentials
 
-A **machine-learned interatomic potential** (MLIP) is fitted to energies and forces from quantum-chemistry calculations, usually DFT. Like EAM, it gives each atom an energy that depends on its neighbours:
+A **machine-learned interatomic potential** (MLIP) assigns atomic energies from local environments, using coefficients fitted to quantum calculations:
 
-- **Input:** the positions of the neighbours of each atom, within a cutoff.
+- **Input:** each atom's neighbour positions within a cutoff.
 - **Output:** the energy of that atom. The total energy is the sum over all atoms.
-- **Forces:** the derivative of the total energy, as for every potential in this lecture.
+- **Forces:** the negative gradient of the total energy with respect to atomic positions.
 - **Training data:** DFT energies and forces for many different structures.
 
 Behler and Parrinello introduced neural-network potentials of this form, and MACE also uses the angles between neighbours [@behler2007generalized; @batatia2022mace].
 
-![Two common designs of machine-learned potentials. Left: an atom-centred neural network, where each atom's neighbours are turned into a descriptor and the same small network gives the atom's energy. Right: a message-passing graph network such as MACE, where neighbours send information about distances and angles to each atom, and the atom's features are updated several times before its energy is computed.](../../../assets/L26-mlip-types.svg){#fig-mlip-types width="100%" fig-alt="Left: three atoms, each passed through a descriptor box and a small neural network to an atomic energy, summed to the total energy. Right: a central atom receiving arrows from six neighbours, then boxes for updating features, repeating, and computing the atomic energy, summed to the total."}
+![Atom-centred neural-network and message-passing designs. Local descriptors or repeated neighbour messages determine atomic energies, which sum to the total.](../../../assets/L26-mlip-types.svg){#fig-mlip-types width="100%" fig-alt="Left: three atoms, each passed through a descriptor box and a small neural network to an atomic energy, summed to the total energy. Right: a central atom receiving arrows from six neighbours, then boxes for updating features, repeating, and computing the atomic energy, summed to the total."}
 
 The MACE-MP-0 medium model used below has **about 4.7 million parameters**, trained on DFT data for many elements [@batatia2025foundation].
 
-The MD loop stays the same: find the neighbours, evaluate the energy, differentiate it to get the forces, and integrate the positions and velocities. A pretrained model is accurate for environments similar to its training data. Check it against reference data before using it for:
+Accuracy depends on the training environments. Independent reference calculations are especially important for:
 
 - reactions, where bonds break and form;
 - unusual charge states;
 - surfaces and defects;
 - strong compression.
 
-### How fast do atoms wobble under different potentials?
+### How does the potential change atomic vibrations?
 
-Start with the same **32-atom periodic FCC copper crystal**, the same lattice spacing, and the same initial velocities. Change only the interaction model: LJ, the project EAM, or MACE-MP-0.
+Compare LJ, the project EAM, and MACE-MP-0 in the same **32-atom periodic FCC copper crystal**:
 
 - **Initial state:** FCC copper with \(a=3.615\) Å and identical seeded velocities drawn at 100 K, with centre-of-mass motion removed.
-- **Dynamics:** 1 ps of NVE motion with a 0.5 fs velocity-Verlet step. No heating ramp or thermostat.
+- **Dynamics:** 1 ps of NVE motion with a 0.5 fs velocity-Verlet step, without a heating ramp or thermostat.
 - **View:** one (001) plane of eight atoms from the periodic cell. Grey rings mark the starting sites. Displacements are drawn twelve times larger than their real size, so a 0.03 Å vibration becomes visible.
 
 ::: {.content-visible when-format="html"}
-![The same copper atoms under LJ, EAM, and MACE. Top: one (001) plane, with displacements drawn ×12 and the centre atom in burgundy. Bottom: the real x-displacement of the centre atom in each model.](../../../assets/L26-atomic-motion.gif){#fig-atomic-motion width="100%"}
+![Copper motion under LJ, EAM, and MACE. Top: one (001) plane, displacements ×12. Bottom: the highlighted atom's real x-displacement.](../../../assets/L26-atomic-motion.gif){#fig-atomic-motion width="100%"}
 :::
 
 ::: {.content-visible unless-format="html"}
@@ -434,18 +424,17 @@ Start with the same **32-atom periodic FCC copper crystal**, the same lattice sp
 
 How to read the animation:
 
-- **Same start:** in each panel the atoms leave the same sites with the same velocities.
 - **LJ (orange curve):** the centre atom oscillates about twice as fast and with about half the amplitude. A stiffer energy minimum gives a stronger restoring force.
-- **EAM (blue) and MACE (green):** the two traces follow each other for the first oscillation and keep a similar frequency and amplitude over 1 ps. They describe a similar copper lattice, although each was built in a different way.
+- **EAM (blue) and MACE (green):** the traces agree for the first oscillation and retain similar frequencies and amplitudes over 1 ps, consistent with similar restoring forces near this FCC structure.
 
 
 ## What to keep
 
-- Truncation, roundoff, and modeling errors need separate checks.
+- Truncation, roundoff, and modelling errors need separate checks.
 - Energy, its first derivative, and its second derivative describe binding, force, and stiffness.
 - Pair models have specific limitations for vacancy formation energies and elastic constants in metals.
 - EAM introduces local-density dependence. Molecular models also need information about bonding and geometry.
-- Machine-learned models expand the environments we can describe, while retaining the need for independent physical benchmarks.
+- Machine-learned models use many fitted coefficients. Their accuracy depends on the training environments and must be tested against independent benchmarks.
 
 ## Check your understanding
 
@@ -455,4 +444,4 @@ How to read the animation:
 
 ## Closing Unit 5
 
-Unit 5 connected initial-value problems to molecular dynamics: integrate the equations of motion, choose physical conditions, measure a trajectory, and assess the interaction model. In the group project, these steps come together in a material-property prediction. The reported result depends on both the numerical procedure and the potential that defines the simulated material.
+Unit 5 connects initial-value problems to MD through integration, physical conditions, trajectory analysis, and interaction potentials. The group project combines these to predict material properties. The results depend on both the numerical procedure and the potential.

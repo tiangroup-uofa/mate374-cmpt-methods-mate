@@ -130,7 +130,7 @@ Four parts organize an MD calculation:
 3. **Ensemble controller:** heat exchange or volume changes, when required.
 4. **Boundaries and cutoff:** the surrounding system and range of interactions.
 
-The potential supplies energy and forces throughout the loop. Today we keep the Lennard–Jones model and develop the first two parts.
+The potential supplies energy and forces throughout the loop.
 
 Over one time step, the integrator approximates
 
@@ -201,7 +201,7 @@ The line \(E_0=-0.8\) intersects the potential on both sides of its minimum:
 
 Both have \(U=-0.8\), \(K=0\). They are the turning points of the same bound radial oscillation.
 
-In the figure, the vertical gap from \(U(r)\) to \(E_0\) is kinetic energy. The atoms move fastest at the minimum and stop momentarily at either turning point. The preparations differ in where the oscillation starts, while their total energy is the same.
+In the figure, the vertical gap from \(U(r)\) to \(E_0\) is kinetic energy. The atoms move fastest at the minimum and stop momentarily at either turning point. The preparations start at different points in the same oscillation.
 
 ## Integrating the equations of motion
 
@@ -299,7 +299,7 @@ That position supplies the new acceleration. To complete the velocity change, us
 }
 \]
 
-Velocity Verlet uses a **half-time-step trick**: an intermediate velocity lets us finish the velocity update once the new acceleration is known. We obtain the new velocity at the new time step together with the new position.
+The **half-time-step trick** lets us finish the velocity update once the new acceleration is known, giving position and velocity at the same time.
 
 ![Velocity Verlet calculates the next position, forms an intermediate velocity, evaluates the new acceleration, and completes the velocity update. Shading identifies newly calculated quantities. Diagram adapted from the storage scheme in Allen and Tildesley [@allentildesley1987computer, fig. 3.2].](../../../assets/L24-velocity-stages.png){#fig-velocity-verlet width="100%" fig-alt="Four storage diagrams show the position-first velocity-Verlet sequence and the synchronized final position and velocity."}
 
@@ -352,7 +352,7 @@ For a sufficiently small step and smooth conservative forces, the energy error n
 
 ## Our updated MD engine: a moving cluster
 
-We can now use velocity Verlet in the cluster engine. Supply an added energy per atom and choose how to put it into the initial state:
+In the velocity-Verlet cluster engine, we can supply added energy per atom in two ways:
 
 - **Initial kinetic energy:** start from the relaxed cluster, distribute velocities among the atoms, remove centre-of-mass motion, and scale the kinetic energy to the target.
 - **Initial potential energy:** compress the closest pair of atoms along its bond until the cluster energy reaches the same target (a root-finding problem), then release from rest.
@@ -362,7 +362,7 @@ The two panels show the same saved trajectory:
 - **Left:** the cluster shape, with current total potential energy \(U\), kinetic energy \(K\), and total energy \(E=U+K\) above it.
 - **Right:** each atom's nearest-neighbour distance marked on the Lennard–Jones pair curve. Several atoms may share the same nearest pair, so the markers are partly transparent.
 
-The right-hand markers have height \(V(r)\) for an individual pair. The cluster energy \(U\) sums **all** unique pairs.
+The right-hand markers show individual pair energies. The cluster energy \(U\) sums **all** unique pairs.
 
 ::: {.quarto-wasm-local notebook="l24_cluster_velocity_verlet.edit.py" view="app" title="Velocity-Verlet cluster: atomic motion and nearest-neighbour pair energies" height="850" loading="lazy" fullscreen="true"}
 The relaxed 13-atom cluster has \(U=-44.33\) in reduced units, with \(\Delta t=0.001\) over \(8\tau\). With \(0.3\,\epsilon\) per atom of initial kinetic energy, the cluster stays compact and its total energy changes by less than \(2\times10^{-4}\). With \(4\,\epsilon\) per atom, atoms escape and nearest-neighbour distances grow beyond \(3\sigma\), while the total energy still changes by less than \(0.5\%\).
@@ -370,7 +370,7 @@ The relaxed 13-atom cluster has \(U=-44.33\) in reduced units, with \(\Delta t=0
 ![Final frames of two velocity-Verlet runs. Top: 0.3 ε per atom, a compact vibrating cluster with nearest-neighbour pairs near the potential minimum. Bottom: 4.0 ε per atom, atoms escape and several nearest-neighbour distances leave the plotted range.](../../../assets/L24-cluster-default.png){width="100%"}
 :::
 
-Increase the starting energy and play the animation. Stronger vibrations can lead to atoms escaping or to breakup. Unlike Euler's numerical heating, this energy was supplied in the **initial condition**. Inspect \(E(t)\) to distinguish the two.
+Increase the starting energy and play the animation. Stronger vibrations can lead to atoms escaping or to breakup. The added energy comes from the **initial condition**. Does \(E(t)\) remain nearly constant, or rise as in the Euler calculation?
 
 ## Reading an MD methods section
 
@@ -541,4 +541,4 @@ The production run therefore takes \(5\times10^{8}\) to \(10^{9}\) velocity-Verl
 
 ## Next
 
-The cluster in our engine is isolated: no surroundings, no temperature control, and every atom interacts with every other. A bulk material needs more. In [L25](../L25/index.qmd), we choose the time step from atomic vibrations, add periodic boundaries and a cutoff, introduce thermostats and barostats, and analyse the saved trajectories.
+Our isolated cluster has no temperature control, and every atom interacts with every other. [L25](../L25/index.qmd) extends this model to bulk material, covering time steps, periodic boundaries, cutoffs, thermostats, barostats, and trajectory analysis.

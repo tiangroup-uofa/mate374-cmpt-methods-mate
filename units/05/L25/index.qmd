@@ -24,7 +24,7 @@ By the end of this lecture, you should be able to:
 
 ## From an isolated pair to a material
 
-In [L24](../L24/index.qmd), positions and velocities evolved through Newton's equations using velocity Verlet. With a suitable interaction model, this procedure can reproduce vibrations, structural rearrangements, and other material behaviour. To connect the trajectory to a laboratory sample, we must also specify its surroundings and decide which quantities to measure.
+In [L24](../L24/index.qmd), we used velocity Verlet to follow atomic vibrations and rearrangements through Newton's equations. To represent a laboratory sample, we must also specify its surroundings and the properties to measure.
 
 - **Time resolution:** how large can a step be while resolving atomic motion?
 - **Surroundings:** how can a small set of atoms represent bulk material at a prescribed temperature and pressure?
@@ -32,7 +32,7 @@ In [L24](../L24/index.qmd), positions and velocities evolved through Newton's eq
 
 ## How much time does a trajectory cover?
 
-Velocity Verlet gives one-step position and velocity errors of \(O(\Delta t^3)\) when the starting state is exact and the forces are smooth. Over a fixed physical duration, the accumulated position and velocity errors are \(O(\Delta t^2)\). Choosing a smaller step improves accuracy, but increases the number of force evaluations needed to reach that duration [@swope1982simulation].
+For smooth forces and an exact starting state, velocity Verlet has one-step position and velocity errors of \(O(\Delta t^3)\). Over a fixed duration, their global errors are \(O(\Delta t^2)\). A smaller step improves accuracy but requires more force evaluations [@swope1982simulation].
 
 A run of \(N_{\mathrm{steps}}\) steps covers
 
@@ -40,7 +40,7 @@ A run of \(N_{\mathrm{steps}}\) steps covers
 \boxed{t_{\mathrm{run}}=N_{\mathrm{steps}}\Delta t.}
 \]
 
-Here \(1\ \mathrm{fs}=10^{-15}\ \mathrm{s}\), \(1\ \mathrm{ps}=10^{-12}\ \mathrm{s}\), and \(1\ \mathrm{ns}=10^{-9}\ \mathrm{s}\). One million steps sounds large. Its physical duration depends on \(\Delta t\):
+Here \(1\ \mathrm{fs}=10^{-15}\ \mathrm{s}\), \(1\ \mathrm{ps}=10^{-12}\ \mathrm{s}\), and \(1\ \mathrm{ns}=10^{-9}\ \mathrm{s}\). The duration of a million steps depends on \(\Delta t\):
 
 | Time step | Duration of \(10^6\) steps | Interpretation |
 |:--|:--|:--|
@@ -48,7 +48,7 @@ Here \(1\ \mathrm{fs}=10^{-15}\ \mathrm{s}\), \(1\ \mathrm{ps}=10^{-12}\ \mathrm
 | \(1\ \mathrm{fs}\) | \(1\ \mathrm{ns}\) | Plausible starting scale for many models |
 | \(10\ \mathrm{fs}\) | \(10\ \mathrm{ns}\) | Requires model-specific accuracy tests |
 
-A very small step spends most of the available computing time resolving a short interval. A large step moves atoms farther before their forces are evaluated again. If that step misses a close encounter or a fast vibration, the trajectory can become unstable.
+Atoms move farther between force evaluations as the step increases. A step that misses a close encounter or fast vibration can make the trajectory unstable.
 
 ::: {.content-visible when-format="html"}
 ![The same argon-model cluster at three time steps.](../../../assets/L25-cluster-steps.gif){#fig-timestep width="100%" fig-alt="Three cluster trajectories compared at the same physical time, using steps of 1, 20, and 200 fs."}
@@ -58,7 +58,7 @@ A very small step spends most of the available computing time resolving a short 
 ![The same cluster after 8 ps: 1 fs requires 8,000 steps, 20 fs requires 400 steps, and 200 fs requires 40 steps but produces numerical breakup.](../../../assets/L25-cluster-steps-poster.png){width="100%"}
 :::
 
-Clearly, the intermediate step size \(\Delta t=20\ \mathrm{fs}\) makes the simulation faster while preserving the physical motion. Increasing it to \(200\ \mathrm{fs}\) makes the cluster explode—but why?
+The cluster remains bound at \(20\ \mathrm{fs}\) with fewer force evaluations. At \(200\ \mathrm{fs}\), it breaks apart. Why?
 
 ### Integration error and a stability bound
 
@@ -74,11 +74,11 @@ For an oscillator released from rest with initial energy \(E_0\), the maximum re
 \boxed{\max_n\frac{|E_n-E_0|}{E_0}\leq\frac{(\omega\Delta t)^2}{4}}
 \]
 
-This \(O(\Delta t^2)\) energy error reflects the second-order accuracy of velocity Verlet: halving the step reduces the error envelope by a factor of four. The harmonic bound provides an estimate using the fastest mode. In practice, a starting choice is a step roughly one order of magnitude smaller than \(2/\omega\), followed by a smaller-step comparison.
+Halving the step reduces this \(O(\Delta t^2)\) energy-error bound by a factor of four. For coupled vibrations, the fastest mode sets the limit. We can start roughly one order of magnitude below \(2/\omega\), then compare with a smaller-step run over the same duration.
 
 ### Bond vibrations set a short time scale
 
-How do we estimate \(\omega\), and thus \(\Delta t\)? Our bead-and-spring models provide an estimate: see [L14](../../03/L14/index.qmd), [L15](../../03/L15/index.qmd), and [Assignment 3, Problem 4](../../../assignments/A3/index.qmd#problem-4-stretching-vibrations-of-hcequivch-30-marks). For two atoms of masses \(m_1\) and \(m_2\), joined by a bond with stiffness \(k\), the vibration period is
+How do we estimate \(\omega\)? Recall the bead-and-spring models in [L14](../../03/L14/index.qmd), [L15](../../03/L15/index.qmd), and [Assignment 3, Problem 4](../../../assignments/A3/index.qmd#problem-4-stretching-vibrations-of-hcequivch-30-marks). For two atoms of masses \(m_1\) and \(m_2\), joined by a bond of stiffness \(k\), the vibration period is
 
 \[
 \boxed{t_{\mathrm{vib}}=2\pi\sqrt{\frac{m_1m_2}{k(m_1+m_2)}}}
@@ -98,8 +98,6 @@ Using representative bond stiffnesses:
 
 ### What processes can MD resolve?
 
-Let's compare typical process time scales. Can MD capture them?
-
 | Process | Illustrative duration | Steps at \(1\ \mathrm{fs}\) | How easy is MD? |
 |:--|:--|:--|:--|
 | **Atomic vibration** | \(10\)–\(100\ \mathrm{fs}\) per oscillation | \(10\)–\(100\) | [Easy]{style="color: #17633b; font-weight: 700;"} |
@@ -108,8 +106,6 @@ Let's compare typical process time scales. Can MD capture them?
 | **Protein folding** | Milliseconds to seconds for many proteins | \(10^{12}\)–\(10^{15}\) | [Very difficult]{style="color: #a52f25; font-weight: 700;"} |
 
 ### Large-scale and long-time MD
-
-How far can we push MD? These two studies show the cost of simulating a huge system and of collecting long trajectories:
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -126,7 +122,7 @@ How far can we push MD? These two studies show the cost of simulating a huge sys
 
 ## Production MD engines
 
-With the development of production MD engines, we usually do not need to write one from scratch—although doing so is still rewarding! A few popular open-source packages in materials and biomolecular simulation are:
+Common MD engines include:
 
 ![Production MD engines, with logos from their project websites.](../../../assets/L25-md-engines.png){width="100%"}
 
@@ -134,11 +130,11 @@ With the development of production MD engines, we usually do not need to write o
 - **[GROMACS](https://www.gromacs.org/):** widely used for biomolecules and molecular systems. [AMBER](https://ambermd.org/) is another established biomolecular package.
 - **[OpenMM](https://openmm.org/):** an open-source simulation engine with a Python interface and GPU support. Custom interactions allow solid and liquid models. We use it in the group project [@eastman2024openmm].
 
-MD has a heavy workload, with many force calculations that can run in parallel on hardware accelerators such as GPUs. As discussed in [L04](../../01/L04/index.qmd), the speedup depends on the workload and hardware. The group project takes advantage of this parallelism.
+The group project uses GPUs for parallel force calculations. As in [L04](../../01/L04/index.qmd), speedup depends on workload and hardware.
 
-Some recent [online tools](https://andeplane.github.io/atomify/) let us test and run MD simulations even in a browser. MD packages have their own input formats and a steep learning curve, but we can already decipher many commands from the physics and numerical methods we know.
+[Atomify](https://andeplane.github.io/atomify/) runs MD examples in a browser.
 
-[]{#lammps-diffusion-example}Here is a **diffusion example in LAMMPS**: selected lines from its [input file](https://github.com/andeplane/atomify/blob/main/public/examples/diffusion/diffusion/simple_diffusion.in) are on the left, and the simulation domain is on the right.
+[]{#lammps-diffusion-example}Selected commands from a [**LAMMPS diffusion input**](https://github.com/andeplane/atomify/blob/main/public/examples/diffusion/diffusion/simple_diffusion.in) appear on the left, with the simulation domain on the right.
 
 :::: {.columns}
 ::: {.column width="53%"}
@@ -157,7 +153,7 @@ run 10000
 :::
 ::::
 
-**How to decipher the input file:**
+**Input commands:**
 
 - **Units:** reduced Lennard–Jones length, energy, mass, and time.
 - **Velocity creation:** initial temperature 3.00 and random seed 1337.
@@ -171,16 +167,14 @@ The initial temperature prepares the velocities. NVE then advances the motion wi
 
 ## Periodic boundary conditions
 
-A small isolated cluster has a large surface-to-volume ratio. To represent a bulk material, we can surround the simulated cell by exact copies of itself. **Periodic boundary conditions (PBC)** describe this repeating system. The contents of a cell may be a crystal, a liquid, or a disordered solid.
-
-Two features need attention:
+A small isolated cluster has a large surface-to-volume ratio. **Periodic boundary conditions (PBC)** represent bulk material by surrounding the cell with exact copies of itself. The cell can contain a crystal, liquid, or disordered solid.
 
 - **Repeated cells:** every copy contains the same relative atomic positions. An atom passing through the left boundary re-enters from the right with its velocity unchanged. Atoms on opposite displayed edges can therefore be neighbours.
 - **Interaction range:** a cutoff \(r_c\) limits short-range force calculations to nearby atoms, including neighbours across a periodic boundary.
 
-![The shaded square is the simulated cell. The surrounding cells repeat its atomic positions and velocities exactly. Arrows show velocity. The cutoff circle includes neighbours across the cell boundary, while atoms outside it are faded. The radius is marked by a plain line.](../../../assets/L25-pbc.svg){#fig-pbc width="75%" fig-alt="Nine repeated cells with a blue central simulation cell. Velocity arrows and atoms outside a large cutoff circle are faded. A plain line marks the cutoff radius."}
+![The shaded cell repeats periodically. Velocity arrows and the cutoff circle show motion and interactions across its boundaries.](../../../assets/L25-pbc.svg){#fig-pbc width="75%" fig-alt="Nine repeated cells with a blue central simulation cell. Velocity arrows and atoms outside a large cutoff circle are faded. A plain line marks the cutoff radius."}
 
-PBC represents an indefinitely repeated material using a finite cell. The chosen cell still limits wavelengths, defects, and fluctuations. Comparing cell sizes tests this finite-size effect.
+The cell size limits wavelengths, defects, and fluctuations. Comparing cell sizes tests these finite-size effects.
 
 ### Interaction cutoff
 
@@ -188,7 +182,7 @@ The Lennard–Jones potential approaches zero at large separation. A cutoff negl
 
 ![Lennard–Jones potential with the cutoff region enlarged on the right. The dashed curve shows the omitted tail beyond \(r_c=2.5\sigma\).](../../../assets/L25-cutoff.svg){width="100%" fig-alt="The full Lennard–Jones potential on the left has a dashed zoom region linked to the enlarged cutoff detail on the right. The omitted tail is dashed, while the truncated interaction jumps to zero."}
 
-Why do we need a cutoff? For \(N\) atoms in three dimensions:
+For \(N\) atoms in three dimensions, compare the work:
 
 - **All pairs:** \(N(N-1)/2\) interactions, giving \(O(N^2)\) work.
 - **Cutoff radius \(r_c\):** each atom has roughly \(\rho(4\pi r_c^3/3)\) neighbours, where \(\rho\) is the atomic number density. With a spatial neighbour search, pair evaluation costs \(O(\rho r_c^3N)\).
@@ -198,14 +192,14 @@ At fixed density and cutoff, the work grows linearly with \(N\)—potentially or
 ::: {.callout-caution}
 ## Charged systems need long-range electrostatics
 
-Interactions between charged atoms (**Coulomb forces**) decay much more slowly than the Lennard–Jones attractive tail. Ionic crystals and charged biomolecules usually need a long-range method such as Ewald summation or particle-mesh Ewald. The [GROMACS explanation](https://manual.gromacs.org/current/reference-manual/functions/long-range-electrostatics.html) describes the real-space and reciprocal-space contributions.
+**Coulomb forces** decay more slowly than the Lennard–Jones tail. Ionic crystals and charged biomolecules usually need [Ewald summation or particle-mesh Ewald](https://manual.gromacs.org/current/reference-manual/functions/long-range-electrostatics.html).
 
-**Use the force field's prescribed electrostatic treatment rather than applying a short-range cutoff to charges without justification.**
+**Use the electrostatic treatment specified by the force field.**
 :::
 
-## Ensemble: maintaining conservation in MD systems
+## Ensembles: energy, temperature, and pressure conditions
 
-Most MD simulations are not isolated systems like our toy experiment. In statistical physics, an **ensemble** describes the possible system states under specified conditions, including which quantities are conserved or controlled. The common ensembles below specify three quantities chosen from:
+A sample can exchange heat or do work on its surroundings. In statistical physics, an **ensemble** describes its possible states under specified conditions. The common ensembles specify three quantities chosen from:
 
 - **N:** number of particles.
 - **V:** volume.
@@ -219,15 +213,13 @@ Most MD simulations are not isolated systems like our toy experiment. In statist
 | **NVT** | Number of particles, volume, temperature | Heat exchange |
 | **NPT** | Number of particles, pressure, temperature | Heat and volume work |
 
-![Physical analogies for the three ensembles. NVE uses a sealed, rigid, insulated vessel. NVT permits heat exchange with a larger bath through a rigid vessel wall. NPT also permits volume work through a loaded movable piston. No sample atoms cross the vessel walls.](../../../assets/L25-ensembles.svg){width="100%" fig-alt="Three cross-sectional apparatus diagrams with eight sample atoms each: a rigid insulated vessel for NVE, a rigid vessel immersed in a heat bath for NVT, and a cylinder with a weighted movable piston immersed in a heat bath for NPT. Red arrows indicate heat exchange, and a separate piston-motion indicator shows variable volume."}
+![NVE: sealed, rigid, insulated vessel. NVT: heat exchange with a bath. NPT: heat exchange and volume work through a movable piston. No atoms cross the walls.](../../../assets/L25-ensembles.svg){width="100%" fig-alt="Three cross-sectional apparatus diagrams with eight sample atoms each: a rigid insulated vessel for NVE, a rigid vessel immersed in a heat bath for NVT, and a cylinder with a weighted movable piston immersed in a heat bath for NPT. Red arrows indicate heat exchange, and a separate piston-motion indicator shows variable volume."}
 
-The isolated pair of L24 illustrates conservative motion without a heat bath. A literal NVE bulk calculation also specifies a volume, often a periodic cell. For NVT and NPT, temperature and pressure are target thermodynamic conditions. Their instantaneous estimates fluctuate in a finite system.
+The isolated pair in L24 has no heat bath. Bulk NVE also specifies a volume, often through a periodic cell. Temperature and pressure estimates fluctuate in a finite system.
 
 ### NVE: the conservative reference
 
-For a time-independent potential, exact Newtonian dynamics conserves total energy. The numerical trajectory should keep the error small at a suitably chosen step. A stable symplectic integrator provides good long-time behaviour, but does not guarantee exactly constant numerical energy.
-
-This makes a short NVE run a useful integration check. If the energy drifts strongly, inspect the step size, force implementation, cutoff treatment, and neighbour-list settings before adding a thermostat.
+For a time-independent potential, exact Newtonian dynamics conserves total energy. With smooth forces and a suitable step, velocity Verlet gives a small, oscillating energy error. A short NVE run therefore tests the integration: strong drift suggests a problem with the step size, forces, cutoff, or neighbour list. A thermostat could conceal this drift by removing the added energy.
 
 ### NVT: how do we control temperature?
 
@@ -260,7 +252,7 @@ The Nosé–Hoover thermostat, named for Shuichi Nosé and William Graham Hoover
 \end{aligned}
 \]
 
-The parameter \(Q\) controls the response time. When kinetic energy exceeds its target on average, \(\zeta\) tends to increase and remove energy. When it is too low, the feedback can add energy. The controller has its own dynamics, so the temperature can fluctuate and may oscillate during adjustment [@hoover1985canonical].
+Here \(f\) counts thermal degrees of freedom, and the thermostat inertia \(Q\) sets the response time. Excess kinetic energy increases \(\zeta\). Positive \(\zeta\) damps the momenta, while negative \(\zeta\) supplies energy. The feedback permits temperature fluctuations and can produce oscillations during adjustment [@hoover1985canonical].
 :::
 :::: {.scientist-portraits}
 ::: {.scientist-portrait}
@@ -274,9 +266,7 @@ Photo: Hiroyuki Hyuga · [Physics Today](https://physicstoday.aip.org/obituaries
 :::::
 
 
-The temperature error accumulates in \(\zeta\), much like integral action in a process controller. Positive \(\zeta\) damps velocities, while negative \(\zeta\) supplies energy. Here \(f\) counts thermal degrees of freedom and \(Q\) is a thermostat inertia. The controller equations must be integrated along with atomic motion.
-
-A tested Nosé–Hoover or Nosé–Hoover-chain implementation is a useful starting point for many-atom NVT. Check average temperature and kinetic-energy fluctuations, together with sensitivity to time step and coupling time. Correct sampling requires sufficient exploration of accessible states. Small harmonic systems can fail this condition, and overly strong coupling can distort motion.
+The kinetic-energy error accumulates in \(\zeta\), like integral control, and is integrated with atomic motion. Check temperature and kinetic-energy fluctuations at different time steps and coupling times. Strong coupling can distort motion, and small harmonic systems can sample the ensemble poorly.
 
 ### NPT: a pressure controller changes the cell
 
@@ -292,11 +282,11 @@ V_{\mathrm{new}}&=\lambda^3V_{\mathrm{old}}.
 \end{aligned}
 \]
 
-This is the geometric part of pressure control. The barostat determines the change from the pressure difference and its own dynamical equations. The integration scheme specifies how often these updates occur.
+The barostat equations determine \(\lambda\) from the pressure difference. The integration scheme sets when these cell and position updates occur.
 
 ::::: {.scientist-method-inline}
 ::: {.scientist-method-text}
-**Parrinello–Rahman dynamics**, named for Michele Parrinello and Aneesur Rahman, also allows cell vectors to change direction, so a crystal can respond through volume and shape [@parrinello1981polymorphic]. A thermostat controls temperature alongside this barostat. Langevin dynamics is another temperature-control method, which requires a separate pressure-control mechanism for NPT.
+**Parrinello–Rahman dynamics**, named for Michele Parrinello and Aneesur Rahman, allows cell vectors to change direction, so a crystal can change volume and shape [@parrinello1981polymorphic]. A thermostat controls temperature alongside it. **Langevin dynamics** controls temperature through friction and random forces, and needs a separate barostat for NPT.
 :::
 :::: {.scientist-portraits}
 ::: {.scientist-portrait}
@@ -317,27 +307,27 @@ This is the geometric part of pressure control. The barostat determines the chan
 :::::
 
 
-Instantaneous pressure fluctuates, often strongly in a small cell. We compare its average with the target and inspect volume and temperature as well. A free nanoparticle surrounded by vacuum needs a different setup from a periodic bulk solid: applying a bulk pressure controller to the surrounding empty box does not directly impose pressure on the particle.
+Pressure fluctuates strongly in small cells. We compare its average with the target and monitor volume and temperature. For a nanoparticle in vacuum, a barostat acts on the mostly empty box and does not directly control the particle's pressure.
 
 ## Practical checklist for an MD simulation
 
-- **Units:** are energy, length, and time expressed in eV, Å, and fs, in atomic units, or in a convention using kJ/mol or kcal/mol?
-- **Initial structure:** has the structure been minimized, with no unphysical overlaps or excessive forces?
-- **Periodic boundaries:** are the intended directions periodic, and is the cell compatible with the cutoff?
-- **Time step:** does a smaller-step run over the same physical duration give stable, consistent results? For many unconstrained atomistic models, \(0.5\)–\(1\ \mathrm{fs}\) is a starting range to test.
-- **Ensemble and controllers:** does the physical question require NVE, NVT, or NPT? Are the thermostat and, where needed, barostat appropriate and properly coupled?
-- **Performance:** how many nanoseconds per day can the actual system and hardware deliver?
-- **Monitoring:** do the trajectory and plots of energy, temperature, pressure, and volume show the expected behaviour?
+- **Units:** eV, Å, and fs, atomic units, or a kJ/mol or kcal/mol convention?
+- **Initial structure:** has minimization removed overlaps and excessive forces?
+- **Periodic boundaries:** are the directions correct and the cell compatible with the cutoff?
+- **Time step:** do smaller steps give consistent results over the same duration? Test \(0.5\)–\(1\ \mathrm{fs}\) as a starting range for many unconstrained models.
+- **Ensemble and controllers:** NVE, NVT, or NPT? Are the controllers appropriate and properly coupled?
+- **Performance:** how many nanoseconds per day on the available hardware?
+- **Monitoring:** do energy, temperature, pressure, volume, and trajectory behave as expected?
 
 ### Minimization, equilibration, and production
 
-![Illustrative potential-energy history for minimization followed by NVT molecular dynamics. Close contacts relax from A to B, thermal motion develops during equilibration, and the metastable structure C eventually orders into D during production. The curve and atomic configurations are schematic, with unequal stage scales.](../../../assets/L25-stages.svg){#fig-md-stages width="100%" fig-alt="Potential energy falls during minimization, rises and fluctuates as the system thermalizes, then fluctuates around a plateau during production before a late drop associated with ordering. Four schematic configurations show the same number of atoms before relaxation, after minimization, in a metastable disordered state, and in an ordered state."}
+![Schematic potential energy through minimization, equilibration, and production. Contacts relax from A to B, then thermal motion develops. Metastable C eventually orders into D. Stage scales differ.](../../../assets/L25-stages.svg){#fig-md-stages width="100%" fig-alt="Potential energy falls during minimization, rises and fluctuates as the system thermalizes, then fluctuates around a plateau during production before a late drop associated with ordering. Four schematic configurations show the same number of atoms before relaxation, after minimization, in a metastable disordered state, and in an ordered state."}
 
 **Minimization** moves atoms downhill in potential energy to remove severe overlaps. Its iteration count is controlled by force or energy convergence and has no physical duration.
 
-**Equilibration** lets atoms adjust to the target conditions before measurements are used. A simple system might require about a nanosecond, while a slowly relaxing structure can require much longer. Stable mean temperature alone does not establish structural equilibration.
+**Equilibration** lets atoms adjust to the target conditions before measurements. Check structure as well as mean temperature.
 
-**Production** records the motion and measurements used to answer the physical question. For equilibrium averages, collection begins after the relevant properties have settled. For a rare-event study, production may instead follow a prepared metastable state until a transition occurs. Runs of \(10\)–\(100\ \mathrm{ns}\), or \(1\ \mu\mathrm{s}\), are illustrative durations, chosen according to the process and required statistics. These durations refer to simulated time.
+**Production** records the trajectories and measurements. Equilibrium averages are collected after the relevant properties settle. Rare-event studies may follow a prepared metastable state until a transition occurs. Depending on the process and required statistics, a run might cover \(10\)–\(100\ \mathrm{ns}\), or \(1\ \mu\mathrm{s}\), of simulated time.
 
 Processes such as solidification can be *kinetically controlled*: slow atomic rearrangements make the transformation take much longer than an atomic vibration. Long MD runs may capture these changes, but other methods, such as Monte Carlo sampling or phase-field modelling, may be more suitable. We discuss these methods in the next unit.
 
@@ -357,13 +347,13 @@ g(r)\approx
 }
 \]
 
-Peaks in \(g(r)\) mark preferred neighbour distances. Integrating the density-weighted RDF gives the **cumulative RDF**, or average neighbour count within a chosen radius. Its value at the first minimum gives the **coordination number**. J. D. Bernal helped develop this geometric picture of liquid structure [@bernal1959geometrical; @finney2013bernal].
+Peaks in \(g(r)\) mark preferred neighbour distances. The **cumulative RDF** counts neighbours within a radius, as derived below. J. D. Bernal helped develop this geometric picture of liquids [@bernal1959geometrical; @finney2013bernal].
 
 - **Crystal:** neighbours occupy distinct shells, giving sharp peaks at characteristic distances. Thermal motion broadens them.
 - **Liquid:** a strong first-neighbour peak remains, followed by broader, damped oscillations.
 - **Amorphous solid:** local peaks can resemble those of a liquid. Motion over time helps distinguish an arrested structure from a flowing one.
 
-When heating a crystal, broadening begins before melting. Loss of distant crystalline peaks is evidence of structural disorder, but a phase interpretation should combine this with energy and mobility. A single broad peak cannot establish a melting temperature.
+Heating broadens crystalline peaks, and loss of distant peaks indicates disorder. Liquids and amorphous solids both have broad peaks, so we also examine energy and mobility to identify melting.
 
 ### Relation to diffraction
 
@@ -374,7 +364,7 @@ S(q)=1+4\pi\rho
 \int_0^\infty r^2[g(r)-1]\frac{\sin(qr)}{qr}\,\mathrm dr.
 \]
 
-Here \(q\) is the magnitude of the scattering vector, with units of inverse length. Thus \(g(r)\) and the structure factor \(S(q)\) are related by an integral transform. X-ray and neutron intensities also depend on the corresponding scattering weights. Sharp real-space neighbour shells and crystalline diffraction peaks are related signatures of order, but their horizontal axes and peak positions represent different quantities [@lesar2013].
+Here \(q\) is the scattering-vector magnitude, in inverse length. The integral relates \(g(r)\) to the structure factor \(S(q)\). X-ray and neutron intensities also include scattering weights [@lesar2013].
 
 ## Coordination number: integrating the neighbour shells
 
@@ -395,7 +385,7 @@ N_{\mathrm c}=4\pi\rho\int_0^{r_{\min}}r^2g(r)\,\mathrm dr.
 ::: {.callout-tip}
 ## From RDF to coordination: numerical integration
 
-We already know this **numerical integration** method from [L19](../../04/L19/index.qmd) and [L20](../../04/L20/index.qmd)! Apply the **trapezoidal rule** or **Simpson's rule** to \(4\pi\rho r^2g(r)\). Integrating to the first minimum gives the first-shell coordination number.
+Apply the **trapezoidal rule** or **Simpson's rule** from [L19](../../04/L19/index.qmd) and [L20](../../04/L20/index.qmd) to \(4\pi\rho r^2g(r)\).
 :::
 
 For ideal cubic crystals with lattice parameter \(a\):
@@ -418,7 +408,7 @@ The first-shell count stays close to 12 as heating broadens the RDF peaks and sm
 
 ## Fitting diffusivity (reading material)
 
-One major use of MD is to study how atoms diffuse through a lattice, which is important in processes such as welding. How do we obtain the **diffusivity \(D\)**—which you may meet in mass-transfer or phase-transformation courses—from the trajectories? Return to the [simple browser diffusion example above](#lammps-diffusion-example).
+Diffusion through a lattice is important in welding. Using our [browser example](#lammps-diffusion-example), how do we obtain the **diffusivity \(D\)** used in mass-transfer and phase-transformation courses?
 
 Measure each atom's squared displacement from its starting position, using unwrapped coordinates across periodic boundaries. Averaging over atoms gives the **mean-squared displacement (MSD)**, \(\langle R^2(t)\rangle\). For three-dimensional diffusion, fit the Einstein relation:
 
@@ -431,7 +421,7 @@ D&=\frac{\text{fitted slope}}{6}
 }
 \]
 
-In principle, the slope is a numerical derivative. But MD data are noisy! Should we differentiate adjacent samples or fit a line? **Fit the linear regime.** Least-squares fitting estimates the slope over a time interval, while direct finite differences amplify the noise.
+How do we estimate this derivative from noisy MD data? Adjacent finite differences amplify the noise. Instead, we fit a line over the **linear diffusion regime** using least squares.
 
 ::: {.content-visible when-format="html"}
 ![Trajectories of five light atoms and their mean-squared displacement. The line fits \(10\leq t/\tau\leq50\), in Lennard–Jones units.](../../../assets/L25-atomify-diffusion.gif){width="100%" loading="lazy"}
@@ -460,4 +450,4 @@ In principle, the slope is a numerical derivative. But MD data are noisy! Should
 
 ## Next
 
-A well-controlled trajectory still depends on the interaction model that supplies its forces. [L26](../L26/index.qmd) examines the choice of potential and its consequences for material behaviour.
+The forces depend on the chosen interaction potential. [L26](../L26/index.qmd) examines how that choice affects material behaviour.
