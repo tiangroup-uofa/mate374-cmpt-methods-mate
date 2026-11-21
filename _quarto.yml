@@ -156,6 +156,8 @@ website:
             contents:
               - href: units/05/L23/index.qmd
                 text: "Lecture 23"
+              - href: units/05/L25/index.qmd
+                text: "L25 · Molecular dynamics (2): control and analysis"
               - href: units/05/references.qmd
                 text: "References"
       - href: seminars/index.qmd

@@ -1,0 +1,37 @@
+{
+  "dataset": "Selected Cu nanoparticle structures for the L25 structure-analysis demo",
+  "derived_from": "instructor-private/project-demo/dft-melting-revised/fitted-2nm-1Kps-seed1/cycle.xyz",
+  "source_run": {
+    "model": "fitted",
+    "nominal_diameter_nm": 2,
+    "heating_rate_K_ps": 1,
+    "seed": 1,
+    "time_step_fs": 2,
+    "boundary_conditions": "nonperiodic; pbc=\"F F F\"",
+    "atom_count": 369
+  },
+  "source_file_sha256": "8f2dc0b7a5a6bc2aa962e35f8fac15a587e1a55eec92a07f1687adf62d6366df",
+  "order_output": "instructor-private/project-demo/dft-melting-revised/fitted-2nm-1Kps-seed1/order.json",
+  "order_file_sha256": "b89cc2a430584c9e27ed62198ead6feaf65a04a56f6786be49e28828f2abcde9",
+  "selection": [
+    {
+      "frame_index_zero_based": 1,
+      "time_ps": 10.0,
+      "stage": "equilibrate",
+      "set_temperature_K": 400.0,
+      "saved_solid_fraction": 0.926829268292683,
+      "label": "solid-like"
+    },
+    {
+      "frame_index_zero_based": 11,
+      "time_ps": 510.0,
+      "stage": "heat",
+      "set_temperature_K": 900.0,
+      "saved_solid_fraction": 0.016260162601626018,
+      "label": "liquid-like"
+    }
+  ],
+  "units": "positions in angstrom; time in ps; temperature in K",
+  "note": "Only these two 369-atom coordinate frames are copied. The trajectory is a finite, nonperiodic nanoparticle. It is saved project output, not a new simulation. The 900 K frame has saved solid_fraction 0.016 and is liquid-like; it is not a jittered lattice.",
+  "selected_file": "cu-2nm-phase-snapshots.xyz"
+}

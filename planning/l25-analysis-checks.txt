@@ -1,0 +1,37 @@
+L25 analysis demos — provenance and checks
+Written 2026-11-20.
+
+Scope
+- Added `activities/l25_structure_analysis.edit.py` and `activities/l25_diffusion_analysis.edit.py`.
+- Added only the requested L25 analysis figures under `assets/`.
+- No QMD, navigation, bibliography, or unrelated project files were edited here. The L25 page was already in the worktree and was rendered as an integration check.
+- The editable notebooks embed their small data inputs in source. No browser fetch or new MD run is needed.
+
+Structure demo
+- The two real coordinate frames are copied to `data/l25/cu-2nm-phase-snapshots.xyz`; their provenance and source hashes are in `data/l25/cu-2nm-phase-snapshots-provenance.json`.
+- Source: saved run `instructor-private/project-demo/dft-melting-revised/fitted-2nm-1Kps-seed1/cycle.xyz`, 2 nm nominal diameter, 369 Cu atoms, fitted model, 1 K/ps, seed 1, 2 fs timestep, nonperiodic `pbc="F F F"`. Only two frames were copied.
+- Frame 1: 10 ps, equilibrate, 400 K set point, saved solid fraction 0.926829; labelled solid-like.
+- Frame 11: 510 ps, heat, 900 K set point, saved solid fraction 0.016260; labelled liquid-like. This is actual saved liquid-like output, not a jittered lattice.
+- The notebook uses a 0.05 Å shell width, 5 Å maximum radius, and 3.1 Å default coordination cutoff. It selects reference centres within 5 Å of each frame's centre of mass using a spherical-core approximation for the nominal 10 Å-radius cluster. It does not claim that this is the exact boundary of the deformed nanoparticle.
+- The nominal density is (369/[(4/3)\pi(10\,\text{Å})^3]=0.0880923\) atoms/Å³. It is a normalization scale from the nominal spherical volume, not a measured thermal density or vacuum-box bulk density. Read (g_\mathrm{core}(r)) as a core shape estimate.
+- The shell-volume integration uses the same binned counts as (g_\mathrm{core}). Density cancels in the cumulative count, so the shell integral reproduces the direct binned coordination for the selected centres even when the nominal density is approximate. No claim is made that every shell is fully inside an exact spherical boundary.
+- Default cutoff results: 46 solid-like reference centres, (N(3.1\,\text{Å})=12.08696); 40 liquid-like reference centres, (N(3.1\,\text{Å})=11.55). The full-range shell-sum/direct-count mismatch is below (1.5\times10^{-14}) neighbours. Exact ideal first-shell checks return SC/BCC/FCC = 6/8/12.
+- Static asset: `assets/L25-analysis-rdf.png`, 2854 × 2151 px at 300 dpi. It labels the snapshots as actual saved data and states the spherical-core/nominal-density caveat.
+
+Diffusion demo
+- Uses the parent-provided `data/l25/atomify-diffusion-msd.csv`, `atomify-simple-diffusion.in`, and `atomify-diffusion-provenance.txt`. The 25 CSV rows are selected unsmoothed values from the completed 10,000-step Atomify browser run; the notebook embeds these rows directly for portability.
+- The input is Lennard-Jones reduced units, NVE, (dt=0.005\tau), with 6,750 atoms (1,125 light, mass 1; 5,625 heavy, mass 4), initial (T=3.00), LJ cutoff (2.5\sigma), seed 1337, and a 30 × 30 × 15 box at number density 0.5. It has no separate equilibration stage.
+- The initial velocity creation sets the initial temperature; NVE does not thermostat the run. Both group MSDs use `compute msd ... com yes`, remove centre-of-mass motion, and use a single time origin. LAMMPS uses unwrapped coordinates for this MSD.
+- Controls: light/heavy group dropdown; fit start default 10 \,\(\tau\); fit end default 50 \,\(\tau\). The latter matches the page's fallback. Fit (\mathrm{MSD}=st+b) with `np.polyfit`, then calculate (D=s/6).
+- Default 10–50 \,\(\tau\) fit uses 17 points. Light: slope 2.3122970098 (\sigma^2/\tau), intercept 3.934943 (\sigma^2), (D=0.385382835\,\sigma^2/\tau). Heavy: slope 1.782731202 (\sigma^2/\tau), intercept −2.114542 (\sigma^2), (D=0.297121867\,\sigma^2/\tau).
+- Endpoint ratios MSD/(6t) at 50 \,\(\tau\) are 0.3964913 (light) and 0.29234047 (heavy). At 0.5 \,\(\tau\), they are 0.3283877 and 0.1207411. The plot contrasts this lag-dependent ratio with the windowed slope fit. These single-origin finite-run results are exploratory mixing-run estimates, not equilibrium transport benchmarks. Do not convert to SI without the LJ length and time scales.
+- Browser provenance reports all 10,000 steps completed, 93.5176 s loop time, and zero dangerous builds. Two UI-side thermo errors (`spcpu` and `cpuremain` variables used between runs) appeared after the completed records. Do not describe the browser run as error-free.
+- Static asset: `assets/L25-analysis-msd.png`, 2854 × 2214 px at 300 dpi. It shows the actual saved MSD samples, default 10–50 \,\(\tau\) fit, and lag-dependent MSD/(6t).
+
+Validation
+- `uv run marimo check activities/l25_structure_analysis.edit.py`: pass.
+- `uv run marimo check activities/l25_diffusion_analysis.edit.py`: pass.
+- `uv run python -W error activities/l25_structure_analysis.edit.py`: pass.
+- `uv run python -W error activities/l25_diffusion_analysis.edit.py`: pass.
+- `quarto render units/05/L25/index.qmd --to html`: pass. Quarto exported both L25 notebooks and rendered the page. Citeproc warned that `andersen1980molecular`, `hoover1985canonical`, `parrinello1981polymorphic`, and `thompson2022lammps` were not found. No bibliography edits were made because they are outside this task's scope.
+- Both L25 PNG assets were checked at 300 dpi. Notebook dependency floors match the project (`marimo>=0.23.16)); the local test environment is marimo 0.24.0.

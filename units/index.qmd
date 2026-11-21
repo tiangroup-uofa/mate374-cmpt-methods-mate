@@ -51,3 +51,4 @@ toc: false
 ## [05 · Initial-value ODE problems and molecular dynamics](05/index.qmd)
 
 23. [L23 · Solving initial-value problems](05/L23/index.qmd) — functions and ODEs, initial and boundary conditions, the vibrating atom, Euler and Runge–Kutta integration, error orders, and SciPy’s `solve_ivp`.
+25. [L25 · Molecular dynamics (2): control and analysis](05/L25/index.qmd) — time steps, OpenMM and LAMMPS, periodic boundaries and cutoff, ensembles and controllers, radial distributions, coordination, and diffusion.

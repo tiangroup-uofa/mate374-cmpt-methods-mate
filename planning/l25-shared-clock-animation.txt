@@ -1,0 +1,20 @@
+L25 time-step animation correction
+
+Replaced the earlier equal-steps-per-frame movie with synchronized physical-time frames.
+- Reuses draw_cluster and STYLE directly from scripts/l21_figures.py: same 3D camera, fixed view cube, outlined gray atoms, red tagged atom, depth shading.
+- Reuses L24 initial-state and velocity-Verlet cell functions.
+- Every frame uses exact saved states at a shared time, from 0 to 8 ps in 0.2 ps intervals. No interpolation or independent panel clocks.
+- Steps: 1 fs, 20 fs, 200 fs. At 8 ps: 8000, 400, 40 steps.
+- Small-step overhead: 20 times as many integration steps as the 20 fs run. This is a step-count comparison, not measured wall time.
+- Max relative energy error over 8 ps, as percent of |E0|: 1 fs = 0.00007408%; 20 fs = 0.0297836%; 200 fs = 58422.2%.
+- At 8 ps, 200 fs has 8 of 13 atoms outside the fixed view. All calculations remain finite over the chosen window, but the large-step run is numerically inaccurate and disintegrates.
+- Revised QMD caption, explanation, and static poster to match.
+- Reproducible generator: scripts/l25_timestep_movie.py. GIF and poster saved at 300 dpi.
+- Prior movie/poster backed up under /tmp/l25-gif-before-shared-clock/.
+
+Validation:
+- Generator assertions check exact shared-frame indices, step-count ratio, bounded small-step errors, and gross large-step error.
+- Inspected final poster and intermediate GIF frame (1.4 ps).
+- One-page Quarto HTML render passed.
+- Browser reloaded and inspected the rendered figure and updated text. Shared clock, physical units and step counters visible. Movie uses shared playback for all panels.
+- Matplotlib reports Arial unavailable on this Linux system and falls back to a sans-serif font, as with the reused L21 renderer. No changes to system fonts or L21 files.

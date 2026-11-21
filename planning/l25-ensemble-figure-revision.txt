@@ -1,0 +1,18 @@
+Ensemble figure revision
+
+Research inspected:
+- Combined older MATE374 notes PDF p.721 (ensembles definitions) and Lecture29 slide2 (small sample in much larger heat bath).
+- https://en.wikipedia.org/wiki/Canonical_ensemble (thermal-reservoir construction).
+- https://en.wikipedia.org/wiki/Isothermal%E2%80%93isobaric_ensemble and its linked illustration https://upload.wikimedia.org/wikipedia/en/f/fa/Constant_pressure_system_immersed_in_a_constant_temperature_bath.png (movable piston in thermal bath). Downloaded to /tmp for visual inspection only; not embedded in course.
+- Reviewed instructor heat-transfer.svg and existing physical schematic styles.
+
+New original native SVG: assets/L25-ensembles.svg. This replaces the lecture PNG reference, without embedding copied reference images.
+- Three cross sections: insulated rigid vessel / rigid sealed vessel in bath / loaded piston-cylinder in bath.
+- Same 8 atoms per sample. Reservoir is larger than sample. No sample particle exchange indicated.
+- Red antiparallel heat arrows cross conducting walls only in NVT/NPT.
+- Loaded piston, pressure arrow and separate motion indicator in NPT. Insulation hatch instead of decorative colour in NVE.
+- Pale blue denotes bath, metallic shading denotes vessel cap/piston, shaded gray spheres denote atoms. Labels and objects aligned across panels.
+- All native vector paths/text/circles/gradients, mm dimensions, Arial labels >=10pt at native width. No raster elements. Temporary preview saved at300dpi and visually inspected.
+- Inkscape geometry checker remains unavailable due hardcoded macOS executable on Linux; no claim of its full validation.
+- QMD caption/alt text now describe physical exchanges and closed sample boundaries.
+- One-page Quarto HTML render passed.

@@ -1,0 +1,39 @@
+Lecture 25 instructor revision
+
+Scope: revised units/05/L25/index.qmd, structure-analysis notebook, supporting L25 assets/data, titles for L24/L26, unit landing links, sidebar labels, unit nocite list. Existing unrelated edits preserved. L26 content intentionally unchanged.
+
+Checks and technical corrections:
+- Velocity Verlet: one-step x/v errors O(dt^3), fixed-duration global x/v errors O(dt^2). Harmonic release-from-rest energy envelope derived; stability omega*dt<2 is not an accuracy recommendation.
+- Cu calculation uses the existing course Cu-fitted LJ values from data/l26/l26-heating-provenance.json, epsilon=.44134189 eV, sigma=2.33743379 A. Pair curvature 4.6162 eV/A^2=73.9599 N/m, reduced mass=31.773 u, period=167.8168 fs. This is explicitly a model-specific pair calculation, not the full phonon spectrum of copper.
+- L24 notebook cell functions reused for animation and sweep. 100 fs remained bounded over 16 ps with max relative energy error .9263%; 150 fs failed after nine completed steps. See l25-timestep-test.txt. Movie uses equal steps per frame and unequal physical durations, explicitly labelled. 300 dpi GIF frames and PNG poster.
+- Temperature equipartition corrected to Kbar/N=3kBT/2. Langevin identified as temperature control, not a stand-alone NPT barostat.
+- Minimization has no physical time; equilibration ~1 ns is illustrative, not 1 hour or a prescribed universal duration.
+- Diffusivity uses one-sixth long-time MSD slope, with a time-integral average and finite-difference noise connection.
+
+Figures and provenance:
+- Engine logos fetched from https://www.lammps.org/movies/logo.gif , https://www.gromacs.org/_images/gmx_logo_blue.png , https://openmm.org/images/logo.svg . Names aligned, no package descriptions within image.
+- Original crystal drawings located in instructor-private/fall-2025/lectures/MATE 374 2025 lecture notes all.pdf, PDF page 826 (slide 22). Cropped only crystal structures, excluded the slide's incompatible coordination formula. Original attribution: adapted from Callister & Rethwisch 9e, Fig. 3.1. Retained this attribution in caption; no unverified bibliography metadata invented.
+- Original analysis sequence inspected around PDF pp.823–826: pair correlations, crystalline/amorphous examples, FCC/SC shells, coordination.
+- New PBC, cutoff, ensembles, stage timeline, RDF shell figures inspected as rendered PNGs. All new PNG outputs saved at 300 dpi.
+- Beside LAMMPS input, the figure shows actual saved Atomify MSD data, not an invented particle snapshot. A browser simulation screenshot was not available locally.
+
+RDF data:
+- Uses existing 2899-atom nominal 4 nm Cu Mishin heating run: instructor-private/project-demo/dft-melting-revised/mishin-4nm-1Kps-seed1/cycle.xyz.
+- Saved-frame averages: 400–450 K at 10/60 ps (2 frames), 950–1050 K at 560/610/660 ps (3), 1250–1350 K at 860/910/960 ps (3). Sparse ramp-window averages, NOT isothermal stationary averages. No new MD trajectory was invented or run. 1000 K remains crystalline; high-temperature window liquid-like. Better equilibrium smoothing would require more saved frames from temperature holds.
+- Mean per-centre histograms for centres within 10 A of COM; shells 0–6 A at 0.06 A spacing; nominal density 2899/(4*pi*20^3/3). Finite-cluster normalization caveat retained. Shell counts preserved; integration reverses normalization. Public compact data and source hash: data/l25/averaged-core-rdf.json. Data embedded in notebook for offline WASM use.
+- Student notebook displays plots, temperature/sampling/radius controls and coordination; no XYZ listing.
+
+Validation:
+- marimo check both L25 notebooks: pass.
+- Direct Python execution of both notebooks: pass.
+- One-page Quarto HTML render: pass, no citation warnings.
+- Browser: page HTTP 200, no broken images, both named notebook iframes present. Additional browser checks recorded below if applicable.
+- project.render includes units/**/*.qmd and was not narrowed. Full-site/full-profile PDF build not run.
+
+Final browser checks:
+- Changed embeds to app view by default, retaining editable notebooks and code-view controls.
+- RDF notebook ran in WASM. Changing dropdown from 400 to 1300 updated saved times to 860/910/960 ps and coordination within 3.30 A from 12.0 to 11.9.
+- Initial edit-view test logged language-server/Copilot initialization timeouts, while Python calculations and plots ran. App view removes code clutter. Browser also reports standard iframe sandbox and unused preload warnings. No claim of an entirely error-free browser console.
+- L24 and L26 separately HTML-rendered to publish changed titles locally. L26 prose untouched.
+- All local L25 links/assets exist; all cited keys exist in root bibliography and unit nocite; RDF g*rho*shell-volume reproduces stored average counts.
+- Full git diff --check reports only pre-existing trailing whitespace in unrelated L21 SVG files; those were left unchanged.

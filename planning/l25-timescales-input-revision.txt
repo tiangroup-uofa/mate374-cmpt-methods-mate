@@ -1,0 +1,10 @@
+L25 timescale and input-file illustration revision
+
+- Replaced long-time bottleneck prose with an ordered comparison: atomic vibration, crack propagation, condensed-state diffusion, protein folding. Table gives illustrative duration ranges and step counts at 1 fs, with material/distance dependence stated.
+- Reduced browser-tool description to one sentence with generic 'online tools' link. Section now titled Reading an MD input file.
+- Replaced the MSD plot beside the input listing with the official simulation-box illustration supplied alongside that same input.
+- Image source: https://raw.githubusercontent.com/andeplane/atomify/main/public/examples/diffusion/diffusion/simple_diffusion.png , retrieved this session. Saved as assets/L25-simulation-box.png, original 1000x575 PNG. This is upstream raster artwork, not a new script-generated figure or an SVG schematic.
+- Live browser Diffusion quick run also inspected; its 6750-atom box shows the same central light-species slab in red heavy species. No fabricated snapshot or inferred coordinates used.
+- Browser canvas export to a temporary localhost receiver failed with TypeError: Failed to fetch. Did not retry or bypass browser restrictions. Used the separately published example illustration, with that provenance identified in the caption.
+- Input excerpt and simulation image remain in side-by-side columns. Existing analysis data and notebook left unchanged.
+- One-page Quarto HTML render passed.

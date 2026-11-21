@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="180mm" height="101mm" viewBox="0 0 180 101">
+<title>Physical boundary conditions for NVE, NVT and NPT</title>
+<desc>Three cross-sectional apparatus schematics contain the same eight sample atoms. NVE has a sealed rigid insulated vessel. NVT has a sealed rigid vessel immersed in a larger constant-temperature bath. NPT has a sealed cylinder with a weighted movable piston in a constant-temperature bath. Heat passes through the conducting walls but particles do not. Piston motion permits volume work in NPT.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt" /></marker>
+<pattern id="insulation" patternUnits="userSpaceOnUse" width="1.8" height="1.8" patternTransform="rotate(45)"><rect width="1.8" height="1.8" style="fill:#f1f1f1" /><path d="M0,0 V1.8" style="fill:none;stroke:#8a8f98;stroke-width:0.35" /></pattern>
+<radialGradient id="sample-atom" cx=".5" cy=".5" r=".5" fx=".35" fy=".32"><stop offset="0" stop-color="white" /><stop offset="1" stop-color="#8a8f98" /></radialGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a8f98" /><stop offset=".45" stop-color="#e4e4e4" /><stop offset="1" stop-color="#8a8f98" /></linearGradient>
+<marker id="tri-red" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid"><path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:#b5473a;fill-rule:evenodd;stroke:#b5473a;stroke-width:1pt" /></marker>
+</defs>
+<rect width="180" height="101" style="fill:white" />
+
+<g id="nve-apparatus" inkscape:groupmode="layer" inkscape:label="NVE physical system">
+<text x="30" y="7" style="font-family:Arial;font-size:6.35px;text-anchor:middle;fill:#231f20;font-weight:bold">NVE</text>
+<text x="30" y="14" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">Microcanonical</text>
+<rect x="13" y="38" width="34" height="43" style="fill:url(#insulation);stroke:#231f20;stroke-width:0.5" />
+<rect x="17" y="42" width="26" height="35" style="fill:white;stroke:#231f20;stroke-width:0.5" />
+<path d="M17,42 H43" style="fill:none;stroke:#231f20;stroke-width:0.9;" />
+<text x="30" y="29" style="font-family:Arial;font-size:3.8px;text-anchor:middle;fill:#231f20;font-weight:normal">Insulated vessel</text>
+<path d="M30,31 V36" style="fill:none;stroke:#5e5e5e;stroke-width:0.3;" />
+<circle cx="22" cy="54" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="30" cy="56" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="38" cy="53" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="25" cy="63" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="35" cy="65" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="22" cy="73" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="31" cy="74" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="38" cy="71" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<text x="30" y="95" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">No heat or volume work</text>
+</g>
+<g id="nvt-apparatus" inkscape:groupmode="layer" inkscape:label="NVT physical system">
+<text x="90" y="7" style="font-family:Arial;font-size:6.35px;text-anchor:middle;fill:#231f20;font-weight:bold">NVT</text>
+<text x="90" y="14" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">Canonical</text>
+<path d="M63,43 Q67,41 71,43 T79,43 T87,43 T95,43 T103,43 T111,43 T117,43 V87 H63 Z" style="fill:#cde5ec;stroke:none" />
+<path d="M63,43 Q67,41 71,43 T79,43 T87,43 T95,43 T103,43 T111,43 T117,43" style="fill:none;stroke:#5e5e5e;stroke-width:0.3;" />
+<path d="M63,36 V87 H117 V36" style="fill:none;stroke:#231f20;stroke-width:0.65;" />
+<text x="90" y="83" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">Heat bath: T</text>
+<rect x="77" y="42" width="26" height="35" style="fill:white;stroke:#231f20;stroke-width:0.5" />
+<rect x="76" y="40" width="28" height="2" style="fill:url(#metal);stroke:#231f20;stroke-width:0.5" />
+<text x="90" y="29" style="font-family:Arial;font-size:3.8px;text-anchor:middle;fill:#231f20;font-weight:normal">Rigid sealed vessel</text>
+<path d="M90,31 V38" style="fill:none;stroke:#5e5e5e;stroke-width:0.3;" />
+<circle cx="83" cy="51" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="94" cy="52" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="98" cy="60" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="88" cy="62" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="82" cy="68" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="92" cy="70" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="87" cy="74" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="98" cy="73" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<path d="M67,60 H80" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri-red)" />
+<path d="M81,65 H68" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri-red)" />
+<text x="69" y="56" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#b5473a;font-weight:normal">Heat</text>
+<text x="90" y="95" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">Heat exchange; fixed volume</text>
+</g>
+<g id="npt-apparatus" inkscape:groupmode="layer" inkscape:label="NPT physical system">
+<text x="150" y="7" style="font-family:Arial;font-size:6.35px;text-anchor:middle;fill:#231f20;font-weight:bold">NPT</text>
+<text x="150" y="14" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">Isothermal–isobaric</text>
+<path d="M123,43 Q127,41 131,43 T139,43 T147,43 T155,43 T163,43 T171,43 T177,43 V87 H123 Z" style="fill:#cde5ec;stroke:none" />
+<path d="M123,43 Q127,41 131,43 T139,43 T147,43 T155,43 T163,43 T171,43 T177,43" style="fill:none;stroke:#5e5e5e;stroke-width:0.3;" />
+<path d="M123,36 V87 H177 V36" style="fill:none;stroke:#231f20;stroke-width:0.65;" />
+<text x="150" y="83" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">Heat bath: T</text>
+<rect x="137" y="49" width="26" height="28" style="fill:white;stroke:none;stroke-width:0" />
+<path d="M137,35 V77 H163 V35" style="fill:none;stroke:#231f20;stroke-width:0.8;" />
+<rect x="137" y="47" width="26" height="2" style="fill:url(#metal);stroke:#231f20;stroke-width:0.5" />
+<rect x="149" y="33" width="2" height="14" style="fill:url(#metal);stroke:#231f20;stroke-width:0.35" />
+<rect x="143" y="29" width="14" height="4" style="fill:#8a8f98;stroke:#231f20;stroke-width:0.4" />
+<path d="M144,28 H156" style="fill:none;stroke:#231f20;stroke-width:0.6;" />
+<text x="165" y="24" style="font-family:Arial;font-size:4.23px;text-anchor:middle;fill:#231f20;font-weight:normal">P</text>
+<path d="M150,18 V25" style="fill:none;stroke:#231f20;stroke-width:0.6;marker-end:url(#tri)" />
+<path d="M168,49 V44" style="fill:none;stroke:#5e5e5e;stroke-width:0.4;marker-end:url(#tri)" /><path d="M168,49 V54" style="fill:none;stroke:#5e5e5e;stroke-width:0.4;marker-end:url(#tri)" /><text x="171" y="38" style="font-family:Arial;font-size:4.23px;text-anchor:middle;fill:#231f20;font-weight:normal">V</text>
+<circle cx="142" cy="53" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="151" cy="54" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="158" cy="58" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="146" cy="60" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="153" cy="65" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="142" cy="71" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="150" cy="74" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<circle cx="158" cy="72" r="1.65" style="fill:url(#sample-atom);stroke:#5e5e5e;stroke-width:0.2" />
+<path d="M127,60 H140" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri-red)" />
+<path d="M141,65 H128" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri-red)" />
+<text x="129" y="56" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#b5473a;font-weight:normal">Heat</text>
+<text x="150" y="95" style="font-family:Arial;font-size:3.6px;text-anchor:middle;fill:#231f20;font-weight:normal">Heat and volume work</text>
+</g>
+</svg>

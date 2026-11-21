@@ -1,0 +1,16 @@
+L24 exact cell functions, 13 atoms, random velocities, 0.30 epsilon/atom, 16 ps target duration.
+Columns: dt_fs, completed steps, max |E-E0|/|E0|, stopped
+(1, 16000, 7.407866443649666e-07, False)
+(2, 8000, 2.963111619787747e-06, False)
+(5, 3200, 1.8520586199082774e-05, False)
+(10, 1600, 7.410077803919946e-05, False)
+(20, 800, 0.0002978361222046745, False)
+(30, 533, 0.0006755408543164884, False)
+(40, 400, 0.0011865386473701946, False)
+(50, 320, 0.0018048525456947034, False)
+(60, 266, 0.0028216758711905377, False)
+(80, 200, 0.005321062344640187, False)
+(100, 160, 0.009263376995451635, False)
+(150, 9, 1717827357140.8396, True)
+(200, 80, 584.2221304129203, False)
+Stability here is tested behavior, not a universal maximum. Relative energy error is normalized by |total initial energy|.

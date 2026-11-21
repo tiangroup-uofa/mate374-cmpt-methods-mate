@@ -1,0 +1,46 @@
+PBC recreation requested by instructor
+
+Source inspected: instructor-private/fall-2025/lectures/MATE 374 Lecture 33.pdf, slide 2; also inspected minimum-image slide 14. The combined archive equivalent is PDF page 806.
+
+Recreated the original composition, not the prior two-panel interpretation:
+- single 3x3 tiled grid;
+- central simulated cell shaded blue;
+- same five sites and velocity directions repeated in every tile;
+- red atoms and black velocity arrows;
+- cutoff circle centred at the left-side atom in the shaded cell, crossing into adjacent cells;
+- radius arrow labelled r_cut.
+
+Accuracy: exact translational copies including velocity vectors. Cutoff radius 0.48 cell lengths, below L/2. Circle extends over left and bottom boundaries. No neighbour-list detail added.
+Colour: pale blue simulated cell, red shaded spheres, black grid/arrows/cutoff, matching original visual roles.
+Layout: one square diagram with large circle, no extra panels. Editable native SVG uses mm canvas, Arial text, named layers, paths and gradients, no embedded raster. Caption revised to describe this diagram.
+
+Source: assets/L25-pbc.svg. QMD embeds SVG directly at 75% page width.
+Validation: XML parsed; 9 groups each contain 5 atoms and 5 arrows (45 total). CairoSVG 300 dpi temporary preview inspected alongside the original slide. Standard Inkscape geometry checker unavailable because its hard-coded macOS executable is absent on this Linux host. One-page HTML render passed.
+Older unreferenced PBC assets left untouched to avoid removing unrelated work.
+
+Cutoff zoom update:
+- Added a dashed source rectangle and linked 2x inset around the PBC cutoff circle.
+- Inset reuses the same native SVG vector groups with a scale transform and clipping path, so positions, velocities, radius and central-cell shading match exactly.
+- Expanded figure width and changed page embed to full width. Caption and alt text describe the inset.
+- Inspected temporary 300 dpi preview; one-page HTML render passed.
+
+Correction after instructor clarification:
+- Removed the PBC zoom inset and all its source-box/connector geometry.
+- Arrows in PBC indicate velocity only. Cutoff radius is now a plain vertical line without marker-end.
+- Circle increased from 14.4 to 14.8 units for a 30-unit cell, maintaining r_cut<L/2. Atoms and complete velocity arrows outside it are faded as whole SVG groups.
+- Zoom box belongs to the potential curve: added assets/L25-cutoff.svg, an editable full LJ curve with a dashed tail-region box linked to the expanded cutoff plot. Red truncated tail and discontinuity shown at 2.5 sigma; no fabricated measured data.
+- Updated page captions and embeds. Both figures remain native SVG.
+- Temporary 300 dpi previews inspected. HTML render passed.
+
+Potential styling refinement:
+- Actual truncated energy is solid red over the entire range, including the pair well, discontinuity and zero tail.
+- Dashed grey curve represents only the true LJ continuation beyond r_c; no dashed reference continuation below the cutoff.
+- Removed zoom rectangle and dashed connectors. Added one large arrow pointing from the full curve toward the enlarged cutoff detail.
+- Retained a light dotted cutoff-position guide, separate from the dashed physical tail.
+- Updated caption and alt text. Native SVG preview inspected and HTML render passed.
+
+Potential figure final quality pass:
+- Replaced the two-panel arrow figure with one clean native SVG plot: full Lennard-Jones curve, ticks, r0/epsilon markers, red truncated potential (curve to r_c then zero), dashed gray true continuation, short red tick at the discontinuity labelled dU = 0.016 epsilon.
+- Direct labels with leader lines: Truncated LJ potential; True Lennard-Jones continuation; rc = 2.5 sigma above the dashed cutoff line.
+- Removed large arrow and zoom box entirely per earlier feedback. Fixed an axis mapping bug (umax/umin were swapped) and a markup escaping bug in the rc label.
+- Preview inspected; updated caption; one-page HTML render passed.

@@ -1,0 +1,10 @@
+L25 workflow figure revision
+- Replaced PNG reference with assets/L25-stages.svg, a native editable SVG with named layers, text, paths, gradients, and atom circles. No embedded raster content.
+- Original PNG moved to /tmp/l25-stages-superseded/L25-stages.png.
+- Illustrative NVT potential-energy curve: monotonic minimization, thermal adjustment, persistent fluctuations, late transition from metastable disorder to an ordered lower-energy state.
+- Four schematic configurations each contain 19 atoms; these are drawn examples, not trajectory snapshots. Caption explicitly identifies schematic data and unequal stage scales.
+- Minimization iteration axis separated from MD time. Example durations retained as illustrative, not quantitative timing of the synthetic event.
+- Production explanation distinguishes equilibrium measurement from observing rare transitions. Warns that an energy plateau alone does not establish global equilibrium, and calls for state-specific analysis on either side of the transition.
+- No Zotero search or paper figure needed for this original schematic.
+- Read svg-figure skill and reviewed existing SVG reference figures. Font check: all labels >=10 pt at 180 mm width; Arial. Standard checker could not complete geometry inspection because its hard-coded macOS Inkscape executable is absent on this Linux machine. CairoSVG 300 dpi temporary preview inspected, leader lines adjusted to avoid axis text.
+- One-page HTML render passed. Native SVG contains no image tags. Temporary PNG is for visual review only; lecture embeds SVG directly.

@@ -1,0 +1,12 @@
+Added compact portrait cards for Michele Parrinello and Aneesur Rahman beside their named barostat. Original image files stored in assets; visible source/author/license links in the lecture; fuller records in assets/L25-portrait-credits.txt.
+
+Did not add guessed or synthetic photos. Nosé and Hoover biographies were checked but had no verified portrait images. Linked Hoover website/obituary HTTPS fetches failed, so no images were extracted from them or represented as checked. Suitable verified images for these two remain to be sourced.
+
+Scoped CSS under .lecture-page .scientist-portraits; no global figure styling changed. QMD keeps native Markdown images and text for non-HTML renderers. One-page HTML render passed.
+
+Instructor follow-up:
+- Used the supplied Physics Today Nosé obituary to verify and download his portrait. Credited photographer Hiroyuki Hyuga as printed on the article. Did not claim a CC license for this photo.
+- Skipped Hoover's portrait as explicitly requested.
+- Changed portrait layouts to sit beside the associated method text: Nosé beside thermostat introduction/equations; Parrinello/Rahman beside their barostat paragraph. Compact boxes retained.
+- Flex layout switches to a stacked reading order on narrow phones to avoid squeezing equations and prose.
+- One-page HTML render passed.

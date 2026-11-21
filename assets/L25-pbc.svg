@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="110mm" height="108mm" viewBox="0 0 110 108">
+<title>Periodic boundary conditions: a simulation cell and eight exact copies</title>
+<desc>Nine translated cells repeat five atomic positions and their velocity vectors. Outside the cutoff circle the atoms and velocity arrows are faded. The cutoff radius is a plain line without an arrowhead, and is 0.493 cell lengths.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid">
+<path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt" />
+</marker>
+<radialGradient id="atom-red" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32">
+<stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#b5473a" />
+</radialGradient>
+</defs>
+<rect width="110" height="108" style="fill:white" />
+<g id="periodic-grid" inkscape:groupmode="layer" inkscape:label="Simulation cell and copies">
+<rect x="40" y="35" width="30" height="30" style="fill:#cde5ec;stroke:none" />
+
+<path d="M10,5 V95" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<path d="M10,5 H100" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<path d="M40,5 V95" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<path d="M10,35 H100" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<path d="M70,5 V95" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<path d="M10,65 H100" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<path d="M100,5 V95" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<path d="M10,95 H100" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+</g>
+<g id="cutoff-circle" inkscape:groupmode="layer" inkscape:label="Interaction cutoff">
+<circle cx="44.2" cy="53.6" r="14.8" style="fill:none;stroke:#231f20;stroke-width:0.65" />
+</g>
+<g id="cell-0-0" inkscape:groupmode="layer" inkscape:label="Cell 1,1: atoms and velocities">
+<g style="opacity:0.28"><path d="M22.450,9.800 L27.700,9.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-0-0" cx="20.800" cy="9.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M36.667,17.033 L40.939,12.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-0-1" cx="35.500" cy="18.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M12.550,23.600 L7.300,23.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-0-2" cx="14.200" cy="23.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M24.433,22.367 L20.161,26.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-0-3" cx="25.600" cy="21.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M31.267,32.867 L35.539,37.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-0-4" cx="30.100" cy="31.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-0-1" inkscape:groupmode="layer" inkscape:label="Cell 1,2: atoms and velocities">
+<g style="opacity:0.28"><path d="M52.450,9.800 L57.700,9.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-1-0" cx="50.800" cy="9.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M66.667,17.033 L70.939,12.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-1-1" cx="65.500" cy="18.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M42.550,23.600 L37.300,23.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-1-2" cx="44.200" cy="23.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M54.433,22.367 L50.161,26.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-1-3" cx="55.600" cy="21.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M61.267,32.867 L65.539,37.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-1-4" cx="60.100" cy="31.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-0-2" inkscape:groupmode="layer" inkscape:label="Cell 1,3: atoms and velocities">
+<g style="opacity:0.28"><path d="M82.450,9.800 L87.700,9.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-2-0" cx="80.800" cy="9.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M96.667,17.033 L100.939,12.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-2-1" cx="95.500" cy="18.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M72.550,23.600 L67.300,23.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-2-2" cx="74.200" cy="23.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M84.433,22.367 L80.161,26.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-2-3" cx="85.600" cy="21.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M91.267,32.867 L95.539,37.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-0-2-4" cx="90.100" cy="31.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-1-0" inkscape:groupmode="layer" inkscape:label="Cell 2,1: atoms and velocities">
+<path d="M36.667,47.033 L40.939,42.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-0-1" cx="35.500" cy="48.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+<g style="opacity:0.28"><path d="M22.450,39.800 L27.700,39.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-0-0" cx="20.800" cy="39.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M12.550,53.600 L7.300,53.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-0-2" cx="14.200" cy="53.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M24.433,52.367 L20.161,56.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-0-3" cx="25.600" cy="51.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M31.267,62.867 L35.539,67.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-0-4" cx="30.100" cy="61.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-1-1" inkscape:groupmode="layer" inkscape:label="Cell 2,2: atoms and velocities">
+<path d="M42.550,53.600 L37.300,53.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-1-2" cx="44.200" cy="53.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+<path d="M54.433,52.367 L50.161,56.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-1-3" cx="55.600" cy="51.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+<g style="opacity:0.28"><path d="M52.450,39.800 L57.700,39.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-1-0" cx="50.800" cy="39.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M66.667,47.033 L70.939,42.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-1-1" cx="65.500" cy="48.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M61.267,62.867 L65.539,67.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-1-4" cx="60.100" cy="61.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-1-2" inkscape:groupmode="layer" inkscape:label="Cell 2,3: atoms and velocities">
+<g style="opacity:0.28"><path d="M82.450,39.800 L87.700,39.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-2-0" cx="80.800" cy="39.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M96.667,47.033 L100.939,42.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-2-1" cx="95.500" cy="48.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M72.550,53.600 L67.300,53.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-2-2" cx="74.200" cy="53.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M84.433,52.367 L80.161,56.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-2-3" cx="85.600" cy="51.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M91.267,62.867 L95.539,67.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-1-2-4" cx="90.100" cy="61.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-2-0" inkscape:groupmode="layer" inkscape:label="Cell 3,1: atoms and velocities">
+<g style="opacity:0.28"><path d="M22.450,69.800 L27.700,69.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-0-0" cx="20.800" cy="69.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M36.667,77.033 L40.939,72.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-0-1" cx="35.500" cy="78.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M12.550,83.600 L7.300,83.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-0-2" cx="14.200" cy="83.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M24.433,82.367 L20.161,86.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-0-3" cx="25.600" cy="81.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M31.267,92.867 L35.539,97.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-0-4" cx="30.100" cy="91.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-2-1" inkscape:groupmode="layer" inkscape:label="Cell 3,2: atoms and velocities">
+<g style="opacity:0.28"><path d="M52.450,69.800 L57.700,69.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-1-0" cx="50.800" cy="69.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M66.667,77.033 L70.939,72.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-1-1" cx="65.500" cy="78.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M42.550,83.600 L37.300,83.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-1-2" cx="44.200" cy="83.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M54.433,82.367 L50.161,86.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-1-3" cx="55.600" cy="81.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M61.267,92.867 L65.539,97.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-1-4" cx="60.100" cy="91.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cell-2-2" inkscape:groupmode="layer" inkscape:label="Cell 3,3: atoms and velocities">
+<g style="opacity:0.28"><path d="M82.450,69.800 L87.700,69.800" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-2-0" cx="80.800" cy="69.800" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M96.667,77.033 L100.939,72.761" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-2-1" cx="95.500" cy="78.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M72.550,83.600 L67.300,83.600" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-2-2" cx="74.200" cy="83.600" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M84.433,82.367 L80.161,86.639" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-2-3" cx="85.600" cy="81.200" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g><g style="opacity:0.28"><path d="M91.267,92.867 L95.539,97.139" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<circle id="atom-2-2-4" cx="90.100" cy="91.700" r="1.65" style="fill:url(#atom-red);stroke:#231f20;stroke-width:0.35" />
+</g></g>
+<g id="cutoff-radius" inkscape:groupmode="layer" inkscape:label="Cutoff radius label">
+<path d="M44.2,51.8 V38.8" style="fill:none;stroke:#231f20;stroke-width:0.4" />
+<text id="cutoff-label" x="45.6" y="44.5" style="font-family:Arial;font-size:4.23px;fill:#231f20;font-style:italic">r<tspan style="font-size:3px;font-style:normal" baseline-shift="sub">cut</tspan></text>
+<text id="cell-label" x="55" y="105" style="font-family:Arial;font-size:4.23px;fill:#231f20;text-anchor:middle">Shaded cell: simulated system</text>
+</g>
+</svg>
