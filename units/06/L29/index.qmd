@@ -1,5 +1,5 @@
 ---
-title: "L29 · The atomistic data revolution"
+title: "L29 · Atomistic methods"
 subtitle: "Where reference energies and forces come from, and how a fitted model returns to the MD loop"
 body-classes: lecture-page
 from: markdown+tex_math_single_backslash

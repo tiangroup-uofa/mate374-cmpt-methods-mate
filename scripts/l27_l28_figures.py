@@ -136,53 +136,82 @@ def export_png(svg_path, width_mm):
 # ---------------------------------------------------------------- L27 figures
 
 def l27_time_scales():
-    """Log time axis: MD reach against measured copper self-diffusion at 800 K."""
-    W, H = 170, 74
+    """Log time axis: our GPU MD run against measured copper self-diffusion at 1000 K."""
+    W, H = 170, 78
     x0, x1 = 8.0, 162.0
     lo, hi = -15, 1
     def X(t):
         return x0 + (math.log10(t) - lo) / (hi - lo) * (x1 - x0)
-    ya = 44.0
+    ya = 46.0
     b = []
-    # MD window band
-    b.append(rect(X(1e-15), ya - 9, X(1e-6) - X(1e-15), 9, fill=BLUE_FILL, stroke="none"))
-    b.append(text(X(1e-6) - 1.5, ya - 3.2, "large MD run: 10" + sup("9") + " steps of 1 fs",
-                  size=SM, anchor="end", fill=BLUE))
-    # axis
+    # what MD reaches: our run (2 ns) and a very large run (1 us)
+    b.append(rect(X(1e-15), ya - 9, X(1e-6) - X(1e-15), 9, fill=PALE, stroke="none"))
+    b.append(line([(X(1e-6), ya - 9), (X(1e-6), ya - 15)], GREY, 0.3))
+    b.append(rect(X(1e-15), ya - 9, X(46e-9) - X(1e-15), 9, fill=BLUE_FILL, stroke="none"))
+    b.append(text(X(46e-9) - 1.5, ya - 3.2, "one GPU day: 46 ns", size=SM, anchor="end", fill=BLUE))
+    b.append(text(X(1e-6) - 1.0, ya - 12.0, "largest runs", size=SM, anchor="end", fill=GREY))
     b.append(line([(x0, ya), (x1 + 3, ya)], INK, 0.5, marker=True))
     for e in range(lo, hi + 1, 3):
         xx = X(10.0 ** e)
         b.append(line([(xx, ya), (xx, ya + 1.6)], INK, 0.35))
     labels = {-15: "1 fs", -12: "1 ps", -9: "1 ns", -6: "1 µs", -3: "1 ms", 0: "1 s"}
-    for e, s in labels.items():
-        b.append(text(X(10.0 ** e), ya + 5.6, s, size=SM, anchor="middle"))
+    for e, lab in labels.items():
+        b.append(text(X(10.0 ** e), ya + 5.6, lab, size=SM, anchor="middle"))
     b.append(text(x1 + 3, ya + 5.6, "time", size=SM, anchor="end", style="italic"))
-    # events above the axis
     events = [
-        (168e-15, "one Cu–Cu vibration", "168 fs", INK),
-        (1.76e-3, "one hop of a Cu atom", "about 2 ms", RED),
-        (0.67, "rearrangement over 5 nm", "about 0.7 s", RED),
+        (168e-15, "one Cu–Cu vibration", "168 fs", INK, 24, "middle", 0),
+        (4.7e-6, "one hop of an atom", "about 5 µs", RED, 19, "end", -1.5),
+        (1.8e-3, "rearrangement over 5 nm", "about 2 ms", RED, 24, "start", 1.5),
     ]
-    heights = [24, 13, 24]
-    for (t, name, val, col), hgt in zip(events, heights):
+    for t, name, val, col, hgt, anchor, dx in events:
         xx = X(t)
-        b.append(line([(xx, ya), (xx, ya - hgt - 0.8)], col, 0.35, dash="1.2,0.8"))
+        y_base = ya - 9 if t < 1e-6 else ya   # keep the dashed line clear of the band label
+        b.append(line([(xx, y_base), (xx, ya - hgt - 0.8)], col, 0.35, dash="1.2,0.8"))
         b.append(f'<circle cx="{xx:.2f}" cy="{ya:.2f}" r="1.1" style="fill:{col};stroke:none" />')
-        anchor = "middle" if t < 1e-6 else "end"
-        dx = 1.6 if t > 0.1 else (-1.5 if t > 1e-6 else 0)
-        if t > 1e-6 and t < 0.1:
-            hgt = hgt - 4.0
         b.append(text(xx + dx, ya - hgt - 6.0, name, size=SM, anchor=anchor, fill=col))
         b.append(text(xx + dx, ya - hgt - 2.0, val, size=SM, anchor=anchor, fill=col, weight="bold"))
-    # gap bracket below
     yb = ya + 13
-    b.append(line([(X(1e-6), yb), (X(0.67), yb)], RED, 0.5, marker=True, start_marker=True))
-    b.append(text((X(1e-6) + X(0.67)) / 2, yb + 5.4, "a factor of about 10" + sup("6"), size=FS, anchor="middle", fill=RED))
-    b.append(text(X(1e-15), yb + 5.4, "Cu self-diffusion at 800 K:", size=SM))
-    b.append(text(X(1e-15), yb + 10.0, it("D") + " ≈ 6 × 10" + sup("−18") + " m" + sup("2") + "/s", size=SM))
-    return svg(W, H, "Time scales of MD and of atomic rearrangement in copper at 800 K",
-               "Logarithmic time axis from 1 fs to 10 s. The MD band ends at one microsecond. One copper hop takes about 2 ms, and rearrangement over 5 nm about 0.7 s, from the measured self-diffusion coefficient.",
+    b.append(line([(X(46e-9), yb), (X(1.8e-3), yb)], RED, 0.5, marker=True, start_marker=True))
+    b.append(text((X(46e-9) + X(1.8e-3)) / 2, yb + 5.4, "about 40 000 GPU days", size=FS, anchor="middle", fill=RED))
+    b.append(text(X(1e-15), yb + 5.4, "Cu self-diffusion at 1000 K:", size=SM))
+    b.append(text(X(1e-15), yb + 10.0, it("D") + " ≈ 2.3 × 10" + sup("−15") + " m" + sup("2") + "/s", size=SM))
+    return svg(W, H, "Time scales of MD and of atomic rearrangement in copper at 1000 K",
+               "Logarithmic time axis from 1 fs to 10 s. A blue band marks the 46 ns that our GPU MD run covers in one day, and a grey band extends to 1 µs for the largest runs. One copper hop takes about 5 µs, and rearrangement over 5 nm about 2 ms, from the measured self-diffusion coefficient.",
                layer("axis", "Time axis and events", "\n".join(b)))
+
+
+def l27_lattice_attempt():
+    """One Monte Carlo attempt on a small lattice: pick a site, pick a neighbour, draw u."""
+    W, H = 160, 62
+    rng = np.random.default_rng(27)
+    L, d = 6, 7.0
+    grid = (rng.random((L, L)) < 0.25).astype(int)
+    grid[2, 2], grid[2, 3] = 1, 0
+    b = []
+    def panel(x0, y0, g, label, hi=None, arrow=None):
+        out = []
+        for r in range(L):
+            for c in range(L):
+                out.append(atom(x0 + c * d, y0 + r * d, g[r, c], r=2.4))
+        if hi:
+            for (r, c) in hi:
+                out.append(rect(x0 + c * d - 3.3, y0 + r * d - 3.3, 6.6, 6.6, stroke=RED, sw=0.5, rx=3.3))
+        if arrow:
+            (r1, c1), (r2, c2) = arrow
+            out.append(line([(x0 + c1 * d + 1.0, y0 + r1 * d - 4.6), (x0 + c2 * d - 1.0, y0 + r2 * d - 4.6)],
+                            RED, 0.5, marker=True, start_marker=True))
+        out.append(text(x0 - 4.5, y0 - 6.0, label, size=PANEL, weight="bold"))
+        return "\n".join(out)
+    b.append(panel(8, 12, grid, "a", hi=[(2, 2)]))
+    b.append(text(8 + 2.5 * d, 12 + L * d + 1.0, "pick a random site", size=SM, anchor="middle"))
+    b.append(panel(62, 12, grid, "b", hi=[(2, 2), (2, 3)], arrow=((2, 2), (2, 3))))
+    b.append(text(62 + 2.5 * d, 12 + L * d + 1.0, "pick one of its 4 neighbours", size=SM, anchor="middle"))
+    g2 = grid.copy(); g2[2, 2], g2[2, 3] = g2[2, 3], g2[2, 2]
+    b.append(panel(116, 12, g2, "c", hi=[(2, 2), (2, 3)]))
+    b.append(text(116 + 2.5 * d, 12 + L * d + 1.0, "if " + it("u") + " &lt; " + it("p") + ", swap", size=SM, anchor="middle"))
+    return svg(W, H, "One Monte Carlo attempt on a lattice",
+               "Three 6 by 6 lattices of grey Cu and blue Ag atoms. Panel a circles one randomly chosen site. Panel b adds a neighbour and a double arrow between them. Panel c shows the two atoms exchanged, which happens when the uniform random number u is smaller than the hop probability p.",
+               layer("attempt", "One attempt", "\n".join(b)))
 
 
 def l27_two_state():
@@ -447,13 +476,166 @@ def l28_pair_sets():
                layer("pair-sets", "Parallel pair sets", b and "\n".join(b)))
 
 
+def rs_binodal_t(t):
+    """Regular solution with Omega = 2 k Tc: Ag fraction of the Cu-rich phase at T/Tc = t."""
+    if t >= 1.0:
+        return 0.5
+    H = 2.0 / t
+    f = lambda c: math.log(c / (1 - c)) + H * (1 - 2 * c)
+    a, b = 1e-12, 0.5 - math.sqrt(max(0.0, 1 - 2 / H)) / 2 - 1e-12
+    for _ in range(200):
+        m = (a + b) / 2
+        if f(a) * f(m) <= 0:
+            b = m
+        else:
+            a = m
+    return m
+
+
+def yang_t(t):
+    """Exact square lattice: minority fraction of the coexisting phase at T/Tc = t."""
+    if t >= 1.0:
+        return 0.5
+    ktc = 1.0 / math.log(1.0 + math.sqrt(2.0))
+    x = math.sinh(1.0 / (ktc * t)) ** -4
+    return (1 - (1 - x) ** 0.125) / 2
+
+
+def l28_phase_construction():
+    """(a) Free-energy curves at three temperatures with common tangents.
+    (b) The tangent points traced out as a phase diagram, with Monte Carlo points."""
+    W, H = 170, 78
+    b = []
+    # ---- panel a: g / (k Tc) = 2 c (1 - c) + (T/Tc) [c ln c + (1 - c) ln(1 - c)]
+    x0, y0, w, h = 18, 8, 62, 52
+    glo, ghi = -0.62, 0.05
+    X = lambda c: x0 + c * w
+    Y = lambda v: y0 + (ghi - v) / (ghi - glo) * h
+    temps = [(1.2, GREY), (0.9, BLUE), (0.7, RED)]
+    for t, col in temps:
+        g = lambda c, t=t: 2 * c * (1 - c) + t * (c * math.log(c) + (1 - c) * math.log(1 - c))
+        cs = np.linspace(0.004, 0.996, 300)
+        b.append(line([(X(c), Y(g(c))) for c in cs], col, 0.6))
+        if t < 1:
+            ca = rs_binodal_t(t)
+            b.append(line([(X(0.0), Y(g(ca))), (X(1.0), Y(g(ca)))], col, 0.3, dash="1.4,0.9"))
+            for c in (ca, 1 - ca):
+                b.append(f'<circle cx="{X(c):.2f}" cy="{Y(g(c)):.2f}" r="0.95" style="fill:{col}" />')
+        lab_c = 0.5
+        b.append(text(X(lab_c), Y(g(lab_c)) - 1.8, f"{t:g} " + it("T") + sub("c"), size=SM, anchor="middle", fill=col))
+    b.append(line([(x0, y0 - 1), (x0, y0 + h), (x0 + w + 2, y0 + h)], INK, 0.5))
+    for c in (0, 0.5, 1.0):
+        b.append(line([(X(c), y0 + h), (X(c), y0 + h + 1.3)], INK, 0.35))
+        b.append(text(X(c), y0 + h + 5.0, f"{c:g}", size=SM, anchor="middle"))
+    b.append(text(x0 + w / 2, y0 + h + 10.5, "Ag fraction, " + it("c"), size=FS, anchor="middle"))
+    b.append(f'<text transform="translate(6.0,{y0 + h / 2:.2f}) rotate(-90)" style="font-family:Arial;font-size:{FS}px;text-anchor:middle;fill:{INK}">'
+             f'free energy per atom, {it("g")}</text>')
+    b.append(text(3.0, 5.5, "a", size=PANEL, weight="bold"))
+    # ---- panel b: phase diagram in T/Tc
+    x1, w1 = 104, 58
+    tlo, thi = 0.5, 1.3
+    X1 = lambda c: x1 + c * w1
+    Y1 = lambda t: y0 + (thi - t) / (thi - tlo) * h
+    ts = np.linspace(0.5, 0.9999, 200)
+    rs = [(rs_binodal_t(t), t) for t in ts] + [(0.5, 1.0)]
+    b.append(line([(X1(c), Y1(t)) for c, t in rs] + [(X1(1 - c), Y1(t)) for c, t in reversed(rs)], INK, 0.6))
+    ex = [(yang_t(t), t) for t in ts] + [(0.5, 1.0)]
+    b.append(line([(X1(c), Y1(t)) for c, t in ex] + [(X1(1 - c), Y1(t)) for c, t in reversed(ex)], BLUE, 0.5, dash="1.6,1.0"))
+    for t, col in temps:
+        if t < 1:
+            ca = rs_binodal_t(t)
+            b.append(line([(X1(ca), Y1(t)), (X1(1 - ca), Y1(t))], col, 0.3, dash="1.4,0.9"))
+            for c in (ca, 1 - ca):
+                b.append(f'<circle cx="{X1(c):.2f}" cy="{Y1(t):.2f}" r="0.95" style="fill:{col}" />')
+    # Monte Carlo points (L28 GPU rule, 64 x 64 slab runs): kT/eps 0.80, 1.00, 1.08
+    ktc = 1.0 / math.log(1.0 + math.sqrt(2.0))
+    for kt, ca, cb in [(0.80, 0.0126, 0.0111), (1.00, 0.0498, 0.0481), (1.08, 0.0846, 0.0944)]:
+        t = kt / ktc
+        for c in (ca, 1 - cb):
+            b.append(rect(X1(c) - 1.0, Y1(t) - 1.0, 2.0, 2.0, fill="white", stroke=BLUE, sw=0.4))
+    b.append(text(X1(0.5), Y1(0.62) + 1.2, "two phases", size=SM, anchor="middle"))
+    b.append(text(X1(0.5), Y1(1.17) + 1.2, "one mixed phase", size=SM, anchor="middle"))
+    b.append(line([(x1, y0 - 1), (x1, y0 + h), (x1 + w1 + 2, y0 + h)], INK, 0.5))
+    for c in (0, 0.5, 1.0):
+        b.append(line([(X1(c), y0 + h), (X1(c), y0 + h + 1.3)], INK, 0.35))
+        b.append(text(X1(c), y0 + h + 5.0, f"{c:g}", size=SM, anchor="middle"))
+    for t in (0.6, 0.8, 1.0, 1.2):
+        b.append(line([(x1 - 1.3, Y1(t)), (x1, Y1(t))], INK, 0.35))
+        b.append(text(x1 - 2.0, Y1(t) + 1.2, f"{t:g}", size=SM, anchor="end"))
+    b.append(text(x1 + w1 / 2, y0 + h + 10.5, "Ag fraction, " + it("c"), size=FS, anchor="middle"))
+    b.append(f'<text transform="translate({x1 - 11:.2f},{y0 + h / 2:.2f}) rotate(-90)" style="font-family:Arial;font-size:{FS}px;text-anchor:middle;fill:{INK}">'
+             f'{it("T")} / {it("T")}<tspan style="font-size:2.9px" dy="1">c</tspan></text>')
+    b.append(text(x1 - 15, 5.5, "b", size=PANEL, weight="bold"))
+    # legend
+    ly = y0 + h + 16.5
+    b.append(line([(x1 - 6, ly - 1.2), (x1, ly - 1.2)], INK, 0.6))
+    b.append(text(x1 + 1.5, ly, "tangent points of the curves in (a)", size=SM))
+    b.append(line([(x1 - 6, ly + 3.8), (x1, ly + 3.8)], BLUE, 0.5, dash="1.6,1.0"))
+    b.append(rect(x1 - 4, ly + 2.8, 2.0, 2.0, fill="white", stroke=BLUE, sw=0.4))
+    b.append(text(x1 + 1.5, ly + 5.0, "lattice: exact and Monte Carlo", size=SM, fill=BLUE))
+    return svg(W, H + 13, "From free-energy curves to a phase diagram",
+               "Panel a: free energy per atom against Ag fraction at 1.2, 0.9 and 0.7 times Tc. Above Tc the curve has one minimum. Below Tc it has two minima, and a dashed common tangent touches each curve at two compositions. Panel b: the tangent points at each temperature traced out as a dome in temperature against composition. Monte Carlo points and the exact lattice boundary, dashed blue, form a flatter dome.",
+               layer("phase-construction", "Free energy to phase diagram", "\n".join(b)))
+
+
+def l28_gradient_penalty():
+    """A Cu-rich / Ag-rich interface: profile c(x), and the two energy terms that peak at it."""
+    W, H = 150, 86
+    b = []
+    t = 0.7
+    ca = rs_binodal_t(t)
+    g = lambda c: 2 * c * (1 - c) + t * (c * math.log(c) + (1 - c) * math.log(1 - c))
+    gt = g(ca)
+    x0, w = 20, 120
+    xs = np.linspace(-1, 1, 300)
+    wid = 0.16
+    c_of = lambda x: ca + (1 - 2 * ca) * 0.5 * (1 + math.tanh(x / wid))
+    X = lambda x: x0 + (x + 1) / 2 * w
+    # top: profile
+    yt, ht = 8, 26
+    Yt = lambda c: yt + (1 - c) * ht
+    b.append(line([(X(x), Yt(c_of(x))) for x in xs], INK, 0.6))
+    b.append(line([(x0, yt - 1), (x0, yt + ht), (x0 + w, yt + ht)], INK, 0.45))
+    for c, lab in ((ca, f"{ca:.2f}"), (1 - ca, f"{1 - ca:.2f}")):
+        b.append(text(x0 - 1.8, Yt(c) + 1.2, lab, size=SM, anchor="end"))
+    b.append(text(x0 - 13, yt + ht / 2 + 1.2, it("c"), size=FS, anchor="middle"))
+    # boxes
+    for xc, lab in ((-0.65, "box inside Cu-rich phase"), (0.0, "box on the interface")):
+        b.append(rect(X(xc) - 6, yt - 3, 12, ht + 3, stroke=RED, sw=0.4, dash="1.2,0.8"))
+        b.append(text(X(xc), yt - 4.5, lab, size=SM, anchor="middle", fill=RED))
+    b.append(text(X(0.62), Yt(1 - ca) + 5.5, "Ag-rich", size=SM, anchor="middle"))
+    b.append(text(X(-0.35), Yt(ca) - 2.5, "Cu-rich", size=SM, anchor="middle"))
+    # bottom: energy densities
+    yb, hb = 52, 22
+    d1 = [g(c_of(x)) - gt for x in xs]
+    dc = np.gradient([c_of(x) for x in xs], xs)
+    # Choose kappa so that both terms have the same peak, as they do for an equilibrium interface.
+    kap = max(d1) / max(0.5 * dc ** 2)
+    d2 = [0.5 * kap * v ** 2 for v in dc]
+    top = max(max(d1), max(d2)) * 1.1
+    Yb = lambda v: yb + hb - v / top * hb
+    b.append(line([(X(x), Yb(v)) for x, v in zip(xs, d1)], BLUE, 0.6))
+    b.append(line([(X(x), Yb(v)) for x, v in zip(xs, d2)], RED, 0.6, dash="1.6,1.0"))
+    b.append(line([(x0, yb - 1), (x0, yb + hb), (x0 + w, yb + hb)], INK, 0.45))
+    b.append(text(x0 + w, yb - 6.0, "local free energy " + it("g") + "(" + it("c") + ") above the tangent", size=SM, anchor="end", fill=BLUE))
+    b.append(text(x0 + w, yb - 1.5, "gradient penalty (" + it("κ") + "/2)(d" + it("c") + "/d" + it("x") + ")" + sup("2"), size=SM, anchor="end", fill=RED))
+    b.append(text(x0 + w, yb + hb + 5.0, "position across the interface, " + it("x"), size=SM, anchor="end"))
+    b.append(f'<text transform="translate({x0 - 5:.2f},{yb + hb / 2:.2f}) rotate(-90)" style="font-family:Arial;font-size:{SM}px;text-anchor:middle;fill:{INK}">extra energy</text>')
+    return svg(W, H, "Energy of an interface in a composition field",
+               "Top: Ag fraction rising smoothly from the Cu-rich value to the Ag-rich value across an interface. A dashed box inside the Cu-rich phase sees a uniform composition. A dashed box on the interface sees a steep change. Bottom: two energy terms peaked at the interface, the local free energy above the common tangent in blue and the gradient penalty in dashed red. Both are zero inside the phases.",
+               layer("gradient", "Gradient penalty", "\n".join(b)))
+
+
 if __name__ == "__main__":
     outputs = {
         "L27-time-scales.svg": (l27_time_scales(), 170),
+        "L27-lattice-attempt.svg": (l27_lattice_attempt(), 160),
         "L27-two-state.svg": (l27_two_state(), 150),
         "L28-three-answers.svg": (l28_three_answers(), 120),
         "L28-pair-sets.svg": (l28_pair_sets(), 128),
         "L28-free-energy.svg": (l28_free_energy(), 120),
+        "L28-phase-construction.svg": (l28_phase_construction(), 170),
+        "L28-gradient-penalty.svg": (l28_gradient_penalty(), 150),
     }
     lattice_svg, n_mixed = l28_lattice()
     outputs["L28-lattice-bonds.svg"] = (lattice_svg, 150)

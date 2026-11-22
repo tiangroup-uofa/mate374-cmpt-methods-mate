@@ -88,11 +88,12 @@ def _(mo):
     H_slider = mo.ui.slider(
         steps=[1.5, 2.25, 2.5, 3.0], value=2.5, label="H = Ω / kT", show_value=True
     )
-    return H_slider, dt_choice, method
+    h_nm = mo.ui.dropdown(options=["0.5", "1", "2"], value="1", label="grid spacing h (nm)")
+    return H_slider, dt_choice, h_nm, method
 
 
 @app.cell(hide_code=True)
-def _(H_slider, dt_choice, method, mo, np, plt, run, time):
+def _(H_slider, dt_choice, h_nm, method, mo, np, plt, run, time):
     t0 = time.perf_counter()
     c, times, energies, n_steps = run(method.value, H_slider.value, float(dt_choice.value))
     elapsed = time.perf_counter() - t0
@@ -108,9 +109,20 @@ def _(H_slider, dt_choice, method, mo, np, plt, run, time):
 
     stable = np.all(np.diff(energies) <= 1e-6) and c.min() > 1e-6 and c.max() < 1 - 1e-6
     verdict = "free energy decreased at every saved step" if stable else "**unstable: free energy rose or c hit 0 or 1**"
+    # Real units: without the bond term, the reduced equation at c = 0.5 is ordinary
+    # diffusion with D* = g''(0.5) = 4 grid spacings^2 per time unit. Matching D* to
+    # the Cu self-diffusion coefficient at 1000 K makes one time unit 4 h^2 / D.
+    _D = 2.33e-15
+    _h = float(h_nm.value) * 1e-9
+    _tau = 4 * _h**2 / _D
     mo.vstack(
         [
-            mo.hstack([method, dt_choice, H_slider], justify="start"),
+            mo.hstack([method, dt_choice, H_slider, h_nm], justify="start", wrap=True),
+            mo.md(
+                f"Real units with *D* = 2.3 × 10⁻¹⁵ m²/s (Cu at 1000 K): the grid is "
+                f"**{128 * float(h_nm.value):.0f} nm** wide, one time unit is **{_tau * 1e3:.1f} ms**, "
+                f"and *t* = 60 is **{60 * _tau:.2f} s**."
+            ),
             mo.md(
                 f"{n_steps:,} steps in **{elapsed:.2f} s**. Mean composition **{c.mean():.5f}**. "
                 f"Range **{c.min():.3f} to {c.max():.3f}**. {verdict}."

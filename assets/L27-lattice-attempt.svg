@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="160mm" height="62mm" viewBox="0 0 160 62">
+<title>One Monte Carlo attempt on a lattice</title>
+<desc>Three 6 by 6 lattices of grey Cu and blue Ag atoms. Panel a circles one randomly chosen site. Panel b adds a neighbour and a double arrow between them. Panel c shows the two atoms exchanged, which happens when the uniform random number u is smaller than the hop probability p.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid">
+<path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt" />
+</marker>
+<radialGradient id="atom-a" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#8a8f98" /></radialGradient>
+<radialGradient id="atom-b" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#1f77b4" /></radialGradient>
+</defs>
+<rect width="160" height="62" style="fill:white" />
+<g id="attempt" inkscape:groupmode="layer" inkscape:label="One attempt">
+<circle cx="8.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="15.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="22.00" cy="12.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="29.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="36.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="43.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="8.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="15.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="22.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="29.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="36.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="43.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="8.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="15.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="22.00" cy="26.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="29.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="36.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="43.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="8.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="15.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="22.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="29.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="36.00" cy="33.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="43.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="8.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="15.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="22.00" cy="40.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="29.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="36.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="43.00" cy="40.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="8.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="15.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="22.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="29.00" cy="47.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="36.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="43.00" cy="47.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<rect x="18.70" y="22.70" width="6.60" height="6.60" ry="3.3" style="fill:none;stroke:#b5473a;stroke-width:0.5" />
+<text x="3.50" y="6.00" style="font-family:Arial;font-size:6.35px;font-weight:bold;font-style:normal;fill:#231f20;text-anchor:start">a</text>
+<text x="25.50" y="55.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">pick a random site</text>
+<circle cx="62.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="69.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="76.00" cy="12.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="83.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="90.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="97.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="62.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="69.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="76.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="83.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="90.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="97.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="62.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="69.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="76.00" cy="26.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="83.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="90.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="97.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="62.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="69.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="76.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="83.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="90.00" cy="33.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="97.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="62.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="69.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="76.00" cy="40.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="83.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="90.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="97.00" cy="40.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="62.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="69.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="76.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="83.00" cy="47.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="90.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="97.00" cy="47.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<rect x="72.70" y="22.70" width="6.60" height="6.60" ry="3.3" style="fill:none;stroke:#b5473a;stroke-width:0.5" />
+<rect x="79.70" y="22.70" width="6.60" height="6.60" ry="3.3" style="fill:none;stroke:#b5473a;stroke-width:0.5" />
+<path d="M77.00,21.40 L82.00,21.40" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri);marker-start:url(#tri)" />
+<text x="57.50" y="6.00" style="font-family:Arial;font-size:6.35px;font-weight:bold;font-style:normal;fill:#231f20;text-anchor:start">b</text>
+<text x="79.50" y="55.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">pick one of its 4 neighbours</text>
+<circle cx="116.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="123.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="130.00" cy="12.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="137.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="144.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="151.00" cy="12.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="116.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="123.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="130.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="137.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="144.00" cy="19.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="151.00" cy="19.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="116.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="123.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="130.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="137.00" cy="26.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="144.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="151.00" cy="26.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="116.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="123.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="130.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="137.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="144.00" cy="33.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="151.00" cy="33.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="116.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="123.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="130.00" cy="40.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="137.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="144.00" cy="40.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="151.00" cy="40.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="116.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="123.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="130.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="137.00" cy="47.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<circle cx="144.00" cy="47.00" r="2.4" style="fill:url(#atom-a);stroke:#231f20;stroke-width:0.3" />
+<circle cx="151.00" cy="47.00" r="2.4" style="fill:url(#atom-b);stroke:#231f20;stroke-width:0.3" />
+<rect x="126.70" y="22.70" width="6.60" height="6.60" ry="3.3" style="fill:none;stroke:#b5473a;stroke-width:0.5" />
+<rect x="133.70" y="22.70" width="6.60" height="6.60" ry="3.3" style="fill:none;stroke:#b5473a;stroke-width:0.5" />
+<text x="111.50" y="6.00" style="font-family:Arial;font-size:6.35px;font-weight:bold;font-style:normal;fill:#231f20;text-anchor:start">c</text>
+<text x="133.50" y="55.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">if <tspan style="font-style:italic">u</tspan> &lt; <tspan style="font-style:italic">p</tspan>, swap</text>
+</g>
+</svg>

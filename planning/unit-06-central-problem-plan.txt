@@ -1,0 +1,58 @@
+Unit 06 rebuild around one central problem: phase separation in a Cu-Ag alloy
+Instructor direction, 2026-11-22. Replaces the earlier L27-L29 storyline.
+
+Titles (short) and subtitles (revealing)
+  L27  Monte Carlo techniques
+  L28  From Monte Carlo to continuum modeling
+  L29  Atomistic methods
+
+Central problem for all three lectures: a Cu-Ag alloy, quenched from a mixed state,
+separates into Cu-rich and Ag-rich regions. How do we simulate that?
+
+L27 sequence
+  1. The problem: SEM of Cu-Ag eutectic (Xu et al. 2022, Materials 15, 8189, CC BY 4.0,
+     Fig. 2), NIST Ag-Cu phase diagram (public domain). Link to A4 Problem 4 (Pb-Sn common tangent).
+  2. First attempt with MD: Cu-20 at% Ag, 32,000 atoms, Williams-Mishin-Hamilton 2006 EAM,
+     LAMMPS Kokkos/CUDA on the office RTX A2000. Show only the GIF of one layer.
+     Time scale from Cu self-diffusion (Kuper 1954) at 1000 K: one hop about 5 us,
+     5 nm about 2 ms, against 46 ns/day of MD.
+  3. Monte Carlo: casino photo (public domain), three portraits, NotebookLM video
+     (AI-generated disclaimer).
+  4. What Monte Carlo is: simulating a random process = averaging; back to Buffon (L01, L02, L04).
+  5. Random numbers in NumPy: default_rng, seeds, events with probability p.
+  6. Pure-Python, one-attempt-at-a-time lattice Monte Carlo on a small 2D lattice.
+     Good for: diffusion (MSD of tagged atoms). Weak: watching the whole microstructure
+     needs too many attempts in pure Python. Open question for L28.
+
+L28 sequence
+  1. Boltzmann probability; how many swaps are needed, and how long is one swap.
+  2. The central limitation of one-at-a-time Monte Carlo; parallel non-touching pair sets
+     (close to cellular automata, but keep the methods distinct).
+  3. The GPU notebook (no need to explain the shader); at least 10 million swaps per second.
+  4. Three regimes with static images and time labels: nucleation, spinodal, mixed.
+  5. From Monte Carlo to the phase diagram: what the Cu-Ag thermodynamics look like.
+     How a phase diagram is constructed: free-energy curves (loop back to Unit 1/A4 common tangent);
+     for each local composition the free energy of the phases; an added gradient penalty
+     that says whether a small box is one phase or sits on an interface.
+  6. From discrete events to continuous density: particles become a composition field.
+     Allen-Cahn / Cahn-Hilliard use this idea so that we can simulate at real length and time scales.
+     Keep the physics light. Connect to the Assignment 2 continuum problem.
+
+L28 second half, instructor direction (2026-11-22, later message)
+  - Ask how Monte Carlo connects to continuum modeling.
+  - From Monte Carlo we see a phase diagram: what does it look like for Cu-Ag?
+  - How is a phase diagram actually constructed? Consult the free-energy diagram
+    (loop back to Unit 1 and A4): for each local composition, the free energy of the phases,
+    plus an added function, a penalty, that tells whether a small box is one phase or two.
+  - Without going deep into physics: we convert a simulation of discrete events into a
+    continuous one, where particles become a density. Allen-Cahn and Cahn-Hilliard use this
+    idea. The goal: simulate at real length and time scales.
+
+L29: atomistic methods (to be planned after L27 and L28).
+
+Notes
+  - Porter, Easterling and Sherif, Phase Transformations in Metals and Alloys (3rd ed.):
+    adapt equations (Delta H_mix = Omega X_A X_B, Omega = N_a z epsilon) and redraw figures
+    (1.13, 1.15, 1.18, 5.39, 5.40) in the course SVG style. Do not copy book images.
+  - Earlier L27 notebooks l27_monte_carlo_dimension and l27_two_state_metropolis are no
+    longer embedded in L27. Decide later whether L28 uses the two-state check or they are removed.

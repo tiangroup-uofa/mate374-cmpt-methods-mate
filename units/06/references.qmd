@@ -5,7 +5,7 @@ format:
     toc: true
 bibliography: ../../references.bib
 nocite: |
-  @metropolis1949monte, @metropolis1953equation, @metropolis1987beginning, @eckhardt1987stan, @uffink2024boltzmann, @weissteinbuffon, @kuper1954selfdiffusion, @onsager1944crystal, @yang1952spontaneous, @allen1979microscopic, @chen1998applications, @wolfram1983statistical, @cahn1958free, @cahn1961spinodal, @kohn1965selfconsistent, @behler2007generalized, @burden2016numerical, @lesar2013, @taylor1997error, @jain2013materialsproject
+  @metropolis1949monte, @metropolis1953equation, @metropolis1987beginning, @eckhardt1987stan, @uffink2024boltzmann, @weissteinbuffon, @kuper1954selfdiffusion, @onsager1944crystal, @yang1952spontaneous, @allen1979microscopic, @chen1998applications, @wolfram1983statistical, @cahn1958free, @cahn1961spinodal, @kohn1965selfconsistent, @behler2007generalized, @burden2016numerical, @lesar2013, @taylor1997error, @jain2013materialsproject, @williams2006embedded, @xu2022cunanowires, @thompson2022lammps, @porter2009phase
 ---
 
 ## Bibliography

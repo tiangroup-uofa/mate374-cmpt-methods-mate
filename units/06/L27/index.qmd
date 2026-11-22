@@ -1,6 +1,6 @@
 ---
-title: "L27 · Monte Carlo: averages as high-dimensional integrals"
-subtitle: "Random sampling for questions that molecular dynamics cannot reach in time"
+title: "L27 · Monte Carlo techniques"
+subtitle: "Why molecular dynamics cannot watch a Cu–Ag alloy separate, and how random numbers can"
 body-classes: lecture-page
 from: markdown+tex_math_single_backslash
 bibliography: ../../../references.bib
@@ -16,82 +16,80 @@ format:
 ::: {.callout-note}
 ## Central question
 
-How can we predict the arrangement that an alloy settles into when molecular dynamics cannot follow the atoms for long enough?
+A copper–silver alloy quenched from high temperature separates into Cu-rich and Ag-rich regions. Molecular dynamics already knows the forces between the atoms. Why can it not show us this separation, and what kind of simulation can?
 :::
 
 ## Learning outcomes
 
 By the end of this lecture, you should be able to:
 
-1. **Estimate** how far atomic rearrangement in a solid lies beyond the time reach of MD.
-2. **Write** an equilibrium property as a Boltzmann-weighted average over configurations, and explain why it is a high-dimensional integral.
-3. **Derive** the Monte Carlo estimate of an integral and its \(1/\sqrt M\) standard error.
-4. **Apply** the Metropolis acceptance rule and check it against an exact two-state result.
-5. **Distinguish** Monte Carlo attempts from physical time.
+1. **Estimate** the time an atom waits between hops in a solid, and compare it with the time an MD run covers.
+2. **Explain** why simulating a random process is a way of calculating an average.
+3. **Generate** random events with a given probability in NumPy, and use a seed to repeat a run.
+4. **Write** a lattice Monte Carlo loop that moves atoms one attempt at a time.
+5. **Measure** a diffusion coefficient from that loop, and estimate how many attempts a microstructure needs.
 
-## Beyond the reach of molecular dynamics
+## The problem for this unit: a Cu–Ag alloy that will not stay mixed
 
-In [L22](../../05/L22/index.qmd#fig-scales-wiki), we placed simulation methods on a map of length against time. Empirical MD occupies a window from nanometres to about a micrometre and from femtoseconds to about a microsecond. In [L24](../../05/L24/index.qmd)–[L26](../../05/L26/index.qmd), we worked inside that window: atomic vibrations, a heated copper particle, and diffusion in a liquid. Many materials questions lie to the right of it, at longer times, or above it, at larger lengths. This unit develops three ways to answer them:
+Copper and silver are both fcc metals, and above about 780 °C they mix in the liquid. On cooling, they separate. The micrographs below show an Ag–Cu alloy close to the eutectic composition after directional solidification. The dark rods and plates are Cu-rich, and the bright matrix is Ag-rich. Faster growth gives a finer pattern [@xu2022cunanowires].
 
-- **Sample arrangements instead of following motion** (L27 and L28).
-- **Replace atoms by a continuous composition field** (L28).
-- **Improve the atomic energy that every method relies on** (L29).
+![SEM cross-sections of an Ag–39.9 at% Cu eutectic alloy grown at (a) 14, (b) 25, and (c) 34 µm/s. Dark regions are the Cu-rich phase. Scale bars are 2 µm. From @xu2022cunanowires, Fig. 2, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).](../../../assets/L27-cuag-eutectic-sem.jpg){#fig-cuag-sem width="85%" fig-alt="Three scanning electron micrographs at 10,000 times magnification. Panel a shows fine, wavy dark lamellae in a bright matrix. Panels b and c show dark rods that become smaller and more closely spaced as the growth rate increases."}
 
-Consider a solid A–B alloy annealed at 800 K. Do A and B stay mixed, or do they gather into A-rich and B-rich regions? What fraction of nearest-neighbour bonds join unlike atoms once the alloy has settled? This arrangement controls strength, conductivity, and phase stability. We have three lectures of MD behind us, so why not run MD and watch the atoms rearrange?
+The phase diagram tells us where this happens. Below the eutectic temperature, almost every composition lies in the two-phase region \(\alpha+\beta\), where \(\alpha\) is Cu with a little Ag dissolved and \(\beta\) is Ag with a little Cu. You constructed the same kind of boundary in [Assignment 4, Problem 4](../../../assignments/A4/index.qmd#problem-4-phase-separation-in-pbsn-solder-35-marks), where a common tangent to two Gibbs-energy curves gave the compositions of the two phases in Pb–Sn solder.
 
-### How long does an atom wait before it moves?
+![Calculated Ag–Cu phase diagram, with temperature in °C against mass % Ag. The \(\alpha\) and \(\beta\) solid solutions are narrow, and the two-phase region \(\alpha+\beta\) fills most of the diagram below the eutectic E. NIST, after Hayes et al. (1986), public domain.](../../../assets/L27-ag-cu-phase-diagram.jpg){#fig-agcu-diagram width="55%" fig-alt="Phase diagram from pure Cu on the left to pure Ag on the right. A liquid region sits above two liquidus lines that meet at a eutectic point near 72 mass percent Ag and 780 degrees Celsius. Narrow alpha and beta regions hug the two edges, and alpha plus beta fills the area below the eutectic line."}
 
-In a crystal, an atom changes place with a neighbour mainly when a vacancy arrives beside it, and the exchange requires passing an energy barrier. Tracer measurements of copper self-diffusion between 958 and 1335 K give [@kuper1954selfdiffusion]
+A phase diagram describes the end state. It does not say how a uniform alloy turns into two phases, how fast, or what pattern it forms on the way. These are the questions that Unit 6 answers, using the same alloy throughout:
+
+- **L27:** why MD is too slow for this process, and how a Monte Carlo simulation moves atoms by random events.
+- **L28:** how Boltzmann probabilities make Ag atoms cluster, how parallel hardware runs millions of events per second, and how the atoms become a continuous composition field.
+- **L29:** where the atomic energies in all these simulations come from.
+
+## First attempt: molecular dynamics
+
+We already have a tool that moves atoms. In [L24](../../05/L24/index.qmd)–[L26](../../05/L26/index.qmd), MD followed atoms by integrating Newton's equations, with forces from an interatomic potential. L26 showed that an embedded-atom (EAM) potential describes metals much better than a pair potential, and an EAM potential fitted to the Cu–Ag system already exists [@williams2006embedded]. So we set up the experiment directly:
+
+- **Starting state:** an fcc crystal of 32,000 atoms, with 20% of the sites chosen at random to hold Ag. This is a fully mixed alloy, the state right after a quench.
+- **Conditions:** 1000 K and zero pressure (NPT, [L25](../../05/L25/index.qmd#npt-a-pressure-controller-changes-the-cell)). The phase diagram places Cu–20 at% Ag at this temperature well inside \(\alpha+\beta\), so the atoms should separate.
+- **Engine:** LAMMPS [@thompson2022lammps] on one office GPU, with a 2 fs time step. The run advances 46 ns of simulated time per day of computing.
+
+The animation shows a single atomic layer of the crystal for 1.7 ns, the length of the run.
+
+::: {.content-visible when-format="html"}
+![Cu–20 at% Ag at 1000 K in MD, one (100) layer of a 32,000-atom crystal. Ag is dark and Cu is light. The atoms vibrate around their sites, and the arrangement does not change over 1.7 ns.](../../../assets/L27-cuag-md.gif){#fig-cuag-md width="60%" fig-alt="Animated square layer of atoms, light copper and dark silver, randomly mixed. The frames show small thermal jitter but the same random arrangement from the first to the last frame."}
+:::
+
+::: {.content-visible unless-format="html"}
+![Cu–20 at% Ag at 1000 K in MD, one (100) layer of a 32,000-atom crystal, after 1.7 ns. Ag is dark and Cu is light. The arrangement is the same as at the start.](../../../assets/L27-cuag-md-final.png){width="60%"}
+:::
+
+Nothing happens. The mean-squared displacement of the atoms stays between 0.25 and 0.27 Å² for the whole run. That is the size of a thermal vibration. An atom that hopped to a neighbouring site would have moved 2.6 Å, or 6.6 Å² squared. Every atom vibrates around its own site, and none has moved.
+
+### How long would we need to wait?
+
+Diffusion in a solid needs an atom to jump into a neighbouring vacant site over an energy barrier. Tracer measurements of copper self-diffusion between 958 and 1335 K give [@kuper1954selfdiffusion]
 
 \[
 D=0.468\ \mathrm{cm^2\,s^{-1}}\,\exp\!\left(-\frac{Q}{RT}\right),\qquad Q=47.1\ \mathrm{kcal\,mol^{-1}}\approx2.04\ \mathrm{eV}.
 \]
 
-This is the Arrhenius form from [L09](../../02/L09/index.qmd). Extrapolating about 160 K below the measured range, to 800 K, gives \(D\approx6\times10^{-18}\ \mathrm{m^2/s}\). A random walk of hops of length \(a\) in three dimensions has \(\langle R^2\rangle=6Dt\), the Einstein relation from [L25](../../05/L25/index.qmd#fitting-diffusivity-reading-material). With the nearest-neighbour distance \(a=0.256\ \mathrm{nm}\):
+This is the Arrhenius form from [L09](../../02/L09/index.qmd). At 1000 K it gives \(D\approx2.3\times10^{-15}\ \mathrm{m^2/s}\). We use it as the estimate for our alloy. A random walk of hops of length \(a=0.256\ \mathrm{nm}\) in three dimensions spreads as \(\langle R^2\rangle=6Dt\), the Einstein relation from [L25](../../05/L25/index.qmd#fitting-diffusivity-reading-material). The numbers follow:
 
-- **Hop rate:** \(\Gamma=6D/a^2\approx570\ \mathrm{s^{-1}}\), so each atom hops about once every 2 ms.
-- **Vibrations per hop:** the Cu–Cu vibration period from L25 is 168 fs, about \(6\times10^{12}\) attempts per second. Only one attempt in roughly \(10^{10}\) succeeds.
-- **Rearrangement over 5 nm:** \(t=L^2/(6D)\approx0.7\ \mathrm{s}\).
+- **Hop rate:** \(\Gamma=6D/a^2\approx2\times10^{5}\ \mathrm{s^{-1}}\), so each atom waits about 5 µs between hops.
+- **Vibrations per hop:** a Cu–Cu vibration lasts 168 fs ([L25](../../05/L25/index.qmd#bond-vibrations-set-a-short-time-scale)). An atom vibrates about 28 million times for each successful hop.
+- **Separation over 5 nm:** \(t=L^2/(6D)\approx2\ \mathrm{ms}\).
 
-![Time scales for copper at 800 K. A large MD run ends near a microsecond. A single hop takes milliseconds, and rearranging a 5 nm region takes most of a second.](../../../assets/L27-time-scales.svg){#fig-time-scales width="100%" fig-alt="A logarithmic time axis from 1 femtosecond to 10 seconds. A blue band marks the reach of a large MD run, ending at 1 microsecond. Markers show one Cu–Cu vibration at 168 fs, one hop at about 2 ms, and rearrangement over 5 nm at about 0.7 s. A red arrow spans the gap of about one million between the MD reach and the rearrangement time."}
+![Time scales at 1000 K. One day of our GPU run covers 46 ns. A single hop takes about 5 µs, and rearranging a 5 nm region about 2 ms.](../../../assets/L27-time-scales.svg){#fig-time-scales width="100%" fig-alt="Logarithmic time axis from 1 femtosecond to 10 seconds. A blue band ends at 46 nanoseconds for one GPU day, and a grey band ends at 1 microsecond for the largest runs. Markers show one Cu–Cu vibration at 168 fs, one hop at about 5 microseconds, and rearrangement over 5 nm at about 2 milliseconds. A red arrow labelled about 40,000 GPU days spans the gap."}
 
-With a 1 fs step, 0.7 s requires about \(7\times10^{14}\) steps. The large runs discussed in [L22](../../05/L22/index.qmd) reach about \(10^9\) steps, and the billion-atom iron solidification in L25 covered 2 ns. The rearrangement lies a factor of about a million beyond a very large run. A longer time step does not help, because L25 showed that the fastest vibration limits it. In any MD run we can afford, the alloy keeps the arrangement it started with.
+At 46 ns per day, 2 ms takes about 40,000 days, more than a century of computing for a region 5 nm across. Our run of 1.7 ns covered less than a thousandth of the time between two hops of a single atom. The MD run was correct, and it answered its question: in 1.7 ns, the alloy stays mixed.
 
-## Which arrangements, and how often?
+How do we reach the hops, then? MD spends almost all its effort on the 28 million vibrations that end where they started. Each vibration either ends in a hop or does not. If we treat the hop as a random event with a known probability, we can skip the vibrations and simulate only the events that change the arrangement. A simulation built from random events is called a **Monte Carlo** simulation.
 
-The settled arrangement does not depend on the path the atoms took, how long they took, or which vacancy carried each atom. If the question concerns only the equilibrium state, we can set the motion aside and ask a question with no time in it: which arrangements does the alloy occupy at temperature \(T\), and how often?
-
-A settled alloy still fluctuates between many arrangements, so a measured property is an average over them, each weighted by how often it occurs. Let \(\mathbf R\) be the list of all atomic positions and \(A(\mathbf R)\) the property, such as the unlike-bond fraction. For a sample in contact with a heat bath, the NVT ensemble of [L25](../../05/L25/index.qmd#ensembles-energy-temperature-and-pressure-conditions), a configuration with energy \(U(\mathbf R)\) occurs with probability proportional to its **Boltzmann weight** \(e^{-U/(k_{\mathrm B}T)}\). The average is
-
-\[
-\boxed{
-\langle A\rangle
-=\frac{\displaystyle\int A(\mathbf R)\,e^{-U(\mathbf R)/(k_{\mathrm B}T)}\,\mathrm d\mathbf R}
-{\displaystyle\int e^{-U(\mathbf R)/(k_{\mathrm B}T)}\,\mathrm d\mathbf R}
-}
-\]
-
-How to read the weights:
-
-- **Low-energy configurations** receive large weights and dominate the average.
-- **Raising \(T\)** flattens the weights, so higher-energy configurations contribute more.
-- **The denominator** turns the weights into probabilities that sum to one.
-
-How large is this integral? The symbol \(\mathrm d\mathbf R\) contains three coordinates per atom, so ten atoms give a 30-dimensional integral. The trapezoidal rule of [L19](../../04/L19/index.qmd) with ten points per coordinate would need \(10^{30}\) energy evaluations. At a million evaluations per second, that is about \(3\times10^{16}\) years. If the atoms sit on fixed lattice sites, the integral becomes a sum over arrangements, and the count is no kinder. An 8 × 8 lattice holding 32 A and 32 B atoms has
-
-\[
-\binom{64}{32}=\frac{64!}{32!\,32!}\approx1.8\times10^{18}
-\]
-
-arrangements, about 58,000 years at the same rate. Neither a grid nor a complete count is usable for a sample of 64 atoms, let alone a real alloy.
-
-## Los Alamos, 1946: an impossible count
-
-Physicists met the same obstacle at Los Alamos after the Second World War, and their version closely resembles ours. Designers of fission devices needed to know whether the neutrons in a device multiply or escape. A neutron starts at some position and velocity, travels, collides, scatters, causes fission, or leaves the material. Each neutron therefore has a branching history of random events, and the multiplication rate is an average over all possible histories. There are far too many to enumerate, just as there are far too many alloy arrangements.
+## Monte Carlo: a casino and a card game
 
 ::::: {.scientist-method-inline}
 ::: {.scientist-method-text}
-The approach that solved it came from a card player. Stanislaw Ulam relaxed with solitaire and enjoyed poker. In 1946, while recovering from an illness, he asked what chance a game of Canfield solitaire has of coming out. Counting the card arrangements was hopeless, so he asked whether it would be more practical to lay out the cards many times and simply count the successful games [@eckhardt1987stan]. A gambler estimates the odds of a game by playing it many times, and Ulam proposed estimating the neutron average the same way.
+The name comes from the casino in Monaco. In 1946, the mathematician Stanislaw Ulam was recovering from an illness at home and playing solitaire. He wondered how likely a game was to come out, gave up on counting the card arrangements, and realised that laying out the cards many times and counting the successes would answer the question [@eckhardt1987stan]. At Los Alamos, he and John von Neumann applied the same idea to neutrons travelling through a fissile core, where each neutron's path is a chain of random collisions. ENIAC, one of the first electronic computers, could follow thousands of such random histories. Nicholas Metropolis suggested the name, partly because Ulam had an uncle who borrowed money from relatives because he "just had to go to Monte Carlo" [@metropolis1987beginning]. In 1953, Metropolis, the Rosenbluths, and Augusta and Edward Teller added the rule for sampling atoms at a given temperature, which we use in L28 [@metropolis1953equation].
 :::
 :::: {.scientist-portraits}
 ::: {.scientist-portrait}
@@ -118,167 +116,161 @@ The approach that solved it came from a card player. Stanislaw Ulam relaxed with
 ::::
 :::::
 
-The idea of statistical sampling was old, but it had fallen out of use because the calculations were too long and tedious to do by hand [@metropolis1987beginning]. Random reasoning has a long history:
+:::: {.columns}
+::: {.column width="58%"}
+![The Monte Carlo casino in the 1890s. Photochrom print, Library of Congress, public domain.](../../../assets/L27-monte-carlo-casino.jpg){#fig-casino fig-alt="Colour-tinted photograph of the ornate Monte Carlo casino building with gardens and palm trees in front."}
+:::
+::: {.column width="42%"}
+::: {.content-visible when-format="html"}
+```{=html}
+<video controls playsinline preload="metadata" poster="../../../assets/L27-monte-carlo-intro-poster.jpg" width="100%" style="max-height: 480px; background: black;" aria-label="Short narrated video on the origin of the Monte Carlo method">
+  <source src="../../../assets/L27-monte-carlo-intro.mp4" type="video/mp4">
+  Your browser does not support embedded video. <a href="../../../assets/L27-monte-carlo-intro.mp4">Open the video directly</a>.
+</video>
+```
+*AI-generated video (Google NotebookLM) from a course script. The people and scenes are drawn illustrations.*
+:::
+:::
+::::
 
-- **Buffon** posed his needle problem in 1733 and published its solution in 1777 [@weissteinbuffon]. We repeated his experiment in [L01](../../01/L01/index.qmd#first-numerical-experiment-buffons-needle).
-- **Boltzmann** explained the second law of thermodynamics through the statistics of enormous numbers of atoms. Mach and Ostwald disputed the atomic view of matter during his lifetime, and Loschmidt and Zermelo raised serious objections to his statistical arguments [@uffink2024boltzmann].
-- **Enrico Fermi** used random sampling for neutron problems in Rome in the early 1930s, working with a small mechanical adding machine, and never published the method [@metropolis1987beginning].
+## Simulating a random process is calculating an average
 
-What changed in the 1940s was the machine. ENIAC, one of the first electronic computers, could generate and process random choices far faster than any team with desk calculators. Ulam discussed the idea with John von Neumann, who in March 1947 outlined a calculation that followed many individual neutron histories through a fissile core. Nicholas Metropolis suggested the name "Monte Carlo", partly because Ulam had an uncle who would borrow money from relatives because he "just had to go to Monte Carlo" [@metropolis1987beginning]. Metropolis and Ulam described the method in 1949 [@metropolis1949monte]. Random sampling needs very many samples, and only a computer can supply them, so Monte Carlo became a method of the computer age.
-
-## Monte Carlo integration
-
-### Buffon's needle was already an integral
-
-In L01, each needle throw gave a value of 1 for a crossing and 0 otherwise. The crossing fraction was the mean of those values, and it estimated the crossing probability \(2L/(\pi D)\). That probability is an integral over every needle position and angle. Throwing needles at random was therefore Monte Carlo integration: we averaged a property over random samples, and the average estimated the integral. For the alloy, each sample is an arrangement of atoms, and the property is the unlike-bond fraction.
-
-### The estimator
-
-Write the integral of a function \(f\) over a region of volume \(V\). The integral equals the average height of \(f\) times the volume. Drawing \(M\) points \(\mathbf X_1,\mathbf X_2,\ldots,\mathbf X_M\) uniformly in the region, the sample mean estimates that average height:
-
-\[
-\boxed{
-\begin{aligned}
-I&=\int_V f(\mathbf x)\,\mathrm d\mathbf x,\\
-\widehat I&=V\,\frac{f(\mathbf X_1)+f(\mathbf X_2)+\cdots+f(\mathbf X_M)}{M}.
-\end{aligned}
-}
-\]
-
-The estimate refers to no grid, so the number of samples need not grow as \(n^d\) with dimension \(d\).
-
-### How accurate is the estimate?
-
-The values \(f_i=f(\mathbf X_i)\) scatter around their mean. Their standard deviation \(\sigma\) measures the spread of individual samples, and more samples do not reduce it. Their average fluctuates much less. For independent samples drawn from the same distribution, the variances of the terms add, and dividing the sum by \(M\) divides its variance by \(M^2\):
+We have used Monte Carlo before. In [L01](../../01/L01/index.qmd#first-numerical-experiment-buffons-needle), we dropped virtual needles on a lined floor and counted crossings. Each throw gave a value of 1 for a crossing and 0 otherwise. The crossing fraction after \(N\) throws was the average of those values,
 
 \[
-\begin{aligned}
-\operatorname{Var}\!\left(\frac{f_1+f_2+\cdots+f_M}{M}\right)
-&=\frac{M\sigma^2}{M^2}=\frac{\sigma^2}{M},\\
-\operatorname{SE}(\widehat I)
-&=V\frac{\sigma}{\sqrt M}.
-\end{aligned}
+\widehat P=\frac{x_1+x_2+\cdots+x_N}{N},\qquad x_i\in\{0,1\},
 \]
 
-The variance is the mean squared deviation from the mean. The **standard error** (SE) is the typical spread of the estimate if we repeated the whole calculation with new random numbers [@taylor1997error, ch. 4]. In practice, the sample standard deviation estimates \(\sigma\):
+and it estimated the crossing probability \(2L/(\pi D)\). That probability is an integral over every possible position and angle of a needle, so the random throws were calculating an integral by averaging. In [L02](../../01/L02/index.qmd#return-to-buffons-needle), we measured how the error of such an average shrinks: the estimate of \(\pi\) had a typical error of \(2.37/\sqrt N\). In [L04](../../01/L04/index.qmd), we made the throws faster with NumPy, compiled loops, many cores, and a GPU.
 
-\[
-s^2=\frac{(f_1-\overline f)^2+(f_2-\overline f)^2+\cdots+(f_M-\overline f)^2}{M-1}.
-\]
+The same reasoning holds for any random process we simulate:
 
-This result explains [L02](../../01/L02/index.qmd). For needles with \(L=D\), the crossing probability is \(p=2/\pi\). Each throw has spread \(\sqrt{p(1-p)}\approx0.48\), and converting the crossing fraction into an estimate of \(\pi\) gives the error scale \(2.37/\sqrt M\) that we observed there. Halving the error needs four times as many throws.
+- **One run** of the process gives one random outcome, such as a crossing or the time until a hop.
+- **Many runs** give a distribution of outcomes.
+- **The average** over runs estimates the expected value, and its error decreases as \(1/\sqrt N\). Four times as many runs halve the error.
 
-### Does the error grow with dimension?
+A random event therefore plays the role that a time step played in MD. MD advanced the atoms by a deterministic rule, and here the next state is chosen by drawing random numbers.
 
-Take an integral whose exact answer we know:
+## Random numbers in NumPy
 
-- **Given:** \(f(\mathbf x)=x_1^2+x_2^2+\cdots+x_d^2\) on the unit cube, so \(V=1\).
-- **Exact answer:** each term integrates to \(1/3\), so \(I=d/3\).
-- **Spread:** each \(x_k^2\) has variance \(1/5-1/9=4/45\). The terms are independent, so \(\sigma^2=4d/45\).
-- **Question:** how does the relative error depend on \(d\)?
+A computer produces random numbers with a **pseudo-random number generator**, a deterministic algorithm whose output passes statistical tests for randomness. In NumPy, we create a generator once and draw from it:
 
-\[
-\frac{\operatorname{SE}(\widehat I)}{I}
-=\frac{\sqrt{4d/45}}{d/3}\,\frac{1}{\sqrt M}
-\approx\frac{0.894}{\sqrt{d}\,\sqrt M}.
-\]
+```python
+import numpy as np
 
-For this function, the relative error even decreases with \(d\), while the grid cost grows as \(n^d\). The general lesson is narrower: Monte Carlo removes the grid explosion, and its accuracy is set by \(\sigma\). The standard error describes a typical run, so a single run can land closer or farther.
+rng = np.random.default_rng(374)   # 374 is the seed
+u = rng.random()                   # a uniform number in [0, 1)
+site = rng.integers(400)           # a whole number 0, 1, ..., 399
+```
 
-::: {.quarto-wasm-local notebook="l27_monte_carlo_dimension.edit.py" title="Monte Carlo error against dimension and sample count" height="720" loading="lazy" fullscreen="true"}
-**Static fallback.** For \(d=10\) and \(M=1000\), the predicted relative standard error is \(0.894/\sqrt{10\,000}\approx0.0089\). Repeated runs give a root-mean-square relative error of about 0.008–0.009, and a grid with ten points per coordinate would need \(10^{10}\) evaluations.
+How to use these draws:
+
+- **Seed:** the same seed reproduces the same sequence, so a run can be repeated exactly and an error can be traced. A different seed gives an independent run. In L04, parallel workers needed separate streams from `SeedSequence.spawn` for the same reason.
+- **An event with probability \(p\):** draw \(u\) and let the event happen if \(u<p\). Since \(u\) is uniform, the chance that it falls below \(p\) is exactly \(p\).
+- **A random choice among \(n\) options:** draw `rng.integers(n)`. Each option has probability \(1/n\).
+
+These three lines are all we need to simulate the atom hops. Return to the vibrating atom. Each vibration ends in a hop with a small probability \(p\), so the atom keeps drawing \(u\) until \(u<p\):
+
+```python
+def vibrations_until_hop(p, rng):
+    count = 0
+    while True:
+        count += 1
+        if rng.random() < p:
+            return count
+```
+
+Repeating this for many atoms gives the distribution of waiting times. The probability that the first \(k-1\) vibrations fail and the \(k\)-th succeeds is \((1-p)^{k-1}p\), and its average is \(1/p\) vibrations. For copper at 1000 K, \(p\approx3.6\times10^{-8}\), so the average wait is the 28 million vibrations we estimated from the measured diffusivity. Use the slider to watch the simulated histogram follow the exact curve, and notice how widely individual atoms differ around the average.
+
+::: {.quarto-wasm-local notebook="l27_random_events.edit.py" title="Waiting for a hop: random events in NumPy" height="560" loading="lazy" fullscreen="true"}
+**Static fallback.** With \(p=0.1\) and 1,000 atoms, the simulated waiting times form a decaying histogram that follows \((1-p)^{k-1}p\), and their average is close to the exact value of 10 vibrations. Some atoms hop on the first vibration and a few wait more than 40.
 :::
 
-## Why uniform samples fail for an alloy
+## A lattice Monte Carlo, one attempt at a time
 
-Apply the estimator to the alloy. Draw arrangements uniformly and weight each by \(e^{-U/(k_{\mathrm B}T)}\), with energy \(\epsilon\) for every unlike bond. On the 8 × 8 lattice, a random arrangement has about 65 unlike bonds out of 128, while two separated strips have 16. At \(k_{\mathrm B}T=\epsilon\), their weights differ by a factor of
+Now we build the alloy simulation. Every atom in the fcc crystal sits on a lattice site, and a hop moves it to a neighbouring site. To keep the picture small, we use a two-dimensional square lattice of \(L\times L\) sites with periodic boundaries, as in [L25](../../05/L25/index.qmd#periodic-boundary-conditions). Each site holds a Cu or an Ag atom, and a hop exchanges the atoms on two neighbouring sites. In a real crystal, the exchange happens through a vacancy. Here we let two neighbours swap directly, which keeps the composition fixed and the code short.
 
-\[
-e^{-(65-16)}=e^{-49}\approx5\times10^{-22}.
-\]
-
-Almost every uniform draw lands on an arrangement with negligible weight, and the rare important arrangements are almost never drawn. The weighted values have an enormous \(\sigma\), so \(\sigma/\sqrt M\) is useless.
-
-The remedy is to choose where the samples land. If we draw points from a probability density \(q(\mathbf x)\) and divide each value by \(q\), the average still estimates the integral:
-
-\[
-\begin{aligned}
-I&=\int\frac{f(\mathbf x)}{q(\mathbf x)}\,q(\mathbf x)\,\mathrm d\mathbf x,\\
-\widehat I&=\frac1M\left[\frac{f(\mathbf X_1)}{q(\mathbf X_1)}+\cdots+\frac{f(\mathbf X_M)}{q(\mathbf X_M)}\right].
-\end{aligned}
-\]
-
-This is **importance sampling**. For a thermal average, the ideal choice of \(q\) is the Boltzmann distribution itself. The weights then cancel, and \(\langle A\rangle\) becomes a plain mean of the sampled values of \(A\). The obstacle is the denominator of the boxed average: normalizing the Boltzmann distribution requires the very integral we wanted to avoid.
-
-## The Metropolis rule
-
-In 1953, Metropolis, Arianna and Marshall Rosenbluth, and Augusta and Edward Teller removed this obstacle on the Los Alamos MANIAC computer [@metropolis1953equation]. The ratio of two Boltzmann weights needs only their energy difference, so the unknown normalization cancels. They built a chain of configurations. At each step, propose a small change, such as swapping an A atom and a B atom, and accept it with probability
-
-\[
-\boxed{
-a=\min\!\left(1,\ \exp\!\left[-\frac{\Delta E}{k_{\mathrm B}T}\right]\right),
-\qquad \Delta E=E_{\mathrm{new}}-E_{\mathrm{old}}.
-}
-\]
+![One Monte Carlo attempt. (a) Pick a random site. (b) Pick one of its four neighbours. (c) Draw \(u\), and swap the two atoms if \(u<p\).](../../../assets/L27-lattice-attempt.svg){#fig-lattice-attempt width="95%" fig-alt="Three 6 by 6 lattices of grey Cu and blue Ag atoms. In panel a, a red ring marks one Ag atom. In panel b, a second ring marks its Cu neighbour and a double arrow joins them. In panel c, the Ag and Cu atoms have exchanged places."}
 
 The procedure for one attempt:
 
-1. **Propose** a change and calculate \(\Delta E\).
-2. **Downhill or level** (\(\Delta E\le0\)): accept.
-3. **Uphill** (\(\Delta E>0\)): draw a uniform random number \(u\) between 0 and 1, and accept if \(u<e^{-\Delta E/(k_{\mathrm B}T)}\).
-4. **Record** the current configuration, whether or not the change was accepted.
+1. **Pick a site** \(i\) at random from the \(L^2\) sites.
+2. **Pick a neighbour** \(j\) at random from its four neighbours.
+3. **Draw** \(u\). If \(u<p\), exchange the atoms on \(i\) and \(j\).
+4. **Repeat.** A **sweep** is \(L^2\) attempts, so every site is tried once on average.
 
-Uphill changes become less likely as \(\Delta E\) grows and more likely as \(T\) rises. Step 4 is easy to overlook, and the two-state check below shows why it matters.
+Written out in pure Python, the loop has no hidden steps. The lists `x` and `y` record each atom's position without wrapping at the boundary, so we can measure how far it travels, as we did with unwrapped coordinates in L25:
 
-### A two-state check
+```python
+for sweep in range(n_sweeps):
+    for attempt in range(N):                  # N = L * L attempts per sweep
+        i = rng.integers(N)                   # 1. a random site
+        dx, dy = steps[rng.integers(4)]       # 2. one of its four neighbours
+        j = neighbour(i, dx, dy)
+        if rng.random() < p:                  # 3. the hop happens with probability p
+            a, b = site[i], site[j]
+            site[i], site[j] = b, a           #    the two atoms exchange sites
+            x[a] += dx; y[a] += dy
+            x[b] -= dx; y[b] -= dy
+```
 
-- **Given:** state 0 with energy 0 and state 1 with energy \(\epsilon\), at \(k_{\mathrm B}T=\epsilon\). Each attempt proposes a switch or a stay with equal probability.
-- **Exact answer:** the Boltzmann fraction in state 1 is \(e^{-1}/(1+e^{-1})\approx0.269\).
-- **Question:** does the Metropolis rule reproduce it?
+The atoms in this simulation never vibrate. Every step either moves two atoms or leaves them in place, so the arrangement changes from the first sweep onward.
 
-An uphill switch is accepted with probability \(e^{-1}\approx0.368\), so a uniform draw of 0.20 accepts it, and a draw of 0.70 rejects it. A downhill switch is always accepted. At equilibrium, the probability flowing from 0 to 1 must equal the reverse flow. The equal proposal factors cancel, leaving
+### What the simulation measures well: diffusion
+
+Each accepted swap moves two atoms by one lattice spacing \(a\). An attempt therefore adds \(2a^2\) to the total squared displacement with probability \(p\), and a sweep of \(L^2\) attempts adds \(2pa^2\) per atom. In two dimensions the Einstein relation reads \(\langle R^2\rangle=4Dt\), so
 
 \[
-p_0\,e^{-\epsilon/(k_{\mathrm B}T)}=p_1\cdot1,
-\qquad
-\frac{p_1}{p_0}=e^{-\epsilon/(k_{\mathrm B}T)},
+\boxed{
+\begin{aligned}
+\langle R^2\rangle&=2p\,a^2\times(\text{number of sweeps}),\\
+D&=\frac{p\,a^2}{2}\ \text{per sweep}.
+\end{aligned}
+}
 \]
 
-which is the Boltzmann ratio. This balance holds because the proposal is symmetric: proposing 0 → 1 is as likely as proposing 1 → 0.
+Run the notebook below, fit the slope of \(\langle R^2\rangle\), and compare it with \(2p\).
 
-![Two-state check at \(k_{\mathrm B}T=\epsilon\). (a) Uphill switches are accepted with probability \(e^{-1}\), downhill switches always. (b) The fraction of recorded states reproduces the Boltzmann values.](../../../assets/L27-two-state.svg){#fig-two-state width="85%" fig-alt="Panel a shows two horizontal energy levels, 0 and epsilon. A red upward arrow is labelled accept e to the minus 1 equals 0.368, and a black downward arrow is labelled accept always. Panel b shows two bars: state 0 at 0.731 and state 1 at 0.269."}
-
-::: {.quarto-wasm-local notebook="l27_two_state_metropolis.edit.py" title="Two-state Metropolis sampling: which records to count" height="660" loading="lazy" fullscreen="true"}
-**Static fallback.** With 20,000 attempts at \(k_{\mathrm B}T=\epsilon\), counting every attempt gives a state-1 fraction of about 0.27, close to the exact 0.269. Counting only accepted switches gives 0.50, because accepted switches alternate between the two states.
+::: {.quarto-wasm-local notebook="l27_lattice_hops.edit.py" title="Lattice Monte Carlo in pure Python: hops and diffusion" height="720" loading="lazy" fullscreen="true"}
+**Static fallback.** On a 20 × 20 lattice with 20% Ag and \(p=0.5\), 200 sweeps give a fitted slope of 0.999 \(a^2\) per sweep against the predicted \(2p=1\), so \(D=0.25\,a^2\) per sweep. Pure Python performs about half a million attempts per second. The final lattice looks as randomly mixed as the starting one.
 :::
 
-Counting only accepted switches gives 0.5 at every temperature, because each accepted switch from 0 to 1 is followed by one from 1 to 0. The repeated records after a rejection carry the information about how long the chain stays in a low-energy state.
+The unit of time here is the sweep. Matching \(D\) per sweep to the measured diffusivity turns sweeps into seconds. With \(p=0.5\) and the copper values at 1000 K,
 
-## Back to the alloy: what the swap gains and gives up
+\[
+t_{\text{sweep}}=\frac{p\,a^2/2}{D}=\frac{0.25\times(0.256\ \mathrm{nm})^2}{2.3\times10^{-15}\ \mathrm{m^2/s}}\approx7\ \mu\mathrm s.
+\]
 
-A Metropolis swap can exchange two distant atoms in one step, a move the real alloy never makes. That freedom is why the method reaches the settled arrangement that MD could not. It also has two costs:
+A single sweep already covers more time than an atom waits for a hop, a wait that MD could not reach in a day. About 260 sweeps reach the 2 ms that would take MD a century.
 
-- **Correlated samples.** Each configuration is built from the previous one, and rejections repeat values. The \(M\) records are therefore not independent, and \(s/\sqrt M\) understates the uncertainty. The chain also needs an initial adjustment before its records represent equilibrium.
-- **No physical time.** The attempt counter measures sampling work. Equilibrium Metropolis sampling gives averages and fluctuations at fixed \(T\), and it says nothing about how fast the alloy gets there.
+### Where it struggles: the whole microstructure
 
-Both costs return in L28, where we run the swap on a lattice and measure the unlike-bond fraction.
+Look again at the lattice after the run. The Ag atoms wander but stay randomly mixed. The simulation gives no reason for Ag to prefer Ag neighbours, because the hop probability \(p\) is the same for every swap. Real Cu–Ag atoms separate because some arrangements have lower energy than others, so the probability of a swap must depend on how the swap changes the energy. That dependence is the subject of L28.
+
+The second difficulty is size. The micrographs show features a few micrometres across. Suppose we wanted a region 1 µm × 1 µm in a single atomic layer:
+
+- **Sites:** \((1\ \mu\mathrm m/0.256\ \mathrm{nm})^2\approx1.5\times10^{7}\).
+- **Time for an atom to diffuse 1 µm:** \(t=L^2/(4D)\approx110\ \mathrm s\), or about \(1.5\times10^{7}\) sweeps.
+- **Attempts:** \(1.5\times10^{7}\ \text{sites}\times1.5\times10^{7}\ \text{sweeps}\approx2\times10^{14}\).
+
+At half a million attempts per second, the pure-Python loop needs about 13 years. The Monte Carlo method closed a gap of a factor of a million in time. Watching a whole microstructure form needs another large factor in the number of attempts per second, and the attempts must know about energy.
 
 ## What to keep
 
-- Atomic rearrangement in a solid alloy takes a million times longer than a very large MD run, as copper self-diffusion data show.
-- An equilibrium property is a Boltzmann-weighted average over configurations, an integral with three coordinates per atom.
-- Monte Carlo replaces the grid with random samples. Its standard error is \(\sigma/\sqrt M\), whatever the dimension.
-- Uniform samples fail for Boltzmann weights. The Metropolis rule samples in proportion to those weights using only energy differences.
-- Every attempt is recorded, including rejections, and attempts are not physical time.
+- MD follows every vibration. In a solid at 1000 K, an atom vibrates about 28 million times per hop, so one GPU day of MD does not reach a single hop.
+- Monte Carlo replaces deterministic steps by random events. Averaging over random outcomes estimates an expected value, with an error that decreases as \(1/\sqrt N\).
+- In NumPy, create one generator with a seed, `rng = np.random.default_rng(seed)`, and let an event with probability \(p\) happen when `rng.random() < p`.
+- A lattice Monte Carlo swaps neighbouring atoms one attempt at a time. Its mean-squared displacement gives \(D=pa^2/2\) per sweep in two dimensions, which converts sweeps into seconds.
+- With a constant hop probability, the alloy stays mixed, and a micrometre-scale region needs about \(10^{14}\) attempts.
 
 ## Check your understanding
 
-1. Using \(D=6\times10^{-18}\ \mathrm{m^2/s}\), how long does a copper atom take to diffuse 1 nm at 800 K? How many 1 fs MD steps is that?
-2. Why does the dimension of the integral not appear in the Monte Carlo standard error?
-3. A Monte Carlo estimate has a standard error of 0.02 with 1,000 samples. How many samples give 0.005?
-4. At \(k_{\mathrm B}T=0.5\epsilon\), what is the acceptance probability of a swap that raises the energy by \(2\epsilon\)?
-5. Why must an uphill change sometimes be accepted for a correct average?
+1. At 1000 K, how many 2 fs MD steps does an atom need, on average, before it hops once?
+2. Why does the same seed give the same Monte Carlo run? When would you want a different seed?
+3. Write one line of NumPy that decides whether an event with probability 0.3 happens.
+4. A lattice run with \(p=0.2\) gives a mean-squared displacement of \(40\,a^2\) after 100 sweeps. Is this consistent with \(2pa^2\) per sweep?
+5. Our lattice Monte Carlo moves atoms over milliseconds, yet the Ag atoms never cluster. What is missing from the hop rule?
 
 ## Next
 
-The Metropolis rule gives us a way to sample alloy arrangements, but we have not yet asked why A and B would not simply mix at random. [L28](../L28/index.qmd) runs the swap on a lattice, accelerates it with the strategies of L04, and then replaces the atoms by a composition field.
+[L28](../L28/index.qmd) gives each swap a probability that depends on its energy change, through the Boltzmann factor. We count how many swaps a microstructure needs, run them in parallel on a GPU at more than ten million per second, and watch Cu–Ag separate in three different ways. The pattern then becomes a composition field, which carries the simulation to real lengths and times.

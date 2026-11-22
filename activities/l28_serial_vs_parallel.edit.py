@@ -60,21 +60,22 @@ def _(math, np):
         non-touching pairs at once, using whole-array operations. L must be a
         multiple of 4."""
         rows, cols = np.indices(s.shape)
-        for axis in (1, 0):
+        # The 16 pair sets in random order. A fixed order would carry isolated
+        # atoms across the lattice like a conveyor belt.
+        for k in rng.integers(16, size=16):
+            axis, a, b = 1 - k // 8, (k // 2) % 4, k % 2
             t = s if axis == 1 else s.T  # view: pairs run along the second index
-            for a in range(4):
-                for b in range(2):
-                    q = np.roll(t, -1, 1)  # right partner of each site
-                    p_nb = (np.roll(t, 1, 1), np.roll(t, 1, 0), np.roll(t, -1, 0))
-                    q_nb = (np.roll(t, -2, 1), np.roll(q, 1, 0), np.roll(q, -1, 0))
-                    before = sum(n != t for n in p_nb) + sum(n != q for n in q_nb)
-                    after = sum(n != q for n in p_nb) + sum(n != t for n in q_nb)
-                    d_e = after - before
-                    in_set = (cols % 4 == a) & (rows % 2 == b) & (t != q)
-                    draw = rng.random(t.shape)
-                    accept = in_set & ((d_e <= 0) | (draw < np.exp(-d_e / kT)))
-                    new = np.where(accept, q, t)
-                    t[...] = np.where(np.roll(accept, 1, 1), np.roll(t, 1, 1), new)
+            q = np.roll(t, -1, 1)  # right partner of each site
+            p_nb = (np.roll(t, 1, 1), np.roll(t, 1, 0), np.roll(t, -1, 0))
+            q_nb = (np.roll(t, -2, 1), np.roll(q, 1, 0), np.roll(q, -1, 0))
+            before = sum(n != t for n in p_nb) + sum(n != q for n in q_nb)
+            after = sum(n != q for n in p_nb) + sum(n != t for n in q_nb)
+            d_e = after - before
+            in_set = (cols % 4 == a) & (rows % 2 == b) & (t != q)
+            draw = rng.random(t.shape)
+            accept = in_set & ((d_e <= 0) | (draw < np.exp(-d_e / kT)))
+            new = np.where(accept, q, t)
+            t[...] = np.where(np.roll(accept, 1, 1), np.roll(t, 1, 1), new)
         return s
 
     return pair_set_sweep, random_alloy, serial_sweep, unlike_fraction

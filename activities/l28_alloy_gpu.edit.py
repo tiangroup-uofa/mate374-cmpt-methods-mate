@@ -185,9 +185,11 @@ function render({ model, el }) {
     gl.uniform1f(U.kT, model.get("kT"));
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(U.S, 0);
-    for (let axis = 0; axis < 2; axis++)
-      for (let a = 0; a < 4; a++)
-        for (let b = 0; b < 2; b++) {
+    // Choose the 16 pair sets in random order. A fixed order would carry an
+    // isolated atom across the lattice like a conveyor belt.
+    for (let k = 0; k < 16; k++) {
+          const r = Math.floor(Math.random() * 16);
+          const axis = r >> 3, a = (r >> 1) & 3, b = r & 1;
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[1 - src]);
           gl.bindTexture(gl.TEXTURE_2D, tex[src]);
           gl.uniform1i(U.axis, axis); gl.uniform1i(U.a, a); gl.uniform1i(U.b, b);
@@ -354,7 +356,9 @@ def _(KTC, K_B, c_boundary, c_slider, eps, mo, np, plt, t_slider):
     phase_panel = mo.vstack([
         fig,
         mo.md(f"k*T*/ε = {KTC * t_slider.value:.3f} · with ε = {eps.value} meV, "
-              f"*T*c = {_tc_K:.0f} K and *T* = {_T_K:.0f} K  \n{_eq}"),
+              f"*T*c = {_tc_K:.0f} K and *T* = {_T_K:.0f} K  \n{_eq}  \n"
+              f"Time: matching tracer diffusion to Cu at 1000 K gives about 22 µs per sweep, "
+              f"so 10,000 sweeps ≈ 0.2 s."),
     ])
     plt.close(fig)
     return (phase_panel,)

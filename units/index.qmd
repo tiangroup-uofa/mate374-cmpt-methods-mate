@@ -58,8 +58,8 @@ toc: false
 
 ## [06 · Multiscale Materials Simulation Techniques](06/index.qmd)
 
-27. [L27 · Monte Carlo: averages as high-dimensional integrals](06/L27/index.qmd) — copper self-diffusion beyond the reach of MD, Boltzmann-weighted averages, Ulam, Metropolis, and the Los Alamos neutron problem, Monte Carlo integration and its standard error, importance sampling, the Metropolis rule, and a two-state check.
-28. [L28 · Alloy arrangements, automata, and phase fields](06/L28/index.qmd) — local swap energies, serial, vectorized, and GPU swaps as a parallel cellular automaton, the composition field and the Cahn–Hilliard equation, and explicit against semi-implicit time stepping.
-29. [L29 · The atomistic data revolution](06/L29/index.qmd) — reference energies and forces from electronic structure calculations, the energy zero and cutoff in a data set, energy against energy-and-force fitting, validation by structure family, and the learned model back in the MD loop.
+27. [L27 · Monte Carlo techniques](06/L27/index.qmd) — a Cu–Ag alloy that separates on cooling, why a GPU MD run with an EAM potential cannot reach a single atomic hop, the Monte Carlo idea from Ulam and Buffon's needle, random events and seeds in NumPy, and a pure-Python lattice Monte Carlo that measures diffusion.
+28. [L28 · From Monte Carlo to continuum modeling](06/L28/index.qmd) — Boltzmann probabilities for Cu–Ag swaps, parallel swaps on a GPU, nucleation, spinodal decomposition, and a mixed alloy, the free energy behind the phase diagram, and the composition field of Allen–Cahn and Cahn–Hilliard models at real lengths and times.
+29. [L29 · Atomistic methods](06/L29/index.qmd) — reference energies and forces from electronic structure calculations, the energy zero and cutoff in a data set, energy against energy-and-force fitting, validation by structure family, and the learned model back in the MD loop.
 
 [Unit 06 · Summary and preparation](06/summary.qmd)
