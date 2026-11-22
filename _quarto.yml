@@ -150,20 +150,35 @@ website:
                 text: "Summary and preparation"
               - href: units/04/references.qmd
                 text: "References"
-          - href: units/05/L22/index.qmd
-            text: "Lecture 22 · Why do we simulate materials?"
           - section: "05 · ODE/IVP and molecular dynamics"
             href: units/05/index.qmd
             contents:
+              - href: units/05/L22/index.qmd
+                text: "Lecture 22"
               - href: units/05/L23/index.qmd
                 text: "Lecture 23"
               - href: units/05/L24/index.qmd
-                text: "L24 · Molecular dynamics (I): from IVP perspective"
+                text: "Lecture 24"
               - href: units/05/L25/index.qmd
-                text: "L25 · Molecular dynamics (II): control and analysis"
+                text: "Lecture 25"
               - href: units/05/L26/index.qmd
-                text: "L26 · Molecular dynamics (III): the choice of potentials"
+                text: "Lecture 26"
+              - href: units/05/summary.qmd
+                text: "Summary and preparation"
               - href: units/05/references.qmd
+                text: "References"
+          - section: "06 · Multiscale Materials Simulation Techniques"
+            href: units/06/index.qmd
+            contents:
+              - href: units/06/L27/index.qmd
+                text: "Lecture 27"
+              - href: units/06/L28/index.qmd
+                text: "Lecture 28"
+              - href: units/06/L29/index.qmd
+                text: "Lecture 29"
+              - href: units/06/summary.qmd
+                text: "Summary and preparation"
+              - href: units/06/references.qmd
                 text: "References"
       - href: seminars/index.qmd
         text: "Seminar materials"

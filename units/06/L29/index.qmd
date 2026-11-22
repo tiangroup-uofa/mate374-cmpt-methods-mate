@@ -1,0 +1,52 @@
+---
+title: "L29 · The atomistic data revolution"
+subtitle: "Where reference energies and forces come from, and how a fitted model returns to the MD loop"
+body-classes: lecture-page
+from: markdown+tex_math_single_backslash
+bibliography: ../../../references.bib
+---
+
+::: {.callout-note}
+## Central question
+
+**A fitted energy curve had to reproduce the quantum interaction energies of an argon cluster. Where does that reference data come from, what extra information makes a flexible atomic model trustworthy, and how does the finished model re-enter the molecular dynamics loop?**
+:::
+
+## Learning outcomes
+
+By the end of this lecture, you should be able to:
+
+1. **Explain** what is calculated for a fixed arrangement of nuclei, and why forces are position derivatives of that energy.
+2. **Describe** how reference energies and forces become training data for a fitted atomic model, and which conventions for the energy zero and the cutoff travel with that data.
+3. **Compare** energy-only fitting with fitting that also uses force values, and say which part of the model each kind of data constrains.
+4. **Check** a supplied force against a central-difference derivative of the energy, and judge which physical environments a training set does and does not cover.
+
+## What is calculated for a fixed copper structure
+
+[Assignment 2](../../../assignments/A2/index.qmd) supplied quantum interaction energies for argon clusters, and adjusting \(\varepsilon\) and \(\sigma\) reduced the residual. The optional copper project supplied something more: energies and forces for distorted crystals and surfaces. Both are outputs of the same operation. Around fixed nuclei, the electrons settle into a ground state, and a new nuclear arrangement gives a new electronic state. Writing \(\mathbf R\) for all nuclear positions, that repeated calculation defines a potential-energy surface \(U_{\mathrm{ref}}(\mathbf R)\) which includes the nucleus–nucleus repulsion, and the forces an MD engine uses are its negative position derivatives [@kohn1965selfconsistent]:
+
+\[
+\mathbf F_i^{\mathrm{ref}} = -\nabla_{\mathbf R_i} U_{\mathrm{ref}}(\mathbf R).
+\]
+
+Directly solving for the many-electron wavefunction would require coordinates for every electron at once. Density functional theory instead organizes the ground-state problem through the electron density \(n(\mathbf r)\), the number of electrons per unit volume at each position, whose integral is the electron count. Each reference calculation therefore returns one energy per structure and one force component per Cartesian coordinate, and the periodic cell and the element identities enter the calculation beside the positions.
+
+## Values and slopes constrain a flexible model
+
+A flexible energy function can follow the reference energies closely using functions of the local atomic environment, such as sums over neighbours weighted by distance [@behler2007generalized]. Energies alone leave the slopes weakly determined, because many environments share a similar energy while differing in how strongly the energy changes when an atom moves. Force values supply those slopes directly, which is why a data set of energy–force pairs transfers to dynamics better than an energy-only set of the same size. Two choices belong to the data rather than to the model: the energy zero, which must be consistent across every structure in the set, and the environment cutoff, whose behaviour as a neighbour distance approaches the cutoff appears in every force.
+
+## What would count as a convincing copper test
+
+Report energy errors per atom and force-component errors separately, inspect each structure family before trusting the aggregate parity plot, and compare relative energies of fcc, bcc, and hcp arrangements against an energy-versus-spacing curve. Agreement at the fcc minimum does not fix the other responses, the limitation noted in [L26](../../05/L26/index.qmd). For the nanoparticle trajectory we intend to run, the supplied files cover distorted crystals and slabs but no liquid or free-cluster family, so a small aggregate error can still leave the melting question unsupported. Validation data must describe the environments where the model will be used; more of the same crystal data may not close that gap.
+
+## The learned model returns to the MD loop
+
+A machine-learned potential enters the loop as an energy-and-force evaluator. Each step, the engine supplies coordinates and cell information, the model returns energy and forces, and velocity Verlet performs the same update as in [L24](../../05/L24/index.qmd); the repeated electronic calculations have been replaced by one approximation fitted to them. Before trusting a trajectory, test the implementation on a single configuration: element labels, energy zero, units, periodicity, and cutoff smoothness. For a Cartesian coordinate \(x\), compare the supplied force with an energy difference at a sensible spacing, using several trial spacings rather than an arbitrarily small \(h\) [@burden2016numerical]:
+
+\[
+F_x \approx -\frac{U(x+h)-U(x-h)}{2h}.
+\]
+
+That check compares two ways of obtaining the same derivative, so it separates an error in the model's energy gradient from an error in the integrator. A short NVE run at two time steps then tests the integration on its own.
+
+Unit 6 reached outside the molecular dynamics window in two directions: Monte Carlo sampled arrangements that MD cannot reach in time, and the phase field replaced atoms by a composition field over larger distances. This lecture reached below the window, to the electrons that set the atomic energies all of those methods require. The materials question decides which direction is worth the cost, while the numerical operations stay familiar: averaging, finite differences, fitting, and time integration.

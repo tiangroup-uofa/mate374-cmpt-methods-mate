@@ -1,0 +1,38 @@
+---
+title: "Multiscale Materials Simulation Techniques"
+toc: false
+from: markdown+tex_math_single_backslash
+bibliography: ../../references.bib
+---
+
+Molecular dynamics follows atoms through time. We have seen how its predictions depend on the integration step, the surroundings, and the potential. Can we do anything fancier? The answer depends on the question. We may want the equilibrium arrangement of an alloy without following every vibration. We may want to follow composition changes across a microstructure too large to describe atom by atom. Or we may need more information about the electrons because the available potential misses an important interaction.
+
+Unit 6 develops these possibilities through three connected questions.
+
+1. **What arrangement does an alloy adopt when MD is too slow to show it?** Atoms in a solid alloy exchange sites far more rarely than MD can follow. We skip the path and evaluate the equilibrium average directly. It is an integral over every atomic coordinate, so we estimate it from random samples and ask how accurate that estimate is.
+2. **Why do A and B not simply mix at random?** Sampling swaps on a lattice answers this, and comparing with the regular-solution model of Assignment 2 shows what that model misses. When the pattern grows larger than any lattice we can sample, we replace atoms by a concentration field that evolves in time.
+3. **Can a fitted potential contain more atomic information?** The cluster-energy fitting in Assignment 2 provides a starting point. We follow a copper configuration from an electronic calculation to energy and force data, then ask how a flexible fitted model can supply forces for MD.
+
+## [L27 · Monte Carlo: averages as high-dimensional integrals](L27/index.qmd) {#l27-sampling}
+
+We start from the multiscale map and the window that MD can reach. The arrangement of A and B atoms in an annealed solid alloy lies outside it. Measured copper self-diffusion at 800 K implies that each atom hops only about once every 2 ms, and rearranging a 5 nm region takes most of a second, about a million times longer than a large MD run [@kuper1954selfdiffusion]. The settled arrangement does not depend on how the atoms got there, so we ask which arrangements the alloy occupies instead. At Los Alamos in the 1940s, Ulam, von Neumann, and Metropolis faced the same kind of impossible count for neutron histories and replaced it with random samples [@metropolis1949monte; @metropolis1987beginning]. A measured property of the alloy at temperature \(T\) is an average over its atomic arrangements, weighted by their Boltzmann factors. Written out, this average is an integral with three coordinates per atom. Ten atoms already give 30 dimensions, and a grid with ten points per coordinate would need \(10^{30}\) energy evaluations.
+
+Monte Carlo integration replaces the grid by a mean over randomly chosen points. We derive why its uncertainty decreases as one over the square root of the number of samples, independent of the dimension, which also explains the slow convergence of Buffon's needle in [L02](../01/L02/index.qmd). Uniform samples still fail for a Boltzmann weight, because almost all of them land on arrangements with negligible weight. The Metropolis rule samples arrangements in proportion to their Boltzmann weight using only energy differences [@metropolis1953equation].
+
+## [L28 · Alloy arrangements, automata, and phase fields](L28/index.qmd) {#l28-patterns}
+
+We apply the same acceptance rule to A–B swaps on a lattice and ask how to make it fast enough for a microstructure. Following the Buffon acceleration of L04, we compare a serial loop, a vectorized update, and a GPU version that runs in the browser. Swaps share neighbours, so parallel updates must use non-touching pairs, which turns the sampler into a cellular automaton [@wolfram1983statistical].
+
+The larger gain comes from changing the model. Averaging the lattice gives a composition field, and the Cahn–Hilliard equation describes its conserved evolution with the regular-solution free energy of [Assignment 2](../../assignments/A2/index.qmd), an interface cost, and a mobility [@cahn1958free; @cahn1961spinodal]. The L17 stencil turns it into coupled ODEs, and we compare forward Euler with a semi-implicit Fourier step [@chen1998applications].
+
+## [L29 · The atomistic data revolution](L29/index.qmd) {#l29-atomic-data}
+
+In [Assignment 2](../../assignments/A2/index.qmd), an energy residual determined the Lennard–Jones parameters. The larger held-out clusters tested how that fit transferred to a new environment. The optional copper-fitting project also provides energies and forces for distorted crystals and surfaces.
+
+We examine where such reference data come from, using the electron density around fixed nuclei to introduce density functional theory [@kohn1965selfconsistent]. We then connect energy fitting, force fitting, and the choice of validation structures to a machine-learned interatomic potential [@behler2007generalized]. The final step returns to the MD loop: the fitted model supplies energy and its position derivatives, while the integrator still advances the atoms.
+
+These three lectures complete the teaching sequence before the separate final review.
+
+[Unit 06 · Summary and preparation](summary.qmd)
+
+[Unit 06 references](references.qmd)

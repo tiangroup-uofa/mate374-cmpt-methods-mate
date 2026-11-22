@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="150mm" height="58mm" viewBox="0 0 150 58">
+<title>Two-state check of the Metropolis rule</title>
+<desc>Panel a: two energy levels 0 and epsilon, uphill acceptance exp(-1) and downhill acceptance 1 at kT equal to epsilon. Panel b: equilibrium fractions of records, 0.731 and 0.269.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid">
+<path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt" />
+</marker>
+<radialGradient id="atom-a" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#8a8f98" /></radialGradient>
+<radialGradient id="atom-b" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#1f77b4" /></radialGradient>
+</defs>
+<rect width="150" height="58" style="fill:white" />
+<g id="two-state" inkscape:groupmode="layer" inkscape:label="Two-state Metropolis check">
+<path d="M8.00,46.00 L52.00,46.00" style="fill:none;stroke:#231f20;stroke-width:0.6" />
+<path d="M8.00,16.00 L52.00,16.00" style="fill:none;stroke:#231f20;stroke-width:0.6" />
+<text x="6.50" y="47.40" style="font-family:Arial;font-size:4.23px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:end">0</text>
+<text x="6.50" y="17.40" style="font-family:Arial;font-size:4.23px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:end"><tspan style="font-style:italic">ε</tspan></text>
+<text x="53.50" y="47.40" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:start">state 0</text>
+<text x="53.50" y="17.40" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:start">state 1</text>
+<path d="M22.00,44.80 L22.00,19.00" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri)" />
+<text x="20.50" y="29.50" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#b5473a;text-anchor:end">accept</text>
+<text x="20.50" y="34.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#b5473a;text-anchor:end"><tspan style="font-style:italic">e</tspan><tspan style="font-size:2.9px" dy="-1.6">−1</tspan><tspan dy="1.6"> </tspan> = 0.368</text>
+<path d="M38.00,17.20 L38.00,43.00" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<text x="39.50" y="29.50" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:start">accept</text>
+<text x="39.50" y="34.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:start">always</text>
+<text x="8.00" y="7.50" style="font-family:Arial;font-size:6.35px;font-weight:bold;font-style:normal;fill:#231f20;text-anchor:start">a</text>
+<text x="84.00" y="7.50" style="font-family:Arial;font-size:6.35px;font-weight:bold;font-style:normal;fill:#231f20;text-anchor:start">b</text>
+<rect x="98.00" y="19.68" width="14.00" height="26.32" ry="0" style="fill:#e4e4e4;stroke:#231f20;stroke-width:0.35" />
+<text x="105.00" y="18.08" style="font-family:Arial;font-size:3.53px;font-weight:bold;font-style:normal;fill:#231f20;text-anchor:middle">0.731</text>
+<text x="105.00" y="50.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">state 0</text>
+<rect x="124.00" y="36.32" width="14.00" height="9.68" ry="0" style="fill:#f5d9d9;stroke:#b5473a;stroke-width:0.35" />
+<text x="131.00" y="34.72" style="font-family:Arial;font-size:3.53px;font-weight:bold;font-style:normal;fill:#b5473a;text-anchor:middle">0.269</text>
+<text x="131.00" y="50.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#b5473a;text-anchor:middle">state 1</text>
+<path d="M95.00,46.00 L141.00,46.00" style="fill:none;stroke:#231f20;stroke-width:0.5" />
+<text x="93.50" y="28.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:end">fraction of</text>
+<text x="93.50" y="32.40" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:end">records</text>
+</g>
+</svg>

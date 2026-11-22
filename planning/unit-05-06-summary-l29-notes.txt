@@ -1,0 +1,42 @@
+Unit 05 and Unit 06 summary pages and the L29 placeholder - notes for the instructor
+Date: drafting session that wired the Unit 05/06 sidebar.
+
+1. units/05/summary.qmd and units/06/summary.qmd are scaffolds built from
+   templates/unit-summary.qmd.template.
+   - Each has the standard "How to prepare" callout with the four-icon key.
+   - One section per lecture in teaching order (L22-L26, then L27-L29), topic
+     titles taken from the lecture pages, three or four review points each.
+   - The review points were written from the section headings already in the
+     lecture pages. They are a starting list for trimming, not the instructor's
+     retained scope. Cut, reword, and reorder to the wording actually taught.
+   - The "Example short-answer questions for this unit" section is missing on
+     purpose. Per the template, the question list is the instructor's own and
+     must not be invented. Send the list and the section will be added in order.
+   - "### Python knowledge" appears once (L23, solve_ivp) as a prose sentence.
+     It still needs its inline marimo embed plus the notebook source under
+     activities/, and embeds are missing wherever a lecture uses Python that is
+     not yet listed here (L24 MD engine steps, L27 two-state Metropolis,
+     L28 serial/vectorized/GPU swaps and phase field). The activities notebooks
+     already in the repository can back those embeds when you confirm which ones
+     students should meet in a review setting.
+
+2. units/06/L29/index.qmd is a short stand-in so that "Lecture 29" in the sidebar
+   resolves. It keeps the title and subtitle used on the Unit 06 landing page, the
+   central question, four learning outcomes, and six-to-seven-paragraph prose that
+   follows the order in planning/unit-06-l29-outline.txt ([L29.1]-[L29.6]). It is
+   roughly 700 words against the 2650-word target in that outline, has no worked
+   example, no figure, and no marimo embed, and it drops [L29.3] on the energy zero
+   to a single clause inside the fitting section.
+   - The other drafting agent may replace this file outright; nothing here depends
+     on the current wording except the section names students might quote.
+   - Cites @kohn1965selfconsistent, @behler2007generalized, and
+     @burden2016numerical. All three already existed in references.bib and are in
+     units/06/references.qmd nocite (@burden2016numerical was added to that list).
+
+3. Sidebar and navigation now: Unit 05 lists Lecture 22-26, then Summary and
+   preparation, then References. Unit 06 lists Lecture 27-29, then Summary and
+   preparation, then References. Lecture labels carry no titles. L22 no longer
+   appears as a loose entry outside a unit, and units/index.qmd lists it first
+   under Unit 05 to match. The two lines in units/index.qmd that read "The
+   atomistic data revolution (L29) follows in the next lecture." were replaced by
+   the numbered L29 entry and the Unit 06 summary link.

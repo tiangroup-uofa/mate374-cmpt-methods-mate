@@ -46,11 +46,20 @@ toc: false
 
 [Unit 04 · Summary and preparation](04/summary.qmd)
 
-22. [L22 · Why do we simulate materials?](05/L22/index.qmd) — the pitch-drop experiment from the funnel to the atoms: Hagen–Poiseuille flow and the viscosity of pitch, extrapolation of a fitted viscosity law, a polymer chain as a random walk, MC and MD for chain length, the quantum origin of interatomic forces, length and time scales, and the numerical core of each simulation method.
-
 ## [05 · Initial-value ODE problems and molecular dynamics](05/index.qmd)
 
+22. [L22 · Why do we simulate materials?](05/L22/index.qmd) — the pitch-drop experiment from the funnel to the atoms: Hagen–Poiseuille flow and the viscosity of pitch, extrapolation of a fitted viscosity law, a polymer chain as a random walk, MC and MD for chain length, the quantum origin of interatomic forces, length and time scales, and the numerical core of each simulation method.
 23. [L23 · Solving initial-value problems](05/L23/index.qmd) — functions and ODEs, initial and boundary conditions, the vibrating atom, Euler and Runge–Kutta integration, error orders, and SciPy’s `solve_ivp`.
 24. [L24 · Molecular dynamics (I): from IVP perspective](05/L24/index.qmd) — Newton and Hamiltonian equations, initial energy and velocities, the MD loop, position Verlet, velocity Verlet, and energy monitoring.
 25. [L25 · Molecular dynamics (II): control and analysis](05/L25/index.qmd) — time steps, OpenMM and LAMMPS, periodic boundaries and cutoff, ensembles and controllers, radial distributions, coordination, and diffusion.
 26. [L26 · Molecular dynamics (III): the choice of potentials](05/L26/index.qmd) — hard spheres, pair and many-body potentials, cohesion, vacancy, and elastic limitations of pair models, EAM, molecular force fields, and atomic motion under machine-learned potentials.
+
+[Unit 05 · Summary and preparation](05/summary.qmd)
+
+## [06 · Multiscale Materials Simulation Techniques](06/index.qmd)
+
+27. [L27 · Monte Carlo: averages as high-dimensional integrals](06/L27/index.qmd) — copper self-diffusion beyond the reach of MD, Boltzmann-weighted averages, Ulam, Metropolis, and the Los Alamos neutron problem, Monte Carlo integration and its standard error, importance sampling, the Metropolis rule, and a two-state check.
+28. [L28 · Alloy arrangements, automata, and phase fields](06/L28/index.qmd) — local swap energies, serial, vectorized, and GPU swaps as a parallel cellular automaton, the composition field and the Cahn–Hilliard equation, and explicit against semi-implicit time stepping.
+29. [L29 · The atomistic data revolution](06/L29/index.qmd) — reference energies and forces from electronic structure calculations, the energy zero and cutoff in a data set, energy against energy-and-force fitting, validation by structure family, and the learned model back in the MD loop.
+
+[Unit 06 · Summary and preparation](06/summary.qmd)

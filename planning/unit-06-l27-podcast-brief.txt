@@ -1,0 +1,88 @@
+MATE 374 · L27 companion podcast brief (for an AI audio tool such as Gemini)
+Optional listening. Not required course material. Label the episode as AI-generated.
+
+FORMAT
+Two hosts, conversational, about 8–10 minutes. Audience: third-year materials
+engineering students who just finished three lectures on molecular dynamics (MD).
+Tone: curious, light, accurate. No equations read aloud beyond one or two simple ones.
+Do not invent quotes, dates, or numbers. Use only the facts listed below. If a
+detail is not listed, keep it general.
+
+MAIN LINE
+
+1. Cold open: a question MD cannot answer
+   - We can simulate atoms vibrating, but can we watch an alloy decide how to
+     arrange its atoms at 800 K?
+   - An atom vibrates about 10^13 times per second but swaps places with a
+     neighbour only about once per second. For every atom in a million-atom
+     sample to move, MD would need about 10^16 time steps. Large MD runs reach
+     about 10^9. So MD just sits there.
+   - Hook: people hit this same wall eighty years ago, with neutrons instead of atoms.
+
+2. Los Alamos, 1946: too many possibilities
+   - The question: in a fission device, do neutrons multiply or escape?
+   - Each neutron has a chain of events: collide, scatter, cause fission, escape.
+     The answer is an average over all possible histories. Far too many to count.
+   - Same structure as our alloy: an average over far too many arrangements.
+
+3. The gambler's shortcut
+   - Stanislaw Ulam relaxed with solitaire and liked poker.
+   - In 1946, recovering from an illness, he wondered: what is the chance a game
+     of Canfield solitaire comes out? Counting all card arrangements was hopeless.
+     Why not just play many games and count the wins?
+   - That is the whole idea: replace an impossible count with random samples.
+
+4. Why now? The computer
+   - Statistical sampling was an old idea that had fallen out of use because it
+     was too tedious by hand.
+   - The ENIAC electronic computer changed that. Ulam talked to John von Neumann,
+     who in March 1947 outlined a calculation that followed many individual
+     neutron histories at random.
+   - Nicholas Metropolis suggested the name "Monte Carlo", partly because Ulam
+     had an uncle who borrowed money from relatives because he "just had to go
+     to Monte Carlo." Metropolis and Ulam published "The Monte Carlo Method" in 1949.
+
+5. People had the idea before, but no machine
+   - Buffon's needle (18th century): drop needles on a lined floor, count the
+     crossings, and you can estimate pi. Our students did this in Lecture 1.
+   - Boltzmann explained thermodynamics through the statistics of enormous
+     numbers of atoms; his statistical view was disputed in his lifetime.
+   - Enrico Fermi used random sampling for neutron problems in Rome in the early
+     1930s with a small mechanical adding machine and never published it.
+   - Later he designed a hand-pushed "Monte Carlo trolley", the FERMIAC, that
+     drew neutron paths on a scale drawing.
+   - Punchline: random methods need huge numbers of samples. They are a
+     computer-age method.
+
+6. The trick we actually use: Metropolis, 1953
+   - Random samples alone fail for materials: almost every random arrangement
+     of atoms has a tiny chance of occurring at a given temperature.
+   - Metropolis, Arianna and Marshall Rosenbluth, and Augusta and Edward Teller
+     found a rule, run on the Los Alamos MANIAC computer: propose a small change,
+     always accept it if the energy goes down, and accept it only sometimes if
+     the energy goes up, more often when it is hotter.
+   - This visits arrangements in proportion to how likely they are, using only
+     energy differences.
+
+7. Back to the alloy, and the catch
+   - A Metropolis "swap" can exchange two distant atoms in one step, something
+     the real alloy never does. That is why it reaches the settled arrangement
+     MD cannot.
+   - The catch: the steps are not time. It tells you where the alloy ends up,
+     not how long it takes.
+   - Teaser: why do A and B not simply mix at random? Next lecture.
+
+FACT GUARDRAILS
+- Keep weapons context to plain facts; no dramatization.
+- Do not claim Ulam invented random sampling; he revived it for computers.
+- Do not give an exact year for Buffon or details of Boltzmann's critics.
+- Do not say Monte Carlo replaces MD; it answers different questions.
+
+SOURCES (for checking the audio, not for reading aloud)
+- N. Metropolis, "The Beginning of the Monte Carlo Method", Los Alamos Science,
+  Special Issue 1987.
+- R. Eckhardt, "Stan Ulam, John von Neumann, and the Monte Carlo Method",
+  Los Alamos Science, Special Issue 1987.
+- N. Metropolis and S. Ulam, J. Am. Stat. Assoc. 44, 335 (1949).
+- N. Metropolis et al., J. Chem. Phys. 21, 1087 (1953).
+- Time estimate: L27 outline, section L27.3.

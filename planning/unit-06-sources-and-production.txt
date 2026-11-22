@@ -1,0 +1,461 @@
+UNIT 6 / SOURCE MAP AND PRODUCTION HANDOFF
+
+Scope
+The latest request replaces complete lecture drafts with connected narrative
+outlines. units/06/index.qmd contains finished unit-level teaching text.
+The three unit-06-l2x-outline.txt files are author-facing outlines, not finished
+2500–2800-word lectures. Their final section gives the future prose budget.
+Final review remains separate. No assignment or exam policy is added.
+
+Sequence checked before editing
+The current source sequence ends at Unit 05, L26, Molecular dynamics (III):
+the choice of potentials. L24 covers initial conditions and Verlet. L25 covers
+control and analysis. L26 covers potentials and already introduces MLIPs.
+Unit 6 uses L27, L28, and L29. The older post-L23 plan proposed another sequence
+and a fourth lecture. Its dates and allocations do not govern this request.
+No dates have been added to the new pages.
+
+Shared checkout and protection
+The shared checkout at /home/ttian7/Dev/tiangroup-uofa/mate374-cmpt-methods-mate
+was inspected read-only. Its uncommitted file contents matched the corresponding
+worktree files at the initial check. Important ignored donor material was absent
+from this worktree: instructor-private/fall-2025/lectures/ and guest_lecture/.
+Those files were read at their shared paths, without copying them into the site.
+A separate directory comparison also found project/report-template/acs-report.bib
+absent here. It is unrelated to Unit 6 and was left alone.
+Existing dirty files, final-mock navigation, project work, and source recovery
+files must remain unchanged. Temporary extraction, arithmetic checks, counts,
+and render copies are under /tmp/mate374-unit6-check/.
+No commit, push, merge, PR, publication, or Opus session is part of this task.
+
+Source-to-section map
+Paths below are relative to this worktree unless an absolute root is given.
+
+L27 structure, revised at the instructor's request: the lecture opens with the
+quantity to evaluate (a Boltzmann-weighted thermal average), shows that it is a
+3N-dimensional integral, and motivates Monte Carlo by the failure of Unit 4 grid
+rules in high dimension. Buffon's needle is no longer the opening. It appears
+as a short callback inside L27.3, where the sqrt(M) derivation explains the
+L02 observation.
+
+L27.1 opening (second instructor revision): the question must be one MD cannot
+reach. It uses a rare-exchange estimate from the L25 Cu-Cu period of 168 fs, the
+L25 step limit, the L22 scale of about 10^9 MD steps, and the L25 statement at
+line 332 that kinetically controlled rearrangements may suit MC or phase field.
+The 2.0 eV barrier is an assumed illustrative value. VERIFY before the full
+lecture: cite a tabulated self-diffusion activation energy for a metal, for
+example Cu in Cu (about 2.1-2.2 eV in common textbook tables), and confirm the
+exact value and source. The single-barrier hop simplifies vacancy-mediated
+exchange, which also requires vacancy formation.
+
+L27.1: units/05/L25/index.qmd, NVT ensemble; old L34 PDF slides 7-10 (the
+canonical average as a configuration integral); MATE 664 L21, Where does the
+probability come from. L27.2: units/04/L19 and L20 composite rules and the
+L20 error-order table. Grid counts, the 58,000-year alloy enumeration, and the
+P^(-2/d) trapezoid scaling are new worked arithmetic.
+
+L27.3: units/01/L01/index.qmd and units/01/L02/index.qmd for the Buffon callback.
+L02 already states the 2.37/sqrt(M) approximation and sampling-error
+convergence. L27 derives the meaning of spread and mean uncertainty rather than
+pretending those topics were fully taught or absent from the written materials.
+The sum-of-squares example in d dimensions is newly worked arithmetic.
+
+L27.3: units/04/L18/index.qmd, Why noise grows when we differentiate;
+units/04/L20/index.qmd, Problem 2: integrating noisy data. These pages use
+standard deviation and independent-noise propagation. L20 already gives an
+inverse-square-root noise scale. The new material explains why a mean has
+less uncertainty than individual observations, the assumptions, and the
+difference between that scale and the error of a particular run.
+
+Historical planning gap: session 33818, messages 33897–33909, especially the
+instructor's 33898 request to use modelling, truncation, round-off, and
+additionally statistical error/deviation. The discussion names sampling error
+in an A1 answer, but does not establish that a statistics lesson was delivered.
+The instructor's present recollection governs the teaching need. Actual
+classroom coverage cannot be reconstructed from the repository alone.
+answer-keys/A1/answers.qmd also names sampling error in its opening answer.
+
+L27.3–L27.5: /home/ttian7/Dev/mate664-kinetics-of-materials/lectures/L21/index.qmd,
+Buffon, Mathematical form of Monte Carlo integration I–III, uniform sampling,
+and Metropolis I–III. Read the original formulas and explanations.
+The x-squared importance-sampling calculation is newly worked arithmetic.
+Use the donor's integration-to-Boltzmann path without its broad efficiency
+claims or kinetic-MC survey.
+
+L27.5 and L28.2–L28.3: planning/post-l23-unit-plan.txt, the two-state symmetric
+proposal, occupancy check, composition-preserving swaps, unlike-neighbour
+fraction, low/high temperature, and two initial configurations.
+Read-only shared donor: instructor-private/fall-2025/lectures/
+MATE 374 Lecture 34.pdf, slides 4–19, especially simple sampling, importance
+sampling, single-particle updates, flowcharts, and the equilibrium summary.
+The PDF title page reads Dr. Hao Zhang, Dec 1, 2025. Attribution to Hao Zhang
+is therefore verified from the original file, rather than inferred from a
+filename. Slides 20–32 supply the larger-scale and diffuse-interface bridge.
+The final application and software slides were read but are outside this scope.
+Use no unqualified “MC has no dynamics” claim across all MC methods. The
+time warning applies to our equilibrium Metropolis implementation.
+
+L28.1 and L28.5: assignments/A2/index.qmd, Problem 2, regular-solution miscibility;
+assignments/A4/index.qmd, Problem 4, common tangents for Pb–Sn.
+These are actual thermodynamic callbacks. They are not a prior diffusion PDE
+lesson. For a continuous composition bridge, the new lattice model penalizes
+unlike bonds. The donor instead favoured unlike bonds. This change is explicit
+in the outline, including why checkerboard ordering needs a separate order field.
+
+L28 rewrite (after the L27 restructure). L28.1 opens with the question that L27
+parked: why do A and B not mix at random? L28.3 is new. It answers that question
+three ways and compares them:
+- Two extremes: random mixture energy eps per site and entropy kB ln 2; mixing
+  wins above kBT = eps/ln 2 = 1.443 eps. New arithmetic.
+- Regular solution: Omega = 4 eps (four neighbours, random pairs, 2c(1-c)
+  unlike fraction, two bonds per site). Its derivative over kBT is exactly the
+  A2 Problem 2 function F(x), with H = Omega/kBT. A2 answer key: x_beta =
+  0.85532 at H = 2.5; the critical point is H = 2, kBT = 2 eps. H = 2.5 is
+  kBT = 1.6 eps. Spinodal at H = 2.5: c = 0.276 and 0.724. Values checked.
+- Exact square lattice (Ising equivalence): kTc/J = 2/ln(1+sqrt 2) = 2.269 with
+  J = eps/2 for the lattice gas mapping, so kTc = 1.135 eps. Onsager (1944),
+  Phys. Rev. 65, 117, checked with Crossref, added as onsager1944crystal.
+  VERIFY the J = eps/2 mapping statement in a textbook before the full lecture.
+- L28.6 now uses the A2 regular solution as the phase-field bulk free energy,
+  replacing the double-well polynomial. g values at H = 2.5: -0.0681 kBT at
+  c = 0.5 and -0.0730 kBT at c = 0.4; g'(0.4) = +0.0945 kBT. The phase-field
+  section states that g, kappa, and the mobility are fitted inputs and that
+  the regular solution overestimates the separation temperature.
+- Cu atom density: 8.5e10 atoms per cubic micrometre, from 8.96 g/cm3 and
+  63.546 g/mol. New arithmetic.
+Previous versions: /tmp/mate374-unit6-check/l28-outline-before-rewrite.txt and
+l29-outline-before-rewrite.txt. L29 changed only its opening and closing
+paragraphs, which now link to the multiscale map and to L28's open parameters.
+
+L28.4: a self-contained conservative binary transport automaton, verified by
+enumerating its local rule and checking the sum. Wolfram (1983) is the background
+reference for cellular automata. The proposed directed rule is not presented as
+a derivation of alloy equilibrium or as a continuum derivation of Cahn–Hilliard.
+
+L28.5–L28.7: /home/ttian7/Dev/mate664-kinetics-of-materials/lectures/
+L16/index.qmd (free-energy curvature, uphill diffusion, interface stabilization),
+L17/index.qmd (capillarity and coarsening), and L20/index.qmd (free-energy
+functional, chemical potential, split real-space equations, and conserved fields).
+These originals were read, not replaced by the brainstorm summary.
+Use the divergence form with chemical potential. The donor's expanded
+g''(c) Laplacian(c) expression omits a nonlinear gradient-squared term when
+g'' varies. Its gradient coefficient also uses a different factor-of-two
+convention in some formulas. The new outline consistently uses kappa/2 in
+the free energy and -kappa Laplacian(c) in the chemical potential.
+No quantitative interface-width formula, nucleation claim for a noiseless
+run, coarsening exponent, Fourier solver, or software survey is imported.
+
+L29.1 and L29.4–L29.5: assignments/A2/index.qmd, Problem 3, and the corresponding
+activities/a2_q3_lj_fit.edit.py source, including its stored small/Ar20 records,
+per-atom residual, sample-size progression, and parity comparison.
+The fitting task used 100 Ar3–Ar7 training clusters and five held-out Ar20
+clusters. No new numerical error values are attributed to that task.
+Assignment 4 Q2 is a derivative exercise. Its handout describes quantum
+energies, but it does not establish an independent measured Cu DFT dataset.
+Do not use it as provenance for the new copper reference calculation.
+
+L29.2–L29.4: the read-only shared file instructor-private/fall-2025/
+guest_lecture/mate374_guest_lecture_Tian.py, particularly Getting Theoretical
+Data, stationary electronic problem, Kohn–Sham equations, self-consistency,
+fitting theoretical data, and MLIPs. Read the original 311–888 region in detail,
+plus the introductory LJ context. The short #...py# recovery file was inspected
+and left unchanged. Its placeholder content adds no substantive coverage.
+Retain fixed nuclei -> electronic calculation -> data -> fitted energy -> MD.
+Omit the Boyle-temperature calculation, repeated potential survey, functional
+ladder, and package catalogue. Do not import the donor's inaccurate electron
+count example, dimensionality typo, or oversimplified product-wavefunction
+statement. The Kohn–Sham source is Kohn and Sham (1965).
+
+L29.2–L29.6: activities/project_bonus_eam_fit.molab.py, especially sections 4–10;
+project/data/cu_vasp_train.xyz, cu_vasp_test.xyz, cu_vasp_atom_reference.json;
+project/index.qmd, optional bonus description.
+Verified current facts: 178 training and 46 held-out structures. Families:
+train fcc 40, bcc 46, hcp 46, surface 46; test fcc 10, bcc 12, hcp 12, surface 12.
+The current fit has 15 coefficients and a fixed atomic reference.
+There is no internal validation split in this source. The old
+planning/ase-dft-study.txt describes a different 16-coefficient revision and
+143/35 internal split. Those historical facts are not substituted for current
+code. The proposed training/validation/test procedure is identified as new.
+The optional bonus is available as an example, not assumed completed by all.
+
+The worked reference is training fcc config_id 32, four atoms in a periodic
+cell. Its energy, atomic reference subtraction, and first force vector are
+read from the current files. The final held-out force example is fcc
+config_id 48. No fitted prediction, MAE, live DFT run, or training result is
+invented. The files contain no liquid or free-cluster family. This leaves a
+specific coverage gap for nanoparticle melting.
+
+Existing-course transition: units/05/L22/index.qmd, the random chains, MC/MD
+comparison, electronic origin of forces, and numerical cores; L24, the IVP,
+energy and force loop, and Verlet derivation; L25, ensembles, equilibration,
+structure and diffusion; L26, the full potential progression and MLIP section.
+The L22 independent chain example is an example of independent MC sampling,
+not a property of all MC. L29 extends L26's data question instead of repeating
+its architectures. The quantum-data callback qualifies practical DFT accuracy.
+
+Voice sources
+Session 283753, including the instructor's request to read IEM CHAB, rejection
+of expanded assistant prose, and paragraph-by-paragraph cleanup discussion.
+planning/l24-l26-voice-review.txt was read in full, including its corrections.
+The complete ch1.tex, ch2.tex, and ch13.tex were read at
+/home/ttian7/Dev-office-backup/CHAB-IEM/chapters/.
+Follow observation -> question -> model -> calculation -> physical meaning.
+Use “we” for actual reasoning. Keep lists for setups and comparisons.
+The second cleanup must inspect each sentence in its paragraph, rather than
+mechanically expanding transitions or merely checking word totals.
+
+Brainstorm access
+Session 283624, messages 283666 and 284217, was read with history_search and
+history_read. Its Qwen response supplies source leads. It does not govern the
+latest sequence or establish prior teaching. No session_read tool is available
+in this session's tool set. That access limit is reported, not worked around.
+
+References
+Seven new root bibliography entries were checked (metropolis1949monte added in
+the L27 revision, onsager1944crystal in the L28 rewrite) against Crossref DOI records
+before insertion: metropolis1953equation, wolfram1983statistical, cahn1958free,
+cahn1961spinodal, kohn1965selfconsistent. Authors, title, venue, year, volume,
+issue, pages, and DOI matched. behler2007generalized already existed and its
+metadata were also checked. Existing lesar2013, taylor1997error, and
+jain2013materialsproject supply background. No syllabus bibliography was edited.
+Unit 06 references use the single root references.bib. No local .bib was made.
+
+Brief asset handoff only
+All entries below are proposals for a later pass. The instructor reserves figure
+work for Opus. No Opus session, actual figure, portrait, image asset, or notebook
+is authorized here. Anchor labels refer to the narrative outlines.
+
+L27.4: Preserve the requested Monte Carlo city figure beside the history paragraph.
+Locate Monte Carlo in Monaco, with a verified source and reuse permission.
+The prose connects the place name to the sampling theme without a tourism or
+origin-story digression. Verify any eventual geographical or historical caption.
+
+L27.2–L27.3: Propose one editable notebook with a dimension control and a
+sample-count control. Compare the grid cost n^d with the Monte Carlo error for
+the sum-of-squares integrand, and compare raw spread with repeated-mean
+uncertainty. The equations and numerical scales provide the static fallback.
+
+L27.4: Optional second mode in the same notebook: uniform versus q(x)=2x
+sampling, showing the factor 6.4 variance reduction.
+
+L27.4: Portraits of Ulam, Metropolis, and Teller beside the history story.
+The instructor's "Taylor" was a typo for Edward Teller, now confirmed.
+Teller is a coauthor of the 1953 Metropolis paper with Arianna W.
+Rosenbluth, Marshall N. Rosenbluth, and Augusta H. Teller. He also attended
+the spring 1946 ENIAC review (Metropolis 1987). Optional fourth image: the
+FERMIAC trolley described in Metropolis 1987, if a reusable photo exists.
+Verify portrait identity, attribution, and reuse permission in the figure pass.
+
+L27.4 history sources, downloaded to /tmp/mate374-unit6-check/dl-lanl/ and read:
+- N. Metropolis, The Beginning of the Monte Carlo Method, Los Alamos Science,
+  Special Issue 1987 (LA-UR-88-9067). Supports: ENIAC review in spring 1946,
+  Ulam's suggestion, von Neumann's letter to Richtmyer of March 11, 1947, and
+  Metropolis naming the method after the uncle who "just had to go to Monte Carlo."
+- R. Eckhardt, Stan Ulam, John von Neumann, and the Monte Carlo Method, same
+  issue (LA-UR-88-9068). Supports Ulam's 1983 remarks: in 1946, convalescing
+  from an illness, he asked the chance that a Canfield solitaire with 52 cards
+  comes out, and considered laying it out many times and counting successes.
+  These two articles have no DOI. They are not in references.bib yet. Add them
+  only after confirming issue number and pages.
+- Metropolis and Ulam (1949), JASA 44(247):335-341, DOI checked with Crossref.
+  Added to references.bib as metropolis1949monte and cited on the unit page.
+
+L27.4 history (instructor revision: the neutron problem leads, as it has the
+same structure as the alloy average). Claims and support:
+- Neutron histories, von Neumann's March 11, 1947 letter to Richtmyer, the
+  spherical core and tamper, scattering, absorption, fission, escape:
+  Metropolis 1987, "The Method" section.
+- Ulam relaxed with solitaire and was stimulated by poker; statistical sampling
+  had "fallen into desuetude because of the length and tediousness of the
+  calculations"; the ENIAC revived it: Metropolis 1987.
+- Canfield solitaire, 1946, convalescing: Eckhardt 1987, quoting Ulam in 1983.
+- Uncle who "just had to go to Monte Carlo": Metropolis 1987.
+- Fermi in Rome in the early 1930s, a small mechanical adding machine, never
+  published: Metropolis 1987, quoting Segre, From X-Rays to Quarks.
+- MANIAC for the 1953 rule: abstract of metropolis1953equation via Crossref.
+- Phrase "strikingly close to ours" is the outline's own comparison.
+NEEDS A CITATION before the full lecture:
+- Buffon's needle date. Buffon posed it in 1733 and published it in 1777
+  (general knowledge, not yet checked against a source). The existing
+  weissteinbuffon entry may cover it. Confirm.
+- Boltzmann's statistical view being strongly disputed in his lifetime
+  (Ostwald, Mach, the energeticists). General history, not yet sourced.
+  Choose a history-of-physics source before writing the sentence.
+- Keep the Hiroshima and thermonuclear context to one factual clause.
+  The 1946 ENIAC review concerned thermonuclear-weapon feasibility
+  (Metropolis 1987).
+
+Podcast idea (instructor suggestion, planning only): the L27 history could seed
+an optional AI-generated audio episode on Buffon, Boltzmann, Fermi, Ulam, von
+Neumann, Metropolis, and Teller. No audio was generated. If produced later,
+check every claim against the sources above, label the episode as AI-generated,
+and keep it outside required material.
+
+L27.3 time estimate: the all-atoms time uses the coupon-collector expectation,
+(ln N + 0.5772)/Gamma, for independent exchanges at equal rates. At N = 10^6
+and Gamma = 1.497 s^-1 this gives 9.6 s, about 9.6e15 MD steps at 1 fs.
+L25 line 69 records the billion-atom iron run as 2 ns at 5 fs (400,000 steps).
+The "ten million times" statement compares 10^16 steps with ~10^9 steps.
+
+L27.5–L27.6: Propose a two-state notebook with a temperature control and a
+single-attempt view. Show retained states after rejections and accumulated
+occupancy against the exact ratio. Its teaching point is correct counting,
+followed by persistence between records. The 0.20/0.70 hand calculation is
+the static fallback.
+
+L28.1–L28.3: Propose one lattice-swap notebook with mixed/strip starts and
+temperature choices. Keep composition fixed and show unlike-bond counts
+with the sampled fraction. Students compare the transient and later blocks.
+The strip count and high-temperature expectation supply the static fallback.
+
+L28.4: Propose a short row-sequence figure for BBAA -> BABA -> ABAB, with the
+B-for-A exchanges identified. Students see the old-state neighbourhood rule
+and count conservation. The displayed update equation carries the explanation.
+
+L28.5–L28.7: Propose one phase-field notebook after the flux derivation, using
+a weakly perturbed periodic composition field. Show composition redistribution
+and interfacial smoothing with the mean fixed. The double-well values and
+two-stage spatial differences provide the static fallback. No live solver is
+needed to follow this outline.
+
+L29.2–L29.3: Propose a reference-structure/data figure for the actual periodic
+four-atom config_id 32. Keep the same geometry beside its energy and force
+labels. Students connect a computed structure to value-and-slope information.
+
+L29.4–L29.5: Propose one data-inspection notebook with family and structure
+selectors, consistent reference subtraction, and a labelled held-out comparison
+once a specific model prediction is verified. Use supplied data, not live DFT
+or live training. The numerical energy subtraction is the static fallback.
+
+L29.6: Propose a small energy/force-evaluator insertion figure at the MD loop.
+It should locate what changes in the existing engine. The prose teaches why
+the integrator and time-step check remain necessary.
+
+Style instructions actually read
+The instructor's session 77267 message 77298 and the shared
+.pi/skills/svg-figure/SKILL.md specify editable SVG, Arial, grayscale with
+a red accent, meaningful comparison colours, large readable annotations,
+bold lowercase panel labels, and tight margins. Do not develop layouts here.
+Any later script-generated raster figure must use 300 dpi.
+The current demo-maker skill, GEMINI_GEM.md marimo conventions, and the user's
+session 78311 message 78406 require controls beside outputs, a visible numerical
+method, editable source, and little notebook prose. Session 276621 message 276873
+also rejects a dense diagnostics line. Keep the explanation in the course text.
+Later notebooks belong under activities/ with inline editable embeds and
+prose/equation fallbacks. No nonexistent embed or image link is inserted now.
+
+Checks and counts
+
+The unit landing text is complete for this pass. The lecture files are
+connected narrative outlines. They are not complete student lecture pages.
+
+Actual section-text counts:
+units/06/index.qmd: 720 words.
+planning/unit-06-l27-outline.txt: 2116 words (instructor sequence: map, alloy,
+time estimate, Ulam and Metropolis, Buffon bridge, MC, Metropolis).
+planning/unit-06-l28-outline.txt: 1779 words.
+planning/unit-06-l29-outline.txt: 1846 words.
+
+Count method: parse the text with Quarto's Pandoc Markdown reader. Count word
+tokens in the prose and headings. Exclude math nodes, code, raw blocks, citation
+nodes, and YAML metadata. For each outline, count from the first numbered
+section through the closing connection. Exclude the outline header, timing
+plan, introductory author notes, section-anchor labels, future word budgets,
+and the production companion. Hyphenated words count as one token. Numbers
+in prose count as tokens. These are outline-section counts, including teaching
+directions. They do not measure completed student lecture prose.
+The future lecture targets remain 2500–2800 words each. Suggested budgets are
+2650 for L27, 2700 for L28, and 2650 for L29.
+
+L27 restructure checks: the grid counts, the 58,000-year enumeration of the
+64-site alloy, the e^-49 weight ratio, and the 0.894 relative-error
+coefficient were recalculated. The revised L27 page rendered without MathJax
+errors. A copy of the previous L27 outline is at
+/tmp/mate374-unit6-check/l27-outline-before-restructure.txt.
+
+Scientific checks passed:
+- The Buffon uncertainty coefficient is approximately 2.37351. At 1000 throws,
+  the crossing-fraction standard error is approximately 0.01521.
+- The x-squared importance-sampling variance reduction is a factor of 6.4.
+- The two-state transition matrix has the stated Boltzmann stationary
+  probabilities, approximately 0.73106 and 0.26894 at kBT = epsilon.
+- The periodic 8-by-8 lattice has 128 bonds. The strips have 16 unlike bonds.
+  The checkerboard has 128. The high-temperature expectation is 32/63.
+- The conservative automaton preserves binary values and the B count for
+  all 256 length-eight binary rows. Its two worked updates also match.
+- Differentiating the discrete gradient energy gives the stated chemical
+  potential. The periodic update conserves composition and decreases the
+  discrete free energy at the continuous-time rate.
+- The copper reference subtraction, force components, structure counts, and
+  distinct training/test configuration IDs match the current data files.
+These are arithmetic and formula checks. No notebook, DFT, training, or MD
+calculation was executed or generated.
+
+The second sentence-by-sentence pass is complete. It included the unit page
+and all three outlines in teaching order. Corrections included:
+- Add the weighted-integral connection before the two-state sampler.
+- State the constant-mobility condition for the ordinary-diffusion limit.
+- Use a distinct mobility symbol, calligraphic M, to avoid reusing the sample
+  count in the field equations.
+- Describe force components as negative energy slopes.
+- Explain PBE, PAW, and coefficient rescaling in physical or numerical terms.
+- Retain genuine physical distinctions and remove unnecessary contrasts.
+New files contain no em dashes, formulaic sentences beginning with One, or
+artificial prose semicolon joins.
+
+Reference and link checks passed. All six citation keys on the unit landing
+page exist in the root bibliography and the unit reference list. The reference
+page contains nine entries, including background sources for the outlines.
+No duplicate bibliography key was found. All local Markdown links in the new
+unit pages have existing source targets. No nonexistent lecture link, image
+link, notebook embed, or executable Python block was added.
+
+Targeted HTML checks passed with Quarto 1.10.20. The check copy is
+/tmp/mate374-unit6-check/render-okrygrk2.
+It rendered units/index.qmd, units/06/index.qmd, units/06/references.qmd,
+and three temporary equation-check pages made from the text outlines.
+A final targeted L27 render checked its revised equation layout.
+The render logs contain no warnings or errors.
+
+Only the isolated copy disabled pre-render hooks, post-render hooks, and
+resource copying. Its render list was restricted to the six check pages.
+The real project retains its original render scope, hooks, resources,
+filters, and format settings. A standard render would run the marimo export
+hook. The full profile also runs figure and answer-PDF hooks. Those hooks
+were not run. This was not a full-site or PDF build.
+The earlier lecture targets were checked as source paths. Their HTML pages
+were outside the targeted render scope.
+
+Browser checks passed on a local loopback-only server. The temporary server
+was stopped after the checks. All six check pages returned HTTP 200. MathJax rendered 69, 70, and 34 math expressions in the
+L27, L28, and L29 check pages, including 10, 11, and 7 display equations.
+No MathJax error node or browser console error was found.
+All six pages fit the desktop width. The unit landing, reference page, and
+three outline check pages fit a 390-pixel phone viewport after local fixes.
+The source fixes split long equations and allowed long DOI links to wrap.
+The DOI wrapping change is confined to units/06/references.qmd.
+
+Scope checks passed against the initial 853-file hash baseline.
+Only three existing files changed: _quarto.yml, units/index.qmd, and
+references.bib. Removing the three intended insertions in memory reproduces
+their exact initial hashes. The other 850 original file hashes still match.
+This includes all earlier lectures and all pre-existing unrelated dirty files.
+There are exactly six new files: the two Unit 6 QMD pages, the three outline
+TXT files, and this companion TXT file.
+The existing final-mock navigation change remains intact.
+Whitespace checks passed. No generated asset or temporary check file entered
+the worktree. No commit, push, merge, PR, or publication was made.
+No Opus session was started.
+
+Unresolved points
+The instructor confirmed that "Taylor" meant Edward Teller. Portraits:
+Ulam, Metropolis, and Teller, after reuse permissions are checked.
+The L28 demixing example is an explicit change from the donor's ordering
+example. The outline preserves the ordering comparison and explains why a
+composition-only field needs the demixing choice.
+The L29 held-out model prediction awaits a later verified model evaluation.
+The outline gives the actual reference value and does not invent a prediction.
+The copper data still lack liquid and free-cluster families. No claim of
+validated nanoparticle-melting transfer is made.
+The session_read tool was unavailable. The Qwen and prose discussions were
+read through history_search and history_read. No access block was bypassed.

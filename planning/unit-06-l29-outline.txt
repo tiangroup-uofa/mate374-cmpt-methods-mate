@@ -1,0 +1,158 @@
+UNIT 6 / L29
+The atomistic data revolution
+Author-facing narrative outline. This is not a complete lecture.
+Eventual lecture target: 2500–2800 prose words.
+Suggested 50-minute allocation: 5 + 10 + 8 + 10 + 10 + 7 minutes.
+
+L27 and L28 moved outward on the multiscale map: to equilibrium arrangements that MD cannot reach in time, and to fields larger than any lattice. Both ended with parameters that had to come from somewhere: the bond energy in the swap model, and the free energy and mobility in the phase field. L29 moves inward on the same map, to electrons, and asks where trustworthy atomic energies come from. The lecture follows one copper configuration through reference calculation, energy and force fitting, validation, and use in MD. The entry point is students' actual fitting experience, not a new catalogue of potential families. L26 already introduced pair models, EAM, neural-network potentials, and MACE. The new question is what information we must supply before a more flexible model becomes useful.
+
+[L29.1] Can we fit anything fancier?
+
+Open with the Assignment 2 operation students performed: add the unique pair energies in each Ar cluster, divide by atom count, form squared differences from the supplied quantum interaction energies, and adjust \(\epsilon\) and \(\sigma\). Increasing the training set from 10 to 100 clusters let them examine parameter stability. Five held-out Ar20 clusters tested transfer beyond the Ar3–Ar7 fitting sizes. The assignment's parity plot gives a concrete reason to ask whether a two-parameter curve can describe more environments.
+
+“Suppose we keep the fitting operation but allow the energy to depend more flexibly on the neighbours. What extra information would let us trust the resulting forces?” The optional project bonus already supplies a copper example with energies and forces. Treat it as a worked resource that everyone can inspect. Do not say that everyone completed the bonus, and do not repeat L26's potential survey.
+
+Connect the question to the map. L28 reached larger structures by replacing atoms with a concentration, and it ended by noting that \(\epsilon\), \(g\), \(\kappa\), and the mobility all have to be supplied. Here we stay with atoms and look below them, at the electrons that set their interactions. Greater detail pays off when a surface, distortion, or change of bonding affects the quantity we want to predict, and the resulting energies can feed back up the map: into MD, into Monte Carlo swap energies, and into the free energies that a phase field needs.
+
+[L29.2] What is calculated for a fixed copper structure?
+
+Use the first frame of project/data/cu_vasp_train.xyz throughout the reference calculation: family fcc, config_id 32, four atoms, a distorted periodic cell. The periodic cell and element identities are part of the input alongside the positions. The four atoms represent a repeating crystal. The frame contains one cell energy and twelve Cartesian force components.
+
+Begin physically: moving a nucleus changes the electron distribution around it. Under the Born–Oppenheimer approximation, we hold the nuclei fixed while finding an electronic state, and repeat at a new geometry if we need another reference. Define \(\mathbf R\) as all nuclear positions and \(U_{\mathrm{ref}}(\mathbf R)\) as the resulting potential-energy surface, including nucleus–nucleus repulsion. Forces are its negative position derivatives:
+
+\[
+\mathbf F_i^{\mathrm{ref}}
+=-\nabla_{\mathbf R_i}U_{\mathrm{ref}}(\mathbf R).
+\]
+
+Explain that the many-electron wavefunction depends on all electron coordinates together. A direct grid would grow with the number of electrons. Density functional theory instead organizes the ground-state problem through the electron density \(n(\mathbf r)\), the number of electrons per volume at position \(\mathbf r\). Its integral is the electron count.
+
+Give one representative Kohn–Sham equation in atomic units, where \(\hbar\), electron mass, and elementary-charge factors are absorbed into the units:
+
+\[
+\begin{aligned}
+\left[-\frac12\nabla^2+v_{\mathrm{eff}}[n](\mathbf r)\right]
+\psi_j(\mathbf r)
+&=\varepsilon_j\psi_j(\mathbf r),\\
+n(\mathbf r)
+&=\sum_j f_j|\psi_j(\mathbf r)|^2.
+\end{aligned}
+\]
+
+Introduce \(\psi_j\) as an auxiliary one-electron orbital, \(\varepsilon_j\) as its eigenvalue, and \(f_j\) as its occupation. These orbital eigenvalues are not the total cell energy. The effective potential includes nuclear attraction, the mean electronic electrostatic contribution, and exchange-correlation effects. Exchange-correlation describes the remaining quantum contributions beyond the chosen independent-electron and mean-field terms.
+
+The density determines the effective potential, whose orbitals determine a new density. Guess a density, solve the eigenproblem, construct a new density, and mix and repeat until the density and energy meet convergence criteria. This recalls L16's eigenproblems and L06's fixed-point iteration without suggesting the self-consistent cycle is always a simple convergent substitution.
+
+Practical DFT requires approximations to exchange-correlation and a finite numerical representation. The accuracy of the reference depends on those approximations and numerical settings. Use the current Cu labels to make that statement concrete: PBE specifies the exchange-correlation approximation, and PAW specifies a treatment of the core and valence electrons. The source records a 400 eV cutoff and specified periodic sampling. Explain a plane-wave cutoff as a limit on the spatial detail represented, and periodic sampling as resolving electronic states in a repeating crystal. No package comparison or functional ladder is needed.
+
+[L29.3] The energy zero is part of the data
+
+Read the actual training frame before fitting anything. It reports \(N=4\) and a cell energy of \(-14.60710306\) eV. The accompanying isolated-Cu record gives \(-0.24239966\) eV for the specified computational setup. Subtract the same atomic reference for every Cu atom:
+
+\[
+\begin{aligned}
+U_{\mathrm{int}}^{\mathrm{ref}}
+&=U_{\mathrm{cell}}^{\mathrm{ref}}-N U_{\mathrm{atom}}^{\mathrm{ref}},\\
+&=-14.60710306-4(-0.24239966),\\
+&=-13.63750442\ \mathrm{eV},\\
+\frac{U_{\mathrm{int}}^{\mathrm{ref}}}{N}
+&=-3.409376105\ \mathrm{eV/atom}.
+\end{aligned}
+\]
+
+This is a signed binding quantity, negative relative to separated atoms. A positive cohesive-energy magnitude uses the opposite sign. The atomic reference is specific to the PAW and computational settings. Do not combine arbitrary atomic energies from another calculation or fit an extra unconstrained per-atom offset after making this subtraction.
+
+At fixed composition and atom count, the subtraction is independent of position, so it does not change the force labels. For the first atom, the recorded force is approximately \((0.20542,-0.04996,-0.30231)\) eV/Å. These components are the negative slopes of the energy surface along the three coordinate directions. The four-atom frame provides twelve such derivatives as well as its energy value, all from a related configuration.
+
+Preserve the dataset's exact energy convention. The bulk files record VASP finite-smearing free energies, TOTEN, at 0.15 eV electronic smearing. Their force labels correspond to that convention. Describe smearing briefly as a numerical treatment of electronic occupations in the metal. Do not call these labels exact zero-temperature cohesive energies or equate the smearing parameter with the MD thermostat temperature. The isolated-atom record uses its documented atomic occupations and has zero electronic entropy.
+
+[L29.4] Values and slopes constrain a flexible energy model
+
+Return to the Assignment 2 residual, now with forces. A curve can pass through energy points and have an incorrect slope between them, so a small energy error does not guarantee correct motion. Fitting the derivatives supplies additional information about how the energy changes as atoms move.
+
+Use the current bonus as the algebraic bridge. Its EAM-type model has 12 fixed-knot cubic pair functions and three embedding terms, with a fixed neighbour-density function and fixed atomic reference. There are 15 fitted coefficients. Collect those coefficients in \(\boldsymbol\theta\). For a known geometry, expand its energy as known contributions times unknown coefficients before using a sum:
+
+\[
+\begin{aligned}
+U_{\boldsymbol\theta}(\mathbf R)
+&=\theta_1 A_1(\mathbf R)+\theta_2 A_2(\mathbf R)+\cdots,\\
+F_{i\alpha,\boldsymbol\theta}
+&=-\theta_1\frac{\partial A_1}{\partial R_{i\alpha}}
+-\theta_2\frac{\partial A_2}{\partial R_{i\alpha}}-\cdots.
+\end{aligned}
+\]
+
+The index \(\alpha\) denotes x, y, or z. Each force component gives another linear equation in the same coefficients. Stacking energy and force equations gives the familiar overdetermined fitting system. It does not make the derivatives statistically independent measurements.
+
+For a flexible atom-centred model, the energy instead takes the representative form
+
+\[
+\begin{aligned}
+U_{\boldsymbol\theta}(\mathbf R)
+&=e_{\boldsymbol\theta}(\mathcal N_1)
++e_{\boldsymbol\theta}(\mathcal N_2)+\cdots,\\
+\mathbf F_{i,\boldsymbol\theta}
+&=-\nabla_{\mathbf R_i}U_{\boldsymbol\theta}.
+\end{aligned}
+\]
+
+Define \(\mathcal N_i\) as the species and relative positions of neighbours around atom \(i\) within the model's range. Distances and angles describe the environment. A shared flexible function maps those inputs to an assigned atomic contribution, and the contributions sum to the total. The reference provides total energies and forces, not a unique measured energy label for each atom.
+
+The model should preserve physical symmetries: translating the whole structure or permuting identical atom labels leaves its energy unchanged. Rotating it leaves energy unchanged and rotates the predicted force vectors. A suitable representation builds those requirements into the fitted model while allowing many adjustable coefficients. A local model also assumes that omitted longer-range information is adequately treated for the intended system.
+
+Introduce the joint objective through scaled differences. Energy per atom and a Cartesian force component have different units, so raw squares cannot be compared without specified weights. For configuration \(c\), with \(N_c\) atoms, use
+
+\[
+\begin{aligned}
+r_{E,c}
+&=\frac{U_{\boldsymbol\theta,c}-U_{\mathrm{int},c}^{\mathrm{ref}}}
+{N_c s_E},\\
+r_{F,ci\alpha}
+&=\frac{F_{ci\alpha,\boldsymbol\theta}
+-F_{ci\alpha}^{\mathrm{ref}}}{s_F},\\
+\mathcal L(\boldsymbol\theta)
+&=\sum_{c\in\mathrm{train}}
+\left[r_{E,c}^2+
+\frac{1}{3N_c}\sum_{i,\alpha}r_{F,ci\alpha}^2\right]\\
+&\quad+\lambda R(\boldsymbol\theta).
+\end{aligned}
+\]
+
+The positive scales \(s_E\) and \(s_F\) control the relative influence of energies and forces. The current bonus uses 0.03 eV/atom and 0.05 eV/Å. It first rescales the coefficient columns of the fitting matrix to comparable sizes. Its regularization penalizes large coefficients in that rescaled system. Explain that \(R\) expresses such a preference and \(\lambda\) controls its strength. No proof of a preferred penalty or new training run is required. A more flexible model can reduce fitting residuals, but useful flexibility must also improve predictions for structures outside the fit.
+
+[L29.5] What would count as a convincing copper test?
+
+The current files contain 178 fitting structures and 46 held-out structures across fcc, bcc, hcp, and surface families. The current bonus uses that two-file separation. It does not implement a separate internal validation split. Explain the additional choice needed when we tune model complexity or fitting weights:
+
+- Training structures determine coefficients.
+- Validation structures guide choices such as model flexibility and regularization.
+- A final test set assesses the chosen model after those choices are fixed.
+
+Place validation within the 178 fitting structures and leave the 46 held-out structures for the final test. This is a proposed teaching procedure, not a claim about existing bonus code. Keep related structures or neighbouring trajectory frames together when splitting data. Putting almost identical structures on both sides can make a test artificially easy. A family-stratified split tests prediction within represented families. Holding a whole family out asks a harder transfer question. Name the question before choosing the split.
+
+Return to one actual held-out structure, fcc config_id 48, with four atoms. Its first-atom x-force is 0.81168297 eV/Å. The comparison to make is \(F_{1x,\mathrm{model}}-0.81168297\) eV/Å on exactly that geometry and cell. No model prediction is asserted in this outline. A later asset can supply a reproducible prediction after its model and provenance are fixed.
+
+Report energy errors per atom and force-component errors separately. Inspect systematic errors by family as well as the aggregate parity plot. Check an energy-versus-spacing curve and the relative energies of fcc, bcc, and hcp structures. Those tests connect to the L26 observation that agreement at the fcc minimum does not determine every other response.
+
+For the nanoparticle question, the supplied files have distorted crystals and slabs, but no liquid or free-cluster family. A small error on those files therefore leaves an important gap for a melting trajectory. Ask students which additional configurations they would request: hot disordered Cu, low-coordination particle surfaces, or strongly compressed encounters, tied to the trajectory they intend to run. Validation data must describe the physical environments where the model will be used. More similar crystal data alone may not close this gap.
+
+[L29.6] The learned model returns to the MD loop
+
+The practical transfer is an energy-and-force evaluator. At each step, the engine supplies coordinates and the required cell information. The model returns the energy and forces, and velocity Verlet performs the same position and velocity update as before. Repeated electronic calculations have been replaced by an approximation fitted to reference calculations. The MD algorithm and the need to resolve fast motion remain.
+
+Before comparing trajectories, evaluate the fitted function and its engine implementation on the same configuration. Check element labels, energy zero, units, periodicity, and cutoff smoothness. For a Cartesian coordinate \(x\), compare the supplied force with an energy difference at a sensible spacing:
+
+\[
+F_x\approx-\frac{U(x+h)-U(x-h)}{2h}.
+\]
+
+This reconnects to the finite-difference and round-off lessons of L17–L18. Use several trial spacings rather than an arbitrarily tiny \(h\). Agreement tests the implementation of the energy gradient. A short NVE comparison at two time steps tests integration. Neither establishes that the reference data cover a liquid environment.
+
+If a trajectory encounters an unrepresented environment, retain that configuration, obtain a consistent reference calculation, and extend the fitting and validation process. An ensemble of models can help flag disagreement, but agreement between models does not establish accuracy when all share the same missing data. No live DFT, model training, notebook, or MD run is part of this writing pass.
+
+End by returning to the multiscale map one last time. MD sits in its window. Monte Carlo reached outside it in time by sampling arrangements, the phase field reached outside it in length and time by averaging atoms into a field, and electronic calculations reached below it to supply the energies that all of them need. The question can lead outward to a field that follows larger patterns, or inward to electrons and a more informative atomic energy. The numerical operations remain familiar: averages, finite differences, eigenproblems, fitting, and time integration. The useful advance is choosing which information the materials question requires. The following meeting is a separate final review, with no new assignment or exam policy introduced here.
+
+Eventual full-lecture prose allocation
+L29.1 250; L29.2 520; L29.3 350; L29.4 650; L29.5 500; L29.6 380.
+Total target: 2650 words. These are expansion budgets, not current counts.
+Brief anchor requests are in unit-06-sources-and-production.txt.

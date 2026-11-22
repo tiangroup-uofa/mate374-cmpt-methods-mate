@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="170mm" height="74mm" viewBox="0 0 170 74">
+<title>Time scales of MD and of atomic rearrangement in copper at 800 K</title>
+<desc>Logarithmic time axis from 1 fs to 10 s. The MD band ends at one microsecond. One copper hop takes about 2 ms, and rearrangement over 5 nm about 0.7 s, from the measured self-diffusion coefficient.</desc>
+<defs>
+<marker id="tri" orient="auto-start-reverse" markerWidth="1" markerHeight="1" viewBox="0 0 1 1" refX="0" refY="0" style="overflow:visible" preserveAspectRatio="xMidYMid">
+<path transform="scale(0.5)" d="M 5.77,0 -2.88,5 V -5 Z" style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt" />
+</marker>
+<radialGradient id="atom-a" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#8a8f98" /></radialGradient>
+<radialGradient id="atom-b" cx="0.5" cy="0.5" r="0.5" fx="0.35" fy="0.32"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#1f77b4" /></radialGradient>
+</defs>
+<rect width="170" height="74" style="fill:white" />
+<g id="axis" inkscape:groupmode="layer" inkscape:label="Time axis and events">
+<rect x="8.00" y="35.00" width="86.62" height="9.00" ry="0" style="fill:#cde5ec;stroke:none;stroke-width:0.265" />
+<text x="93.12" y="40.80" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#1f77b4;text-anchor:end">large MD run: 10<tspan style="font-size:2.9px" dy="-1.6">9</tspan><tspan dy="1.6"> </tspan> steps of 1 fs</text>
+<path d="M8.00,44.00 L165.00,44.00" style="fill:none;stroke:#231f20;stroke-width:0.5;marker-end:url(#tri)" />
+<path d="M8.00,44.00 L8.00,45.60" style="fill:none;stroke:#231f20;stroke-width:0.35" />
+<path d="M36.88,44.00 L36.88,45.60" style="fill:none;stroke:#231f20;stroke-width:0.35" />
+<path d="M65.75,44.00 L65.75,45.60" style="fill:none;stroke:#231f20;stroke-width:0.35" />
+<path d="M94.62,44.00 L94.62,45.60" style="fill:none;stroke:#231f20;stroke-width:0.35" />
+<path d="M123.50,44.00 L123.50,45.60" style="fill:none;stroke:#231f20;stroke-width:0.35" />
+<path d="M152.38,44.00 L152.38,45.60" style="fill:none;stroke:#231f20;stroke-width:0.35" />
+<text x="8.00" y="49.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">1 fs</text>
+<text x="36.88" y="49.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">1 ps</text>
+<text x="65.75" y="49.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">1 ns</text>
+<text x="94.62" y="49.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">1 µs</text>
+<text x="123.50" y="49.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">1 ms</text>
+<text x="152.38" y="49.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">1 s</text>
+<text x="165.00" y="49.60" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:italic;fill:#231f20;text-anchor:end">time</text>
+<path d="M29.42,44.00 L29.42,19.20" style="fill:none;stroke:#231f20;stroke-width:0.35;stroke-dasharray:1.2,0.8" />
+<circle cx="29.42" cy="44.00" r="1.1" style="fill:#231f20;stroke:none" />
+<text x="29.42" y="14.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:middle">one Cu–Cu vibration</text>
+<text x="29.42" y="18.00" style="font-family:Arial;font-size:3.53px;font-weight:bold;font-style:normal;fill:#231f20;text-anchor:middle">168 fs</text>
+<path d="M125.86,44.00 L125.86,30.20" style="fill:none;stroke:#b5473a;stroke-width:0.35;stroke-dasharray:1.2,0.8" />
+<circle cx="125.86" cy="44.00" r="1.1" style="fill:#b5473a;stroke:none" />
+<text x="124.36" y="29.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#b5473a;text-anchor:end">one hop of a Cu atom</text>
+<text x="124.36" y="33.00" style="font-family:Arial;font-size:3.53px;font-weight:bold;font-style:normal;fill:#b5473a;text-anchor:end">about 2 ms</text>
+<path d="M150.70,44.00 L150.70,19.20" style="fill:none;stroke:#b5473a;stroke-width:0.35;stroke-dasharray:1.2,0.8" />
+<circle cx="150.70" cy="44.00" r="1.1" style="fill:#b5473a;stroke:none" />
+<text x="152.30" y="14.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#b5473a;text-anchor:end">rearrangement over 5 nm</text>
+<text x="152.30" y="18.00" style="font-family:Arial;font-size:3.53px;font-weight:bold;font-style:normal;fill:#b5473a;text-anchor:end">about 0.7 s</text>
+<path d="M94.62,57.00 L150.70,57.00" style="fill:none;stroke:#b5473a;stroke-width:0.5;marker-end:url(#tri);marker-start:url(#tri)" />
+<text x="122.66" y="62.40" style="font-family:Arial;font-size:4.23px;font-weight:normal;font-style:normal;fill:#b5473a;text-anchor:middle">a factor of about 10<tspan style="font-size:2.9px" dy="-1.6">6</tspan><tspan dy="1.6"> </tspan></text>
+<text x="8.00" y="62.40" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:start">Cu self-diffusion at 800 K:</text>
+<text x="8.00" y="67.00" style="font-family:Arial;font-size:3.53px;font-weight:normal;font-style:normal;fill:#231f20;text-anchor:start"><tspan style="font-style:italic">D</tspan> ≈ 6 × 10<tspan style="font-size:2.9px" dy="-1.6">−18</tspan><tspan dy="1.6"> </tspan> m<tspan style="font-size:2.9px" dy="-1.6">2</tspan><tspan dy="1.6"> </tspan>/s</text>
+</g>
+</svg>

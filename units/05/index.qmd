@@ -10,4 +10,6 @@ Unit 5 develops the numerical solution of ordinary differential equations, the s
 - [L25 · Molecular dynamics (II): control and analysis](L25/index.qmd) — time steps, periodic boundaries, ensembles, structure, and diffusion.
 - [L26 · Molecular dynamics (III): the choice of potentials](L26/index.qmd) — hard spheres, pair potentials, many-body and machine-learned interatomic potentials, and how to measure what each one gets wrong.
 
+[Unit 05 · Summary and preparation](summary.qmd)
+
 [Unit 05 references](references.qmd)

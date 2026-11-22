@@ -1,0 +1,182 @@
+UNIT 6 / L28
+Alloy arrangements, automata, and phase fields
+Author-facing narrative outline. This is not a complete lecture.
+Eventual lecture target: 2500–2800 prose words.
+Suggested 50-minute allocation: 4 + 8 + 9 + 4 + 5 + 6 + 9 + 5 minutes.
+
+L28 opens with the question that L27 left open: why do A and B not simply mix at random? The same binary alloy runs through the whole lecture. We first sample its arrangements with the Metropolis swap from L27 and compare the result with the regular-solution model students solved in Assignment 2. A local update rule then shows how material balance works between cells. Finally, the alloy grows beyond any lattice we can sample, and we replace individual atoms by a concentration field that evolves in time. Explain every change of physical description. Equilibrium sampling, a prescribed cellular rule, and continuum transport answer different questions even when their displayed patterns look alike.
+
+Model choice relative to the donor plan: post-l23-unit-plan.txt favours unlike neighbours, which gives chemical ordering. This outline uses an unlike-bond energy penalty, which gives demixing. Demixing connects directly to the A2 miscibility gap and to a conserved composition field. The ordering case is mentioned once in L28.1 so that the change of physics is stated openly.
+
+[L28.1] The parked question and the lattice model
+
+Return to the board from L27: an A–B alloy annealed at 800 K, and the question we parked. Why would A and B not simply mix at random? Students usually answer “because some bonds are preferred.” Turn that into a model we can count.
+
+Use two 8-by-8 periodic lattices, each with 32 A and 32 B atoms. In one, the species are mixed at random. In the other, they form two strips. Give the setup as a list:
+
+- \(N_s=64\) fixed sites, four nearest neighbours each, periodic boundaries.
+- Fixed numbers \(N_A=N_B=32\).
+- Energy \(\epsilon>0\) for each unlike nearest-neighbour bond, zero for like bonds.
+
+Count each bond once. With \(N_{AB}\) unlike bonds,
+
+\[
+\begin{aligned}
+U&=\epsilon N_{AB},\\
+N_b&=\frac{4N_s}{2}=128,\\
+f_{AB}&=\frac{N_{AB}}{N_b}.
+\end{aligned}
+\]
+
+The strips have two periodic interfaces of eight bonds each, so \(N_{AB}=16\) and \(f_{AB}=0.125\). A random arrangement has about 65 unlike bonds. A checkerboard has all 128 and is the worst case here. If unlike bonds instead lowered the energy, the checkerboard would win. That is chemical ordering, and a composition alone cannot describe it, because a checkerboard and a random mixture have the same average composition. We use the penalty so that composition can describe the A-rich and B-rich regions later in the lecture.
+
+[L28.2] The Metropolis swap on the lattice
+
+Apply the L27 rule. Choose two distinct sites at random and propose exchanging their atoms. The reverse exchange has the same proposal probability. Swapping like atoms changes nothing. Swapping an A and a B keeps both species counts fixed, which is why we use swaps and not single-site changes of identity.
+
+Work one swap by hand. Choose two sites that are not neighbours. The A site has one B neighbour and three A neighbours, so its unlike count goes from one to three when it becomes B. The B site has two A and two B neighbours, so its unlike count stays at two when it becomes A. The configuration gains two unlike bonds:
+
+\[
+\begin{aligned}
+\Delta U&=\epsilon(3-1+2-2)=2\epsilon,\\
+a&=\exp\left(-\frac{2\epsilon}{k_{\mathrm B}T}\right).
+\end{aligned}
+\]
+
+Compare three temperatures in a list:
+
+- \(k_{\mathrm B}T=0.5\epsilon\): \(a=e^{-4}\approx0.018\).
+- \(k_{\mathrm B}T=\epsilon\): \(a=e^{-2}\approx0.135\). A uniform draw of 0.10 accepts the swap, and 0.20 rejects it.
+- \(k_{\mathrm B}T=4\epsilon\): \(a=e^{-0.5}\approx0.61\).
+
+A swap that removes two unlike bonds is always accepted. For neighbouring sites, count the bond between them only once. The swap exchanges identities at fixed positions in a single step. It does not follow a path or cross a barrier, which is exactly the freedom that let L27 bypass the MD time problem.
+
+At very high temperature, energy matters little, every arrangement at fixed composition becomes equally likely, and \(f_{AB}\) approaches a random-mixture value. Starting from an A atom, the chance that a neighbour site holds B is \(N_B/(N_s-1)\). Counting both orders,
+
+\[
+\mathbb E[f_{AB}]=\frac{2N_AN_B}{N_s(N_s-1)}=\frac{32}{63}\approx0.508.
+\]
+
+At low temperature, predict a smaller \(f_{AB}\) as A-rich and B-rich regions form.
+
+[L28.3] Why not mix at random? Three answers of increasing care
+
+Now answer the parked question with three models of the same alloy. Each one keeps more information about the arrangement than the previous one.
+
+First answer, two extremes. A random mixture at \(c=1/2\) has energy \(\epsilon\) per site (two bonds per site, half of them unlike) and mixing entropy \(k_{\mathrm B}\ln2\) per site. A fully separated alloy has almost no unlike bonds in a large sample and no mixing entropy. Comparing free energies per site, \(\epsilon-k_{\mathrm B}T\ln2\) against zero, mixing wins when \(k_{\mathrm B}T>\epsilon/\ln2\approx1.44\epsilon\). Mixing is driven by entropy, the number of ways to arrange the atoms, and opposed by the bond energy.
+
+Second answer, the regular solution of Assignment 2. Allow any composition \(c\), the fraction of B, and keep the assumption that neighbours are random. The unlike-bond fraction at random is \(2c(1-c)\), so the energy per site is \(4\epsilon c(1-c)\). Writing \(\Omega=4\epsilon\), the free energy per site is
+
+\[
+\begin{aligned}
+g(c)&=\Omega c(1-c)+k_{\mathrm B}T\left[c\ln c+(1-c)\ln(1-c)\right],\\
+\frac{1}{k_{\mathrm B}T}\frac{\mathrm dg}{\mathrm dc}
+&=\ln\frac{c}{1-c}+H(1-2c),\qquad H=\frac{\Omega}{k_{\mathrm B}T}.
+\end{aligned}
+\]
+
+The second line is exactly the function \(F(x)\) that students solved in A2 Problem 2. Its outer roots are the two phase compositions. A2 showed they exist only when \(H>2\), that is, below \(k_{\mathrm B}T=2\epsilon\). At \(H=2.5\), students found \(x_\beta\approx0.855\) and \(x_\alpha\approx0.145\).
+
+Third answer, the lattice sampled exactly. The regular solution assumes every atom sees an average neighbourhood. In the lattice, neighbours are correlated: B atoms cluster locally even when the alloy is mixed on average. This local clustering lowers the energy of the mixed state without full separation, so the mixed state survives to a lower temperature. For the infinite square lattice, the exact answer is known from Onsager's 1944 solution of the equivalent Ising model: separation begins below \(k_{\mathrm B}T\approx1.13\epsilon\).
+
+Put the three answers side by side:
+
+- Two extremes: mixing above \(k_{\mathrm B}T\approx1.44\epsilon\).
+- Regular solution (A2): separation below \(k_{\mathrm B}T=2\epsilon\).
+- Exact lattice: separation below \(k_{\mathrm B}T\approx1.13\epsilon\).
+
+At \(k_{\mathrm B}T=1.6\epsilon\), which is \(H=2.5\), A2 predicts two phases of 14.5% and 85.5% B. The lattice alloy at that temperature stays mixed, with local clusters. Monte Carlo sampling is how we see such correlations for a model with no exact solution. A 64-site run shows the trend between low and high temperature. It cannot locate a sharp transition, because a finite lattice has none, and students should not fit one.
+
+[L28.4] Measurements from a chain of related configurations
+
+Measure \(f_{AB}\) after every attempt. A rejection repeats the current value, and a single swap changes only a few bonds, so neighbouring records resemble each other. Their scatter describes real fluctuations. Their number overstates the independent information in \(s/\sqrt M\).
+
+Compare two runs at the same temperature, one started as strips and one as a random mixture. An early drift is adjustment from the chosen start. If the later records still differ, the calculation has not reached a common average. If they agree, that is useful evidence, though slow changes between unvisited arrangements can remain.
+
+Estimate the uncertainty with long blocks. Average successive segments of the settled record, each longer than the visible persistence of the fluctuations. If the block means behave roughly independently, their spread divided by the square root of the number of blocks estimates the uncertainty of the overall mean. Lengthening the blocks should leave that estimate in a stable range. Longer sampling reduces sampling uncertainty. It does not repair a poor bond model.
+
+[L28.5] A local update rule and material balance
+
+The lattice so far contains a few dozen atoms. Before we leave individual atoms, look at a different kind of lattice calculation, because it shows the bookkeeping we will need for a field. A cellular automaton gives each cell a state, a fixed neighbourhood, and a rule that all cells apply at the same time.
+
+Take a short periodic row of A and B. The rule: a B atom exchanges with an A immediately to its right. All cells decide from the old row, then update together. Write B as \(b_i^n=1\) and A as \(b_i^n=0\), where \(i\) labels the cell and \(n\) the update round. The product \(b_i^n(1-b_{i+1}^n)\) equals one exactly when B can leave cell \(i\). Incoming minus outgoing gives
+
+\[
+b_i^{n+1}=b_i^n+b_{i-1}^n(1-b_i^n)-b_i^n(1-b_{i+1}^n).
+\]
+
+Work the row BBAA to BABA, then to ABAB. Summing over the ring cancels every outgoing term with an incoming one, so the number of B atoms is conserved. This rule imposes directed motion and contains no Boltzmann factor, so it does not sample the alloy's equilibrium, and its rounds are not physical time unless the rule is tied to a physical rate. What we keep is the balance: the change in a cell equals what flows in minus what flows out.
+
+[L28.6] When the pattern is larger than any lattice we can sample
+
+Return to the multiscale map from L27. Real phase separation produces regions micrometres across. A cubic micrometre of copper holds about \(8.5\times10^{10}\) atoms. We also often want to know how fast the regions grow during an anneal, and Metropolis swaps give no time. Both reasons push us up the map, to larger length and longer time.
+
+Replace site labels by a concentration. Define \(c(\mathbf r,t)\) as the fraction of B atoms in a small region around position \(\mathbf r\) at time \(t\). A value \(c=0.4\) means 40% B in that region, averaged over many sites. We give up individual atoms and vibrations, and the grid spacing now resolves composition changes and interfaces instead of atomic spacing.
+
+For the bulk free energy we can use the A2 regular solution directly. At \(H=2.5\):
+
+- Uniform \(c=0.5\): \(g\approx-0.0681\,k_{\mathrm B}T\) per site.
+- Two equal regions at \(c=0.4\) and \(0.6\), same average composition: \(g\approx-0.0730\,k_{\mathrm B}T\) per site.
+
+The split lowers the bulk free energy, so a small composition difference grows. The curvature \(g''\) is negative between \(c\approx0.276\) and \(0.724\), the spinodal region where any small fluctuation grows.
+
+A sharp boundary between regions has an energy cost. Add a penalty for composition gradients, with coefficient \(\kappa>0\) and site density \(n_0\):
+
+\[
+F[c]=n_0\int_V\left[g(c)+\frac{\kappa}{2}|\nabla c|^2\right]\mathrm dV.
+\]
+
+Read the bracket as the free energy at each position. \(g\) favours distinct compositions, and the gradient term penalizes abrupt changes, which gives the interface a finite width.
+
+State the cost of this step plainly. The regular solution overestimates the separation temperature, as L28.3 showed. A phase-field model inherits whatever free energy it is given. In practice, \(g\), \(\kappa\), and the mobility below are fitted to measurements, thermodynamic databases, or atomistic calculations at smaller scale.
+
+[L28.7] The driving force and the conservation equation
+
+Changing the local B fraction changes the free energy. Define the exchange chemical potential \(\mu\) as that change per exchanged atom:
+
+\[
+\mu=g'(c)-\kappa\nabla^2c.
+\]
+
+The Laplacian is the sum of second derivatives in each direction. On a grid, each cell appears in the gradient penalty at both of its boundaries, and differentiating those two squared differences gives \(2c_i-c_{i-1}-c_{i+1}\), the negative curvature term.
+
+B moves from high to low \(\mu\). Define a composition flux \(\mathbf j_c\) and a nonnegative mobility \(\mathcal M\). The automaton's balance, in continuous form, says the composition of a region changes by what flows in minus what flows out:
+
+\[
+\boxed{
+\begin{aligned}
+\mu&=g'(c)-\kappa\nabla^2c,\\
+\frac{\partial c}{\partial t}&=\nabla\cdot(\mathcal M\nabla\mu).
+\end{aligned}
+}
+\]
+
+This is the Cahn–Hilliard equation. Read it through the A2 numbers. At \(H=2.5\), \(g'(0.4)\approx+0.095\,k_{\mathrm B}T\) and \(g'(0.6)\approx-0.095\,k_{\mathrm B}T\). The chemical potential is higher in the B-poor region, so B flows toward the region that is already B-rich. This is uphill diffusion, and it is how the miscibility gap appears in time. Outside the spinodal, with negligible \(\kappa\) and constant \(\mathcal M\), the equation reduces to ordinary diffusion with \(D=\mathcal M g''>0\). Inside it, \(g''<0\) and composition differences grow.
+
+Now the model has a time. The mobility sets how fast B moves, and it must be calibrated, for example from a measured interdiffusion coefficient, before simulated time can be read in seconds. Metropolis attempts could not supply this.
+
+[L28.8] The familiar numerical operations inside the new model
+
+On a one-dimensional periodic grid with spacing \(h\) and constant \(\mathcal M\), apply the central second difference from L17 twice:
+
+\[
+\begin{aligned}
+\mu_i&=g'(c_i)-\kappa\frac{c_{i-1}-2c_i+c_{i+1}}{h^2},\\
+\dot c_i&=\mathcal M\frac{\mu_{i-1}-2\mu_i+\mu_{i+1}}{h^2}.
+\end{aligned}
+\]
+
+These are coupled ODEs for the cell compositions, the IVP form of Unit 5. Start from \(c=0.5\) with a small random perturbation, since a perfectly uniform field stays uniform. Summing the second line over a periodic grid gives zero, so the average composition is conserved. In the continuous model, the free energy can only decrease:
+
+\[
+\frac{\mathrm dF}{\mathrm dt}=-n_0\int_V\mathcal M|\nabla\mu|^2\,\mathrm dV\le0.
+\]
+
+Use conservation and decreasing free energy as checks, along with grid and time-step refinement. The fourth derivative makes explicit time steps very small, and the logarithms in \(g\) diverge at \(c=0\) and 1, so an unstable step can push compositions out of range.
+
+Close on the same alloy at two scales. Swaps sampled arrangements and showed what mean field misses. The field followed separation in time at a scale no lattice run could cover, after atomic detail was folded into \(g\), \(\kappa\), and \(\mathcal M\). Every one of those parameters, and the bond energy \(\epsilon\) itself, has to come from somewhere. L29 turns inward on the map to the source of atomic energies.
+
+Eventual full-lecture prose allocation
+L28.1 300; L28.2 400; L28.3 500; L28.4 240; L28.5 280; L28.6 420; L28.7 400; L28.8 260.
+Total target: 2800 words. These are expansion budgets, not current counts.
+Brief anchor requests are in unit-06-sources-and-production.txt.

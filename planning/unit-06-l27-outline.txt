@@ -1,0 +1,193 @@
+UNIT 6 / L27
+Monte Carlo: averages as high-dimensional integrals
+Author-facing narrative outline. This is not a complete lecture.
+Eventual lecture target: 2500–2800 prose words.
+Suggested 50-minute allocation: 3 + 4 + 7 + 8 + 2 + 10 + 12 + 4 minutes.
+
+The teaching sequence follows the instructor's order. The unit starts on the multiscale map, at the edge of what MD can reach. An alloy arrangement gives a concrete system beyond that edge, and a time estimate shows why. The question then changes from how atoms move to which arrangements they occupy. The earliest answer to that question, from Ulam and Metropolis, estimates a many-dimensional average by random sampling. Buffon's needle connects the random-throw intuition to that average in about one minute. The rest of the lecture develops the estimate, its uncertainty, and the Metropolis rule. The binary alloy of L28 is the running example throughout.
+
+[L27.1] Where MD sits on the multiscale map
+
+Return to the length–time map from L22, the panel that places ab initio MD, empirical MD, kinetic Monte Carlo, and continuum mechanics on logarithmic axes. Point at the empirical MD window: nanometres to perhaps a micrometre, picoseconds to about a microsecond. Recall what students just did in L24–L26 inside that window: vibrations, a heating ramp, diffusion in a liquid.
+
+Then state the purpose of the unit plainly. Many materials questions sit outside that window, to the right in time or upward in length. Unit 6 is about how we answer them anyway: by sampling arrangements instead of following motion (L27–L28), by replacing atoms with a continuous field (L28), and by improving the atomic energy itself (L29).
+
+[L27.2] A question outside the window: how do A and B arrange themselves?
+
+Give the system. An A–B solid alloy is annealed at 800 K. Do A and B stay mixed, or do they separate into A-rich and B-rich regions? What fraction of nearest-neighbour bonds join unlike atoms once the alloy has settled? This arrangement controls properties students know from earlier MATE courses, such as strength and phase stability.
+
+Park a second question on the board without answering it: why would A and B not simply mix at random? The answer involves a competition between bond energies and the number of possible arrangements. L28 returns to it with the swap calculation. Here we need only the first question.
+
+Students have just spent three lectures on MD. Ask them: why not run MD and watch the atoms rearrange?
+
+[L27.3] Estimate the time for atoms to change places
+
+Build the estimate from numbers students already have.
+
+Step 1, the vibration frequency. An atom in a crystal rattles in the cage of its neighbours. L25 gave a Cu–Cu vibration period of about 168 fs:
+
+\[
+\nu\approx\frac{1}{168\ \mathrm{fs}}\approx6\times10^{12}\ \mathrm{s^{-1}}.
+\]
+
+Each vibration is an attempt to leave the site.
+
+Step 2, the chance that one attempt succeeds. Two atoms change places only when one passes over an energy barrier \(E_{\mathrm a}\), usually with a nearby vacancy. Only a fraction \(e^{-E_{\mathrm a}/(k_{\mathrm B}T)}\) of attempts carries enough energy. The exchange rate per atom is
+
+\[
+\Gamma=\nu\exp\left(-\frac{E_{\mathrm a}}{k_{\mathrm B}T}\right).
+\]
+
+Step 3, the numbers. Use \(E_{\mathrm a}=2.0\) eV, the same order as tabulated activation energies for self-diffusion in metals, and \(T=800\) K:
+
+- \(k_{\mathrm B}T\approx0.069\) eV, so \(e^{-E_{\mathrm a}/(k_{\mathrm B}T)}\approx2.5\times10^{-13}\).
+- \(\Gamma\approx1.5\ \mathrm{s^{-1}}\). Each atom changes place about once every 0.7 s.
+- In MD steps of 1 fs, that single exchange takes about \(7\times10^{14}\) steps.
+
+Step 4, every atom in a million-atom alloy. A nanoscale sample with \(10^6\) atoms needs essentially all of them to have moved before its arrangement means anything. Exchanges happen at random, so the last few atoms take longer than the average. The expected time until every atom has moved at least once is about \(\ln(10^6)\approx14\) times the single-atom time:
+
+\[
+t_{\mathrm{all}}\approx\frac{\ln N+0.58}{\Gamma}\approx\frac{14.4}{1.5\ \mathrm{s^{-1}}}\approx10\ \mathrm{s}.
+\]
+
+That is about \(10^{16}\) MD steps. The largest MD runs mentioned in L22 reach about \(10^9\) steps, and L25's billion-atom iron run covered 2 ns. The arrangement is roughly ten million times beyond a very large run. A larger time step does not help, because L25 showed that the fastest vibration limits it. Within a realistic simulation time, MD of this alloy keeps the arrangement it started with.
+
+The logarithm can be shown in one line or left as “a factor of about ten.” The conclusion does not depend on it.
+
+[L27.4] An easier route: ask which arrangements, not how they got there
+
+Ask the class how to make this easier. The equilibrium arrangement does not depend on the path the atoms took, how long it took, or which vacancy carried each atom. If we only need the settled arrangement, we can skip the motion entirely and ask a question without time in it: which arrangements does the alloy occupy at temperature \(T\), and how often?
+
+People faced the same kind of problem at Los Alamos in the 1940s, and their version was strikingly close to ours. Tell it as a short story, about three minutes, with the portraits and the city image.
+
+- **The problem.** For a fission device, they needed to know whether neutrons multiply or escape. A neutron starts at some position and velocity, collides, scatters, causes fission, or leaves the material. Each neutron's history is a long chain of such events. The answer is an average over all possible histories, far too many to enumerate. This is the same structure as our alloy: an average over far too many arrangements.
+- **The gambler's idea.** Stanislaw Ulam liked games of chance. He relaxed with solitaire and was stimulated by poker. In 1946, recovering from an illness, he wondered about the chance that a game of Canfield solitaire comes out. Counting card arrangements was hopeless, so he asked whether it would be more practical to lay out many games and simply count the successes.
+- **The computer.** Ulam knew that statistical sampling was an old mathematical idea that had fallen out of use because the calculations were too long and tedious by hand. The new ENIAC electronic computer changed that. He discussed the idea with John von Neumann, who in March 1947 outlined a statistical calculation that followed many individual neutron histories.
+- **The name.** Nicholas Metropolis suggested “Monte Carlo,” partly because Ulam had an uncle who borrowed money from relatives because he “just had to go to Monte Carlo.” Metropolis and Ulam described the method in a 1949 paper.
+- **The rule we use.** The acceptance rule later in this lecture comes from a 1953 paper by Metropolis, Arianna and Marshall Rosenbluth, and Augusta and Edward Teller. It ran on the Los Alamos MANIAC computer.
+
+Then widen the story briefly, because students may ask why nobody did this earlier. Random reasoning was not new. Buffon posed his needle problem in the eighteenth century. Boltzmann explained thermodynamics through the statistics of very many atoms, and his statistical view was strongly disputed during his lifetime. Enrico Fermi had used random sampling for neutron moderation in Rome in the early 1930s with a small mechanical adding machine and never published it. What changed in the 1940s was the machine. Random sampling only works with very many samples, and only a computer can produce them. Monte Carlo is a method of the computer age.
+
+The point to carry forward is that each of these people replaced an impossible count with random samples.
+
+Why does an integral appear? Keep the step small to avoid confusion. A settled alloy still fluctuates between many arrangements. A measured property, such as the unlike-bond fraction, is an average over those arrangements, each weighted by how often it occurs. An average over many possibilities is a weighted sum. When positions vary continuously, that sum becomes an integral.
+
+Write a configuration as \(\mathbf R\), the list of all atomic positions, and the property as \(A(\mathbf R)\). L25 introduced the NVT ensemble for a sample in a heat bath. In that ensemble, a configuration occurs with probability proportional to its Boltzmann weight:
+
+\[
+\boxed{
+\langle A\rangle
+=\frac{\displaystyle\int A(\mathbf R)\,e^{-U(\mathbf R)/(k_{\mathrm B}T)}\,\mathrm d\mathbf R}
+{\displaystyle\int e^{-U(\mathbf R)/(k_{\mathrm B}T)}\,\mathrm d\mathbf R}
+}
+\]
+
+- Low-energy configurations receive large weights.
+- Raising \(T\) flattens the weights, so higher-energy configurations contribute more.
+- The denominator turns the weights into probabilities.
+
+Count the dimension once, then move on. \(\mathrm d\mathbf R\) has three coordinates per atom, so ten atoms give 30 dimensions. A Unit 4 grid with ten points per coordinate would need \(10^{30}\) energy evaluations, about \(3\times10^{16}\) years at a million per second. For atoms fixed on lattice sites, the integral becomes a sum over arrangements: the 64-site alloy of L28 with 32 A and 32 B atoms has \(\binom{64}{32}\approx1.8\times10^{18}\) arrangements, about 58,000 years at the same rate. Neither the grid nor the full count is usable. This is where Ulam's idea enters.
+
+[L27.5] Buffon's needle in one minute: from throws to an average
+
+Dice, needles, and an alloy integral look like unrelated problems. Show that they are the same operation, using the experiment students ran in L01. Each needle throw gave a value of 1 for a crossing and 0 otherwise. The crossing fraction was the mean of those values, and it estimated a probability, \(2L/(\pi D)\). That probability is itself an integral over all needle positions and angles. Throwing needles at random was therefore Monte Carlo integration: average a property over random samples, and the average estimates the integral. In the alloy, each sample is an arrangement instead of a needle, and the property is the unlike-bond fraction instead of a crossing. Do not retell the experiment. A single sentence on the result is enough: L02 found that the error fell only as about \(2.37/\sqrt M\). The next section explains why.
+
+[L27.6] Monte Carlo integration and its uncertainty
+
+Write the estimate for an integral over a region of volume \(V\). The integral equals the average height of \(f\) times the volume, and the mean of random samples estimates that average height:
+
+\[
+\boxed{
+\begin{aligned}
+I&=\int_V f(\mathbf x)\,\mathrm d\mathbf x,\\
+\widehat I&=V\,\frac{f(\mathbf X_1)+f(\mathbf X_2)+\cdots+f(\mathbf X_M)}{M}.
+\end{aligned}
+}
+\]
+
+Nothing here refers to a grid, so the number of samples \(M\) need not grow as \(n^d\). How accurate is the estimate?
+
+Introduce the two quantities that the course has not developed. The values \(f(\mathbf X_i)\) scatter around their mean. Their standard deviation \(\sigma\) is the spread of individual samples, and it does not shrink with more samples. Their average fluctuates much less. For independent samples with finite variance, the variances add, and dividing the sum by \(M\) divides its variance by \(M^2\):
+
+\[
+\begin{aligned}
+\operatorname{Var}\!\left(\frac{f_1+\cdots+f_M}{M}\right)
+&=\frac{M\sigma^2}{M^2}=\frac{\sigma^2}{M},\\
+\operatorname{SE}(\widehat I)
+&=V\frac{\sigma}{\sqrt M}.
+\end{aligned}
+\]
+
+Explain variance as squared spread, and the standard error as the typical spread of the estimate if the whole calculation were repeated with new random numbers. The assumptions are independent samples from the same distribution with finite variance. The sample standard deviation estimates \(\sigma\):
+
+\[
+\begin{aligned}
+s^2
+&=\frac{1}{M-1}\Big[(f_1-\overline f)^2+(f_2-\overline f)^2\\
+&\qquad+\cdots+(f_M-\overline f)^2\Big].
+\end{aligned}
+\]
+
+Close the Buffon loop. For \(L=D\), a crossing has spread \(\sqrt{p(1-p)}\approx0.48\) with \(p=2/\pi\), and converting the crossing fraction to \(\widehat\pi\) gives the \(2.37/\sqrt M\) of L02. Halving the error needs four times as many throws.
+
+Show why the scaling matters in high dimension with an integral we can check. Take \(f(\mathbf x)=x_1^2+\cdots+x_d^2\) on the unit cube:
+
+- **Exact answer:** \(I=d/3\).
+- **Spread of one sample:** each term has variance \(4/45\), so \(\sigma^2=4d/45\).
+- **Question:** how does the relative error depend on \(d\)?
+
+\[
+\frac{\operatorname{SE}(\widehat I)}{I}
+=\frac{\sqrt{4d/45}}{d/3}\frac{1}{\sqrt M}
+\approx\frac{0.894}{\sqrt{d}\,\sqrt M}.
+\]
+
+The relative error does not grow with dimension here, while the grid cost grew as \(n^d\). Keep the claim specific: Monte Carlo removes the grid explosion, but its accuracy still depends on \(\sigma\). A standard error is a typical scale, not a bound on any single run.
+
+[L27.7] Why uniform samples fail, and the Metropolis rule
+
+Apply the estimate to the alloy. Draw arrangements uniformly and weight each by \(e^{-U/(k_{\mathrm B}T)}\). Each unlike bond costs energy \(\epsilon\). A random 64-site arrangement has about 65 unlike bonds out of 128, while two separated strips have 16. At \(k_{\mathrm B}T=\epsilon\), their weights differ by \(e^{-49}\approx5\times10^{-22}\). Uniform draws almost always land on arrangements with negligible weight, so \(\sigma\) is enormous and \(\sigma/\sqrt M\) is useless.
+
+The remedy is to choose where samples land. Drawing from a density \(q(\mathbf x)\) and reweighting gives
+
+\[
+\begin{aligned}
+I&=\int\frac{f(\mathbf x)}{q(\mathbf x)}\,q(\mathbf x)\,\mathrm d\mathbf x,\\
+\widehat I&=\frac1M\sum_{i=1}^M\frac{f(\mathbf X_i)}{q(\mathbf X_i)}.
+\end{aligned}
+\]
+
+For a thermal average, the ideal \(q\) is the Boltzmann distribution, which turns the average into a plain mean of sampled values. The obstacle is the denominator of the boxed average: normalizing that distribution needs the integral we wanted to avoid.
+
+Metropolis and co-workers removed the obstacle in 1953. Ratios of Boltzmann weights need only energy differences. Build a chain: propose a small change, such as swapping an A and a B atom, then accept it with
+
+\[
+\boxed{
+a=\min\left(1,\exp\left[-\frac{\Delta E}{k_{\mathrm B}T}\right]\right),
+\qquad \Delta E=E_{\mathrm{new}}-E_{\mathrm{old}}.
+}
+\]
+
+Downhill changes are always accepted. Uphill changes are accepted with a probability that falls with \(\Delta E\) and rises with \(T\). After a rejection, the current configuration is recorded again.
+
+Check the rule on two states with an exact answer, \(E_0=0\) and \(E_1=\epsilon\), with a symmetric proposal (a fair coin proposes switching or staying). At \(k_{\mathrm B}T=\epsilon\):
+
+- An uphill switch is accepted with probability \(e^{-1}\approx0.368\). A uniform draw of 0.20 accepts it, and 0.70 rejects it.
+- A downhill switch is always accepted.
+- Every attempt records the current state, including a rejection or a proposed stay.
+
+At equilibrium, the probability flowing from 0 to 1 equals the reverse flow. The equal proposal factors cancel, leaving \(p_0e^{-\epsilon/(k_{\mathrm B}T)}=p_1\), the Boltzmann ratio. The upper state holds about 0.269 of the records. Counting only accepted switches would give the wrong answer. This balance holds for symmetric proposals.
+
+[L27.8] Back to the alloy: what we gained and what we gave up
+
+Return to the map from [L27.1]. A Metropolis swap can exchange two distant atoms in one step, a move the alloy never makes directly. That freedom is why the method reaches the settled arrangement that MD could not. It has two costs:
+
+- **Correlated samples.** Each configuration is built from the previous one, and rejections repeat values, so \(s/\sqrt M\) with \(M\) the number of records understates the uncertainty. The chain also needs an initial adjustment before its records represent equilibrium. L28 handles both.
+- **No physical time.** The attempt counter measures sampling work. Equilibrium Metropolis gives averages and fluctuations at fixed \(T\), not how fast the alloy gets there.
+
+Closing question, connected to the parked question from [L27.2]: “If a swap raises the energy, why must it sometimes be accepted for a correct average?” The answer starts to explain why A and B do not simply separate completely or mix completely, and opens the swap calculation in L28.
+
+Eventual full-lecture prose allocation
+L27.1 170; L27.2 220; L27.3 430; L27.4 600; L27.5 150; L27.6 520; L27.7 500; L27.8 180.
+Total target: 2770 words. These are expansion budgets, not current counts.
+Brief anchor requests are in unit-06-sources-and-production.txt.

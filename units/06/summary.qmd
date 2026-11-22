@@ -1,0 +1,36 @@
+---
+title: "Unit 06 · Summary and exam preparation"
+subtitle: "Multiscale Materials Simulation Techniques"
+from: markdown+tex_math_single_backslash
+---
+
+Molecular dynamics follows atoms through time inside one window of length and time. This unit leaves that window in three ways: sampling arrangements directly, averaging atoms into a field, and going below the atoms for the energies every method needs.
+
+::: {.callout-note .prep-key}
+## How to prepare
+
+- [P · Practice]{.prep-label .prep-practice} **Practice:** Work on paper, with help from the provided functions or widgets when useful.
+- [R · Recall]{.prep-label .prep-recall} **Recall:** Know the concepts clearly and distinguish related ideas.
+- [E · Explain]{.prep-label .prep-explain} **Explain:** Describe the idea in your own words, without memorizing detailed algorithms.
+- [N · Recognize]{.prep-label .prep-recognize} **Recognize:** Know the method names and where to find them in the linked lecture or notebook.
+:::
+
+## [L27 · Monte Carlo: averages as high-dimensional integrals](L27/index.qmd)
+
+- [E · Explain]{.prep-label .prep-explain} Explain why the settled arrangement of an alloy can be sampled instead of followed in time, using the waiting time for an atom to hop.
+- [P · Practice]{.prep-label .prep-practice} Estimate an integral as a Monte Carlo mean over random points, form the standard error from the spread of the samples, and state what quadrupling the sample count does to that error.
+- [R · Recall]{.prep-label .prep-recall} Recall why uniform samples carry almost no Boltzmann weight in many dimensions, and what information the Metropolis acceptance rule needs.
+
+## [L28 · Alloy arrangements, automata, and phase fields](L28/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Evaluate the energy change of one A–B swap from its neighbouring pairs and decide whether the move is accepted.
+- [R · Recall]{.prep-label .prep-recall} Recall why simultaneous swaps must use non-touching pairs, and how that rule makes the sampler a cellular automaton.
+- [N · Recognize]{.prep-label .prep-recognize} Locate the Cahn–Hilliard equation and name its ingredients: the regular-solution free energy, the gradient cost, and the mobility.
+- [E · Explain]{.prep-label .prep-explain} Explain why a semi-implicit step in Fourier space allows a larger time step than the forward Euler limit for the same field equation.
+
+## [L29 · The atomistic data revolution](L29/index.qmd)
+
+- [R · Recall]{.prep-label .prep-recall} Recall that reference energies and forces come from electronic structure calculations at fixed nuclei, and that forces are the negative position derivatives of that energy.
+- [E · Explain]{.prep-label .prep-explain} Explain why energies alone constrain a flexible atomic model weakly, and what force values add.
+- [P · Practice]{.prep-label .prep-practice} Check a supplied force component against a central-difference energy derivative, using several sensible spacings.
+- [N · Recognize]{.prep-label .prep-recognize} Recognize density functional theory, symmetry-function and machine-learned potentials, and validation by structure family, with their lecture sections.

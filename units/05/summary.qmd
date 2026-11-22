@@ -1,0 +1,50 @@
+---
+title: "Unit 05 · Summary and exam preparation"
+subtitle: "Initial-value ODE problems and molecular dynamics"
+from: markdown+tex_math_single_backslash
+---
+
+An initial-value problem turns Newton's second law into a step-by-step trajectory, and every trajectory needs a time step, a set of surroundings, and a potential before it can be read as a material.
+
+::: {.callout-note .prep-key}
+## How to prepare
+
+- [P · Practice]{.prep-label .prep-practice} **Practice:** Work on paper, with help from the provided functions or widgets when useful.
+- [R · Recall]{.prep-label .prep-recall} **Recall:** Know the concepts clearly and distinguish related ideas.
+- [E · Explain]{.prep-label .prep-explain} **Explain:** Describe the idea in your own words, without memorizing detailed algorithms.
+- [N · Recognize]{.prep-label .prep-recognize} **Recognize:** Know the method names and where to find them in the linked lecture or notebook.
+:::
+
+## [L22 · Why do we simulate materials?](L22/index.qmd)
+
+- [E · Explain]{.prep-label .prep-explain} Explain how the pitch-drop experiment is read as very slow flow: the drop rate and Hagen–Poiseuille flow give the viscosity of pitch, and the fitted viscosity law is then extrapolated.
+- [R · Recall]{.prep-label .prep-recall} Recall why interatomic forces come from electrons, and which part of that interaction a classical potential replaces.
+- [N · Recognize]{.prep-label .prep-recognize} Locate the four questions for every simulation (system, property, method, numerical core) and the length- and time-scale map that places Monte Carlo, molecular dynamics, and electronic methods.
+
+## [L23 · Solving initial-value problems](L23/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Rewrite a second-order equation as a first-order system and take one explicit Euler step by hand from the given initial position and velocity.
+- [R · Recall]{.prep-label .prep-recall} Recall the difference between initial and boundary conditions, and the order of the leading error for explicit Euler and for Runge–Kutta.
+- [E · Explain]{.prep-label .prep-explain} Explain where the extra energy in the vibrating-atom Euler trajectory comes from, and how evaluating more slopes per step reduces that drift.
+
+### Python knowledge
+
+One call to `solve_ivp` replaces the hand-written loop: the rate function, the time span, the evaluation times, and the chosen method decide the returned trajectory.
+
+## [L24 · Molecular dynamics (I): the MD loop and velocity Verlet](L24/index.qmd)
+
+- [P · Practice]{.prep-label .prep-practice} Carry out one velocity-Verlet step for a pair interaction: update positions, recompute forces at the new positions, then update velocities.
+- [R · Recall]{.prep-label .prep-recall} Recall which quantity stays constant in an NVE trajectory and what an energy drift says about the time step.
+- [E · Explain]{.prep-label .prep-explain} Explain why Størmer–Verlet and velocity Verlet keep better energy behaviour than forward Euler for the same cost per step.
+
+## [L25 · Molecular dynamics (II): control and analysis](L25/index.qmd)
+
+- [R · Recall]{.prep-label .prep-recall} Recall what each ensemble holds fixed or controls: NVE energy, NVT temperature, NPT temperature and pressure, and which device performs the control.
+- [N · Recognize]{.prep-label .prep-recognize} Locate periodic boundary conditions, the interaction cutoff, long-range electrostatics, and the Nosé–Hoover thermostat, and name where a production engine such as LAMMPS or OpenMM sets each one.
+- [E · Explain]{.prep-label .prep-explain} Explain how the time step is chosen against the fastest motion in the system, and what the radial distribution function, the coordination number, and a diffusion coefficient measure about a trajectory.
+
+## [L26 · Molecular dynamics (III): the choice of potentials](L26/index.qmd)
+
+- [E · Explain]{.prep-label .prep-explain} Explain, using the 13-atom cluster, why a pair model misses the energy per atom for a metal, and what an embedded-atom method adds.
+- [N · Recognize]{.prep-label .prep-recognize} Recognize hard spheres, the Lennard–Jones pair curve, embedded-atom methods, bond-order and molecular force fields, and machine-learned potentials, together with the lecture section where each is introduced.
+- [R · Recall]{.prep-label .prep-recall} Recall one known limitation of each potential family and the calculated property that exposes it, such as cohesion, vacancy formation, elastic constants, or melting.
