@@ -25,11 +25,7 @@ The larger gain comes from changing the model. Averaging the lattice gives a com
 
 ## [L29 · Atomistic methods](L29/index.qmd) {#l29-atomic-data}
 
-In [Assignment 2](../../assignments/A2/index.qmd), an energy residual determined the Lennard–Jones parameters. The larger held-out clusters tested how that fit transferred to a new environment. The optional copper-fitting project also provides energies and forces for distorted crystals and surfaces.
-
-We examine where such reference data come from, using the electron density around fixed nuclei to introduce density functional theory [@kohn1965selfconsistent]. We then connect energy fitting, force fitting, and the choice of validation structures to a machine-learned interatomic potential [@behler2007generalized]. The final step returns to the MD loop: the fitted model supplies energy and its position derivatives, while the integrator still advances the atoms.
-
-These three lectures complete the teaching sequence before the separate final review.
+L27 and L28 needed one number for Cu–Ag: the mixing enthalpy, or the bond energy behind it. L29 calculates it from the electrons. The outer s electrons of Cu and Ag spread to their neighbours, and tight binding turns this into a matrix of on-site energies and hoppings whose eigenvalues are the electron levels [@slater1954simplified]. A periodic ring of atoms in NumPy shows how a weak Cu–Ag hopping makes the mixing enthalpy positive. Density functional theory removes the fitted parameters by working with the electron density [@hohenberg1964inhomogeneous; @kohn1965selfconsistent], and a PBE calculation gives a Cu–Ag mixing enthalpy of about +95 meV/atom at equal composition, the value that sets the swap energies and the free-energy curve of L28.
 
 [Unit 06 · Summary and preparation](summary.qmd)
 

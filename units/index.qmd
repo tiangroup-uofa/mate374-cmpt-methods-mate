@@ -60,6 +60,6 @@ toc: false
 
 27. [L27 · Monte Carlo techniques](06/L27/index.qmd) — a Cu–Ag alloy that separates on cooling, why a GPU MD run with an EAM potential cannot reach a single atomic hop, the Monte Carlo idea from Ulam and Buffon's needle, random events and seeds in NumPy, and a pure-Python lattice Monte Carlo that measures diffusion.
 28. [L28 · From Monte Carlo to continuum modeling](06/L28/index.qmd) — Boltzmann probabilities for Cu–Ag swaps, parallel swaps on a GPU, nucleation, spinodal decomposition, and a mixed alloy, the free energy behind the phase diagram, and the composition field of Allen–Cahn and Cahn–Hilliard models at real lengths and times.
-29. [L29 · Atomistic methods](06/L29/index.qmd) — reference energies and forces from electronic structure calculations, the energy zero and cutoff in a data set, energy against energy-and-force fitting, validation by structure family, and the learned model back in the MD loop.
+29. [L29 · Atomistic methods](06/L29/index.qmd) — Cu and Ag valence orbitals, tight binding as a matrix eigenvalue problem on a periodic ring, how on-site energies and hopping decide whether metals mix, the electron density and the Kohn–Sham equations, and a DFT mixing enthalpy for Cu–Ag.
 
 [Unit 06 · Summary and preparation](06/summary.qmd)
