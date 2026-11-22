@@ -36,6 +36,29 @@ def render(label, snaps, out):
                    loop=0, optimize=True)
 
 
+def render_combined(cache, out, dpi=300):
+    """All three regimes on one shared clock: the same sweep count in every panel."""
+    snaps = {label: np.load(cache / f"{label}.npz") for label, _, _ in R.CASES}
+    heads = {"nucleation": ("Nucleation", "3% Ag, T/Tc = 0.7"),
+             "spinodal": ("Spinodal decomposition", "50% Ag, T/Tc = 0.7"),
+             "mixed": ("Stays mixed", "20% Ag, T/Tc = 1.3")}
+    images = []
+    for t in FRAMES:
+        fig, axes = plt.subplots(1, 3, figsize=(7.5, 3.0), dpi=dpi)
+        for ax, (label, _, _) in zip(axes, R.CASES):
+            ax.imshow(snaps[label][str(t)], cmap="Blues", vmin=-0.3, vmax=1.2, interpolation="nearest")
+            ax.set_xticks([]); ax.set_yticks([])
+            name, sub = heads[label]
+            ax.set_title(f"{name}\n{sub}", fontsize=8.5)
+        fig.suptitle(f"{t:,} sweeps  ≈  {R.seconds(t)}", fontsize=11, fontweight="bold", y=0.06)
+        fig.subplots_adjust(left=0.01, right=0.99, top=0.84, bottom=0.12, wspace=0.04)
+        fig.canvas.draw()
+        images.append(Image.fromarray(np.asarray(fig.canvas.buffer_rgba())[..., :3]).quantize(colors=32))
+        plt.close(fig)
+    images[0].save(out, save_all=True, append_images=images[1:],
+                   duration=[180] * (len(images) - 1) + [2500], loop=0, optimize=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cache", default="/tmp/l28-regime-gifs")
@@ -50,9 +73,8 @@ def main():
              for c in R.CASES if not (cache / f"{c[0]}.npz").exists()]
     for p in procs:
         p.wait()
-    for label, _, _ in R.CASES:
-        render(label, np.load(cache / f"{label}.npz"), R.ROOT / "assets" / f"L28-{label}.gif")
-        print("wrote", label)
+    render_combined(cache, R.ROOT / "assets" / "L28-regimes.gif")
+    print("wrote combined")
 
 
 if __name__ == "__main__":
