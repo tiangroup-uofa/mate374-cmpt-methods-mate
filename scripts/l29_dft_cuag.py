@@ -95,8 +95,28 @@ def run_atoms():
     (OUT / "atom_orbitals.json").write_text(json.dumps(out))
 
 
+def run_dos():
+    """Density of states of fcc Cu and Ag, and the SCF history of the CuAg cell."""
+    out = {}
+    for sym, a in (("Cu", 3.644), ("Ag", 4.146)):
+        from ase.build import bulk
+        at = bulk(sym, "fcc", a=a)
+        at.calc = calculator(None)
+        at.get_potential_energy()
+        e, dos = at.calc.get_dos(spin=0, npts=600, width=0.15)
+        out[sym] = {"E_minus_EF": (e - at.calc.get_fermi_level()).tolist(), "dos": dos.tolist()}
+    (OUT / "dos_cu_ag.json").write_text(json.dumps(out))
+    log = OUT / "cuag_scf.txt"
+    at = build("CuAg", 3.918)
+    at.calc = calculator(str(log))
+    at.get_potential_energy()
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    if len(sys.argv) > 1 and sys.argv[1] == "dos":
+        run_dos()
+        return
     if len(sys.argv) > 1:
         run_cell(sys.argv[1])
         return

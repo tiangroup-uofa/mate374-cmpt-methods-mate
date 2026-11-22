@@ -83,6 +83,12 @@ The bond between the two atoms is unlike before and after the swap, so it drops 
 
 The reverse swap has \(\Delta E=-6\epsilon\) and is always accepted. Ag atoms that meet therefore tend to stay together. The calculation reads only the six outside neighbours, so its cost does not depend on the size of the lattice.
 
+The pure-Python loop of L27 needs only this one change. Run it below and compare a temperature below \(T_c\) with one above.
+
+::: {.quarto-wasm-local notebook="l28_boltzmann_swaps.edit.py" title="L27's lattice loop with the Boltzmann rule" height="640" loading="lazy" fullscreen="true"}
+**Static fallback.** On a 32 × 32 lattice with 50% Ag, 100 sweeps at \(0.7\,T_c\) bring the unlike-bond fraction from 0.50 down to about 0.21, and Ag-rich domains appear. At \(1.5\,T_c\) it settles near 0.35 and the lattice stays mixed. Pure Python performs about 400,000 attempts per second.
+:::
+
 ![Pairs proposed together in one parallel pass (red outlines) on a periodic 8 × 8 lattice. (a) The six shaded sites are the neighbours read by one pair, and no other pair in the pass writes to them. (b) A different pass, shifted by two columns and one row.](../../../assets/L28-pair-sets.svg){#fig-pair-sets width="85%" fig-alt="Two 8 by 8 grids of grey dots. In panel a, red rounded outlines enclose horizontal pairs in columns 0 to 1 and 4 to 5 of every second row, and six grey squares mark the neighbours of one pair. Panel b shows the same pattern shifted by two columns and one row."}
 
 ## How many swaps, and how fast?
@@ -137,6 +143,20 @@ How to read the three rows:
 - **Spinodal decomposition (middle).** At 50% Ag, every small composition fluctuation grows at once. A fine, interconnected pattern appears within 100 sweeps, about 2 ms, and coarsens into broad bands. There is no waiting time and no single particle to point at.
 - **Stable mixture (bottom).** Above \(T_c\), the atoms form short-lived clusters, but no pattern grows. The unlike-bond fraction stays at about 0.22 for all 100,000 sweeps.
 
+::: {.content-visible when-format="html"}
+:::: {.columns}
+::: {.column width="33%"}
+![Nucleation](../../../assets/L28-nucleation.gif){fig-alt="Animated lattice with scattered dark Ag atoms that slowly gather into a few compact particles."}
+:::
+::: {.column width="33%"}
+![Spinodal](../../../assets/L28-spinodal.gif){fig-alt="Animated lattice where a fine dark and light maze forms immediately and coarsens into broad bands."}
+:::
+::: {.column width="33%"}
+![Mixed](../../../assets/L28-mixed.gif){fig-alt="Animated lattice of fine random speckle that does not change in character."}
+:::
+::::
+:::
+
 The same swap rule produces all three behaviours. Which one we see depends on where the alloy sits on the phase diagram.
 
 ## Where does the phase diagram come from?
@@ -170,6 +190,12 @@ How to read the construction:
 - **Below \(T_c\):** the curve has two minima. A straight line touching both, the **common tangent**, gives the compositions of the two phases. An alloy between those two points lowers its free energy by splitting into them, exactly as in A4.
 - **Phase diagram:** repeating the tangent at each temperature and plotting its two points against \(T\) traces the dome in @fig-phase-construction b.
 - **Nucleation or spinodal:** where the curve bends downward (\(g''<0\)), any small fluctuation lowers the free energy, which is the spinodal region in the middle row of @fig-regimes. Between the tangent point and the region of downward bending, small fluctuations raise \(g\), and the alloy must wait for a large enough cluster, which is nucleation in the top row.
+
+Move the temperature and composition below and watch where the alloy lands: in the spinodal, in the nucleation band, or in the one-phase region.
+
+::: {.quarto-wasm-local notebook="l28_free_energy_tangent.edit.py" title="Free-energy curve, common tangent, and the phase diagram" height="640" loading="lazy" fullscreen="true"}
+**Static fallback.** At \(T/T_c=0.8\) (regular solution), the common tangent touches at 0.145 and 0.855, and the spinodal lies between 0.276 and 0.724. An alloy with 20% Ag therefore nucleates, and one with 50% Ag decomposes spinodally.
+:::
 
 The regular solution assumes that neighbours are random, while the lattice simulation lets Ag atoms cluster. The two domes in @fig-phase-construction b therefore differ: the lattice dome is flatter on top, and the regular solution overestimates \(T_c\) by a factor of about 1.8. At low temperature, where isolated atoms really are randomly placed, the two agree.
 

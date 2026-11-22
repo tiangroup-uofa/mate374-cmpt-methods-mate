@@ -46,7 +46,7 @@ def pair_sets(N):
     return out
 
 
-def run(t_over_tc, c0, N=256, seed=7):
+def run(t_over_tc, c0, N=256, seed=7, times=SNAPS):
     rng = np.random.default_rng(seed)
     kT = KTC * t_over_tc
     sets = pair_sets(N)
@@ -54,7 +54,7 @@ def run(t_over_tc, c0, N=256, seed=7):
     s[: round(c0 * N * N)] = 1
     rng.shuffle(s)
     snaps, t = {}, 0
-    for target in SNAPS:
+    for target in times:
         while t < target:
             for k in rng.integers(16, size=16):
                 P, Q, nP, nQ = sets[k]
@@ -70,6 +70,10 @@ def run(t_over_tc, c0, N=256, seed=7):
 
 def seconds(t):
     v = t * T_SWEEP
+    if v < 1e-3:
+        return f"{v * 1e6:.0f} µs"
+    if v < 1e-2:
+        return f"{v * 1e3:.1f} ms"
     return f"{v * 1e3:.0f} ms" if v < 1 else f"{v:.1f} s"
 
 
@@ -128,6 +132,10 @@ def main():
     fig.savefig(out, dpi=300)
     print("wrote", out)
     coarse_grain(data["spinodal"]["10000"])
+    fig, a = plt.subplots(figsize=(3.0, 3.0))
+    a.imshow(data["spinodal"]["100000"], cmap="Blues", vmin=-0.3, vmax=1.2, interpolation="nearest")
+    a.axis("off")
+    fig.savefig(ROOT / "assets" / "L28-spinodal-snapshot.png", dpi=300, bbox_inches="tight")
     summary = {}
     for label, _, _ in CASES:
         g = data[label]["100000"]

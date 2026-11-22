@@ -1,0 +1,31 @@
+# Random fcc Cu-20at%Ag, Williams-Mishin-Hamilton 2006 EAM (NIST CTCMS).
+# Equilibrate 20 ps (NPT), reset the displacement reference, then run and dump.
+variable T    index 1000
+variable nrep index 20
+variable nrun index 1000000
+units metal
+boundary p p p
+atom_style atomic
+lattice fcc 3.70
+region box block 0 ${nrep} 0 ${nrep} 0 ${nrep}
+create_box 2 box
+create_atoms 1 box
+set type 1 type/fraction 2 0.20 374
+mass 1 63.546
+mass 2 107.8682
+pair_style eam/alloy
+pair_coeff * * CuAg.eam.alloy Cu Ag
+neighbor 1.0 bin
+velocity all create ${T} 4928459 mom yes rot yes dist gaussian
+timestep 0.002
+fix 1 all npt temp ${T} ${T} 0.2 iso 0.0 0.0 2.0
+thermo 2500
+run 10000
+reset_timestep 0
+compute msd all msd com yes
+thermo_style custom step time temp press vol pe c_msd[4]
+thermo 10000
+thermo_modify flush yes
+dump d all custom 20000 dump.cuag id type x y z
+dump_modify d sort id
+run ${nrun}

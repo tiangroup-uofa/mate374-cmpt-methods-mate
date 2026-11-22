@@ -43,6 +43,12 @@ How to read @fig-orbitals:
 
 So an electron in the metal has two choices at each atom: stay, with the energy of its orbital, or hop to a neighbour. The balance of the two decides the energy of an arrangement, and with it the mixing enthalpy.
 
+### The smallest case: two atoms, two electrons
+
+Start with two neighbouring atoms, each contributing one s orbital and one electron. Sharing makes two new levels: a **bonding** level lowered by the hopping \(t\), and an **antibonding** level raised by \(t\). Both electrons go into the bonding level, so the pair gains \(2t\). If the Cu–Ag hopping is weaker than the average of Cu–Cu and Ag–Ag, an unlike pair gains less, and the difference is exactly the bond energy \(\epsilon\) of L28.
+
+![Bonding and antibonding levels of three two-atom pairs, with illustrative hoppings \(t_{\mathrm{CuCu}}=1.2\), \(t_{\mathrm{AgAg}}=0.9\), and \(t_{\mathrm{CuAg}}=0.8\) eV. With both electrons in the bonding level, the unlike pair is less stable than the average of the like pairs by \(\epsilon=+0.5\) eV.](../../../assets/L29-dimer-levels.png){#fig-dimer width="100%" fig-alt="Three energy-level diagrams. Each shows two atomic levels at zero energy splitting into a lower bonding level holding two electrons and a higher empty antibonding level. The splitting is largest for Cu–Cu, plus or minus 1.2 eV, then Ag–Ag, plus or minus 0.9 eV, and smallest for Cu–Ag, plus or minus 0.8 eV."}
+
 ## Tight binding: the electron problem as a matrix
 
 **Tight binding** writes each electron state as a combination of atomic orbitals, one per atom, and keeps only two kinds of numbers [@slater1954simplified]:
@@ -91,6 +97,8 @@ The procedure in NumPy:
 
 For a pure ring, the eigenvalues are known exactly, \(E_m=\varepsilon-2t\cos(2\pi m/N)\) for \(m=0,1,\ldots,N-1\), which is a useful check on the code.
 
+![Energy levels of pure rings of \(N\) atoms. Two atoms give one bonding and one antibonding level. As \(N\) grows, the levels fill the range from \(-2t\) to \(+2t\), and for a large ring they form a continuous **band**. With one electron per atom, the lower half is filled up to the **Fermi level**.](../../../assets/L29-ring-to-band.png){#fig-ring-band width="100%" fig-alt="Left: columns of energy levels for rings of 2, 4, 8, 16 and 64 atoms, with the lower half coloured as filled. The levels spread between minus 2 and plus 2 and become dense. Right: a histogram of 2000 levels with a black curve that rises at both band edges, and a dashed Fermi level at zero."}
+
 ::: {.quarto-wasm-local notebook="l29_tight_binding.edit.py" title="Tight binding on a periodic ring: energy levels and the mixing enthalpy" height="760" loading="lazy" fullscreen="true"}
 **Static fallback.** For a 20-atom ring with \(t_{\mathrm{CuCu}}=1.2\) eV, \(t_{\mathrm{AgAg}}=0.9\) eV, \(t_{\mathrm{CuAg}}=0.8\) eV, and equal on-site energies, the alternating arrangement has \(\Delta H_{\text{mix}}\approx+316\) meV/atom and two separated blocks \(+24\) meV/atom. Raising \(\varepsilon_{\mathrm{Ag}}\) by 0.5 eV lowers both, to \(+261\) and \(+18\) meV/atom.
 :::
@@ -134,9 +142,21 @@ Because \(v_{\text{eff}}\) depends on \(n\), the equations are solved by iterati
 3. **Fill** the lowest levels to get a new density.
 4. **Mix** the new density with the old and repeat until it stops changing.
 
+The same loop can be tried on the tight-binding ring. Let the on-site energy of each atom rise when it holds extra electrons, \(\varepsilon_i=\varepsilon_i^0+U(n_i-1)\), so the matrix depends on its own solution. The notebook below guesses the electron count on each atom, builds \(\mathbf H\), solves it, and mixes the new counts with the old ones, exactly the four steps above.
+
+::: {.quarto-wasm-local notebook="l29_self_consistency.edit.py" title="A self-consistent tight-binding ring: guess, solve, mix, repeat" height="600" loading="lazy" fullscreen="true"}
+**Static fallback.** For an alternating Cu–Ag ring with \(\varepsilon_{\mathrm{Ag}}-\varepsilon_{\mathrm{Cu}}=1\) eV and \(U=2\) eV, mixing with \(\alpha=0.3\) converges in 18 iterations, with 1.21 electrons on each Cu and 0.79 on each Ag. Without the repulsion (\(U=0\)), Cu would hold 1.45 electrons, so the feedback reduces the charge transfer. With \(\alpha=1\), the loop oscillates and does not converge.
+:::
+
+![The same loop in a real DFT calculation of the CuAg cell (GPAW). The change in the density falls with each iteration until it is below the tolerance.](../../../assets/L29-scf.png){#fig-scf width="55%" fig-alt="A line plot of the logarithm of the density change against iteration number, falling from about minus 1.4 at iteration 2 to about minus 3.1 at iteration 8, with one small rise at iteration 7."}
+
 ![Valence electron density in the CuAg L1₀ cell from a PBE calculation, on a plane through Cu and Ag atoms, repeated twice in each direction. The bright rings are the d electrons around each nucleus. Between the atoms, a low and fairly uniform density remains: the shared s electrons of the metal.](../../../assets/L29-cuag-density.png){#fig-density width="60%" fig-alt="A square map of electron density with bright rings around four Ag sites and dimmer rings around Cu sites, separated by a dark, nearly uniform background between the atoms."}
 
 In a periodic crystal, the orbitals \(\psi_j\) repeat from cell to cell up to a phase, so the calculation needs only one cell, a set of sample points for that phase (the **k-points**), and a finite set of plane waves to represent the orbitals. The periodic boundary that was a matrix corner in the tight-binding ring becomes the natural setting of the calculation. Codes such as Quantum ESPRESSO [@giannozzi2009quantum], GPAW [@mortensen2024gpaw], and SPARC [@xu2021sparc] solve exactly this problem, with different ways of representing the orbitals.
+
+The output that corresponds to @fig-ring-band is the **density of states**: how many electron levels the crystal has at each energy. For real Cu and Ag, it shows the narrow d bands of @fig-orbitals sitting below a low, flat s band that crosses the Fermi level.
+
+![Density of states of fcc Cu and Ag from PBE. The tall peaks are the d bands, filled and below the Fermi level. The Ag 4d band lies about 2 eV deeper than the Cu 3d band. The low, flat part around the Fermi level comes from the shared s electrons.](../../../assets/L29-dos.png){#fig-dos width="70%" fig-alt="Two density-of-states curves. The Cu curve has a tall band of peaks between about minus 5 and minus 1.5 eV. The Ag curve has its band between about minus 6.5 and minus 3 eV. Both are low and flat near the Fermi level at zero."}
 
 ## The Cu–Ag mixing enthalpy from DFT
 
@@ -182,5 +202,7 @@ On L28's square lattice, each atom has four neighbours, so \(\Omega=4\epsilon\) 
 5. Using \(\Omega=0.38\) eV and \(\Omega=4\epsilon\), what is the acceptance probability at 800 K of a swap that creates two extra unlike bonds?
 
 ## Next
+
+![Unit 6 in one picture. The DFT mixing enthalpy supplies the bond energy for every Monte Carlo swap and the \(\Omega\) in the free energy of the composition field, and both produce the separated patterns that the Cu–Ag micrographs show.](../../../assets/L29-unit-chain.png){#fig-chain width="100%" fig-alt="Four panels joined by arrows: the DFT mixing-enthalpy parabola, a Monte Carlo lattice with winding Cu-rich and Ag-rich bands, a smooth composition field with the same bands, and an SEM image of a Cu–Ag eutectic."}
 
 This completes Unit 6. A Cu–Ag alloy that separates on cooling needed three models: Monte Carlo swaps to reach the slow hops, a composition field to reach real lengths and times, and an electronic calculation to supply the energy that drives both.

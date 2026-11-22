@@ -65,6 +65,8 @@ The animation shows a single atomic layer of the crystal for 1.7 ns, the length 
 
 Nothing happens. The mean-squared displacement of the atoms stays between 0.25 and 0.27 Å² for the whole run. That is the size of a thermal vibration. An atom that hopped to a neighbouring site would have moved 2.6 Å, or 6.6 Å² squared. Every atom vibrates around its own site, and none has moved.
 
+![Mean-squared displacement of all 32,000 atoms during the MD run. It jumps to the size of a thermal vibration within the first picoseconds and then stays flat, far below the value for a single hop (dashed).](../../../assets/L27-md-msd.png){#fig-md-msd width="70%" fig-alt="A flat blue line near 0.25 square angstroms from 0 to 1.7 nanoseconds, well below a red dashed line at 6.6 square angstroms labelled one hop to a neighbouring site."}
+
 ### How long would we need to wait?
 
 Diffusion in a solid needs an atom to jump into a neighbouring vacant site over an energy barrier. Tracer measurements of copper self-diffusion between 958 and 1335 K give [@kuper1954selfdiffusion]
