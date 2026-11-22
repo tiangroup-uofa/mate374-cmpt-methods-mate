@@ -277,7 +277,7 @@ function render({ model, el }) {
 export default { render };
 """
         _css = r"""
-.alloy-widget{font-family:Arial,sans-serif;font-size:14px;max-width:520px}
+.alloy-widget{font-family:Arial,sans-serif;font-size:13px;max-width:512px}
 .alloy-widget canvas{width:100%;max-width:512px;aspect-ratio:1;image-rendering:pixelated;display:block;border:1px solid #8a8f98}
 .alloy-readout{margin-top:6px;line-height:1.5}
 """
@@ -336,7 +336,7 @@ def _(KTC, K_B, c_boundary, c_slider, eps, mo, np, plt, t_slider):
     _t = np.r_[np.linspace(0.40, 0.999, 400), 1.0]
     _cb = c_boundary(_t)
     _cb[-1] = 0.5  # the two branches meet at the critical point
-    fig, ax = plt.subplots(figsize=(3.4, 3.0), dpi=110)
+    fig, ax = plt.subplots(figsize=(3.0, 2.7), dpi=100)
     ax.fill_betweenx(_t, _cb, 1 - _cb, color="#dbe7f3")
     ax.plot(np.r_[_cb, (1 - _cb)[::-1]], np.r_[_t, _t[::-1]], color="#1f77b4", lw=1.6)
     ax.plot([c_slider.value], [t_slider.value], "o", color="#d62728", ms=7, zorder=3)
@@ -353,13 +353,13 @@ def _(KTC, K_B, c_boundary, c_slider, eps, mo, np, plt, t_slider):
         _eq = f"Equilibrium phases: {_ceq:.3f} and {1 - _ceq:.3f} B. The point is {_where}."
     else:
         _eq = "Above Tc the equilibrium state is one mixed phase at every composition."
-    phase_panel = mo.vstack([
+    phase_panel = mo.hstack([
         fig,
         mo.md(f"k*T*/ε = {KTC * t_slider.value:.3f} · with ε = {eps.value} meV, "
               f"*T*c = {_tc_K:.0f} K and *T* = {_T_K:.0f} K  \n{_eq}  \n"
               f"Time: matching tracer diffusion to Cu at 1000 K gives about 22 µs per sweep, "
               f"so 10,000 sweeps ≈ 0.2 s."),
-    ])
+    ], widths=[1, 1.4], align="center", gap=1)
     plt.close(fig)
     return (phase_panel,)
 
@@ -369,7 +369,8 @@ def _(c_slider, eps, lattice, mo, phase_panel, preset, restart, running, size, t
     mo.vstack([
         mo.hstack([preset, t_slider, c_slider], justify="start", wrap=True),
         mo.hstack([size, eps, restart, running], justify="start", wrap=True),
-        mo.hstack([mo.ui.anywidget(lattice), phase_panel], justify="start", align="start", wrap=True),
+        mo.ui.anywidget(lattice),
+        phase_panel,
     ])
     return
 
