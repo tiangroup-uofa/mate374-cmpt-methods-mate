@@ -1,0 +1,149 @@
+## Q1 · Short answers (20 points)
+
+Answer each part in one or two sentences. Support your answer with one reason or example.
+
+**(a) Floating-point numbers (5 points)**
+
+A student stores the decimal number $0.1$ in a double-precision binary floating-point variable. Is the stored value exactly equal to $1/10$?
+
+~~~{=latex}
+\vspace{2cm}
+~~~
+
+**(b) Solving linear systems (5 points)**
+
+Gaussian elimination for a general dense $n\times n$ system $\mathbf{A}\mathbf{x}=\mathbf{b}$ costs $O(n^3)$ arithmetic operations. Is this cubic cost unavoidable for every $n\times n$ linear system?
+
+~~~{=latex}
+\vspace{2cm}
+~~~
+
+**(c) Numerical differentiation (5 points)**
+
+You estimate a derivative using finite differences. Why can reducing the step size $h$ make the result less accurate?
+
+~~~{=latex}
+\vspace{2cm}
+~~~
+
+**(d) Integrating a fluctuating signal (5 points)**
+
+A molecular dynamics simulation records an atom's velocity components $v_x(t)$, $v_y(t)$, and $v_z(t)$ at discrete times. These values fluctuate because of thermal motion. The distance travelled between $0$ and $T$ is
+$$
+L=\int_0^T\sqrt{v_x(t)^2+v_y(t)^2+v_z(t)^2}\,\mathrm{d}t.
+$$
+Must you fit a smooth curve to the velocity data before calculating $L$ numerically?
+
+~~~{=latex}
+\vspace{1.5cm}
+~~~
+
+{{< pagebreak >}}
+
+## Q2 · Balancing a chemical reaction (25 points)
+
+Pyrite in iron ore can react with oxygen and water:
+$$
+\mathrm{FeS_2}+a\,\mathrm{O_2}+b\,\mathrm{H_2O}
+\;\rightarrow\;c\,\mathrm{Fe_2O_3}+d\,\mathrm{H_2SO_4}.
+$$
+The coefficient of $\mathrm{FeS_2}$ is fixed at $1$. Find the four unknown coefficients by conserving the number of atoms of each element on both sides. For example, conservation of Fe gives $1=2c$.
+
+**(a) Balance equations (10 points)**
+
+Write one balance equation for each of Fe, S, O, and H. Rearrange the four equations into matrix form $\mathbf{A}\mathbf{x}=\mathbf{b}$, with $\mathbf{x}=(a,b,c,d)^T$.
+
+**(b) Solution (10 points)**
+
+Solve the matrix equation for $a,b,c,d$ using any suitable method. Identify your method and report the four coefficients.
+
+**(c) An additional product (5 points)**
+
+Suppose $e\,\mathrm{FeO}$ also forms as a third product. Are the element balances sufficient to determine all five unknown coefficients uniquely? Explain.
+
+:::: {.content-visible when-format="html"}
+
+::: {.quarto-wasm-local notebook="final_mock_q2.edit.py" view="edit" title="Q2 · Blank workspace" height="450" loading="lazy" fullscreen="true"}
+Open the editable Q2 notebook using the link above. Record your method and results on the answer sheet.
+:::
+
+::::
+
+{{< pagebreak >}}
+
+## Q3 · Cooling a steel plate (30 points)
+
+A steel plate at $1200\,\mathrm K$ is left to cool in a room at $300\,\mathrm K$. The plate can move to the next processing step once it reaches $350\,\mathrm K$. Its temperature $T$ follows
+$$
+\frac{\mathrm dT}{\mathrm dt}=-0.2T+60,\qquad T(0)=1200\,\mathrm K,
+$$
+with $T$ in kelvin and $t$ in seconds.
+
+**(a) Long-time temperature (5 points)**
+
+Without solving the ODE, predict the temperature the plate will eventually reach. Explain briefly.
+
+**(b) Cooling time (25 points)**
+
+How long will it take for the plate to reach $350\,\mathrm K$? Use any suitable method. Show how you find the time and report it in seconds.
+
+Possible approaches:
+
+1. **Solve the ODE analytically.** Use the resulting expression for $T(t)$ to find when the plate reaches $350\,\mathrm K$.
+2. **Integrate the ODE directly.** Use forward Euler, a Runge–Kutta method, or another integrator. Locate the time at which the computed temperature crosses $350\,\mathrm K$.
+3. **Use the supplied integrator with a root finder.** The notebook function `final_temp(t_final, n)` takes a trial time `t_final` in seconds and returns the temperature in kelvin after `n` equal forward Euler steps. Choose and report `n`. Keep it fixed during the root search. Write a residual that is zero when the returned temperature equals the target, then find the trial time that makes it zero.
+
+:::: {.content-visible when-format="html"}
+
+::: {.quarto-wasm-local notebook="final_mock_q3.edit.py" view="edit" title="Q3 · Cooling workspace with Euler helper" height="450" loading="lazy" fullscreen="true"}
+The editable Q3 notebook linked above includes `final_temp(t_final, n)`. Record your method and result on the answer sheet.
+:::
+
+::::
+
+{{< pagebreak >}}
+
+## Q4 · Length of a pretzel (25 points)
+
+~~~{=latex}
+\begin{wrapfigure}[8]{r}{1.05in}
+\vspace{-0.6\baselineskip}
+\centering
+\includegraphics[width=0.95in]{../../exams/final-pretzel.png}
+\vspace{-\baselineskip}
+\end{wrapfigure}
+~~~
+
+::: {.content-visible when-format="html"}
+<img src="final-pretzel.png" alt="Pretzel illustration from the supplied book exercise" style="float: right; width: 100px; margin: 0 0 0.75rem 1rem;">
+:::
+
+A robot makes a pretzel by laying dough along the following curve, with the parameter $t$ running from $-4$ to $3$:
+$$
+\begin{aligned}
+x(t)&=(2.5-0.3t^2)\cos t,\\
+y(t)&=(3.3-0.4t^2)\sin t.
+\end{aligned}
+$$
+
+The total length of dough required is the arc length:
+$$
+L=\int_{-4}^{3}\sqrt{\left(\frac{\mathrm{d}x}{\mathrm{d}t}\right)^2+
+\left(\frac{\mathrm{d}y}{\mathrm{d}t}\right)^2}\,\mathrm{d}t.
+$$
+
+**(a) The curve (5 points)**
+
+Write Python functions for $x(t)$ and $y(t)$ in the notebook. Run the supplied plotting cell to display the pretzel's shape.
+
+**(b) Numerical integration (20 points)**
+
+Determine $L$ by numerical integration, using a method of your choice. Report the length, identify your method, and explain why it is suitable for this problem. The reference length is $17.2750$.
+
+:::: {.content-visible when-format="html"}
+
+::: {.quarto-wasm-local notebook="final_mock_q4.edit.py" view="edit" title="Q4 · Coordinate functions and automatic plot" height="650" loading="lazy" fullscreen="true"}
+Open the editable Q4 notebook using the link above. Record your method and results on the answer sheet.
+:::
+
+::::

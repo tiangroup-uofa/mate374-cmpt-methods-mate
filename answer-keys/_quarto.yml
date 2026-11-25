@@ -9,6 +9,8 @@ project:
     - A5/answers.qmd
     - midterm-mock/questions.qmd
     - midterm-mock/answers.qmd
+    - final-mock/questions.qmd
+    - final-mock/answers.qmd
 # Reuse the canonical assignment PDF options for every answer key.
 metadata-files:
   - ../assignments/_metadata.yml

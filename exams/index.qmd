@@ -1,0 +1,19 @@
+---
+title: "Exams info"
+format: html
+---
+
+## Final examination
+
+**Tuesday, December 22, 2026 · 5:30–7:30 pm · two hours · open book**
+
+- [Final exam information and full mock examination](final-mock.qmd) — all four questions, editable notebook workspaces, and sample solutions.
+- [Mock final question paper (PDF)](final-mock.pdf)
+- [Mock final sample answers (PDF)](final-mock-solutions.pdf)
+
+## Midterm examination
+
+- [Midterm information and preparation (I)](midterm-prep-1.qmd)
+- [Python preparation (II)](midterm-prep-2.qmd)
+- [Mock midterm](midterm-mock.qmd)
+- [Midterm results and answer check](midterm-answer-check.qmd)

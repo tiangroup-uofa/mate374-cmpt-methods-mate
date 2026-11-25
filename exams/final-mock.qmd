@@ -1,0 +1,44 @@
+---
+title: "Final examination · Information and mock"
+format: html
+---
+
+## Exam information
+
+| | Details |
+|---|---|
+| **Date and time** | Tuesday, December 22, 2026 · 5:30–7:30 pm |
+| **Location** | Same classroom as the lecture, as listed in the [syllabus](../syllabus/index.qmd#assessment) |
+| **Course weight** | 40% |
+| **Format** | Two hours, open book; one short-answer question and three practical problems |
+
+Bring a laptop or tablet, a pen or pencil, and any notes or printed materials you wish to consult. The course website, notebooks, assignment solutions, and Python/API documentation are permitted. Search engines may be used for documentation or debugging information.
+
+**Generative AI and communication with other people are prohibited**, including AI assistance in searches, debugging, or writing code.
+
+**Only answers on the answer sheet will be marked.** Show your method, calculations, results, units, and assumptions. Unless a question specifies a method, you may use pen and paper, a calculator, or Python.
+
+**Upload any code through Canvas for record keeping.** If uploading fails, write the key code on the answer sheet. Code quality is not graded.
+
+**No official formula sheet is provided. You may bring your own.**
+
+If a question is unclear, state your interpretation or assumptions and proceed. Ask for technical help if you cannot access the coding environment.
+
+## Mock final examination
+
+The mock has four questions worth 100 points: Q1 (20), Q2 (25), Q3 (30), and Q4 (25). It includes short answers and three problems on linear systems, ordinary differential equations, and numerical integration. Attempt it in two hours under examination conditions.
+
+- [Question paper (PDF)](final-mock.pdf)
+- [Q2 · Balancing a chemical reaction (editable notebook)](../wasm-local/final_mock_q2.html){target="_blank"}
+- [Q3 · Cooling a steel plate (editable notebook)](../wasm-local/final_mock_q3.html){target="_blank"}
+- [Q4 · Length of a pretzel (editable notebook)](../wasm-local/final_mock_q4.html){target="_blank"}
+
+Q2 opens a blank notebook with marimo and NumPy imported. Q3 provides a forward Euler helper that you can use to estimate the cooling time. Q4 provides placeholders for the two coordinate functions and plots the curve automatically once you implement them. Use **Save** or Ctrl+S / Cmd+S to download your edited notebook.
+
+{{< include ../_includes/final-mock-questions.qmd >}}
+
+::: {.callout-note collapse="true"}
+## Sample solutions with Python code
+
+[Mock final sample solutions (PDF)](final-mock-solutions.pdf)
+:::

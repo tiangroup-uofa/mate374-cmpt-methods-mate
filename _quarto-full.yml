@@ -11,6 +11,8 @@ project:
     - "assignments/A4/A4-answers.pdf"
     - "exams/midterm-mock.pdf"
     - "exams/midterm-mock-solutions.pdf"
+    - "exams/final-mock.pdf"
+    - "exams/final-mock-solutions.pdf"
     - "completed-notebooks/**"
 
 format:

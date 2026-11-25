@@ -1,0 +1,50 @@
+---
+title: "Mock final examination"
+format:
+  pdf:
+    toc: false
+    mainfont: "TeX Gyre Heros"
+    sansfont: "TeX Gyre Heros"
+    fontsize: 11pt
+    documentclass: scrartcl
+    include-in-header:
+      text: |
+        \usepackage{wrapfig}
+    papersize: letter
+    geometry:
+      - margin=0.8in
+    template-partials:
+      - before-body.tex
+---
+
+~~~{=latex}
+\begin{center}
+{\Large University of Alberta}\\[0.15cm]
+{\large Chemical and Materials Engineering}\\[0.6cm]
+{\Large\bfseries MAT E 374}\\[0.2cm]
+{\large Computational Methods in Materials Engineering}\\[0.6cm]
+{\Large\bfseries Mock final examination}\\[0.3cm]
+Practice examination · 100 points\\[0.3cm]
+Suggested duration: 2 hours\\
+Same rules as the final examination\\[0.7cm]
+\end{center}
+\noindent Name: \hrulefill\quad Student ID: \hrulefill
+\vspace{0.5cm}
+~~~
+
+## Instructions
+
+- This examination has **four questions worth 100 points**: Q1 (20), Q2 (25), Q3 (30), and Q4 (25). The duration is **2 hours**.
+- The examination is **open book**. You may consult printed materials, course materials, notebooks, assignment solutions, and Python/API documentation. Search engines may be used to find documentation or debugging information.
+- **Generative AI and communication with other people are prohibited**, including AI assistance in searches, debugging, or writing code.
+- Unless a question specifies a method, you may use pen and paper, calculator-assisted calculations (including Python as a calculator), or Python code. Show the method, intermediate steps, and results.
+- **Only answers on the answer sheet will be marked.** Include units and supporting calculations. If using Python, identify the method and functions used.
+- **Upload any code through Canvas for record keeping.** If uploading fails, write the key code on the answer sheet. Code quality is not graded.
+- **No official formula sheet is provided. You may bring your own.**
+- If a question is unclear, state your interpretation or assumptions and proceed. Do not ask for clarification of examination questions. Ask for technical help if you cannot access the coding environment.
+
+**Editable notebooks:** [Q2 · Chemical reaction](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/final_mock_q2.html) · [Q3 · Steel plate cooling](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/final_mock_q3.html) · [Q4 · Pretzel length](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/wasm-local/final_mock_q4.html)
+
+{{< pagebreak >}}
+
+{{< include ../../_includes/final-mock-questions.qmd >}}
