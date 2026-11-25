@@ -26,7 +26,8 @@ format:
 {\Large\bfseries Mock final examination}\\[0.3cm]
 Practice examination · 100 points\\[0.3cm]
 Suggested duration: 2 hours\\
-Same rules as the final examination\\[0.7cm]
+Same rules as the final examination\\
+Final examination location: \textbf{MEC 3-3}\\[0.7cm]
 \end{center}
 \noindent Name: \hrulefill\quad Student ID: \hrulefill
 \vspace{0.5cm}

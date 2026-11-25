@@ -1,5 +1,6 @@
 ---
 title: "Final exam info and mock"
+body-classes: course-view-page
 format: html
 ---
 

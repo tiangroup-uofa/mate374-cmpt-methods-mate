@@ -11,6 +11,8 @@ format:
       - margin=0.8in
 ---
 
+Final examination location: **MEC 3-3**.
+
 ## Completed reference notebooks
 
 - [Q2 · Balancing a chemical reaction](https://tiangroup-uofa.github.io/mate374-cmpt-methods-mate/completed-notebooks/8f7c2e91/final_mock_q2_completed.html)
