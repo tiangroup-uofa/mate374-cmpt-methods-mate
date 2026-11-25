@@ -174,7 +174,7 @@ The pair escapes above 0.5 ε per atom, when its total energy becomes positive. 
 
 - **More bonds:** the cluster has 42 nearest-neighbour bonds and a binding energy of \(44.3\,\varepsilon\), or \(3.4\,\varepsilon\) per atom. The dimer has \(0.5\,\varepsilon\) per atom. Removing a surface atom breaks several bonds and costs about \(6.4\,\varepsilon\).
 - **Shared energy:** energy spreads over \(3N-6=33\) vibrational modes. Roughly half becomes potential energy, so an individual pair seldom receives enough to separate.
-- **Temperature:** near the minimum, each atom stores about \(3k_BT\): kinetic \(\tfrac32k_BT\) and a similar potential share. At 0.7 ε per atom, the cluster has \(k_BT\approx0.25\,\varepsilon\), below the bulk melting estimate \(k_BT_m\approx0.7\,\varepsilon\) in @fig-read-thermal.
+- **Temperature:** near the minimum, each atom stores about \(3k_BT\): kinetic \(\tfrac32k_BT\) and a similar potential share. At 0.7 ε per atom, the cluster has \(k_BT\approx0.25\,\varepsilon\).
 :::
 
 #### 3 · The second derivative: bond stiffness {.curve-reading}
@@ -185,32 +185,36 @@ The pair escapes above 0.5 ε per atom, when its total energy becomes positive. 
 
 ![Bond stiffness from the curvature at equilibrium. Inset: the harmonic approximation.](../../../assets/L26-curve-stiffness.svg){#fig-read-stiffness width="70%" fig-align="center" fig-alt="Second derivative of the Lennard-Jones potential with the value at r0 marked as the stiffness, and an inset showing the potential near its minimum overlaid with a dashed parabola."}
 
-#### 4 · Thermal expansion and melting {.curve-reading}
+#### 4 · Thermal expansion {.curve-reading}
 
-- **Thermal expansion \(\alpha\):** the compressed side of the well is steeper. As vibration energy rises, the energy-level midpoints shift outward, indicating an increasing mean bond length.
-- **Melting point:** the well depth sets a thermal-energy scale. For bulk Lennard–Jones near the triple point, \(k_BT_m\approx0.7\,\varepsilon\) [@agrawal1995melting].
+The compressed side of the well is steeper, so a vibrating pair reaches farther to the stretched side than to the compressed side. As temperature rises, this asymmetry increases the mean separation and helps explain positive thermal expansion.
 
 ![Energy-level midpoints shift outward as vibration energy rises.](../../../assets/L26-curve-thermal.svg){#fig-read-thermal width="70%" fig-align="center" fig-alt="Lennard-Jones well with four horizontal energy levels; red dots at the midpoint of each level drift to larger separation as energy increases."}
 
-The pair curve sets the energy scale. Collective motion, crystal structure, and pressure also affect expansion and melting.
-
 ### Worked case · Stiffness in Assignment 4
 
-Central differences of the Cu–Cu energy data in [Assignment 4, Problem 2](../../../assignments/A4/index.qmd) give force and stiffness. At \(r=2.5\) Å, \(k\approx4.80\ \mathrm{eV/\mathring A^2}\), compared with the exact \(4.765\ \mathrm{eV/\mathring A^2}\).
+The equilibrium bond stiffness is the curvature at the **energy minimum**, where the force is zero. In [Assignment 4, Problem 2](../../../assignments/A4/index.qmd), the force changes sign between 2.80 and 2.90 Å. The lowest tabulated energy is at 2.90 Å. At that point, the central difference gives a curvature of \(1.112\ \mathrm{eV/\mathring A^2}\), close to the supplied exact value of \(1.100\ \mathrm{eV/\mathring A^2}\). This gives an estimate of the bond stiffness near equilibrium.
 
 ![Assignment 4 Cu–Cu energy, force, and stiffness. Squares: exact derivatives. Circles: central differences at interior points, one-sided at the ends.](../../../assets/L26-a4-force-stiffness.png){#fig-a4-stiffness width="70%" fig-align="center" fig-alt="Three stacked panels for a Cu-Cu bond: energy, force, and stiffness versus separation, with finite-difference points lying on the exact derivative values."}
 
-### Pair-model predictions for metals
+### Limitations of pair models for metals
 
 A pair potential assigns the same pair energy at a given separation in every environment. In metals, changing the neighbours redistributes the shared electrons.
 
-#### Cohesive energy and vacancy formation energy
+#### **1. Incorrect vacancy-to-cohesive energy ratio**
 
-**Cohesive energy** \(E_{\mathrm{coh}}\) is the energy per atom needed to separate a bulk crystal into isolated atoms. A **vacancy** is an unoccupied lattice site. Its formation energy is the cost of removing the atom to a bulk reservoir of the same material:
+- **Cohesive energy**, \(E_{\mathrm{coh}}\): the energy per atom needed to separate a bulk crystal into isolated atoms.
+- **Vacancy formation energy**, \(E_{\mathrm{vac}}\): the energy needed to remove one atom from its lattice site and transfer it to a bulk reservoir of the same metal.
+
+Let \(E_{\mathrm{atom}}\) be the energy of one isolated atom, \(E_{\mathrm{bulk}}\) the total energy of the perfect \(N\)-atom crystal, and \(E_{\mathrm{def}}(N-1)\) the total energy of the crystal with one atom removed. Both energies are positive for the metals in @tbl-vac-coh.
 
 \[
-E_{\mathrm{vac}}=E_{N-1}^{\mathrm{defect}}
--\frac{N-1}{N}E_N^{\mathrm{perfect}}.
+\boxed{
+\begin{aligned}
+E_{\mathrm{coh}} &= E_{\mathrm{atom}}-\frac{E_{\mathrm{bulk}}}{N},\\[0.3em]
+E_{\mathrm{vac}} &= E_{\mathrm{def}}(N-1)-\frac{N-1}{N}E_{\mathrm{bulk}}.
+\end{aligned}
+}
 \]
 
 - **Pair potential, unrelaxed monatomic crystal:** removing an atom breaks its pair interactions. For a fixed, environment-independent pair potential, keeping the other atoms and cell fixed gives \(E_{\mathrm{vac}}/E_{\mathrm{coh}}=1\) under the bulk reservoir convention.
@@ -232,7 +236,7 @@ E_{\mathrm{vac}}=E_{N-1}^{\mathrm{defect}}
 
 Electron redistribution changes the remaining bonds even at fixed separation, an effect absent from the pair model. Atomic relaxation also changes the pair-model vacancy energy, so the ratio of one applies to the unrelaxed crystal.
 
-#### Elastic constants
+#### **2. Cannot reproduce the elastic tensor**
 
 Stress is force per unit area. Three force components on each of three face orientations form the **stress tensor**:
 
@@ -285,6 +289,10 @@ Real metals break this rule. Copper has \(C_{12}\approx121\) GPa but \(C_{44}\ap
 
 Changing pair parameters preserves this equality for a zero-pressure, unrelaxed crystal.
 
+#### **3. Overestimated stiffness in copper**
+
+Fitting a Lennard–Jones model to copper's equilibrium spacing and cohesive energy fixes the position and depth of the energy minimum. The curvature can still be too large, as the comparison with EAM below shows.
+
 ### Many-body energies in the electron sea
 
 Effective medium theory (**EMT**) and the embedded atom method (**EAM**) describe metallic ion cores in a shared electron distribution. Their energies depend on the surrounding atoms [@norskov1980effective; @daw1984embedded].
@@ -323,24 +331,17 @@ Here \(f(r_{ij})\) is the density contribution of neighbour \(j\) at atom \(i\).
 
 LJ is fitted to FCC copper's lattice constant, 3.615 Å, and cohesive energy, 3.54 eV/atom, matching the project EAM [@mishin2001cu]. Each panel shows energy versus nearest-neighbour distance for one structure.
 
-![Energy per atom of copper on simple cubic (SC), body-centred cubic (BCC), and face-centred cubic (FCC) lattices, computed with LJ (dashed) and EAM (solid). Dots mark each minimum. Crystal drawings adapted from Callister and Rethwisch, 9th edition, Fig. 3.1.](../../../assets/L26-lj-vs-eam-phases.png){#fig-lj-vs-eam width="100%" fig-alt="Three panels of energy per atom against nearest-neighbour distance for SC, BCC, and FCC copper. LJ and EAM agree at the FCC minimum near minus 3.54 eV, differ slightly for BCC, and differ by about 0.8 eV for SC, each with a sphere model of the unit cell."}
+![Energy per atom of copper on simple cubic (SC), body-centred cubic (BCC), and face-centred cubic (FCC) lattices, computed with LJ (dashed) and EAM (solid). Dots mark each minimum. Crystal drawings adapted from Callister and Rethwisch, 9th edition, Fig. 3.1.](../../../assets/L26-lj-vs-eam-phases.png){#fig-lj-vs-eam width="100%" fig-alt="Three panels of energy per atom against nearest-neighbour distance for SC, BCC, and FCC copper. The LJ curves have sharper minima than the EAM curves. Each panel includes a sphere model of the unit cell."}
 
-- **FCC (12 neighbours):** the two curves share the same minimum, because both models were fitted there.
-- **BCC (8 neighbours):** EAM is lower by about 0.1 eV/atom.
-- **SC (6 neighbours):** LJ loses about one-third of its binding (−2.31 eV/atom), while EAM keeps −3.11 eV/atom.
+**LJ predicts a stiffer response to uniform expansion than the metallic EAM model.** The energy rises more sharply as the lattice spacing moves away from equilibrium.
 
-The sharper LJ minimum predicts a stiffer response to uniform expansion. Matching the equilibrium spacing and cohesive energy leaves the curvature as a further test.
-
-## Stage 3 · Bond order and molecular force fields
+## Stage 3 · Molecular force fields
 
 For a water molecule, we need the H–O–H angle: bent and straight arrangements can have the same two O–H distances.
 
-- **Bond order:** single, double, and triple bonds differ in length and strength. Potentials use a continuous, environment-dependent measure.
 - **Bond angles:** three atoms define an angle.
 - **Dihedral angles:** four atoms define the relative rotation of two planes.
 - **Atom types and charges:** distinguish chemical environments within the same element.
-
-Tersoff and Brenner potentials include bond-order and angular dependence for covalent materials. ReaxFF describes bond formation and breaking [@tersoff1988new; @brenner1990empirical; @vanduin2001reaxff]. Finnis–Sinclair describes metallic cohesion using a tight-binding approximation to the electronic energy [@finnis1984simple].
 
 For biomolecules with fixed bonds, a **force field** combines stretching, bending, twisting, and non-bonded energies. Forces follow by differentiating the total energy [@lesar2013]:
 
@@ -362,12 +363,13 @@ Improper terms maintain planarity or handedness. Non-bonded \(U_{\mathrm{inter}}
 ### How many parameters does a potential need?
 
 - **Lennard–Jones:** **2 parameters**, \(\varepsilon\) and \(\sigma\).
-- **EAM:** three tabulated functions, \(\phi(r)\), \(f(r)\), and \(F(\rho)\). The project bonus fits **15 coefficients**.
+- **Mishin’s copper EAM1:** **23 free parameters**. The analytic forms for the pair, density, and embedding functions have \(15+5+8=28\) parameters before five constraints are applied [@mishin2001cu, §III and Table I]. The simulation reads tabulated samples of the three fitted functions.
+- **Bonus-project EAM fit:** **15 free coefficients** in a different parameterization, with the density function held fixed.
 - **Force field for one protein:** thousands of terms, counted below for lysozyme.
 
 Hen egg-white lysozyme (PDB 1AKI) has 129 amino acids. With hydrogens added and the AMBER ff14SB force field [@maier2015ff14], the counts are:
 
-![Hen egg-white lysozyme (PDB 1AKI): 1,960 atoms including hydrogens.](../../../assets/L26-lysozyme.png){#fig-lysozyme width="60%" fig-align="center" fig-alt="Atoms of the lysozyme protein drawn as coloured spheres, with a black line tracing the folded backbone."}
+![Hen egg-white lysozyme (PDB 1AKI). Ribbon image from the RCSB Protein Data Bank. [Open the interactive 3D structure](https://www.rcsb.org/3d-view/1AKI).](../../../assets/L26-lysozyme-rcsb.jpeg){#fig-lysozyme width="60%" fig-align="center" fig-alt="Ribbon view of folded lysozyme, with coiled helices and connecting loops coloured from blue to red."}
 
 ::: {.table-responsive}
 
