@@ -8,7 +8,7 @@ format: html
 | | Details |
 |---|---|
 | **Date and time** | Tuesday, December 22, 2026 · 5:30–7:30 pm |
-| **Location** | Same classroom as the lecture, as listed in the [syllabus](../syllabus/index.qmd#assessment) |
+| **Location** | **MEC 3-3**, as listed in the [syllabus](../syllabus/index.qmd#assessment) |
 | **Course weight** | 40% |
 | **Format** | Two hours, open book; one short-answer question and three practical problems |
 
