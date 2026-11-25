@@ -231,10 +231,10 @@ website:
             text: "Midterm prep (II)"
           - href: exams/midterm-mock.qmd
             text: "Mock midterm"
-          - href: exams/final-mock.qmd
-            text: "Final exam and mock"
           - href: exams/midterm-answer-check.qmd
             text: "Midterm results and answer check"
+          - href: exams/final-mock.qmd
+            text: "Final exam info and mock"
       - href: project/index.qmd
         text: Project
 

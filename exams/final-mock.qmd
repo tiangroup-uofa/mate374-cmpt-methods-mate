@@ -1,5 +1,5 @@
 ---
-title: "Final examination · Information and mock"
+title: "Final exam info and mock"
 format: html
 ---
 
