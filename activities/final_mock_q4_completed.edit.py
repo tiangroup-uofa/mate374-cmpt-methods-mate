@@ -23,7 +23,7 @@ def _(mo):
     mo.md(r"""
     # Mock final · Q4 · Length of a pretzel
 
-    $x(t)=(2.5-0.3t^2)\cos t$, $y(t)=(3.3-0.4t^2)\sin t$, $-4\leq t\leq3$.
+    $x(t)=(2.5-0.3t^2)\cos t$, $y(t)=(3.3-0.4t^2)\sin t$, $-4\leq t\leq4$.
 
     Save your edited notebook when finished.
     """)
@@ -53,7 +53,7 @@ def _(np):
 
 @app.cell
 def _(np, plt, x, y):
-    t_plot = np.linspace(-4.0, 3.0, 600)
+    t_plot = np.linspace(-4.0, 4.0, 600)
     curve_fig, curve_ax = plt.subplots(figsize=(4, 4))
     curve_ax.plot(x(t_plot), y(t_plot), color="#b8582d")
     curve_ax.set_aspect("equal")
@@ -69,14 +69,14 @@ def _(mo):
     mo.md(r"""
     ### (b) Numerical integration · 20 points
 
-    Determine the length by numerical integration, using a method of your choice. Report the length, identify your method, and explain why it is suitable for this problem. The reference length is 17.2750.
+    Determine the length by numerical integration, using a method of your choice. Report the length, identify your method, and explain why it is suitable for this problem. The reference length is 20.2658.
     """)
     return
 
 
 @app.cell
 def _(np, x, y):
-    t_int = np.linspace(-4.0, 3.0, 10001)
+    t_int = np.linspace(-4.0, 4.0, 10001)
     dxdt = np.gradient(x(t_int), t_int)
     dydt = np.gradient(y(t_int), t_int)
     speed = np.sqrt(dxdt**2 + dydt**2)
@@ -88,7 +88,7 @@ def _(np, x, y):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    This example uses finite differences for the coordinate derivatives and the composite trapezoidal rule for the speed integral. The fine uniform grid resolves the smooth curve. The result rounds to the reference length, 17.2750.
+    This example uses finite differences for the coordinate derivatives and the composite trapezoidal rule for the speed integral. The grid covers the full curve from $t=-4$ to $t=4$. The estimated length is 20.2658.
     """)
     return
 

@@ -118,7 +118,7 @@ The editable Q3 notebook linked above includes `final_temp(t_final, n)`. Record 
 <img src="final-pretzel.png" alt="Pretzel illustration from the supplied book exercise" style="float: right; width: 100px; margin: 0 0 0.75rem 1rem;">
 :::
 
-A robot makes a pretzel by laying dough along the following curve, with the parameter $t$ running from $-4$ to $3$:
+A robot makes a pretzel by laying dough along the following curve, with the parameter $t$ running from $-4$ to $4$:
 $$
 \begin{aligned}
 x(t)&=(2.5-0.3t^2)\cos t,\\
@@ -128,7 +128,7 @@ $$
 
 The total length of dough required is the arc length:
 $$
-L=\int_{-4}^{3}\sqrt{\left(\frac{\mathrm{d}x}{\mathrm{d}t}\right)^2+
+L=\int_{-4}^{4}\sqrt{\left(\frac{\mathrm{d}x}{\mathrm{d}t}\right)^2+
 \left(\frac{\mathrm{d}y}{\mathrm{d}t}\right)^2}\,\mathrm{d}t.
 $$
 
@@ -138,7 +138,7 @@ Write Python functions for $x(t)$ and $y(t)$ in the notebook. Run the supplied p
 
 **(b) Numerical integration (20 points)**
 
-Determine $L$ by numerical integration, using a method of your choice. Report the length, identify your method, and explain why it is suitable for this problem. The reference length is $17.2750$.
+Determine $L$ by numerical integration, using a method of your choice. Report the length, identify your method, and explain why it is suitable for this problem. The reference length is $20.2658$.
 
 :::: {.content-visible when-format="html"}
 

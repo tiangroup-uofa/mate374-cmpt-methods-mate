@@ -129,9 +129,9 @@ The supplied plotting cell displays the curve.
 
 ### (b) Numerical integration
 
-I sampled the coordinates on a fine uniform grid, estimated their derivatives with finite differences, and applied the composite trapezoidal rule to the speed:
+I sampled the coordinates on a fine uniform grid from $t=-4$ to $t=4$, estimated their derivatives with finite differences, and applied the composite trapezoidal rule to the speed:
 ~~~python
-t_int = np.linspace(-4.0, 3.0, 10001)
+t_int = np.linspace(-4.0, 4.0, 10001)
 dxdt = np.gradient(x(t_int), t_int)
 dydt = np.gradient(y(t_int), t_int)
 speed = np.sqrt(dxdt**2 + dydt**2)
@@ -139,6 +139,6 @@ length = np.trapezoid(speed, t_int)
 print(length)
 ~~~
 $$
-L=17.27497277\ldots\approx17.2750.
+L\approx20.2658.
 $$
 The trapezoidal rule is suitable for the sampled speed values, and the fine grid resolves the smooth curve. Other suitable numerical methods are also acceptable.

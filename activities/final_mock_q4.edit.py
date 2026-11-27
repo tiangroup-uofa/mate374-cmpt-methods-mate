@@ -33,7 +33,7 @@ def _(np):
 
 @app.cell
 def _(np, plt, x, y):
-    t_plot = np.linspace(-4.0, 3.0, 600)
+    t_plot = np.linspace(-4.0, 4.0, 600)
     fig, ax = plt.subplots()
     ax.plot(x(t_plot), y(t_plot))
     ax.set_aspect("equal")
